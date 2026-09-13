@@ -45,7 +45,13 @@ function j(data, status) {
   });
 }
 
-function authorLabel(user) {
+// Nama tampilan: prioritas nama profil yang diedit user di halaman akun Clincoo
+// (account_profile, key 'u<id>:name'), fallback ke nama pendaftaran / awalan email.
+async function authorLabel(db, user) {
+  try {
+    const row = await db.prepare('SELECT value FROM account_profile WHERE key = ?').bind('u' + user.id + ':name').first();
+    if (row && row.value && String(row.value).trim()) return String(row.value).trim().slice(0, 40);
+  } catch (e) { /* tabel/kolom belum ada -> fallback */ }
   return (user.name || (user.email || 'pengguna').split('@')[0]).slice(0, 40);
 }
 
@@ -107,7 +113,7 @@ export async function onRequestGet({ env, request }) {
       comments: (commentsByPost[p.id] || []).reverse()
     }));
 
-    return j({ feed, me: { name: authorLabel(user), id: user.id } });
+    return j({ feed, me: { name: await authorLabel(env.DB, user), id: user.id } });
   } catch (err) {
     return j({ error: err.message }, 500);
   }
@@ -144,8 +150,11 @@ export async function onRequestPost({ env, request }) {
       const id = randId();
       await env.DB.prepare(
         `INSERT INTO community_posts (id, user_id, author_name, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?)`
-      ).bind(id, user.id, authorLabel(user), text, image, nowIso()).run();
-      return j({ success: true, post: { id, author: authorLabel(user), user_id: user.id, mine: true, text, image, created_at: nowIso(), likes: 0, liked_by_me: false, comment_count: 0, comments: [] } });
+      const label = await authorLabel(env.DB, user);
+      await env.DB.prepare(
+        `INSERT INTO community_posts (id, user_id, author_name, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?)`
+      ).bind(id, user.id, label, text, image, nowIso()).run();
+      return j({ success: true, post: { id, author: label, user_id: user.id, mine: true, text, image, created_at: nowIso(), likes: 0, liked_by_me: false, comment_count: 0, comments: [] } });
     }
 
     if (action === 'react') {
@@ -177,8 +186,11 @@ export async function onRequestPost({ env, request }) {
       const id = randId();
       await env.DB.prepare(
         `INSERT INTO community_comments (id, post_id, user_id, author_name, text, created_at) VALUES (?, ?, ?, ?, ?, ?)`
-      ).bind(id, postId, user.id, authorLabel(user), text, nowIso()).run();
-      return j({ success: true, comment: { id, post_id: postId, author: authorLabel(user), text, created_at: nowIso() } });
+      const label = await authorLabel(env.DB, user);
+      await env.DB.prepare(
+        `INSERT INTO community_comments (id, post_id, user_id, author_name, text, created_at) VALUES (?, ?, ?, ?, ?, ?)`
+      ).bind(id, postId, user.id, label, text, nowIso()).run();
+      return j({ success: true, comment: { id, post_id: postId, author: label, text, created_at: nowIso() } });
     }
 
     return j({ error: 'Aksi tidak dikenal' }, 400);
