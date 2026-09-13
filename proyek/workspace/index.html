@@ -2111,6 +2111,41 @@
       if (e) e.preventDefault();
       var pid = ''; try { pid = localStorage.getItem('clincoo_current_project_id') || ''; } catch (err) {}
       if (!pid) { try { addNotification('Editor', 'Buka proyek dulu untuk mengakses editor.'); } catch (err) {} return; }
+      // Editor = fitur paket Pro. User belum berlangganan -> popup daftar paket
+      // (pola sama seperti Sync GitHub: cache segar dipakai, kalau basi revalidasi dulu).
+      if (window.clincooEditorPlan === 'Starter') {
+        if (typeof window.clincooOpenPlansPopup === 'function') { window.clincooOpenPlansPopup(); return; }
+      } else if (!window.clincooEditorPlan) {
+        var _cSub = clincooReadSubCache();
+        var _fresh = _cSub && _cSub.plan && (Date.now() - (_cSub.ts || 0)) < 15 * 60 * 1000;
+        if (_fresh && _cSub.plan !== 'Starter') { clincooLaunchEditor(pid); return; }
+        if (_fresh && _cSub.plan === 'Starter') {
+          if (typeof window.clincooOpenPlansPopup === 'function') { window.clincooOpenPlansPopup(); return; }
+          clincooLaunchEditor(pid); return;
+        }
+        // Plan belum diketahui: tanya server dulu supaya user Pro tidak salah diblok.
+        (async function () {
+          try {
+            var _t = clincooAuthToken();
+            var _res = await fetch(clincooApiBase() + '/api/subscription', { cache: 'no-store', headers: _t ? { Authorization: 'Bearer ' + _t } : {} });
+            if (_res.ok) {
+              var _d = await _res.json();
+              if (_d && _d.plan) {
+                window.clincooEditorPlan = _d.plan;
+                try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: _d.plan, billingCycle: _d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (_e) {}
+                clincooShowCrowns(_d.plan === 'Starter');
+                if (_d.plan !== 'Starter') { clincooLaunchEditor(pid); return; }
+              }
+            }
+          } catch (_e) {}
+          if (typeof window.clincooOpenPlansPopup === 'function') window.clincooOpenPlansPopup();
+        })();
+        return;
+      }
+      clincooLaunchEditor(pid);
+    }
+
+    function clincooLaunchEditor(pid) {
       var name = 'Proyek';
       try {
         var ps = JSON.parse(localStorage.getItem('clincoo_projects') || '[]');
