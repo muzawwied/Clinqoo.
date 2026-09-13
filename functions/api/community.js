@@ -34,6 +34,8 @@ async function ensureTables(db) {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_community_posts_time ON community_posts(created_at DESC)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_community_comments_post ON community_comments(post_id, created_at)`)
   ]);
+  // Migrasi ringan: kolom foto (data-URL terkompresi klien, maks ~90KB)
+  try { await db.prepare(`ALTER TABLE community_posts ADD COLUMN image TEXT`).run(); } catch (e) { /* kolom sudah ada */ }
 }
 
 function j(data, status) {
@@ -67,7 +69,7 @@ export async function onRequestGet({ env, request }) {
     const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '30', 10) || 30, 1), 50);
 
     const posts = await env.DB.prepare(
-      `SELECT p.id, p.user_id, p.author_name, p.text, p.created_at,
+      `SELECT p.id, p.user_id, p.author_name, p.text, p.created_at, p.image,
               (SELECT COUNT(*) FROM community_likes l WHERE l.post_id = p.id) AS likes,
               (SELECT COUNT(*) FROM community_comments c WHERE c.post_id = p.id) AS comment_count,
               (SELECT COUNT(*) FROM community_likes l2 WHERE l2.post_id = p.id AND l2.user_id = ?) AS liked_by_me
@@ -97,6 +99,7 @@ export async function onRequestGet({ env, request }) {
       user_id: p.user_id,
       mine: p.user_id === user.id,
       text: p.text,
+      image: p.image || '',
       created_at: p.created_at,
       likes: p.likes || 0,
       liked_by_me: p.liked_by_me > 0,
@@ -123,8 +126,14 @@ export async function onRequestPost({ env, request }) {
 
     if (action === 'post') {
       const text = String(body.text || '').trim();
-      if (!text) return j({ error: 'Postingan tidak boleh kosong' }, 400);
       if (text.length > MAX_POST) return j({ error: 'Maksimal ' + MAX_POST + ' karakter' }, 400);
+      let image = '';
+      if (body.image != null && body.image !== '') {
+        image = String(body.image);
+        if (!image.startsWith('data:image/')) return j({ error: 'Format gambar tidak didukung' }, 400);
+        if (image.length > 120000) return j({ error: 'Gambar kegedean — coba pilih yang lebih kecil' }, 400);
+      }
+      if (!text && !image) return j({ error: 'Postingan tidak boleh kosong' }, 400);
 
       // Anti-spam sederhana: maks 1 postingan per 15 detik per user
       const recent = await env.DB.prepare(
@@ -134,9 +143,9 @@ export async function onRequestPost({ env, request }) {
 
       const id = randId();
       await env.DB.prepare(
-        `INSERT INTO community_posts (id, user_id, author_name, text, created_at) VALUES (?, ?, ?, ?, ?)`
-      ).bind(id, user.id, authorLabel(user), text, nowIso()).run();
-      return j({ success: true, post: { id, author: authorLabel(user), user_id: user.id, mine: true, text, created_at: nowIso(), likes: 0, liked_by_me: false, comment_count: 0, comments: [] } });
+        `INSERT INTO community_posts (id, user_id, author_name, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?)`
+      ).bind(id, user.id, authorLabel(user), text, image, nowIso()).run();
+      return j({ success: true, post: { id, author: authorLabel(user), user_id: user.id, mine: true, text, image, created_at: nowIso(), likes: 0, liked_by_me: false, comment_count: 0, comments: [] } });
     }
 
     if (action === 'react') {
