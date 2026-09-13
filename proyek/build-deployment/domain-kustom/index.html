@@ -551,6 +551,9 @@
             if (!res.ok || st.error) throw new Error(st.error || ('HTTP ' + res.status));
             window.__statusRetries = 0;
             if (st.pages_url) { lastPagesUrl = st.pages_url; updateDNSRecords('', st.pages_url); writeDomainCache({ pagesUrl: st.pages_url }); }
+            // Simpan status "pernah deploy" ke cache: kalau nanti API status gagal
+            // (rate limit/jaringan), section DNS tetap tampil dari cache — tidak menghilang.
+            writeDomainCache({ deployed: !!(st.deployed || st.last_deployment) });
             // Input domain TIDAK diisi otomatis dari domain yang terpasang di Cloudflare —
             // sumber tampilan input hanya domain yang tersimpan (D1), supaya tidak
             // "tiba-tiba ada isinya" padahal user belum mengisi domain kustom.
@@ -575,6 +578,9 @@
                 return;
             }
             const cached = readDomainCache();
+            // Section DNS jangan ikut hilang hanya karena API status sedang gagal:
+            // bila cache bilang proyek ini pernah dideploy, tetap tampilkan recordnya.
+            if (cached && cached.deployed) { var _dnsFb = document.getElementById('dns-section'); if (_dnsFb) _dnsFb.classList.remove('hidden'); }
             // Tanpa domain tersimpan: tetap tanpa teks apa pun (jangan bikin user panik).
             if (cached && cached.label) paintDomainLabel(cached.label, !!cached.active);
             else if (cached && cached.attached) paintDomainLabel('Gagal memuat status', false);
@@ -599,6 +605,7 @@
         const cached = readDomainCache();
         if (cached) {
             if (cached.pagesUrl) { lastPagesUrl = cached.pagesUrl; updateDNSRecords(cached.domain || '', cached.pagesUrl); }
+            if (cached.deployed) { var _dnsC = document.getElementById('dns-section'); if (_dnsC) _dnsC.classList.remove('hidden'); }
             if (cached.label) paintDomainLabel(cached.label, !!cached.active);
             if (cached.domain && domainInput) {
                 domainInput.value = cached.domain;

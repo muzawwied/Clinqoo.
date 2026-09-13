@@ -244,17 +244,12 @@
             <section class="space-y-5">
                 <div>
                     <h2 class="text-xl font-bold text-gray-900">Domain kustom</h2>
-                    <p class="text-sm text-gray-500 mt-1">Gunakan domain kustom untuk mengakses situs Anda selain dari URL default yang kami sediakan. <a href="#" class="text-blue-600 hover:underline">Pelajari lebih lanjut tentang mengonfigurasi domain kustom.</a></p>
+                    <p class="text-sm text-gray-500 mt-1">Gunakan domain kustom untuk mengakses situs Anda selain dari URL default yang kami sediakan. <a href="../domain-kustom/" class="text-blue-600 hover:underline">Kelola domain kustom Anda di sini.</a></p>
                 </div>
                 
+                <!-- Input domain kustom dipindah ke halaman Domain Kustom (build-deployment/domain-kustom) -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <input type="text" id="input-custom-domain" placeholder="www.example.com" class="w-full sm:w-72 px-4 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none transition-colors">
-                </div>
-
-                <!-- Custom Domain Save Button: Removed button moved to the left, Save button with gray border -->
-                <div class="flex justify-end pt-1 gap-2">
-                    <button id="btn-remove-domain" onclick="removeCustomDomain()" class="px-3 py-1.5 border border-gray-300 bg-white text-red-600 hover:bg-gray-50 rounded-md text-xs font-semibold transition-colors hidden">Hapus</button>
-                    <button onclick="saveCustomDomain()" id="btn-save-domain" class="custom-domain-btn min-w-[72px] h-[34px] px-3 bg-white text-gray-900 border border-gray-300 rounded-md text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center shadow-sm">Simpan</button>
+                    <a href="../domain-kustom/" class="custom-domain-btn inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-900 border border-gray-300 rounded-md text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">Kelola Domain Kustom <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
                 </div>
 
                 <p class="pt-2"><span id="cf-domain-status" class="text-xs mt-1.5 font-medium hidden"></span></p>
@@ -760,20 +755,15 @@
         }
         // Manajemen Custom Domain & HTTPS
         function loadCustomDomain() {
+            // Input & tombol domain kustom sudah pindah ke halaman Domain Kustom —
+            // fungsi ini hanya mengatur toggle HTTPS & menampilkan status domain.
             const domain = localStorage.getItem('clincoo_custom_domain');
-            const input = document.getElementById('input-custom-domain');
-            const btnRemove = document.getElementById('btn-remove-domain');
             const checkHttps = document.getElementById('check-https');
-            
-            if (domain) {
-                input.value = domain;
-                btnRemove.classList.remove('hidden');
+            if (domain && checkHttps) {
                 checkHttps.disabled = false;
                 checkHttps.classList.remove('opacity-50', 'cursor-not-allowed');
                 checkHttps.checked = localStorage.getItem('clincoo_enforce_https') === 'true';
-            } else {
-                input.value = '';
-                btnRemove.classList.add('hidden');
+            } else if (checkHttps) {
                 checkHttps.disabled = true;
                 checkHttps.classList.add('opacity-50', 'cursor-not-allowed');
                 checkHttps.checked = true;
@@ -781,68 +771,6 @@
             fetchStatus().then(st => renderRealDomains(st.domains || [])).catch(() => {});
         }
 
-        async function saveCustomDomain() {
-            const input = document.getElementById('input-custom-domain').value.trim();
-            const btn = document.getElementById('btn-save-domain');
-            
-            if (!input) {
-                console.warn("Mohon masukkan domain terlebih dahulu.");
-                return;
-            }
-
-            if (btn.disabled) return;
-            
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
-            lucide.createIcons();
-
-            try {
-                await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'add_domain', domain: input }) });
-                localStorage.setItem('clincoo_custom_domain', input);
-                // Sinkron ke project-settings agar halaman domain-kustom ikut menampilkan domain ini
-                try {
-                    const cur = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid())).catch(() => ({}));
-                    let s = {};
-                    try { s = (cur.domain_settings ? JSON.parse(cur.domain_settings) : {}) || {}; } catch (e) { s = {}; }
-                    s.domain = input;
-                    await apiFetch('/project-settings', { method: 'POST', body: JSON.stringify({ project_id: pid(), domain_settings: JSON.stringify(s) }) });
-                } catch (e) {}
-                if(localStorage.getItem('clincoo_enforce_https') === null) {
-                    localStorage.setItem('clincoo_enforce_https', 'true');
-                }
-                loadCustomDomain();
-                const st = await fetchStatus().catch(() => null);
-                if (st) renderRealDomains(st.domains || []);
-                btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i>`;
-                lucide.createIcons();
-            } catch (err) {
-                console.warn('Gagal menghubungkan domain: ' + err.message);
-            }
-
-            setTimeout(() => {
-                btn.innerHTML = "Simpan";
-                btn.disabled = false;
-            }, 1500);
-        }
-
-        async function removeCustomDomain() {
-            if(!confirm("Apakah Anda yakin ingin menghapus custom domain?")) return;
-            const domain = localStorage.getItem('clincoo_custom_domain');
-            try {
-                if (domain) await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid(), action: 'remove_domain', domain }) });
-            } catch (err) { console.warn('Gagal: ' + err.message); }
-            localStorage.removeItem('clincoo_custom_domain');
-            localStorage.removeItem('clincoo_enforce_https');
-            // Hapus juga dari project-settings supaya halaman domain-kustom ikut bersih
-            try {
-                const cur = await apiFetch('/project-settings?project_id=' + encodeURIComponent(pid())).catch(() => ({}));
-                let s = {};
-                try { s = (cur.domain_settings ? JSON.parse(cur.domain_settings) : {}) || {}; } catch (e) { s = {}; }
-                delete s.domain;
-                await apiFetch('/project-settings', { method: 'POST', body: JSON.stringify({ project_id: pid(), domain_settings: JSON.stringify(s) }) });
-            } catch (e) {}
-            loadCustomDomain();
-        }
 
         function toggleHttps() {
             const checkHttps = document.getElementById('check-https');
