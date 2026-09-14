@@ -30,12 +30,12 @@
     <meta name="twitter:image" content="https://muzawwied.github.io/Clincoo./assets/og-image.png?v=7">
   
   <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  
+  <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   
@@ -2184,11 +2184,16 @@
         '&folder=' + encodeURIComponent(currentFolderPath) + '&file=' + encodeURIComponent(filename);
     }
     // Initialize application
-    window.onload = function() {
+    // Boot secepat mungkin: jangan nunggu semua resource CDN (window.onload) —
+    // DOM sudah ter-parse karena script ini di akhir <body>.
+    (function wsBoot() {
       loadWorkspaceFiles();
       wsCloudPull();
       showWorkspace();
       renderNotifications();
+      // Ikon lucide dimuat defer — begitu siap, render ulang ikon yang belum tergambar.
+      if (window.lucide) { try { lucide.createIcons(); } catch (e) {} }
+      else { window.addEventListener('load', function () { try { lucide.createIcons(); } catch (e) {} }); }
 
       // Handle GitHub OAuth redirect callback (?code=...)
       const urlParams = new URLSearchParams(window.location.search);
@@ -2196,7 +2201,7 @@
       if (oauthCode) {
         handleGitHubOAuthCallback(oauthCode);
       }
-    };
+    })();
 
   </script>
 <script>
