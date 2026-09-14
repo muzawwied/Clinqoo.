@@ -15,7 +15,7 @@
 //   GET  /            → health check
 //   POST /run {task_id} → dispatch task 'queued' sekarang (Bearer AGENT_WORKER_TOKEN jika diset)
 
-import { WorkflowEntrypoint } from 'cloudflare:workflows';
+import { WorkflowEntrypoint } from 'cloudflare:workers';
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
 const WA_MAX_CHARS = 3800;

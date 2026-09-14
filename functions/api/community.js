@@ -148,8 +148,6 @@ export async function onRequestPost({ env, request }) {
       if (recent && recent.n > 0) return j({ error: 'Sabar sedikit — posting lagi 15 detik ke depan ya' }, 429);
 
       const id = randId();
-      await env.DB.prepare(
-        `INSERT INTO community_posts (id, user_id, author_name, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?)`
       const label = await authorLabel(env.DB, user);
       await env.DB.prepare(
         `INSERT INTO community_posts (id, user_id, author_name, text, image, created_at) VALUES (?, ?, ?, ?, ?, ?)`
@@ -184,8 +182,6 @@ export async function onRequestPost({ env, request }) {
       const exists = await env.DB.prepare(`SELECT id FROM community_posts WHERE id = ?`).bind(postId).first();
       if (!exists) return j({ error: 'Postingan tidak ditemukan' }, 404);
       const id = randId();
-      await env.DB.prepare(
-        `INSERT INTO community_comments (id, post_id, user_id, author_name, text, created_at) VALUES (?, ?, ?, ?, ?, ?)`
       const label = await authorLabel(env.DB, user);
       await env.DB.prepare(
         `INSERT INTO community_comments (id, post_id, user_id, author_name, text, created_at) VALUES (?, ?, ?, ?, ?, ?)`
