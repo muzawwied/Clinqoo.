@@ -22,6 +22,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <style>
+    .bg-accent { background-color: var(--accent-color) !important; }
+    .text-accent { color: var(--accent-color) !important; }
+    .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
     body { font-family: 'Inter', sans-serif; background-color: #f7f7f8; transition: background-color 0.3s ease, color 0.3s ease; }
     * { -ms-overflow-style: none; scrollbar-width: none; }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -44,6 +47,9 @@
     body.dark-mode .pack-card:hover { border-color: #444 !important; }
     body.dark-mode .tab-pill { background-color: #141414 !important; border-color: #262626 !important; }
     body.dark-mode .section-wrap { background-color: #0a0a0a !important; }
+    body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+    body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+    body.dark-mode .text-accent { color: #ffffff !important; }
 
     .tab-pill { transition: all .18s ease; white-space: nowrap; }
     .tab-pill.active { background-color: var(--accent-color, #111827); color: #fff; border-color: transparent; }
