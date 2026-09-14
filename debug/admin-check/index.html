@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cek Status Admin</title>
+<script src="../../js/auth-client.js?v=2"></script>
+<style>
+  body { font-family: system-ui, sans-serif; background:#0a0a0a; color:#eee; padding:20px; line-height:1.6; }
+  .box { background:#141414; border:1px solid #333; border-radius:10px; padding:16px; margin-bottom:12px; }
+  .ok { color:#4ade80; font-weight:bold; }
+  .bad { color:#f87171; font-weight:bold; }
+  pre { white-space:pre-wrap; word-break:break-all; font-size:13px; background:#000; padding:10px; border-radius:8px; }
+</style>
+</head>
+<body>
+  <h2>Cek Status Admin Panel</h2>
+  <div class="box" id="result">Memeriksa…</div>
+  <script>
+    (async function () {
+      const el = document.getElementById('result');
+      const base = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+      const token = (window.ClincooAuth && ClincooAuth.getToken) ? ClincooAuth.getToken() : null;
+
+      let html = '';
+      html += '<p>Token tersimpan: ' + (token ? '<span class="ok">ADA</span> (' + token.slice(0,8) + '…)' : '<span class="bad">TIDAK ADA</span>') + '</p>';
+
+      if (!token) {
+        html += '<p class="bad">Kamu belum login (token kosong). Coba logout lalu login ulang.</p>';
+        el.innerHTML = html;
+        return;
+      }
+
+      try {
+        const res = await fetch(base + '/api/admin/ping', { headers: { 'Authorization': 'Bearer ' + token } });
+        const status = res.status;
+        const data = await res.json().catch(() => ({}));
+        html += '<p>HTTP status: <b>' + status + '</b></p>';
+        html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        if (data && data.success && data.is_admin) {
+          html += '<p class="ok">✅ Akun ini TERDETEKSI sebagai admin/owner. Menu Panel Admin harusnya muncul.</p>';
+        } else if (data && data.success) {
+          html += '<p class="bad">❌ Login berhasil tapi akun ini BELUM terdaftar sebagai admin/owner di server.</p>';
+        } else {
+          html += '<p class="bad">❌ Gagal memverifikasi (' + (data.error || 'unknown') + ').</p>';
+        }
+      } catch (e) {
+        html += '<p class="bad">Error jaringan: ' + e.message + '</p>';
+      }
+      el.innerHTML = html;
+    })();
+  </script>
+</body>
+</html>
