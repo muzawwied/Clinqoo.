@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="js/auth-client.js?v=2"></script>
+  <script src="js/templates-data.js?v=20260912"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+    <meta name="google-site-verification" content="HCtGe7V5sYoerCNurPfg3iawtdg7mpQq914vPpqUNvY" />
+    <meta name="google-site-verification" content="MSQHPML78vxo_IYLXr2yyjv630w8ndYnZi2hh15RZaQ" />
+    <title>Clincoo • Publikasikan situs anda bersama Clincoo.</title>
+    <meta name="description" content="Bangun, kelola, dan publikasikan situsmu dengan mudah. Clincoo membantu mengubah ide menjadi situs yang siap diakses siapa saja, tanpa proses yang rumit.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clincoo">
+    <meta name="keywords" content="buat website, ai website builder, pembuatan website, template landing page, website profesional, editor kode online, deploy website">
+    <meta name="author" content="Clincoo">
+    <meta property="og:title" content="Clincoo • Publikasikan situs anda bersama Clincoo.">
+    <meta property="og:description" content="Bangun, kelola, dan publikasikan situsmu dengan mudah. Clincoo membantu mengubah ide menjadi situs yang siap diakses siapa saja, tanpa proses yang rumit.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Clincoo">
+    <meta property="og:url" content="https://muzawwied.github.io/Clincoo./">
+    <meta property="og:image" content="https://muzawwied.github.io/Clincoo./assets/og-image.png?v=7">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Clincoo • Publikasikan situs anda bersama Clincoo.">
+    <meta name="twitter:description" content="Bangun, kelola, dan publikasikan situsmu dengan mudah. Clincoo membantu mengubah ide menjadi situs yang siap diakses siapa saja, tanpa proses yang rumit.">
+    <meta name="twitter:image" content="https://muzawwied.github.io/Clincoo./assets/og-image.png?v=7">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+    <script src="https://unpkg.com/lucide@1.41.0"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        html, body { overflow-x: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* BG hero: hanya dari balik header sampai di atas judul 'Proyek terbaru' */
+        #hero-bg {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 100vw;
+            transform: translateX(-50%);
+            height: 70vh;
+            z-index: 0;
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.66) 0%, rgba(255,255,255,0.80) 60%, #ffffff 100%), url('assets/backgrounds/bg-light-morning.webp');
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+        body.dark-mode #hero-bg {
+            background-image: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.68) 60%, #000000 100%), url('assets/backgrounds/bg-dark-night2.webp');
+        }
+        /* konten halaman selalu di atas lapisan BG hero */
+        /* ===== Footer halaman utama =====
+           BG = lanjutan/versi lain dari BG hero: asset sama, tapi crop bagian bawah gambar.
+           Gradasi menyatu dengan warna halaman di tepi atas, makin transparan ke bawah. */
+        #site-footer {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            background-image: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.55) 30%, rgba(255,255,255,0.28) 100%), url('assets/backgrounds/bg-light-morning.webp');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+        }
+        body.dark-mode #site-footer {
+            background-image: linear-gradient(180deg, #000000 0%, rgba(0,0,0,0.58) 30%, rgba(0,0,0,0.42) 100%), url('assets/backgrounds/bg-dark-night2.webp');
+        }
+        body.dark-mode #site-footer a:hover { color: #ffffff !important; }
+        /* Wordmark 3D nempel di dalem gambar */
+        /* Panggung footer: wordmark besar DI BELAKANG (dgn refleksi kaya air),
+           teks navigasi + copyright abu-abu DI DEPAN, menimpa wordmark. Murni CSS (ringan, tanpa library 3D). */
+        #site-footer .footer-stage {
+            position: relative;
+            display: grid;
+            place-items: center;
+            padding: 10px 0 30px;
+            min-height: 92px;
+        }
+        #site-footer .footer-stage > * { grid-area: 1 / 1; }
+        #site-footer .footer-wordmark {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            font-weight: 800;
+            font-size: clamp(2.2rem, 7vw, 3.5rem);
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            opacity: 0.94;
+            text-shadow: 0 3px 14px rgba(0,0,0,0.28);
+        }
+        /* Refleksi kaya di air: mirror teks, pudar ke bawah */
+        #site-footer .footer-wordmark::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            transform: scaleY(-1);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.32), transparent 75%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.32), transparent 75%);
+        }
+        body.dark-mode #site-footer .footer-wordmark {
+            color: #f3f4f6;
+            opacity: 0.92;
+            text-shadow: 0 3px 16px rgba(0,0,0,0.55);
+        }
+        /* Teks abu-abu di depan: tetap kebaca & terlihat menimpa wordmark */
+        #site-footer .footer-front {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        #site-footer .footer-front .footer-sub,
+        #site-footer .footer-front a,
+        #site-footer .footer-front span { text-shadow: 0 1px 4px rgba(0,0,0,0.45), 0 1px 1px rgba(255,255,255,0.25); }
+        .page-view { position: relative; z-index: 1; }
+        :root {
+            --accent-color: #000000;
+            --accent-hover: #1f2937;
+            --accent-text: #ffffff;
+        }
+        .bg-accent { background-color: var(--accent-color) !important; }
+        .text-accent { color: var(--accent-color) !important; }
+        .border-accent { border-color: var(--accent-color) !important; }
+        .hover\:bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
+        body.dark-mode {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        body.dark-mode header#main-header, body.dark-mode .header-bar {
+            background-color: #000000;
+            border-color: #0a0a0a;
+        }
+        body.dark-mode .bg-white {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
+        body.dark-mode #sidebar-toggle,
+        body.dark-mode button[onclick="toggleSidebar()"],
+        body.dark-mode button[onclick="history.back()"],
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"],
+        body.dark-mode .header-glass button[onclick],
+        body.dark-mode header button[onclick] {
+            background-color: #000000 !important;
+            border: 1.5px solid rgba(255,255,255,0.4) !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle svg,
+        body.dark-mode button[onclick="toggleSidebar()"] svg,
+        body.dark-mode button[onclick="history.back()"] svg,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"] svg,
+        body.dark-mode .header-glass button[onclick] svg,
+        body.dark-mode header button[onclick] svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        body.dark-mode #sidebar-toggle:hover,
+        body.dark-mode button[onclick="toggleSidebar()"]:hover,
+        body.dark-mode button[onclick="history.back()"]:hover,
+        body.dark-mode button[onclick="navigateTo(\'page-home\')"]:hover,
+        body.dark-mode .header-glass button[onclick]:hover,
+        body.dark-mode header button[onclick]:hover {
+            background-color: #1a1a1a !important;
+            border-color: rgba(255,255,255,0.7) !important;
+        }
+        body.dark-mode .bg-\[\#F9FAFB\] {
+            background-color: #0a0a0a !important;
+        }
+        body.dark-mode .border-gray-100, body.dark-mode .border-gray-200 {
+            border-color: #222222 !important;
+        }
+        body.dark-mode .text-gray-900, body.dark-mode .text-gray-800, body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .text-gray-700, body.dark-mode .text-gray-600, body.dark-mode .text-gray-500 {
+            color: #888888 !important;
+        }
+        body.dark-mode .text-gray-400 {
+            color: #666666 !important;
+        }
+        body.dark-mode svg.text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .bg-gray-200, body.dark-mode .bg-gray-300 {
+            background-color: #222222 !important;
+        }
+        body.dark-mode .bg-gray-100, body.dark-mode .bg-gray-50 {
+            background-color: #0a0a0a !important;
+            border-color: #222222 !important;
+            color: #e0e0e0 !important;
+        }
+        body.dark-mode .hover\:bg-gray-50:hover, body.dark-mode .hover\:bg-gray-100:hover {
+            background-color: #0a0a0a !important;
+            color: #ffffff !important;
+        }
+        body.dark-mode .typing {
+            border-right-color: #ffffff;
+        }
+        body.dark-mode textarea {
+            color: #ffffff !important;
+        }
+        body.dark-mode textarea::placeholder {
+            color: #666666 !important;
+        }
+        body.dark-mode .option-popup, 
+        body.dark-mode #notif-menu, 
+        body.dark-mode #upload-menu, 
+        body.dark-mode #theme-dropdown-menu, 
+        body.dark-mode #accent-dropdown-menu {
+            background-color: #0a0a0a !important;
+            border-color: #222222 !important;
+            color: #ffffff !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+        }
+        body.dark-mode .group:hover .group-hover\:text-black {
+            color: #ffffff !important;
+        }
+        body.dark-mode .group:hover .group-hover\:text-gray-900 {
+            color: #ffffff !important;
+        }
+        body.dark-mode .group:hover .group-hover\:border-gray-200 {
+            border-color: #333333 !important;
+        }
+        body.dark-mode .bg-white.shadow-sm, body.dark-mode .bg-white.shadow-\[0_8px_30px_rgb\(0\,0\,0\,0\.08\)\] {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3) !important;
+        }
+        body.dark-mode #file-preview-container > div {
+            background-color: #0a0a0a !important;
+            border-color: #222222 !important;
+            color: #e0e0e0 !important;
+        }
+        body.dark-mode .bg-black { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-black.text-white { color: #000000 !important; }
+        body.dark-mode .hover\:bg-gray-800:hover { background-color: #333333 !important; }
+        body.dark-mode .bg-accent { background-color: #ffffff !important; color: #000000 !important; }
+        body.dark-mode .bg-accent.text-white { color: #000000 !important; }
+        body.dark-mode .text-accent { color: #ffffff !important; }
+        body.dark-mode .border-accent { border-color: #ffffff !important; }
+        body.dark-mode header { background-color: #000000 !important; }
+       .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+       .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        textarea:focus {
+            outline: none!important;
+            box-shadow: none!important;
+        }
+       .typing {
+            display: inline-block;
+            border-right: 2px solid black;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: blink 0.7s step-end infinite;
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    /* auto-dark-fix v1 */
+    body.dark-mode .bg-gray-50\/80 { background-color: #141414 !important; }
+    body.dark-mode .bg-gray-200 { background-color: #262626 !important; }
+    body.dark-mode .bg-gray-300 { background-color: #333333 !important; }
+    body.dark-mode .bg-gray-400 { background-color: #444444 !important; }
+    body.dark-mode .border-gray-50 { border-color: #0a0a0a !important; }
+    body.dark-mode .border-gray-200\/50,
+    body.dark-mode .border-gray-200\/60,
+    body.dark-mode .border-gray-200\/70 { border-color: #222222 !important; }
+    body.dark-mode .border-gray-300 { border-color: #333333 !important; }
+    body.dark-mode .border-gray-400 { border-color: #444444 !important; }
+    body.dark-mode .bg-blue-50,
+    body.dark-mode .bg-blue-50\/50 { background-color: #0d1a26 !important; }
+    body.dark-mode .border-blue-100,
+    body.dark-mode .border-blue-200 { border-color: #1e3a52 !important; }
+    body.dark-mode .bg-red-50,
+    body.dark-mode .bg-red-50\/50 { background-color: #2a1414 !important; }
+    body.dark-mode .bg-red-100 { background-color: #3a1a1a !important; }
+    body.dark-mode .border-red-100,
+    body.dark-mode .border-red-200 { border-color: #4a2020 !important; }
+    body.dark-mode .bg-green-100 { background-color: #14301c !important; }
+    body.dark-mode .bg-white\/95 { background-color: rgba(10,10,10,0.95) !important; }
+    body.dark-mode .hover\:bg-gray-50:hover,
+    body.dark-mode .hover\:bg-gray-50\/50:hover,
+    body.dark-mode .hover\:bg-gray-50\/80:hover { background-color: #1a1a1a !important; }
+    body.dark-mode .hover\:bg-gray-100:hover { background-color: #262626 !important; }
+    body.dark-mode .hover\:bg-gray-200:hover,
+    body.dark-mode .hover\:bg-gray-200\/50:hover { background-color: #333333 !important; }
+    body.dark-mode .hover\:bg-blue-50:hover,
+    body.dark-mode .hover\:bg-blue-100:hover { background-color: #163247 !important; }
+    body.dark-mode .hover\:bg-red-50:hover,
+    body.dark-mode .hover\:bg-red-100:hover { background-color: #3a1a1a !important; }
+    body.dark-mode .hover\:border-gray-300:hover,
+    body.dark-mode .hover\:border-gray-400:hover,
+    body.dark-mode .hover\:border-gray-900:hover { border-color: #555555 !important; }
+    body.dark-mode .focus\:border-gray-400:focus,
+    body.dark-mode .focus\:border-gray-900:focus { border-color: #666666 !important; }
+    body.dark-mode input::placeholder, body.dark-mode textarea::placeholder { color: #666666 !important; }
+    /* daftar template dilebarkan keluar container (kiri-kanan) di layar lebar */
+    @media (min-width: 768px) {
+        #tpl-section { width: calc(100% + 72px); margin-left: -36px; margin-right: -36px; }
+    }
+</style>
+    <script>
+        // Early route detection - prevents flash of home page on refresh
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var path = params.get('path');
+            var pageId = 'page-home';
+            // Save current page to localStorage as backup
+            try { localStorage.setItem('clincoo_current_page', pageId); } catch(e) {}
+            document.addEventListener('DOMContentLoaded', function() {
+                var pages = document.querySelectorAll('.page-view');
+                pages.forEach(function(p) {
+                    if (p.id === pageId) {
+                        p.classList.remove('hidden');
+                        p.classList.add('flex');
+                    } else {
+                        p.classList.add('hidden');
+                        p.classList.remove('flex');
+                    }
+                });
+            });
+        })();
+    </script>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
+<script>(function(){try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+    <link rel="preload" as="image" href="assets/backgrounds/bg-light-morning.webp">
+    <link rel="preload" as="image" href="assets/backgrounds/bg-dark-night2.webp">
+
+    <script>/* clincoo-seo-auto: canonical & og mengikuti domain aktif */
+(function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<0;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.png?v=7");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.png?v=7");}catch(e){}})();
+    </script>
+
+    <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "name": "Clincoo", "url": "https://muzawwied.github.io/Clincoo./", "description": "Bangun, kelola, dan publikasikan situsmu dengan mudah. Clincoo membantu mengubah ide menjadi situs yang siap diakses siapa saja, tanpa proses yang rumit.", "inLanguage": "id"}, {"@type": "Organization", "name": "Clincoo", "url": "https://muzawwied.github.io/Clincoo./", "logo": "https://muzawwied.github.io/Clincoo./assets/og-image.png?v=7"}, {"@type": "SoftwareApplication", "name": "Clincoo", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "url": "https://muzawwied.github.io/Clincoo./", "description": "Bangun, kelola, dan publikasikan situsmu dengan mudah. Clincoo membantu mengubah ide menjadi situs yang siap diakses siapa saja, tanpa proses yang rumit.", "inLanguage": "id", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}]}</script>
+<!-- Google tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KMQ8WBZF6E');
+</script>
+<!-- End Google tag -->
+<script src="js/i18n-dict.js" defer></script>
+<script src="js/i18n.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col text-gray-900 pt-20">
+    <div id="hero-bg"></div>
+    <script>try{var t=localStorage.getItem('clincoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||(t==='Sistem (Default)'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.body.classList.add('dark-mode');var a=localStorage.getItem('clincoo_accent')||'Hitam (Default)';var am={'Hitam (Default)':{m:'#000000',h:'#1f2937'},'Biru':{m:'#2563eb',h:'#1d4ed8'},'Hijau':{m:'#059669',h:'#047857'},'Ungu':{m:'#9333ea',h:'#7e22ce'},'Merah':{m:'#dc2626',h:'#b91c1c'}};var c=am[a]||am['Hitam (Default)'];document.documentElement.style.setProperty('--accent-color',c.m);document.documentElement.style.setProperty('--accent-hover',c.h);}catch(e){}</script>
+    <header id="main-header" class="bg-white flex justify-between items-center p-2 fixed top-0 w-full z-50 transition-transform duration-300">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('page-home')">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M12.6%2012C12.9%209.2%2012.2%207%2011.1%207C9.8%207%208.5%209.2%208.8%2012Z%22%2F%3E%3Cpath%20d%3D%22M11.9%209.1C11.2%2010.1%2011.4%2011.1%2011.9%2011.6C12.4%2011.1%2012.7%2010.1%2011.9%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M19.4%2012C19.1%209.2%2019.8%207%2020.9%207C22.2%207%2023.5%209.2%2023.2%2012Z%22%2F%3E%3Cpath%20d%3D%22M20.1%209.1C20.8%2010.1%2020.6%2011.1%2020.1%2011.6C19.6%2011.1%2019.3%2010.1%2020.1%209.1Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E" alt="App Logo" class="w-10 h-10 rounded-full bg-white shadow-sm hover:scale-105 transition-transform">
+            <div class="flex items-center gap-1.5">
+                <span class="font-[800] text-3xl tracking-tight text-black">Clincoo</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="relative">
+                <button id="notif-btn" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="Notifications" aria-expanded="false">
+                    <svg class="w-[22px] h-[22px] text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                </button>
+                <div id="notif-menu" class="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-3 opacity-0 invisible -translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-top-right">
+                    <div class="flex justify-between items-center mb-2 px-1">
+                        <span class="font-semibold text-sm text-gray-900">Notifikasi</span>
+                        <a href="akun/notifikasi/" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
+                    </div>
+                    <div class="flex flex-col gap-2 mb-2">
+                        <div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>
+                    </div>
+                </div>
+            </div>
+            <a href="akun/Profile/" class="flex items-center justify-center p-2 hover:opacity-70 transition-opacity cursor-pointer" aria-label="User Profile">
+                <svg class="w-[22px] h-[22px] text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="5" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></circle><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21a8 8 0 0 0-16 0"></path>
+                </svg>
+            </a>
+        </div>
+    </header>
+    <main id="page-home" class="page-view hidden flex-1 w-full max-w-3xl mx-auto px-5 pt-8 pb-10 flex flex-col justify-start">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
+                <span id="typing-text" class="text-black"></span>
+            </h1>
+            <p id="motivation-text" class="text-gray-500 mt-2 text-sm sm:text-base max-w-lg mx-auto leading-relaxed"></p>
+        </div>
+        <div class="w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-5 transition-all text-left border border-gray-100">
+            <div id="file-preview-container" class="hidden flex-nowrap overflow-x-auto hide-scrollbar gap-2 mb-3 pb-1 w-full"></div>
+            <textarea
+                id="main-prompt-input"
+                rows="3"
+                placeholder="Tanya apa saja..."
+                class="w-full resize-none border-0 bg-transparent p-0 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 text-base md:text-lg leading-relaxed"
+            ></textarea>
+            <div class="flex items-center justify-between pt-2">
+                <div class="relative">
+                    <button id="add-btn" class="p-2 text-gray-400 hover:text-black rounded-full transition-colors cursor-pointer" aria-expanded="false" title="Lampirkan File">
+                        <svg id="add-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </button>
+                    <div id="upload-menu" class="absolute bottom-full left-0 mb-2 w-56 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50">
+                        <button id="upload-file-btn" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-sm font-medium text-left cursor-pointer">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            Upload file
+                        </button>
+                    </div>
+                    <input type="file" id="real-file-input" class="hidden" multiple>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                <div class="relative shrink-0">
+                    <button id="team-mode-capsule" type="button" class="flex items-center gap-1.5 h-10 pl-3 pr-2.5 rounded-full border border-gray-200 text-[13px] font-medium text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors cursor-pointer">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
+                        <span id="team-mode-label">Biasa</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-60 bg-white text-gray-800 border border-gray-100 rounded-xl shadow-xl p-1.5 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
+                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Kolaborasi
+                                <span id="collab-crown-label" class="text-amber-500 shrink-0 cursor-pointer hover:text-amber-600 transition-colors" title="Lihat daftar paket" onclick="event.stopPropagation(); tmOpenCollabPlansPopup();"><svg class="w-4 h-4 " fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg></span>
+                                
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Tim AI berdiskusi &amp; membangun web</span>
+                        </button>
+                        <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
+                                Biasa
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Chat dengan satu AI</span>
+                        </button>
+                    </div>
+                </div>
+                <button id="submit-prompt-btn" class="w-10 h-10 bg-accent text-white rounded-full hover:bg-accent-hover transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                    </svg>
+                </button>
+                </div>
+            </div>
+        </div>
+        <div class="w-full mt-6">
+            <div class="flex items-center gap-3 overflow-x-auto hide-scrollbar pb-3 w-full">
+                <button onclick="usePrompt('Buatkan Situs Portfolio Minimalis yang responsif dan elegan dengan bagian tentang saya, pengalaman, dan kontak.')" class="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-[#F9FAFB] hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer text-sm font-medium text-gray-600">
+                    Situs Portfolio Minimalis
+                </button>
+                <button onclick="usePrompt('Buatkan Dashboard Analitik Modern dengan mode gelap, menyertakan diagram garis dan panel statistik pengguna.')" class="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-[#F9FAFB] hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer text-sm font-medium text-gray-600">
+                    Dashboard Analitik Modern
+                </button>
+                <button onclick="usePrompt('Rancang Halaman Landing E-Commerce yang fokus pada konversi, menampilkan hero section menarik dan daftar produk terlaris.')" class="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-[#F9FAFB] hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer text-sm font-medium text-gray-600">
+                    Halaman Landing E-Commerce
+                </button>
+                 <button onclick="usePrompt('Buatkan Aplikasi Catatan Harian yang simpel namun estetik, dengan fitur pencarian dan kategori catatan.')" class="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-[#F9FAFB] hover:bg-gray-100 border border-gray-100 rounded-2xl transition-all duration-200 active:scale-95 cursor-pointer text-sm font-medium text-gray-600">
+                    Aplikasi Catatan Harian
+                </button>
+            </div>
+        </div>
+        <div id="section-proyek-terbaru" class="w-full mt-28">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-gray-900 tracking-tight">Proyek terbaru</h2>
+                <a href="akun/proyek/" class="text-xs font-semibold text-gray-400 hover:text-black transition-colors cursor-pointer">Lihat Semua</a>
+            </div>
+            <div id="home-projects-list" class="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-2 pt-1 w-full"></div>
+        </div>
+        <div id="tpl-section" class="w-full mt-28">
+            <div class="mb-4">
+                <h2 class="text-lg font-bold text-gray-900 tracking-tight">Jelajahi template</h2>
+            </div>
+            <div class="flex flex-col gap-5 w-full">
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                        <img src="assets/templates/portfolio.webp?v=2" alt="Pratinjau Portfolio Profesional" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Portfolio Profesional</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Portfolio pribadi full-stack developer dengan bagian karya, layanan, blog, dan kontak dalam desain gelap elegan.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('portfolio', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Tolong buatkan website Portfolio Profesional berdasarkan template dengan desain minimalis dan elegan, sertakan bagian karya, resume, dan kontak.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('portfolio', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('portfolio', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('portfolio', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                        
+                        <img src="assets/templates/saas.webp?v=2" alt="Pratinjau Landing Page SaaS" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Landing Page SaaS</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Landing page produk SaaS modern — hero, fitur, showcase, testimoni, pricing, dan FAQ dalam satu halaman ringan yang siap konversi.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('saas', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Buatkan landing page SaaS modern dengan hero section yang kuat, fitur unggulan, testimoni, tabel harga, dan FAQ yang meyakinkan.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('saas', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('saas', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('saas', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                        <img src="assets/templates/topup.webp?v=4" alt="Pratinjau Top Up Game" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Top Up Game</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Situs top up game instan dengan tema terang/gelap — katalog game populer, nominal lengkap, dan pelacakan pesanan.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('topup', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Buatkan situs top up game instan dengan katalog game populer, pilihan nominal, dan alur pesanan yang cepat.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('topup', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('topup', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('topup', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                        <img src="assets/templates/tasks.webp?v=2" alt="Pratinjau Manajemen Tugas" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Manajemen Tugas</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Aplikasi manajemen tugas profesional — dashboard statistik, papan kanban, kalender, proyek, dan laporan dalam desain terang elegan.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Buatkan aplikasi manajemen tugas profesional dengan dashboard statistik, papan kanban, kalender, proyek, dan laporan.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('tasks', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer group relative bg-white">
+                    <div class="w-full aspect-video sm:h-80 overflow-hidden bg-[#F9FAFB]">
+                       
+                        <img src="assets/templates/properti.webp" alt="Pratinjau Web Properti" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300">
+                    </div>
+                    <div class="flex justify-between items-end gap-3 w-full p-4">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">Web Properti</h3>
+                            <p class="text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">Situs agen properti profesional — katalog listing dengan filter tipe, lokasi, dan budget, valuasi properti, serta layanan agen.</p>
+                        </div>
+                        <div class="relative flex-shrink-0">
+                            <button class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition-colors" onclick="toggleOption(this, event)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                            </button>
+                            <div class="option-popup absolute bottom-full right-0 mb-2 w-44 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-bottom-right">
+                                <button onclick="useTemplate('properti', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Gunakan Template</button>
+                                <button onclick="usePrompt('Buatkan website agen properti profesional dengan katalog listing, filter pencarian tipe, lokasi, dan budget, valuasi properti, serta halaman layanan, tentang, dan kontak.')" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Pakai Prompt Ini</button>
+                                <button onclick="previewTemplate('properti', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Lihat Preview</button>
+                                <button onclick="favoriteTemplate('properti', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">Simpan ke Favorit</button>
+                                <button onclick="reportTemplate('properti', event)" class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">Laporkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>            </div>
+        </div>
+    </main>
+
+    <!-- ===== Footer halaman utama ===== -->
+    <footer id="site-footer" class="w-full mt-2">
+        <div class="max-w-3xl mx-auto px-5 text-center">
+            <div class="footer-stage">
+                <span class="footer-wordmark" data-text="Clincoo">Clincoo</span>
+                <div class="footer-front">
+                    <div class="flex items-center justify-center gap-2 text-[12px] flex-wrap text-gray-600 dark:text-gray-300">
+                        <a href="akun/tentang/" class="hover:text-black dark:hover:text-white transition-colors">Tentang</a>
+                        <span class="text-gray-400 dark:text-gray-500">|</span>
+                        <a href="https://muzawwied.github.io/Clincoo-Legal/syarat-ketentuan.html" target="_blank" rel="noopener" class="hover:text-black dark:hover:text-white transition-colors">Ketentuan</a>
+                        <span class="text-gray-400 dark:text-gray-500">|</span>
+                        <a href="https://muzawwied.github.io/Clincoo-Legal/kebijakan-privasi.html" target="_blank" rel="noopener" class="hover:text-black dark:hover:text-white transition-colors">Privasi</a>
+                    </div>
+                    <span class="footer-sub text-[11px] text-gray-600 dark:text-gray-300">&copy; 2026 Clincoo. Semua hak dilindungi.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+    
+    // ============================================
+    // NOTIFICATION SYSTEM - D1-backed with page links
+    // ============================================
+    const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';
+    let d1Notifs = [];
+    let d1UnreadCount = 0;
+
+    // Icon mapping per notification type
+    const notifIcons = {
+        security: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />',
+        login: '<path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />',
+        settings: '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />',
+        deploy: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />',
+        maintenance: '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />',
+        info: '<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />'
+    };
+
+    const notifColors = {
+        security: '#ef4444',
+        login: '#3b82f6',
+        settings: '#6366f1',
+        deploy: '#10b981',
+        maintenance: '#f59e0b',
+        wallet: '#f59e0b',
+        info: '#6b7280'
+    };
+
+    async function fetchD1Notifications() {
+        try {
+            const res = await fetch(NOTIF_API);
+            if (!res.ok) return;
+            const data = await res.json();
+            d1Notifs = data.notifications || [];
+            d1UnreadCount = data.unreadCount || 0;
+            renderIndexNotifications();
+        } catch(e) {}
+    }
+
+    async function markNotifRead(id) {
+        try {
+            await fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_read', id }) });
+            fetchD1Notifications();
+        } catch(e) {}
+    }
+
+    async function markAllNotifsRead() {
+        try {
+            await fetch(NOTIF_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'mark_all_read' }) });
+            fetchD1Notifications();
+        } catch(e) {}
+    }
+
+    function handleNotifClick(n) {
+        if (!n.read) markNotifRead(n.id);
+        if (n.link) {
+            var link = n.link;
+            if (link.startsWith('/')) link = link.substring(1);
+            window.location.href = link;
+        }
+        // No link = just an informational notification, nothing to navigate to
+    }
+
+    function renderIndexNotifications() {
+        const notifs = d1Notifs;
+        const notifMenu = document.getElementById('notif-menu');
+        if (!notifMenu) return;
+
+        const contentArea = notifMenu.querySelector('.text-xs.text-gray-500.text-center');
+        const parent = contentArea ? contentArea.parentElement : null;
+
+        // Update bell badge
+        const notifBtn = document.getElementById('notif-btn');
+        if (notifBtn) {
+            let badge = notifBtn.querySelector('.notif-badge');
+            if (d1UnreadCount > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'notif-badge absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center';
+                    notifBtn.style.position = 'relative';
+                    notifBtn.appendChild(badge);
+                }
+                badge.textContent = d1UnreadCount > 9 ? '9+' : d1UnreadCount;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        if (!parent) return;
+
+        if (notifs.length === 0) {
+            // Sudah ada "Lihat Semua" di header dropdown — jangan diulang di bawah
+            parent.innerHTML = '<div class="text-xs text-gray-500 text-center py-5">Belum ada notifikasi baru</div>';
+            return;
+        }
+
+        parent.innerHTML = '<div class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar"></div>';
+        const listContainer = parent.querySelector('div');
+
+        for (let n of notifs.slice(0, 5)) {
+            let timeStr = new Date(n.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const type = n.type || 'info';
+            const color = notifColors[type] || notifColors.info;
+            const item = document.createElement('div');
+            item.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer' + (n.read ? ' opacity-60' : '');
+            item.onclick = function() { handleNotifClick(n); };
+            item.innerHTML = '<div class="flex-1 min-w-0"><p class="text-xs text-gray-600">' + n.message + '</p><div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] font-medium" style="color:' + color + '">' + (n.source || '') + '</span><span class="text-[10px] text-gray-400">' + timeStr + '</span></div></div>';
+            listContainer.appendChild(item);
+        }
+
+    }
+
+
+</script>
+    <script>
+        try { lucide.createIcons(); } catch (e) {}
+        let currentThemeMode = 'Sistem (Default)';
+        let currentAccentName = 'Hitam (Default)';
+        try {
+            currentThemeMode = localStorage.getItem('clincoo_theme') || 'Sistem (Default)';
+            currentAccentName = localStorage.getItem('clincoo_accent') || 'Hitam (Default)';
+        } catch(e) {}
+        function applyTheme() {
+            const isDark = (currentThemeMode === 'Gelap') || 
+                           (currentThemeMode === 'Sistem (Default)' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                document.documentElement.style.background='#0a0a0a';
+                document.documentElement.style.colorScheme='dark';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.documentElement.style.background='';
+                document.documentElement.style.colorScheme='light';
+            }
+        }
+        function setTheme(themeName) {
+            currentThemeMode = themeName;
+            try { localStorage.setItem('clincoo_theme', themeName); } catch(e) {}
+            const themeStatusText = document.getElementById('theme-status-text');
+            const themeMenu = document.getElementById('theme-dropdown-menu');
+            if (themeStatusText) {
+                themeStatusText.textContent = themeName;
+            }
+            applyTheme();
+            if (themeMenu) themeMenu.classList.add('hidden');
+        }
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (currentThemeMode === 'Sistem (Default)') {
+                    applyTheme();
+                }
+            });
+        }
+        const accentMap = {
+            'Hitam (Default)': { main: '#000000', hover: '#1f2937', cls: 'bg-gray-900' },
+            'Biru': { main: '#2563eb', hover: '#1d4ed8', cls: 'bg-blue-600' },
+            'Hijau': { main: '#059669', hover: '#047857', cls: 'bg-emerald-600' },
+            'Ungu': { main: '#9333ea', hover: '#7e22ce', cls: 'bg-purple-600' },
+            'Merah': { main: '#dc2626', hover: '#b91c1c', cls: 'bg-red-600' }
+        };
+        function setAccent(name, bgClass) {
+            currentAccentName = name;
+            try { localStorage.setItem('clincoo_accent', name); } catch(e) {}
+            const accentName = document.getElementById('accent-name');
+            const accentDot = document.getElementById('accent-dot');
+            const accentMenu = document.getElementById('accent-dropdown-menu');
+            if (accentName) accentName.textContent = name;
+            if (accentDot) {
+                accentDot.className = `w-2 h-2 rounded-full ${bgClass || accentMap[name].cls}`;
+            }
+            const colors = accentMap[name] || accentMap['Hitam (Default)'];
+            document.documentElement.style.setProperty('--accent-color', colors.main);
+            document.documentElement.style.setProperty('--accent-hover', colors.hover);
+            if (accentMenu) accentMenu.classList.add('hidden');
+        }
+        const profileInput = document.getElementById('profile-pic-input');
+        const profileDisplay = document.getElementById('profile-pic-display');
+        try {
+            const savedPic = localStorage.getItem('clincoo_profile_pic');
+            if(savedPic && profileDisplay) {
+                profileDisplay.style.backgroundImage = `url(${savedPic})`;
+                profileDisplay.textContent = '';
+            }
+        } catch(e) {}
+
+        // Sync name and email from localStorage (shared with personal/)
+        try {
+            const savedName = localStorage.getItem('clincoo_fullname');
+            const savedEmail = localStorage.getItem('clincoo_email');
+            const nameEl = document.getElementById('profile-display-name');
+            const emailEl = document.getElementById('profile-display-email');
+            if (savedName && nameEl) nameEl.textContent = savedName;
+            if (savedEmail && emailEl) emailEl.textContent = savedEmail;
+            // Update avatar initial if name exists
+            if (savedName && profileDisplay && !profileDisplay.style.backgroundImage) {
+                profileDisplay.textContent = savedName.charAt(0).toUpperCase();
+            }
+        } catch(e) {}
+
+        // Muat profil dari database per akun (D1) — sinkron lintas perangkat
+        try {
+            const PROFILE_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/account-profile';
+            fetch(PROFILE_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+                if (!d) return;
+                const nm = d.name || '', em = d.email || '', av = d.avatar || '';
+                try {
+                    if (nm) localStorage.setItem('clincoo_fullname', nm);
+                    if (em) localStorage.setItem('clincoo_email', em);
+                    if (av) localStorage.setItem('clincoo_profile_pic', av);
+                } catch(e) {}
+                const nameEl2 = document.getElementById('profile-display-name');
+                const emailEl2 = document.getElementById('profile-display-email');
+                if (nm && nameEl2) nameEl2.textContent = nm;
+                if (em && emailEl2) emailEl2.textContent = em;
+                if (av && profileDisplay) { profileDisplay.style.backgroundImage = 'url(' + av + ')'; profileDisplay.textContent = ''; }
+                else if (nm && profileDisplay && !profileDisplay.style.backgroundImage) { profileDisplay.textContent = nm.charAt(0).toUpperCase(); }
+            }).catch(function () {});
+        } catch(e) {}
+
+        if (profileInput) {
+            profileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64 = event.target.result;
+                        try { localStorage.setItem('clincoo_profile_pic', base64); } catch(err) {}
+                        if (profileDisplay) {
+                            profileDisplay.style.backgroundImage = `url(${base64})`;
+                            profileDisplay.textContent = '';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        let greetName = 'Vylonium';
+        try {
+            const sn = localStorage.getItem('clincoo_fullname');
+            if (sn && sn.trim()) greetName = sn.trim().split(' ')[0];
+        } catch(e) {}
+        const text = "Hallo, " + greetName;
+        const motivations = [
+            "Setiap baris kode yang kamu tulis hari ini adalah fondasi untuk inovasi besar di masa depan.",
+            "Wujudkan imajinasi tanpa batasmu menjadi karya digital yang memukau dan bermanfaat.",
+            "Kreativitas dan ketekunan adalah kunci utama untuk menciptakan perubahan nyata.",
+            "Satu langkah kecil dalam membangun ide hari ini akan membawamu pada kesuksesan besar.",
+            "Jangan batasi mimpimu; rancang dan bangun masa depanmu sekarang juga dengan penuh semangat."
+        ];
+        const el = document.getElementById("typing-text");
+        const motEl = document.getElementById("motivation-text");
+        if (motEl) {
+            motEl.textContent = motivations[Math.floor(Math.random() * motivations.length)];
+        }
+        // Tampil langsung tanpa animasi typing — halaman sudah punya loading state sendiri
+        if (el) { el.textContent = text; el.classList.remove("typing"); }
+        const addBtn = document.getElementById('add-btn');
+        const addIcon = document.getElementById('add-icon');
+        const uploadMenu = document.getElementById('upload-menu');
+        if (addBtn && addIcon && uploadMenu) {
+            addBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isExpanded = addBtn.getAttribute('aria-expanded') === 'true';
+                if (!isExpanded) {
+                    addBtn.setAttribute('aria-expanded', 'true');
+                    addIcon.style.transform = 'rotate(45deg)';
+                    uploadMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                    uploadMenu.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                } else {
+                    addBtn.setAttribute('aria-expanded', 'false');
+                    addIcon.style.transform = 'rotate(0deg)';
+                    uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-none');
+                    uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-auto');
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!addBtn.contains(e.target) && !uploadMenu.contains(e.target)) {
+                    addBtn.setAttribute('aria-expanded', 'false');
+                    addIcon.style.transform = 'rotate(0deg)';
+                    uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                }
+            });
+        }
+        const uploadFileBtn = document.getElementById('upload-file-btn');
+        const realFileInput = document.getElementById('real-file-input');
+        const filePreviewContainer = document.getElementById('file-preview-container');
+        if (uploadFileBtn && realFileInput) {
+            uploadFileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                realFileInput.click();
+                if (addBtn && uploadMenu) {
+                    addBtn.setAttribute('aria-expanded', 'false');
+                    if (addIcon) addIcon.style.transform = 'rotate(0deg)';
+                    uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                }
+            });
+            // Upload dari halaman utama: ISI file dibaca sekarang (bukan cuma nama),
+            // distage di localStorage lalu dibawa ke halaman chat saat prompt dikirim.
+            window.__stagedAtt = [];
+            try { localStorage.removeItem('clincoo_staged_attachments'); } catch (e) {}
+            window.__readFileAsDataURL = function (f) {
+                return new Promise(function (res, rej) {
+                    const r = new FileReader();
+                    r.onload = function () { res(r.result); };
+                    r.onerror = function () { rej(r.error); };
+                    r.readAsDataURL(f);
+                });
+            };
+            window.__readFileAsText = function (f) {
+                return new Promise(function (res, rej) {
+                    const r = new FileReader();
+                    r.onload = function () { res(r.result); };
+                    r.onerror = function () { rej(r.error); };
+                    r.readAsText(f);
+                });
+            };
+            window.__stageSize = function () {
+                let total = 0;
+                window.__stagedAtt.forEach(function (a) {
+                    total += (a.data ? a.data.length : 0) + (a.text ? a.text.length : 0);
+                });
+                return total;
+            };
+            window.__saveStaged = function () {
+                try { localStorage.setItem('clincoo_staged_attachments', JSON.stringify(window.__stagedAtt)); } catch (e) {}
+            };
+            window.removeStagedChip = function (id) {
+                window.__stagedAtt = window.__stagedAtt.filter(function (a) { return a.id !== id; });
+                __saveStaged();
+                const chip = document.querySelector('.file-chip[data-att-id="' + id + '"]');
+                if (chip) chip.remove();
+                const c = document.getElementById('file-preview-container');
+                if (c && c.children.length === 0) c.classList.add('hidden');
+            };
+            realFileInput.addEventListener('change', async (e) => {
+                const maxFiles = 10;
+                const maxStage = 3.5 * 1024 * 1024; // batas total isi lampiran (localStorage)
+                const currentCount = filePreviewContainer ? filePreviewContainer.querySelectorAll('.file-chip').length : 0;
+                let files = Array.from(e.target.files);
+                if (currentCount + files.length > maxFiles) {
+                    files = files.slice(0, maxFiles - currentCount);
+                }
+                if (files.length > 0 && filePreviewContainer) {
+                    filePreviewContainer.classList.remove('hidden');
+                    filePreviewContainer.classList.add('flex');
+                    for (const file of files) {
+                        const ext = (file.name.split('.').pop() || '').toLowerCase();
+                        let iconStr = 'file';
+                        if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) iconStr = 'image';
+                        else if (['html', 'css', 'js', 'json', 'xml', 'jsx', 'tsx', 'php'].includes(ext)) iconStr = 'file-code-2';
+                        else if (['pdf', 'txt', 'doc', 'docx', 'md'].includes(ext)) iconStr = 'file-text';
+                        else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) iconStr = 'file-archive';
+                        const attId = 'att_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+                        let data = null, text = null;
+                        const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext) || (file.type || '').startsWith('image/');
+                        try {
+                            if (isImage && file.size <= 2 * 1024 * 1024) {
+                                data = await __readFileAsDataURL(file);
+                            } else if (!isImage && !['zip', 'rar', '7z', 'tar', 'gz', 'pdf', 'doc', 'docx'].includes(ext) && file.size <= 150 * 1024) {
+                                text = await __readFileAsText(file);
+                            }
+                        } catch (err) {}
+                        if (__stageSize() + (data ? data.length : 0) + (text ? text.length : 0) > maxStage) {
+                            data = data && !text ? null : data; // jangan penuhi localStorage — lampiran berikutnya nama-saja
+                        }
+                        window.__stagedAtt.push({ id: attId, type: isImage ? 'image' : 'document', name: file.name, size: file.size, data: data, text: text, extension: ext });
+                        __saveStaged();
+                        const chip = document.createElement('div');
+                        chip.className = 'file-chip inline-flex items-center gap-2 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-xl text-xs text-gray-800 font-medium shadow-sm transition-colors duration-300 flex-shrink-0';
+                        chip.setAttribute('data-att-id', attId);
+                        chip.innerHTML = `
+                            <i data-lucide="${iconStr}" class="w-3.5 h-3.5 text-gray-500"></i>
+                            <span class="max-w-[150px] truncate">${file.name}</span>
+                            <button type="button" class="text-gray-400 hover:text-black cursor-pointer ml-1" onclick="removeStagedChip('${attId}')" title="Hapus lampiran">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        `;
+                        filePreviewContainer.appendChild(chip);
+                    }
+                    try { lucide.createIcons(); } catch (e) {}
+                }
+                realFileInput.value = '';
+            });
+        }
+        const themeBtn = document.getElementById('theme-dropdown-btn');
+        const themeMenu = document.getElementById('theme-dropdown-menu');
+        if (themeBtn && themeMenu) {
+            themeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                themeMenu.classList.toggle('hidden');
+                const accentMenu = document.getElementById('accent-dropdown-menu');
+                if (accentMenu) accentMenu.classList.add('hidden');
+            });
+        }
+        const accentBtn = document.getElementById('accent-dropdown-btn');
+        const accentMenu = document.getElementById('accent-dropdown-menu');
+        if (accentBtn && accentMenu) {
+            accentBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                accentMenu.classList.toggle('hidden');
+                if (themeMenu) themeMenu.classList.add('hidden');
+            });
+        }
+        document.addEventListener('click', (e) => {
+            if (themeMenu && !themeMenu.contains(e.target) && themeBtn && !themeBtn.contains(e.target)) {
+                themeMenu.classList.add('hidden');
+            }
+            if (accentMenu && !accentMenu.contains(e.target) && accentBtn && !accentBtn.contains(e.target)) {
+                accentMenu.classList.add('hidden');
+            }
+        });
+        const notifBtn = document.getElementById('notif-btn');
+        const notifMenu = document.getElementById('notif-menu');
+        if (notifBtn && notifMenu) {
+            notifBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isExpanded = notifBtn.getAttribute('aria-expanded') === 'true';
+                if (!isExpanded) {
+                    notifBtn.setAttribute('aria-expanded', 'true');
+                    notifMenu.classList.remove('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+                    notifMenu.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    markAllNotifsRead();
+                } else {
+                    notifBtn.setAttribute('aria-expanded', 'false');
+                    notifMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    notifMenu.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!notifBtn.contains(e.target) && !notifMenu.contains(e.target)) {
+                    notifBtn.setAttribute('aria-expanded', 'false');
+                    notifMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    notifMenu.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+                }
+            });
+        }
+        function toggleOption(btn, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.querySelectorAll('.option-popup').forEach(popup => {
+                if (popup !== btn.nextElementSibling) {
+                    popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                }
+            });
+            const popup = btn.nextElementSibling;
+            if (popup.classList.contains('opacity-100')) {
+                popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+            } else {
+                popup.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                popup.classList.add('opacity-100', 'visible', 'translate-y-0');
+            }
+        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.option-popup') && !e.target.closest('button[onclick^="toggleOption"]')) {
+                document.querySelectorAll('.option-popup').forEach(popup => {
+                    popup.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                    popup.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                });
+            }
+        });
+        let lastScroll = 0;
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > lastScroll && currentScroll > 60) {
+                if(header) header.style.transform = 'translateY(-100%)';
+            } else {
+                if(header) header.style.transform = 'translateY(0)';
+            }
+            lastScroll = currentScroll;
+        });
+        const reverseRouteMap = {
+            'page-home': '?session=active&ref=client&path=/home'
+        };
+        function navigateTo(pageId, pushState = true) {
+            try { localStorage.setItem('clincoo_current_page', pageId); } catch(e) {}
+            document.querySelectorAll('.page-view').forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('flex');
+            });
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('flex');
+                window.scrollTo(0, 0);
+            }
+            if(notifMenu && notifBtn) {
+                notifBtn.setAttribute('aria-expanded', 'false');
+                notifMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                notifMenu.classList.add('opacity-0', 'invisible', '-translate-y-2', 'pointer-events-none');
+            }
+            if (header) {
+                if (pageId === 'page-home') {
+                    header.style.display = 'flex';
+                } else {
+                    header.style.display = 'none';
+                }
+            }
+            if (pushState && reverseRouteMap[pageId]) {
+                const newPath = reverseRouteMap[pageId];
+                if (window.location.search !== newPath) {
+                    try {
+                        // replaceState (bukan pushState): ganti tab TIDAK menambah entri
+                        // history. Sebelumnya tiap klik tab nambah entri sehingga tombol
+                        // kembali muter-muter lewat semua tab yang pernah diklik.
+                        window.history.replaceState({ pageId: pageId }, "", newPath);
+                    } catch (e) {}
+                }
+            }
+        }
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.pageId) {
+                navigateTo(event.state.pageId, false);
+            } else {
+                const params = new URLSearchParams(window.location.search);
+                const path = params.get('path');
+                let pageId = 'page-home';
+                navigateTo(pageId, false);
+            }
+        });
+        function initializeRoute() {
+            const params = new URLSearchParams(window.location.search);
+            const path = params.get('path');
+            let initialPageId = 'page-home';
+            // Fallback: check localStorage if no URL path - validate the value exists
+            if (!path) {
+                try {
+                    const saved = localStorage.getItem('clincoo_current_page');
+                    // Only use saved page if the element actually exists
+                    if (saved && document.getElementById(saved)) {
+                        initialPageId = saved;
+                    }
+                } catch(e) {}
+            }
+            
+            navigateTo(initialPageId, false);
+            try {
+                if (window.location.search !== reverseRouteMap[initialPageId]) {
+                    window.history.replaceState({ pageId: initialPageId }, "", reverseRouteMap[initialPageId] || '?session=active&ref=client&path=/home');
+                }
+            } catch (e) {}
+        }
+        initializeRoute();
+        fetchD1Notifications();
+        setInterval(fetchD1Notifications, 30000);
+        
+        // Notif login dihilangkan — tidak dibuat otomatis lagi
+        function usePrompt(promptText) {
+            const textarea = document.getElementById('main-prompt-input');
+            if (textarea) {
+                textarea.value = promptText;
+                textarea.focus();
+                navigateTo('page-home');
+                window.scrollTo(0, 0);
+            }
+        }
+        // ===== MODE TIM AI: kapsul dropdown di samping tombol kirim (sama seperti di halaman chat) =====
+        // Pilihan tersimpan di localStorage 'clincoo_team_mode' dan otomatis dipakai halaman chat saat pindah.
+        const TM_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+        let teamModeOn = false;
+        try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
+        const teamCapsule = document.getElementById('team-mode-capsule');
+        const teamMenu = document.getElementById('team-mode-menu');
+        const teamLabel = document.getElementById('team-mode-label');
+        function applyTeamModeStyle() {
+            if (!teamCapsule || !teamLabel) return;
+            teamLabel.textContent = teamModeOn ? 'Kolaborasi' : 'Biasa';
+            if (teamModeOn) {
+                teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
+            } else {
+                teamCapsule.classList.remove('bg-gray-900', 'border-gray-900', 'text-white');
+                teamCapsule.classList.add('border-gray-200', 'text-gray-600');
+            }
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                const active = (btn.getAttribute('data-team-mode') === 'kolaborasi') === teamModeOn;
+                btn.classList.toggle('bg-gray-100', active);
+            });
+        }
+        function toggleTeamMenu(show) {
+            if (!teamMenu) return;
+            if (show) {
+                teamMenu.classList.remove('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                teamMenu.classList.add('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+            } else {
+                teamMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                teamMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+            }
+        }
+        // Kolaborasi = fitur Paket Pro
+        const TM_SUB_CACHE_KEY = 'clincoo_subscription_cache';
+        function tmReadSubCache() { try { return JSON.parse(localStorage.getItem(TM_SUB_CACHE_KEY) || 'null') || null; } catch (e) { return null; } }
+        function tmIsPlanPro() { var c = tmReadSubCache(); return !!(c && c.plan && c.plan !== 'Starter'); }
+        function tmRefreshCollabBadge() {
+            var b = document.getElementById('collab-pro-badge');
+            if (b) b.classList.toggle('hidden', tmIsPlanPro());
+            // Label mahkota premium hanya tampil di akun yang belum berlangganan.
+            var c = document.getElementById('collab-crown-label');
+            if (c) c.classList.toggle('hidden', tmIsPlanPro());
+        }
+        function tmUpgradeUrlPro() {
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+            return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
+        }
+        function tmShowProLockPopup() {
+            // Kolaborasi khusus Paket Pro -> carousel daftar paket (bukan kartu ringkas).
+            var cached = tmReadSubCache();
+            tmShowCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
+        }
+    // Mahkota diklik -> popup daftar paket (sama seperti fitur Sync GitHub di workspace).
+    async function tmOpenCollabPlansPopup() {
+      var cached = tmReadSubCache();
+      var fresh = cached && cached.plan && ((Date.now() - (cached.ts || 0)) < 15 * 60 * 1000);
+      if (fresh && cached.plan !== 'Starter') return; // sudah Pro: mahkota tidak relevan
+      tmShowCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
+      // Revalidasi di background: popup ditutup bila ternyata paket sudah Pro.
+      try {
+        var tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+        var res = await fetch(TM_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+        if (res.ok) {
+          var d = await res.json();
+          if (d && d.plan) {
+            try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+            tmRefreshCollabBadge();
+            if (d.plan !== 'Starter') {
+              var mp = document.getElementById('upgrade-plans-modal');
+              if (mp) { mp.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); }
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+function tmShowCollabPlansModal(sub) {
+      if (document.getElementById('upgrade-plans-modal')) return;
+      var m = document.createElement('div');
+      m.id = 'upgrade-plans-modal';
+      var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+      var current = (sub && sub.plan) ? sub.plan : 'Starter';
+      var billing = (sub && sub.billingCycle) ? sub.billingCycle : 'Bulanan';
+      var checkoutUrl = function (name, cyc) {
+        return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
+      };
+
+      var plans = [
+        { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
+          items: [
+            ['Hingga 3 proyek aktif', true],
+            ['1 kolaborator per proyek', true],
+            ['Chat AI di setiap proyek (50 pesan/bulan)', true],
+            ['3 template proyek siap pakai', true],
+            ['Tugas terjadwal & notifikasi', true],
+            ['Deploy web 5x per bulan', true],
+            ['Kolaborasi tim lebih besar', false],
+            ['Impor repository GitHub', false]
+          ] },
+        { name: 'Pro', tagline: 'Untuk profesional dan kreator aktif.', price: '49K', per: '/bln', hot: true,
+          items: [
+            ['Hingga 10 proyek aktif', true],
+            ['Hingga 5 kolaborator per proyek', true],
+            ['Semua fitur Starter: chat AI, template & tugas terjadwal', true],
+            ['Deploy web hingga 25x per bulan', true],
+            ['Impor repository GitHub ke workspace', true]
+          ] },
+        { name: 'Bisnis', tagline: 'Untuk tim dan operasi skala besar.', price: '129K', per: '/bln', hot: false,
+          items: [
+            ['Semua fitur Pro', true],
+            ['Hingga 50 proyek aktif', true],
+            ['Hingga 20 kolaborator per proyek', true],
+            ['Kontrol akses & keamanan proyek lanjutan', true],
+            ['Deploy web tanpa batas', true]
+          ] }
+      ];
+
+      var card = function (p) {
+        var isCurrent = (p.name === current);
+        var list = p.items.map(function (it) {
+          return '<li class="flex items-start gap-2.5 text-[13px] ' + (p.hot ? 'text-gray-900 font-medium' : (it[1] ? 'text-gray-700' : 'text-gray-400 opacity-70')) + '">' +
+            (it[1]
+              ? '<svg class="w-4 h-4 shrink-0 ' + (p.hot ? 'text-accent' : 'text-gray-900') + '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"></path></svg>'
+              : '<svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path></svg>') +
+            '<span>' + it[0] + '</span></li>';
+        }).join('');
+        var btn;
+        if (isCurrent) {
+          btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
+        } else if (p.hot) {
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
+        } else {
+          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
+        }
+        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
+          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
+          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
+          '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
+          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
+          '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
+      };
+
+      var slides = plans.map(card).join('');
+      var dots = plans.map(function (p, i) {
+        return '<button class="upc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
+      }).join('');
+
+      var css = document.createElement('style');
+      css.id = 'upgrade-plans-css';
+      css.textContent =
+        '#upgrade-plans-modal .text-accent{color:var(--accent-color,#000000);} ' +
+        '#upgrade-plans-modal .bg-accent{background-color:var(--accent-color,#000000);color:#ffffff;} ' +
+        '#upgrade-plans-modal .border-accent{border-color:var(--accent-color,#000000);} ' +
+        'body.dark-mode #upgrade-plans-modal .text-accent{color:#ffffff !important;} ' +
+        'body.dark-mode #upgrade-plans-modal .bg-accent{background-color:#ffffff !important;color:#000000 !important;} ' +
+        'body.dark-mode #upgrade-plans-modal .border-accent{border-color:#ffffff !important;}';
+
+      m.innerHTML =
+        '<div class="fixed inset-0 z-[95] overflow-y-auto p-3 sm:p-4" style="background:rgba(0,0,0,0.45)">' +
+        '<div class="min-h-full flex items-center justify-center">' +
+        '<div class="bg-white rounded-2xl w-full max-w-sm relative px-4 sm:px-5 pt-9 pb-4 my-2">' +
+        '<button id="upgrade-plans-x" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition-colors z-10" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18M6 6l12 12"></path></svg></button>' +
+        '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Mode Kolaborasi</h3>' +
+        '<p class="text-[13px] sm:text-sm text-gray-500 mt-1 text-center leading-snug px-1">Mode kolaborasi tim AI tersedia mulai paket Pro. Paket kamu saat ini: <b>' + current + '</b>.</p>' +
+        '<div class="relative mt-4">' +
+          '<div id="upc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +
+            '<div id="upc-track" class="flex transition-transform duration-300 ease-out">' + slides + '</div>' +
+          '</div>' +
+          '<button id="upc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"></path></svg></button>' +
+          '<button id="upc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"></path></svg></button>' +
+        '</div>' +
+        '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
+        '</div></div>';
+      document.body.appendChild(css);
+      document.body.appendChild(m);
+
+      var track = m.querySelector('#upc-track');
+      var dotsEls = m.querySelectorAll('.upc-dot');
+      var idx = 1;
+      function render() {
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        dotsEls.forEach(function (d, i) {
+          var on = (i === idx);
+          d.style.width = on ? '18px' : '6px';
+          d.style.background = on ? '' : '#d1d5db';
+          d.classList.toggle('bg-accent', on);
+        });
+      }
+      function go(i) { idx = (i + plans.length) % plans.length; render(); }
+      m.querySelector('#upc-prev').addEventListener('click', function () { go(idx - 1); });
+      m.querySelector('#upc-next').addEventListener('click', function () { go(idx + 1); });
+      dotsEls.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.dataset.i, 10)); }); });
+
+      var vp = m.querySelector('#upc-viewport'), sx = null, dx = 0;
+      vp.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; dx = 0; track.style.transition = 'none'; }, { passive: true });
+      vp.addEventListener('touchmove', function (e) {
+        if (sx === null) return;
+        dx = e.touches[0].clientX - sx;
+        var w = vp.offsetWidth;
+        var lo = -(w * (plans.length - 1)) - 30;
+        var trackX = Math.min(Math.max(-(idx * w) + dx, lo), 30);
+        track.style.transform = 'translateX(' + trackX + 'px)';
+      }, { passive: true });
+      vp.addEventListener('touchend', function () {
+        track.style.transition = '';
+        if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1); else render();
+        sx = null;
+      });
+
+      m.querySelector('#upgrade-plans-x').addEventListener('click', function () { m.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); });
+      m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
+      render();
+    }
+        async function tmRevalidatePlan() {
+            try {
+                var tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+                var res = await fetch(TM_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
+                if (!res.ok) return;
+                var d = await res.json();
+                if (d && d.plan) {
+                    try { localStorage.setItem(TM_SUB_CACHE_KEY, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+                    tmRefreshCollabBadge();
+                    if (tmIsPlanPro()) {
+                        var lk = document.getElementById('collab-pro-lock');
+                        if (lk) lk.remove();
+                        var mp = document.getElementById('upgrade-plans-modal');
+                        if (mp) { mp.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); }
+                    }
+                }
+            } catch (e) {}
+        }
+        if (teamCapsule) {
+            applyTeamModeStyle();
+            tmRefreshCollabBadge();
+            tmRevalidatePlan();
+            teamCapsule.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleTeamMenu(teamMenu.classList.contains('invisible'));
+            });
+            document.querySelectorAll('.team-mode-option').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var want = btn.getAttribute('data-team-mode') === 'kolaborasi';
+                    if (want && !tmIsPlanPro()) {
+                        toggleTeamMenu(false);
+                        tmShowProLockPopup();
+                        tmRevalidatePlan();
+                        return;
+                    }
+                    teamModeOn = want;
+                    try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
+                    applyTeamModeStyle();
+                    toggleTeamMenu(false);
+                });
+            });
+            document.addEventListener('click', function () { toggleTeamMenu(false); });
+        }
+
+        const submitPromptBtn = document.getElementById('submit-prompt-btn');
+        const mainPromptInput = document.getElementById('main-prompt-input');
+        function processPromptSubmission(customTitle) {
+            if(!mainPromptInput) return;
+            const prompt = mainPromptInput.value.trim();
+            if(!prompt) return;
+            
+            // Clear stale handoff data that could cause issues
+            try {
+                localStorage.removeItem('clincoo_current_chat_msg');
+                localStorage.removeItem('clincoo_current_project_id');
+                localStorage.removeItem('clincoo_current_attachments');
+            } catch(e) {}
+            const projectId = 'proj_' + Date.now();
+            let titleParts = prompt.split(' ');
+            let title = customTitle || titleParts.slice(0, 4).join(' ');
+            if(!customTitle && titleParts.length > 4) title += '...';
+            const newProject = {
+                id: projectId,
+                title: title,
+                prompt: prompt,
+                updatedAt: new Date().toISOString()
+            };
+            let projects = [];
+            try {
+                const stored = localStorage.getItem('clincoo_projects');
+                if(stored) projects = JSON.parse(stored);
+            } catch(e) {}
+            projects.unshift(newProject);
+            try {
+                localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                pushProjectsToServer(projects);
+                localStorage.setItem('clincoo_current_chat_msg', prompt);
+                localStorage.setItem('clincoo_current_project_id', projectId);
+                let staged = [];
+                try { staged = JSON.parse(localStorage.getItem('clincoo_staged_attachments') || '[]'); } catch(e) {}
+                if (staged.length > 0) {
+                    // Isi file ikut (teks utk dokumen, dataURL utk gambar) — bukan sekadar nama.
+                    // File besar yang tak terbaca tetap dikirim nama-saja agar AI tahu lampirannya ada.
+                    const attachments = staged.map(a => ({ type: a.type, name: a.name, size: a.size, data: a.data, text: a.text, extension: a.extension }));
+                    localStorage.setItem('clincoo_current_attachments', JSON.stringify(attachments));
+                    localStorage.removeItem('clincoo_staged_attachments');
+                    if (filePreviewContainer) {
+                        filePreviewContainer.classList.add('hidden');
+                        filePreviewContainer.classList.remove('flex');
+                        filePreviewContainer.innerHTML = '';
+                    }
+                }
+            } catch(e) {}
+            window.location.href = 'proyek/chat/?id=' + projectId;
+        }
+        if(submitPromptBtn) {
+            submitPromptBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                try { processPromptSubmission(); } catch(err) { console.error('Submit error:', err); }
+            });
+        }
+        if(mainPromptInput) {
+            mainPromptInput.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    try { processPromptSubmission(); } catch(err) { console.error('Submit error:', err); }
+                }
+            });
+        }
+
+        // Escape HTML + buang sisa sintaks markdown — pembersih pertahanan-berlapis untuk
+        // kartu proyek: menangani proyek lama yang sudah kesimpan dengan markdown mentah,
+        // bukan cuma proyek baru (perbaikan penyimpanan dilakukan juga di proyek/chat).
+        function escCard(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+        function stripMdCard(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/```[\s\S]*?```/g, ' ')
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+                .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                .replace(/(\*|_)(.*?)\1/g, '$2')
+                .replace(/~~(.*?)~~/g, '$1')
+                .replace(/^\s*[-*+]\s+/gm, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function renderProjects() {
+            let projects = [];
+            try {
+                const stored = localStorage.getItem('clincoo_projects');
+                if (stored) projects = JSON.parse(stored);
+            } catch(e) {}
+
+            // Bersihin nama proyek yang ketiban pesan error kuota AI (biar balik ke nama template/asli)
+            let dirty = false;
+            projects.forEach(function(p) {
+                if (p && p.aiName && /^(kuota ai|maaf, terjadi kesalahan|maaf, terjadi)/i.test(p.aiName.trim())) {
+                    delete p.aiName; delete p.aiDesc; dirty = true;
+                }
+            });
+            if (dirty) {
+                try {
+                    localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                    if (typeof pushProjectsToServer === 'function') pushProjectsToServer(projects);
+                } catch(e) {}
+            }
+
+            const homeList = document.getElementById('home-projects-list');
+            const allList = document.getElementById('all-projects-list');
+
+            function timeAgo(dateStr) {
+                const diff = Date.now() - new Date(dateStr).getTime();
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+                if (days > 0) return 'Diperbarui ' + days + ' hari lalu';
+                if (hours > 0) return 'Diperbarui ' + hours + ' jam lalu';
+                return 'Diperbarui baru saja';
+            }
+
+            function createHomeCard(proj) {
+                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
+                return '<div data-proj-id="'+proj.id+'" class="relative w-56 sm:w-60 flex-shrink-0 border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group" onclick="openProject(\''+proj.id+'\')">' +
+                    '<div class="w-full h-28 bg-[#F9FAFB] rounded-xl mb-3.5 p-3 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
+                    '<div class="flex items-center justify-between"><div class="w-12 h-2 bg-gray-200 rounded-full"></div><div class="w-3 h-3 rounded-full bg-black/10"></div></div>' +
+                    '<div class="grid grid-cols-2 gap-2 my-auto"><div class="h-10 rounded-lg border border-gray-100 p-1.5 flex flex-col justify-between"><div class="w-6 h-1.5 bg-gray-200 rounded"></div><div class="w-10 h-2 bg-gray-900 rounded"></div></div><div class="h-10 rounded-lg border border-gray-100 p-1.5 flex flex-col justify-between"><div class="w-6 h-1.5 bg-gray-200 rounded"></div><div class="w-8 h-2 bg-gray-400 rounded"></div></div></div>' +
+                    '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div>' +
+                    '</div>' +
+                    '<h3 class="font-semibold text-gray-900 text-sm group-hover:text-black truncate">'+title+'</h3>' +
+                    '<p class="text-[11px] text-gray-500 mt-0.5 truncate">'+desc.substring(0, 40)+'</p>' +
+                    '<p class="text-xs text-gray-400 mt-1.5">'+timeAgo(proj.updatedAt)+'</p>' +
+                    '</div>';
+            }
+
+            function createAllCard(proj) {
+                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
+                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
+                return '<div data-proj-id="'+proj.id+'" class="relative w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4" onclick="openProject(\''+proj.id+'\')">' +
+                    '<div class="w-20 h-20 shrink-0 bg-[#F9FAFB] rounded-xl p-2.5 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
+                    '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div>' +
+                    '</div>' +
+                    '<div class="flex-1 min-w-0"><h3 class="font-semibold text-gray-900 text-base group-hover:text-black truncate">'+title+'</h3>' +
+                    '<p class="text-[13px] text-gray-500 mt-0.5 truncate">'+desc.substring(0, 60)+'</p>' +
+                    '<p class="text-sm text-gray-400 mt-1">'+timeAgo(proj.updatedAt)+'</p></div>' +
+                    '<div class="relative flex-shrink-0"><button class="p-2 text-gray-400 hover:text-black rounded-lg transition-colors" onclick="toggleOption(this, event)"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>' +
+                    '<div class="option-popup absolute top-full right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgb(0,0,0,0.08)] py-2 opacity-0 invisible translate-y-2 transition-all duration-200 z-20 origin-top-right" onclick="event.stopPropagation()">' +
+                    '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="openProject(\''+proj.id+'\')">Lanjutkan</button>' +
+                    '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="duplicateProject(\''+proj.id+'\')">Duplikat</button>' +
+                    '<button class="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" onclick="shareProject(\''+proj.id+'\')">Bagikan</button>' +
+                    '<button class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-gray-50 transition-colors" onclick="deleteProject(\''+proj.id+'\')">Hapus</button>' +
+                    '</div></div></div>';
+            }
+
+            if (homeList) {
+                if (projects.length === 0) {
+                    homeList.innerHTML = '<p class="text-sm text-gray-400 py-8 text-center w-full">Belum ada proyek. Buat proyek baru untuk memulai!</p>';
+                } else {
+                    homeList.innerHTML = projects.slice(0, 6).map(createHomeCard).join('');
+                }
+            }
+            if (allList) {
+                if (projects.length === 0) {
+                    allList.innerHTML = '<p class="text-sm text-gray-400 py-8 text-center w-full">Belum ada proyek. Buat proyek baru untuk memulai!</p>';
+                } else {
+                    allList.innerHTML = projects.map(createAllCard).join('');
+                }
+            }
+            if (typeof lucide !== 'undefined') try { lucide.createIcons(); } catch (e) {}
+        }
+        function openProject(id) {
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            const proj = projects.find(p => p.id === id);
+            if (proj) {
+                // Riwayat dimuat dari D1 di halaman chat, prompt lama tidak di-replay
+                localStorage.setItem('clincoo_current_project_id', id);
+                // Klik proyek dari halaman utama: SELALU langsung ke workspace
+                window.location.href = 'proyek/workspace/?id=' + id;
+            }
+        }
+        // Toast teks sederhana (preferensi notifikasi teks-saja)
+        function showToast(msg, kind) {
+            var t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translate(-50%,12px);z-index:999;' +
+                'padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;' +
+                'background:' + (kind === 'error' ? '#dc2626' : '#111') + ';box-shadow:0 8px 24px rgba(0,0,0,.18);' +
+                'opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;';
+            document.body.appendChild(t);
+            requestAnimationFrame(function () { t.style.opacity = '1'; t.style.transform = 'translate(-50%,0)'; });
+            setTimeout(function () { t.style.opacity = '0'; t.style.transform = 'translate(-50%,12px)'; setTimeout(function () { t.remove(); }, 350); }, 2200);
+        }
+        var _pendingDeleteId = null;
+        function deleteProject(id) {
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            const proj = projects.find(p => p.id === id);
+            const modal = document.getElementById('confirm-delete-modal');
+            const nameEl = document.getElementById('confirm-delete-name');
+            if (!modal) return; // popup tidak ada: jangan hapus tanpa konfirmasi
+            _pendingDeleteId = id;
+            if (nameEl) nameEl.textContent = (proj && proj.title) ? '"' + proj.title + '"' : 'Proyek ini';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        function closeDeleteModal() {
+            const modal = document.getElementById('confirm-delete-modal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            _pendingDeleteId = null;
+            resetDeleteModalUI();
+        }
+        function resetDeleteModalUI() {
+            const okBtn = document.getElementById('confirm-delete-ok');
+            const cancelBtn = document.getElementById('confirm-delete-cancel');
+            const errEl = document.getElementById('confirm-delete-error');
+            if (okBtn) { okBtn.disabled = false; okBtn.innerHTML = 'Hapus'; okBtn.classList.remove('cc-spin'); }
+            if (cancelBtn) cancelBtn.style.visibility = '';
+            if (errEl) errEl.classList.add('hidden');
+            document.querySelectorAll('.cc-del-overlay').forEach(function (ov) { ov.remove(); });
+            document.querySelectorAll('.cc-deleting').forEach(function (el) { el.classList.remove('cc-deleting'); });
+        }
+        async function doDeleteProject(id) {
+            const tok = localStorage.getItem('clincoo_auth_token') || '';
+            const API_ROOT = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+            const authHdr = { 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) };
+            // tarik publish-an: situs + link publik (Cloudflare Pages) dihapus (non-fatal)
+            try {
+                await fetch(API_ROOT + '/deploy', { method: 'POST', headers: authHdr, body: JSON.stringify({ project_id: id, action: 'unpublish' }) });
+            } catch (e) {}
+            // hapus SEMUA data proyek di server (chat, file, settings, env vars, log)
+            let ok = true, serverOk = true;
+            try {
+                const res = await fetch(PROJECTS_API, { method: 'POST', headers: authHdr, body: JSON.stringify({ action: 'delete', id: id }) });
+                if (!res.ok) serverOk = false;
+                else { const d = await res.json().catch(() => null); if (d && d.success === false) serverOk = false; }
+            } catch (e) { serverOk = false; }
+            // server gagal -> jangan bohong: kartu tetap ada & pelanggan diberi tahu
+            if (!serverOk) return false;
+            // data lokal proyek (chat, file workspace, penunjuk aktif)
+            try {
+                localStorage.removeItem('clincoo_ls_chat_' + id);
+                localStorage.removeItem('clincoo_workspace_files_' + id);
+                localStorage.removeItem('clincoo_current_chat_msg_' + id);
+                if (localStorage.getItem('clincoo_current_project_id') === id) localStorage.removeItem('clincoo_current_project_id');
+            } catch (e) {}
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            projects = projects.filter(p => p.id !== id);
+            localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+            pushProjectsToServer(projects);
+            renderProjects();
+            return ok;
+        }
+        document.addEventListener('DOMContentLoaded', function wireDeleteModal() {
+            const modal = document.getElementById('confirm-delete-modal');
+            if (!modal) return;
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeDeleteModal(); });
+            document.getElementById('confirm-delete-cancel').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirm-delete-ok').addEventListener('click', async function () {
+                const id = _pendingDeleteId;
+                if (!id) { closeDeleteModal(); return; }
+                const okBtn = document.getElementById('confirm-delete-ok');
+                const cancelBtn = document.getElementById('confirm-delete-cancel');
+                // status menghapus: tombol berputar, kartu proyek diredupkan + spinner
+                okBtn.disabled = true;
+                okBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 inline-block align-[-3px] cc-spin"></i> Menghapus...';
+                if (cancelBtn) cancelBtn.style.visibility = 'hidden';
+                document.querySelectorAll('[data-proj-id="' + id + '"]').forEach(function (el) {
+                    el.classList.add('cc-deleting');
+                    el.insertAdjacentHTML('beforeend', '<div class="cc-del-overlay absolute inset-0 flex items-center justify-center"><i data-lucide="loader-2" class="w-6 h-6 text-gray-900 cc-spin"></i></div>');
+                });
+                try { lucide.createIcons(); } catch (e) {}
+                let ok = false;
+                try { ok = await doDeleteProject(id); } catch (e) { ok = false; }
+                if (ok) {
+                    closeDeleteModal();
+                    showToast('Proyek dihapus', 'success');
+                } else {
+                    const errEl = document.getElementById('confirm-delete-error');
+                    if (errEl) errEl.classList.remove('hidden');
+                    if (okBtn) { okBtn.disabled = false; okBtn.innerHTML = 'Coba Lagi'; }
+                    document.querySelectorAll('.cc-del-overlay').forEach(function (ov) { ov.remove(); });
+                    document.querySelectorAll('.cc-deleting').forEach(function (el) { el.classList.remove('cc-deleting'); });
+                }
+            });
+        });
+        function duplicateProject(id) {
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            const proj = projects.find(p => p.id === id);
+            if (proj) {
+                const copy = { ...proj, id: 'proj_' + Date.now(), title: proj.title + ' (Copy)', updatedAt: new Date().toISOString() };
+                projects.unshift(copy);
+                localStorage.setItem('clincoo_projects', JSON.stringify(projects));
+                pushProjectsToServer(projects);
+                renderProjects();
+            }
+        }
+        function shareProject(id) {
+            let projects = [];
+            try { const stored = localStorage.getItem('clincoo_projects'); if (stored) projects = JSON.parse(stored); } catch(e) {}
+            const proj = projects.find(p => p.id === id);
+            if (proj && navigator.share) {
+                navigator.share({ title: proj.title, text: proj.prompt }).catch(() => {});
+            }
+        }
+        // === Sinkronisasi daftar proyek per akun ke D1 (Cloudflare) ===
+        const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
+        let _pushTimer = null;
+        function showPlanLimitModal(d) {
+            if (!d || !d.upgrade_needed) return;
+            if (document.getElementById('plan-limit-modal')) return;
+            var m = document.createElement('div');
+            m.id = 'plan-limit-modal';
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+            m.innerHTML =
+                '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
+                '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
+                '<h3 class="text-base font-semibold text-gray-900">Batas proyek paket ' + (d.plan || 'Starter') + '</h3>' +
+                '<p class="text-sm text-gray-500 mt-1.5 leading-snug px-1">Paket kamu hanya bisa menyimpan maksimal <span class="font-semibold text-gray-700">' + (d.limit || 0) + ' proyek</span>. Proyek baru tetap tersimpan di perangkat ini, tapi tidak tersinkron ke akun.</p>' +
+                '<a href="' + base + '/akun/langganan/upgrade/" class="mt-4 block w-full py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">Upgrade Paket</a>' +
+                '<button id="plan-limit-close" class="mt-2 w-full py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors">Nanti saja</button>' +
+                '</div></div>';
+            document.body.appendChild(m);
+            var btn = m.querySelector('#plan-limit-close');
+            if (btn) btn.addEventListener('click', function () { m.remove(); });
+        }
+        function pushProjectsToServer(projects) {
+            if (_pushTimer) clearTimeout(_pushTimer);
+            _pushTimer = setTimeout(function () {
+                try {
+                    fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'replace_all', projects: projects }) }).then(function (res) {
+                        if (!res.ok) return res.json().then(function (d) { showPlanLimitModal(d); }).catch(function () {});
+                    }).catch(function () {});
+                } catch (e) {}
+            }, 700);
+        }
+        function syncProjectsFromServer() {
+            try {
+                fetch(PROJECTS_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+                    if (!d || !Array.isArray(d.projects)) return;
+                    const list = d.projects;
+                    let local = [];
+                    try { const st = localStorage.getItem('clincoo_projects'); if (st) local = JSON.parse(st); } catch(e) {}
+                    // MERGE DUA ARAH (aman dari kehilangan data):
+                    // 1) proyek lokal yang belum ada di server -> dorong ke server (registrasi kepemilikan utk deploy)
+                    // 2) proyek server yang belum ada di lokal -> tambahkan ke lokal
+                    // 3) id sama -> pakai yang updatedAt-nya lebih baru
+                    const serverById = {};
+                    list.forEach(sp => serverById[sp.id] = sp);
+                    const merged = local.slice();
+                    local.forEach(lp => {
+                        const sp = serverById[lp.id];
+                        if (sp && new Date(sp.updatedAt || 0) > new Date(lp.updatedAt || 0)) {
+                            const idx = merged.findIndex(m => m.id === lp.id);
+                            if (idx !== -1) merged[idx] = sp;
+                        }
+                    });
+                    list.forEach(sp => { if (!merged.some(m => m.id === sp.id)) merged.push(sp); });
+                    const toPush = merged.filter(m => !serverById[m.id]); // belum terdaftar di server
+                    if (toPush.length) {
+                        try {
+                            fetch(PROJECTS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'upsert', projects: toPush }) }).catch(function () {});
+                        } catch (e) {}
+                    }
+                    if (JSON.stringify(merged) !== JSON.stringify(local)) {
+                        try { localStorage.setItem('clincoo_projects', JSON.stringify(merged)); } catch(e) {}
+                        renderProjects();
+                    }
+                }).catch(function () {});
+            } catch (e) {}
+        }
+        renderProjects();
+        syncProjectsFromServer();
+
+        setTheme(currentThemeMode);
+        setAccent(currentAccentName, accentMap[currentAccentName] ? accentMap[currentAccentName].cls : 'bg-gray-900');
+    </script>
+
+<style>
+.cc-spin{animation:cc-spin .8s linear infinite}
+@keyframes cc-spin{to{transform:rotate(360deg)}}
+.cc-deleting{opacity:.45;pointer-events:none;filter:grayscale(.3)}
+</style>
+<!-- Popup konfirmasi hapus proyek (CTA teks, radius kecil) -->
+<div id="confirm-delete-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">
+  <div class="bg-white rounded-md w-full max-w-xs px-5 pt-5 pb-4 text-center">
+    <h3 class="text-base font-semibold text-gray-900">Hapus proyek ini?</h3>
+    <p id="confirm-delete-name" class="text-sm text-gray-500 mt-1 px-2 truncate"></p>
+    <p class="text-[13px] text-gray-400 mt-2 leading-snug">Semua data proyek akan dihapus, <span class="text-gray-500">termasuk situs yang sudah dipublish dan link publiknya</span>.</p>
+    <p id="confirm-delete-error" class="text-xs text-red-600 mt-2 hidden">Gagal menghapus proyek. Periksa koneksi lalu coba lagi.</p>
+    <div class="flex items-center justify-center gap-10 mt-5">
+      <button type="button" id="confirm-delete-cancel" class="text-sm font-medium text-gray-400 hover:text-gray-900 transition-colors px-1 py-0.5">Batal</button>
+      <button type="button" id="confirm-delete-ok" class="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors px-1 py-0.5">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* BG hero: tinggi area gambar menyesuaikan posisi judul 'Proyek terbaru'.
+   Gambar tampil hanya di halaman home, dari balik header sampai tepat di atas judul. */
+(function(){
+    var heroBg = document.getElementById('hero-bg');
+    var homePage = document.getElementById('page-home');
+    var section = document.getElementById('section-proyek-terbaru');
+    function updateHeroBg(){
+        if(!heroBg) return;
+        var onHome = homePage && !homePage.classList.contains('hidden');
+        if(!onHome || !section){ heroBg.style.display = 'none'; return; }
+        heroBg.style.display = 'block';
+        var top = section.getBoundingClientRect().top + window.scrollY;
+        heroBg.style.height = Math.max(top - 16, 320) + 'px';
+    }
+    window.addEventListener('load', updateHeroBg);
+    window.addEventListener('resize', updateHeroBg);
+    document.addEventListener('DOMContentLoaded', updateHeroBg);
+    if(homePage){
+        try { new MutationObserver(updateHeroBg).observe(homePage, { attributes: true, attributeFilter: ['class'] }); } catch(e){}
+    }
+    /* re-hitung setelah render konten dinamis */
+    setTimeout(updateHeroBg, 300);
+    setTimeout(updateHeroBg, 1200);
+})();
+</script>
+
+    <script>/* clincoo-sw-register */
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }
+    </script>
+</body>
+</html>
