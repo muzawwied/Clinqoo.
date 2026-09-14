@@ -469,6 +469,13 @@
                             </span>
                             <span class="text-xs text-gray-500 mt-0.5">Tim AI berdiskusi &amp; membangun web (5 kuota/pesan)</span>
                         </button>
+                        <button type="button" data-team-mode="agent" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
+                            <span class="text-sm font-semibold flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Agent
+                            </span>
+                            <span class="text-xs text-gray-500 mt-0.5">Tugas otonom di latar belakang — progres dikirim ke chat (1 kuota)</span>
+                        </button>
                         <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
                             <span class="text-sm font-semibold flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
@@ -1692,6 +1699,7 @@
         }
 
         function stopGeneration() {
+            try { window.__agentAbort = true; } catch (e) {}
             if (abortController) {
                 abortController.abort();
                 abortController = null;
@@ -1762,13 +1770,16 @@
         // Pilihan mode lewat capsul dropdown di samping kiri tombol kirim.
         let teamModeOn = false;
         try { teamModeOn = localStorage.getItem('clincoo_team_mode') === '1'; } catch (e) {}
+        let agentModeOn = false;
+        try { agentModeOn = localStorage.getItem('clincoo_agent_mode') === '1' && !teamModeOn; } catch (e) {}
         const teamCapsule = document.getElementById('team-mode-capsule');
         const teamMenu = document.getElementById('team-mode-menu');
         const teamLabel = document.getElementById('team-mode-label');
         function applyTeamModeStyle() {
             if (!teamCapsule || !teamLabel) return;
-            teamLabel.textContent = teamModeOn ? 'Kolaborasi' : 'Biasa';
-            if (teamModeOn) {
+            teamLabel.textContent = agentModeOn ? 'Agent' : (teamModeOn ? 'Kolaborasi' : 'Biasa');
+            const modeActive = teamModeOn || agentModeOn;
+            if (modeActive) {
                 teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
                 teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
             } else {
@@ -1776,7 +1787,8 @@
                 teamCapsule.classList.add('border-gray-200', 'text-gray-600');
             }
             document.querySelectorAll('.team-mode-option').forEach(function (btn) {
-                const active = (btn.getAttribute('data-team-mode') === 'kolaborasi') === teamModeOn;
+                const m = btn.getAttribute('data-team-mode');
+                const active = (m === 'kolaborasi' && teamModeOn) || (m === 'agent' && agentModeOn) || (m === 'biasa' && !teamModeOn && !agentModeOn);
                 btn.classList.toggle('bg-gray-100', active);
             });
         }
@@ -2003,15 +2015,19 @@ function showCollabPlansModal(sub) {
             document.querySelectorAll('.team-mode-option').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
-                    var want = btn.getAttribute('data-team-mode') === 'kolaborasi';
-                    if (want && !isPlanPro()) {
+                    var m = btn.getAttribute('data-team-mode');
+                    if (m === 'kolaborasi' && !isPlanPro()) {
                         toggleTeamMenu(false);
                         showProLockPopup();
                         revalidatePlan2();
                         return;
                     }
-                    teamModeOn = want;
-                    try { localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0'); } catch (err) {}
+                    teamModeOn = (m === 'kolaborasi');
+                    agentModeOn = (m === 'agent');
+                    try {
+                        localStorage.setItem('clincoo_team_mode', teamModeOn ? '1' : '0');
+                        localStorage.setItem('clincoo_agent_mode', agentModeOn ? '1' : '0');
+                    } catch (err) {}
                     applyTeamModeStyle();
                     toggleTeamMenu(false);
                 });
@@ -2390,6 +2406,7 @@ function showCollabPlansModal(sub) {
                     case 'deploy_project': return await toolDeployProject(args);
                     case 'add_env_var': return await toolAddEnvVar(args);
                     case 'list_env_vars': return await toolListEnvVars(args);
+                    case 'review_code': return await toolReviewCode(args);
                     default: return { success: false, error: 'Tool tidak dikenal: ' + name };
                 }
             } catch (e) {
@@ -2941,6 +2958,104 @@ function showCollabPlansModal(sub) {
         }
         }
 
+        // ===== MODE AGENT: tugas otonom di latar belakang, progres dikirim ke chat =====
+        // Ala superagent: mulai -> event per langkah -> auto-resume kena limit -> hasil akhir.
+        function agentSleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+        function agentAuthHeaders() {
+            var tok = localStorage.getItem('clincoo_auth_token') || localStorage.getItem('clincoo_token') || '';
+            return tok ? { 'Authorization': 'Bearer ' + tok } : {};
+        }
+        function agentEventsText(events) {
+            return (events || []).map(function (ev) {
+                if (ev.kind === 'start') return '\u{1F680} ' + ev.text;
+                if (ev.kind === 'progress') return '\u2699\uFE0F ' + ev.text;
+                if (ev.kind === 'done') return '\u2705 ' + ev.text;
+                if (ev.kind === 'paused') return '\u23F8\uFE0F ' + ev.text;
+                return '\u2022 ' + ev.text;
+            }).join('\n');
+        }
+        async function runAgentTask(goal) {
+            window.__agentAbort = false;
+            isGenerating = true;
+            const aiMsg = { id: generateId(), role: 'ai', text: '\u26A1 Memulai tugas agent...', isProcessing: true, toolCalls: [] };
+            messages.push(aiMsg);
+            renderMessages();
+            scrollToBottom(true);
+
+            const AGENT_API = TOOL_API_BASE + '/api/agent';
+            const upd = function (text, done, isError) {
+                const idx = messages.findIndex(function (m) { return m.id === aiMsg.id; });
+                if (idx !== -1) {
+                    messages[idx].text = text;
+                    messages[idx].isProcessing = !done;
+                    messages[idx].isError = !!isError;
+                    if (done) messages[idx].isTyping = false;
+                    renderMessages();
+                    try { saveChatLog(); } catch (e) {}
+                }
+                scrollToBottom(false);
+            };
+
+            let task = null;
+            let seen = 0;
+            try {
+                const res = await fetch(AGENT_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, agentAuthHeaders()), body: JSON.stringify({ action: 'start', goal: goal, project_id: (typeof currentProjectId !== 'undefined' ? currentProjectId : undefined) }) });
+                const data = await res.json().catch(function () { return {}; });
+                if (res.status === 429 && data.quota_exhausted) { upd('Kuota AI hari ini sudah habis \u2014 tugas batal. Coba lagi besok.', true, true); isGenerating = false; return; }
+                if (!res.ok || !data.ok) { upd('Gagal memulai tugas: ' + (data.error || 'HTTP ' + res.status), true, true); isGenerating = false; return; }
+                task = data.task;
+
+                while (!window.__agentAbort) {
+                    const st = await fetch(AGENT_API + '?task_id=' + encodeURIComponent(task.id), { headers: agentAuthHeaders() });
+                    const sd = await st.json().catch(function () { return {}; });
+                    if (!st.ok || !sd.ok) { await agentSleep(4000); continue; }
+                    task = sd.task;
+                    const evs = sd.events || [];
+                    if (evs.length > seen) {
+                        seen = evs.length;
+                        upd('\u26A1 Tugas: ' + goal + '\n\n' + agentEventsText(evs) + (task.status === 'running' ? '\n\n\u23F3 Bekerja di latar belakang...' : ''), false, false);
+                    }
+                    if (task.status === 'done') {
+                        upd(task.result ? String(task.result) : 'Tugas selesai.', true, false);
+                        isGenerating = false;
+                        try { saveChatLog(); } catch (e) {}
+                        return;
+                    }
+                    if (task.status === 'failed') {
+                        upd('Tugas gagal: ' + (task.error || 'provider AI tidak tersedia'), true, true);
+                        isGenerating = false;
+                        return;
+                    }
+                    if (task.status === 'paused') {
+                        // AUTO-LANJUT tanpa konfirmasi \u2014 kena limit/budget pun lanjut sendiri dari langkah terakhir
+                        const rr = await fetch(AGENT_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, agentAuthHeaders()), body: JSON.stringify({ action: 'resume', task_id: task.id }) });
+                        if (rr.status === 429) {
+                            upd('\u23F8\uFE0F Tugas dijeda \u2014 kuota habis. Lanjut otomatis begitu kuota terisi.\n\n' + agentEventsText(evs), true, false);
+                            isGenerating = false;
+                            return;
+                        }
+                        await agentSleep(2000);
+                        continue;
+                    }
+                    await agentSleep(4000);
+                }
+                if (window.__agentAbort) upd('\u26A1 Tugas dihentikan \u2014 progres tersimpan, kirim pesan lagi untuk lanjut.', true, false);
+            } catch (e) {
+                upd('Gagal menjalankan tugas: ' + (e && e.message), true, true);
+            }
+            isGenerating = false;
+        }
+
+        // ===== TOOL REVIEW KODE: kirim seluruh file workspace ke /api/review =====
+        async function toolReviewCode(args) {
+            const files = wsFlatten(wsLoad()).filter(function (f) { return f.content; }).slice(0, 25);
+            if (!files.length) return { error: 'Workspace masih kosong \u2014 belum ada kode untuk direview.' };
+            const res = await fetch(TOOL_API_BASE + '/api/review', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, agentAuthHeaders()), body: JSON.stringify({ files: files, question: (args && args.question) || '' }) });
+            const d = await res.json().catch(function () { return {}; });
+            if (!res.ok) return { error: d.error || 'Gagal mereview kode (HTTP ' + res.status + ')' };
+            return { ok: true, findings: d.findings || '' };
+        }
+
         function handleSubmit() {
             const val = chatInput.value.trim();
             if ((!val && currentAttachments.length === 0) || isGenerating) return;
@@ -2961,6 +3076,7 @@ function showCollabPlansModal(sub) {
             renderMessages();
             scrollToBottom(true);
             
+            if (agentModeOn && val) { runAgentTask(val); return; }
             fetchAIResponse();
         }
 

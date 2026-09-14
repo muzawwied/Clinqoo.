@@ -240,6 +240,9 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
       args: { type: 'OBJECT', description: 'Objek argumen input untuk function, contoh: {"url": "https://contoh.com"}.' }
     }, required: ['name'] } },
   // ===== TOOLS BROWSER/SCREENSHOT (dieksekusi otomatis di server) =====
+  { name: 'review_code',
+    description: 'Periksa SEMUA kode proyek di workspace untuk menemukan error, bug, kelemahan keamanan, dan masalah logika — laporan per file dengan saran perbaikan. Gunakan saat user minta cek/review/debug/cari bug kode proyek.',
+    parameters: { type: 'OBJECT', properties: { question: { type: 'STRING', description: 'Fokus review khusus (opsional), contoh: "kenapa tombol simpan tidak berfungsi".' } } } },
   { name: 'take_screenshot',
     description: 'Ambil screenshot halaman web dari sebuah URL dan kembalikan LINK gambar pratinjau yang bisa dibagikan ke user. Gunakan saat user minta screenshot/preview situs, baik situs user maupun situs lain.',
     parameters: { type: 'OBJECT', properties: {
