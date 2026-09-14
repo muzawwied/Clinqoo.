@@ -204,7 +204,7 @@ export async function onRequestPost({ request, env }) {
   await ensureQrisColumns(db);
 
   // total tagihan (jika BuatQris menambahkan kode unik, pakai nilai dari mereka)
-  const total = parseInt(p.total || p.amount || p.total_payment || amount, 10) || amount;
+  const total = parseInt(p.total_amount || p.total || p.total_payment || p.amount || amount, 10) || amount;
 
   await db.prepare(
     'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id, qr_url, bill_total, expires_at) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)'
