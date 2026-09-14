@@ -1,8 +1,14 @@
-// Cloudflare Pages Functions - Top Up via QRIS Pakasir (app.pakasir.com)
-// Flow: pilih QRIS -> create transaction Pakasir -> frontend render QR string -> bayar -> webhook/poll -> saldo masuk D1
-// Env: PAKASIR_API_KEY (wajib) & PAKASIR_PROJECT (opsional, default 'clincoo')
-// Alternatif env: tabel env_vars D1 (key: PAKASIR_API_KEY / PAKASIR_PROJECT)
-// Webhook (di dashboard Pakasir): https://<domain>/api/topup-qris
+// Cloudflare Pages Functions - Top Up via QRIS BuatQris (api.buatqris.site)
+// Flow: pilih QRIS -> create QRIS di BuatQris -> frontend tampilkan QR (image/qr_url)
+//       -> bayar -> webhook bertanda tangan (X-BuatQris-Signature, HMAC-SHA256) -> saldo masuk D1
+// Env (Cloudflare Pages vars atau tabel env_vars D1, global):
+//   BUATQRIS_ACCOUNT_ID      (wajib) — dari dashboard BuatQris (Developer > Open API)
+//   BUATQRIS_SECRET_TOKEN   (wajib) — secret token API
+//   BUATQRIS_WEBHOOK_SECRET (opsional) — kunci tanda tangan webhook; jika kosong pakai secret_token
+//   BUATQRIS_METHOD         (opsional) — metode qris: qris_one..qris_four, default 'qris_two'
+// Callback URL (di dashboard BuatQris): https://<domain>/api/topup-qris
+// Referensi order ditanam di `description` QRIS ("Clincoo TOPUPQ-xxx") sehingga
+// webhook apa pun formatnya tetap bisa dicocokkan ke order — plus verifikasi HMAC.
 
 import { currentUser } from './user-scope.js';
 import { creditTopup } from './topup.js';
@@ -30,37 +36,35 @@ async function getSecret(env, key) {
   return null;
 }
 
-const PAKASIR_BASE = 'https://app.pakasir.com';
+const BQ_BASE = 'https://api.buatqris.site';
+const BQ_ORDER_PREFIX = 'TOPUPQ-';
 
-async function pakasirPost(path, apiKey, project, orderId, amount) {
+// Panggil API BuatQris (POST, form-urlencoded seperti contoh resmi mereka)
+async function bqPost(params) {
   try {
-    const res = await fetch(PAKASIR_BASE + path, {
+    const res = await fetch(BQ_BASE, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project, order_id: orderId, amount, api_key: apiKey })
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(params).toString()
     });
     return await res.json();
   } catch { return null; }
 }
 
-async function pakasirDetail(apiKey, project, orderId, amount) {
-  try {
-    const url = PAKASIR_BASE + '/api/transactiondetail?project=' + encodeURIComponent(project) +
-      '&amount=' + encodeURIComponent(amount) + '&order_id=' + encodeURIComponent(orderId) +
-      '&api_key=' + encodeURIComponent(apiKey);
-    const res = await fetch(url);
-    return await res.json();
-  } catch { return null; }
-}
-
-// Klaim order atomik: mencegah kredit ganda saat webhook & poll berjalan bersamaan
+// Klaim order atomik: mencegah kredit ganda saat webhook datang berkali-kali
 async function claimOrder(db, orderId) {
   const r = await db.prepare("UPDATE topup_orders SET status = 'paid' WHERE id = ? AND status = 'pending'").bind(orderId).run();
   return (r.meta?.changes || 0) > 0;
 }
 
-// GET /api/topup-qris?action=ping            -> status konfigurasi (untuk UI)
-// GET /api/topup-qris?action=status&order_id -> cek status order (live check ke Pakasir + kredit bila lunas)
+async function ensureQrisColumns(db) {
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_qr TEXT').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_total REAL').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_expired TEXT').run(); } catch (e) {}
+}
+
+// GET /api/topup-qris?action=ping           -> status konfigurasi (untuk UI)
+// GET /api/topup-qris?action=status&order_id -> status order (webhook = sumber kebenaran)
 export async function onRequestGet({ request, env }) {
   const db = env.DB;
   if (!db) return json({ error: 'D1 not bound' }, 500);
@@ -68,135 +72,152 @@ export async function onRequestGet({ request, env }) {
   const action = url.searchParams.get('action');
 
   if (action === 'ping') {
-    const apiKey = await getSecret(env, 'PAKASIR_API_KEY');
-    const project = (await getSecret(env, 'PAKASIR_PROJECT')) || 'clincoo';
-    return json({ configured: !!apiKey, project, provider: 'pakasir' });
+    const accountId = await getSecret(env, 'BUATQRIS_ACCOUNT_ID');
+    return json({ configured: !!(accountId && (await getSecret(env, 'BUATQRIS_SECRET_TOKEN'))), provider: 'buatqris' });
   }
 
   if (action === 'status') {
-    const orderId = url.searchParams.get('order_id') || '';
+    const orderId = url.searchParams.get('order_id');
     if (!orderId) return json({ error: 'order_id required' }, 400);
-    let order;
-    try { order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first(); } catch (e) { return json({ error: e.message }, 500); }
-    if (!order) return json({ status: 'unknown' });
-    if (order.status === 'paid') return json({ status: 'paid', amount: order.amount });
-    if (order.status === 'failed') return json({ status: 'failed' });
-
-    // Order pending -> cek live ke Pakasir
-    const apiKey = await getSecret(env, 'PAKASIR_API_KEY');
-    const project = (await getSecret(env, 'PAKASIR_PROJECT')) || 'clincoo';
-    if (!apiKey) return json({ status: order.status, error: 'payment_not_configured' });
-    const det = await pakasirDetail(apiKey, project, orderId, order.amount);
-    const trx = det?.transaction;
-    if (trx?.status === 'completed') {
-      if (await claimOrder(db, orderId)) {
-        const fresh = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first();
-        try { await creditTopup(env, fresh); } catch (e) {}
-      }
-      return json({ status: 'paid', amount: order.amount });
-    }
-    return json({ status: 'pending', expired_at: trx?.expired_at || null });
+    let order = null;
+    try { order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first(); } catch (e) {}
+    if (!order) return json({ error: 'order not found' }, 404);
+    return json({ success: true, order_id: order.id, status: order.status, amount: order.amount, credited: order.status === 'paid' });
   }
 
   return json({ error: 'unknown action' }, 400);
 }
 
 // POST /api/topup-qris
-//  a) {action:'create', amount}                 -> buat transaksi QRIS di Pakasir, simpan order pending
-//  b) {action:'cancel', order_id}               -> batalkan order (Pakasir + D1)
-//  c) Webhook Pakasir {order_id, status, ...}   -> verifikasi via transactiondetail -> kredit saldo
+//  a) {action:'create', amount}                -> buat transaksi QRIS di BuatQris, simpan order pending
+//  b) {action:'cancel', order_id}              -> batalkan order (D1)
+//  c) Webhook BuatQris (event callback)         -> verifikasi HMAC -> kredit saldo
 export async function onRequestPost({ request, env }) {
   const db = env.DB;
   if (!db) return json({ error: 'D1 not bound' }, 500);
 
+  const rawBody = await request.text();
   let body = {};
-  try { body = await request.json(); } catch { return json({ error: 'invalid body' }, 400); }
+  try { body = JSON.parse(rawBody || '{}'); } catch { body = {}; }
 
-  // ---- Webhook Pakasir (tanpa field action) ----
-  // Pakasir tidak mengirim token tanda tangan, jadi sebelum mengkredit saldo
-  // kita WAJIB verifikasi ulang via API transactiondetail (server-to-server).
-  if (!body.action && body.order_id && body.status) {
-    const apiKey = await getSecret(env, 'PAKASIR_API_KEY');
-    const project = (await getSecret(env, 'PAKASIR_PROJECT')) || 'clincoo';
-    if (!apiKey) return json({ received: false, error: 'not configured' }, 503);
+  // ---- Webhook BuatQris (event callback, tanpa action create/cancel) ----
+  if (body.action !== 'create' && body.action !== 'cancel') {
+    // Verifikasi tanda tangan HMAC-SHA256: X-BuatQris-Signature atas RAW body
+    const secret = (await getSecret(env, 'BUATQRIS_WEBHOOK_SECRET')) || (await getSecret(env, 'BUATQRIS_SECRET_TOKEN'));
+    if (!secret) return json({ received: false, error: 'not configured' }, 503);
+    const sig = String(request.headers.get('x-buatqris-signature') || request.headers.get('x-buatqris-signature'.toUpperCase()) || '');
+    if (!sig) return json({ received: false, error: 'signature missing' }, 401);
+    let expected = '';
+    try {
+      // HMAC-SHA256 via WebCrypto standar (Workers mendukung crypto.subtle)
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(rawBody));
+      expected = [...new Uint8Array(sigBuf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      return json({ received: false, error: 'hmac error' }, 500);
+    }
+    const given = sig.replace(/^sha256=/i, '').toLowerCase();
+    if (given !== expected) return json({ received: false, error: 'signature invalid' }, 401);
+
+    // Cari referensi order kita (ditanam di description QRIS) di mana pun posisinya
+    const raw = String(rawBody || '') + ' ' + JSON.stringify(body || {});
+    const m = raw.match(new RegExp(BQ_ORDER_PREFIX + '[A-Za-z0-9-]+'));
+    if (!m) return json({ received: true, matched: false });
+
+    const orderId = m[0];
     let order = null;
-    try { order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(String(body.order_id)).first(); } catch (e) {}
-    if (order && order.status === 'pending') {
-      const det = await pakasirDetail(apiKey, project, order.id, order.amount);
-      if (det?.transaction?.status === 'completed') {
-        if (await claimOrder(db, order.id)) {
-          const fresh = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(order.id).first();
-          try { await creditTopup(env, fresh); } catch (e) {}
-        }
+    try { order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first(); } catch (e) {}
+    if (!order) return json({ received: true, matched: false });
+
+    // Deteksi status dari payload (nama field callback bervariasi — cocokkan fleksibel)
+    const low = raw.toLowerCase();
+    const negative = ['pending', 'expire', 'expired', 'failed', 'fail', 'gagal', 'cancel', 'cancelled', 'refund'];
+    const positive = ['success', 'paid', 'berhasil', 'complete', 'completed', 'settlement'];
+    const isNeg = negative.some(w => low.includes(w));
+    const isPos = positive.some(w => low.includes(w));
+
+    if (isPos && !isNeg && order.status === 'pending') {
+      if (await claimOrder(db, order.id)) {
+        const fresh = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(order.id).first();
+        try { await creditTopup(env, fresh); } catch (e) {}
+        try { await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
+          .bind('topup_buatqris_paid', order.id + ' (' + order.amount + ')', order.user_id).run(); } catch (e) {}
       }
     }
-    return json({ received: true });
+    return json({ received: true, matched: true });
   }
 
   // ---- Batalkan order ----
   if (body.action === 'cancel') {
     const orderId = String(body.order_id || '');
     if (!orderId) return json({ error: 'order_id required' }, 400);
-    const apiKey = await getSecret(env, 'PAKASIR_API_KEY');
-    const project = (await getSecret(env, 'PAKASIR_PROJECT')) || 'clincoo';
     let order = null;
     try { order = await db.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first(); } catch (e) {}
     if (!order) return json({ error: 'order not found' }, 404);
-    if (apiKey && order.status === 'pending') {
-      await pakasirPost('/api/transactioncancel', apiKey, project, order.id, order.amount);
+    if (order.status === 'pending') {
       await db.prepare("UPDATE topup_orders SET status = 'failed' WHERE id = ?").bind(order.id).run();
     }
     return json({ success: true });
   }
 
   // ---- Buat transaksi QRIS baru ----
-  if (body.action !== 'create') return json({ error: 'unknown action' }, 400);
-
   const tpUser = await currentUser(env, request);
   if (!tpUser) return json({ error: 'Login diperlukan', need_login: true }, 401);
 
   const amount = parseInt(body.amount, 10);
   if (!amount || amount < 10000) return json({ error: 'minimal top up 10000' }, 400);
 
-  const apiKey = await getSecret(env, 'PAKASIR_API_KEY');
-  if (!apiKey) {
+  const accountId = await getSecret(env, 'BUATQRIS_ACCOUNT_ID');
+  const secretToken = await getSecret(env, 'BUATQRIS_SECRET_TOKEN');
+  if (!accountId || !secretToken) {
     return json({
       error: 'payment_not_configured',
-      message: 'PAKASIR_API_KEY belum diatur. Tambahkan di Cloudflare Pages > Settings > Environment variables, atau di tabel env_vars.'
+      message: 'BuatQris belum dikonfigurasi. Isi BUATQRIS_ACCOUNT_ID dan BUATQRIS_SECRET_TOKEN (dari dashboard BuatQris > Developer > Open API) di Environment.'
     }, 503);
   }
-  const project = (await getSecret(env, 'PAKASIR_PROJECT')) || 'clincoo';
+  const method = (await getSecret(env, 'BUATQRIS_METHOD')) || 'qris_two';
 
-  const orderId = 'TOPUPQ-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  const orderId = BQ_ORDER_PREFIX + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
-  const pay = await pakasirPost('/api/transactioncreate/qris', apiKey, project, orderId, amount);
-  const p = pay?.payment;
-  if (!p || !p.payment_number) {
-    return json({ error: 'pakasir_error', message: (pay?.message) || 'Gagal membuat transaksi QRIS di Pakasir.' }, 502);
+  const pay = await bqPost({
+    action: 'api_create_qris',
+    account_id: accountId,
+    secret_token: secretToken,
+    amount: String(amount),
+    description: 'Top up saldo Clincoo ' + orderId,
+    qris_method: method
+  });
+  // Respons BuatQris: { qr_url, payment_url, status, ... } (tahan terhadap bungkus data)
+  const p = (pay && (pay.qr_url || pay.payment_url || pay.status)) ? pay : (pay && pay.data) || null;
+  if (!p || !p.qr_url) {
+    return json({ error: 'buatqris_error', message: (pay && pay.message) || (pay && pay.msg) || 'Gagal membuat QRIS di BuatQris (cek saldo/akun/konfigurasi API).' }, 502);
   }
 
-  // Kolom tambahan untuk QRIS Pakasir (aman dipanggil berulang)
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_qr TEXT').run(); } catch (e) {}
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_total REAL').run(); } catch (e) {}
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_expired TEXT').run(); } catch (e) {}
+  await ensureQrisColumns(db);
+
+  // total tagihan (jika BuatQris menambahkan kode unik, pakai nilai dari mereka)
+  const total = parseInt(p.total || p.amount || p.total_payment || amount, 10) || amount;
 
   await db.prepare(
-    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id, pakasir_qr, pakasir_total, pakasir_expired) VALUES (?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?)'
-  ).bind(orderId, amount, 'QRIS (Pakasir)', 'pending', tpUser.id, p.payment_number, p.total_payment || amount, p.expired_at || null).run();
+    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id, pakasir_qr, pakasir_total, pakasir_expired) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)'
+  ).bind(orderId, amount, 'QRIS (BuatQris)', 'pending', p.payment_url || null, tpUser.id, p.qr_url, total, new Date(Date.now() + 15 * 60 * 1000).toISOString()).run();
 
   try {
     await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
-      .bind('topup_qris_created', orderId + ' (' + amount + ')', tpUser.id).run();
+      .bind('topup_qris_created', orderId + ' (' + amount + ') via BuatQris', tpUser.id).run();
   } catch (e) {}
 
   return json({
     success: true,
     order_id: orderId,
-    qr_string: p.payment_number,
+    qr_string: p.qr_url,        // kompatibel UI lama (field ini berisi URL gambar QR)
+    qr_image: p.qr_url,         // URL gambar QR siap tampil
+    payment_url: p.payment_url || null,
     amount: amount,
-    fee: p.fee || 0,
-    total_payment: p.total_payment || amount,
-    expired_at: p.expired_at || null,
-    sandbox: (p.is_sandbox === true) || null
+    fee: 0,
+    total_payment: total,
+    expired_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    provider: 'buatqris'
   });
 }

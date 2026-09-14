@@ -239,7 +239,7 @@
                             </div>
                             <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
-                        <!-- QRIS via Pakasir — aktif: buat transaksi, QR ditampilkan di step khusus -->
+                        <!-- QRIS via BuatQris — aktif: buat transaksi, QR ditampilkan di step khusus -->
                         <div onclick="selectPaymentMethod(this)" class="pay-method-card border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]">
                             <div class="flex items-center space-x-3.5 flex-1 min-w-0 mr-2 p-3.5">
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
@@ -486,7 +486,7 @@
             </main>
         </div>
 
-        <!-- STEP 4: QRIS PAYMENT (Pakasir) -->
+        <!-- STEP 4: QRIS PAYMENT (BuatQris) -->
         <div id="step-qris" class="hidden flex-col w-full min-h-screen overflow-y-auto">
             <header class="flex justify-start px-4 py-3 sticky top-0 w-full z-40 bg-white dark:bg-[#0a0a0a]">
                 <button onclick="qrisBackToAmount()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-all cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white shadow-sm">
@@ -733,16 +733,14 @@
         var XENDIT_METHOD_MAP = { 'QRIS Instant': 'qris', 'LinkAja': 'linkaja', 'GoPay': 'gopay', 'OVO': 'ovo', 'DANA': 'dana', 'ShopeePay': 'shopeepay', 'BCA Virtual Account': 'bca', 'Mandiri Virtual Account': 'mandiri', 'BRI Virtual Account': 'bri', 'BNI Virtual Account': 'bni' };
         var topupPollTimer = null;
 
-        // ===== QRIS via Pakasir =====
+        // ===== QRIS via BuatQris =====
         var qrisOrder = null;
         var qrisPollTimer = null;
         var qrisCountdownTimer = null;
 
-        // Estimasi biaya layanan Pakasir (QRIS), mengikuti tarif produksi:
-        // <= 105.000: 310 + 0.7% nominal | > 105.000: flat 1% (pakasir.com/p/pricing) — final tetap mengikuti tagihan
+        // Estimasi biaya layanan BuatQris: mulai 1% per transaksi berhasil (buatqris.site) — final mengikuti tagihan
         function qrisFeeEstimate(amount) {
-            if (amount > 105000) return Math.ceil(amount * 0.01);
-            return 310 + Math.ceil(amount * 0.007);
+            return Math.ceil(amount * 0.01);
         }
 
         function showQrisConfirm() {
@@ -787,7 +785,7 @@
             if (!res.success) {
                 if (btn) { btn.disabled = false; btn.textContent = 'Konfirmasi'; }
                 if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu coba isi saldo kembali.'); return; }
-                if (res.error === 'payment_not_configured') { showModal('Top Up Gagal', res.message || 'PAKASIR_API_KEY belum diatur.'); return; }
+                if (res.error === 'payment_not_configured') { showModal('Top Up Gagal', res.message || 'BuatQris belum dikonfigurasi (BUATQRIS_ACCOUNT_ID / BUATQRIS_SECRET_TOKEN).'); return; }
                 showModal('Top Up Gagal', res.message || res.error || 'Gagal membuat transaksi QRIS.');
                 return;
             }
@@ -810,10 +808,21 @@
             document.getElementById('qris-total').textContent = 'Rp ' + Number(res.total_payment || 0).toLocaleString('id-ID');
             var box = document.getElementById('qris-qr-box');
             box.innerHTML = '';
-            try {
-                new QRCode(box, { text: res.qr_string, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
-            } catch (e) {
-                box.innerHTML = '<p class="text-xs text-gray-500 dark:text-gray-400 px-4">Gagal merender QR. Coba lagi.</p>';
+            if (res.qr_image) {
+                // BuatQris: QR sudah berupa gambar siap tampil
+                box.innerHTML = '<img src="' + res.qr_image + '" alt="QRIS" class="w-[220px] h-[220px] object-contain">';
+                if (res.payment_url) {
+                    var pWrap = document.createElement('p');
+                    pWrap.className = 'text-center mt-2';
+                    pWrap.innerHTML = '<a href="' + res.payment_url + '" target="_blank" rel="noopener" class="text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 underline">Buka halaman bayar di tab baru</a>';
+                    box.parentElement.appendChild(pWrap);
+                }
+            } else {
+                try {
+                    new QRCode(box, { text: res.qr_string, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+                } catch (e) {
+                    box.innerHTML = '<p class="text-xs text-gray-500 dark:text-gray-400 px-4">Gagal merender QR. Coba lagi.</p>';
+                }
             }
             try { lucide.createIcons(); } catch (e) {}
             try { localStorage.setItem('clincoo_qris_active_order', JSON.stringify(res)); } catch (e) {}
