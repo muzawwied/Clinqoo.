@@ -332,8 +332,9 @@
         });
 
         function goBack() {
-            if (window.ClincooBack) { window.ClincooBack('../'); return; }
-            if (history.length > 1) { history.back(); } else { location.replace('../'); }
+            // Kembali SELALU ke halaman Dompet (bukan history.back yang bisa nyasar ke halaman topup)
+            try { location.replace('../../'); return; } catch (e) {}
+            if (history.length > 1) { history.back(); } else { location.replace('../../'); }
         }
 
         function authHeaders() {
