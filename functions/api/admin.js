@@ -31,8 +31,9 @@ async function ensureAdminMigration(db) {
   try { await db.prepare("ALTER TABLE auth_users ADD COLUMN suspend_reason TEXT").run(); } catch (e) {}
   try {
     for (const email of ADMIN_EMAILS) {
-      await db.prepare("UPDATE auth_users SET role = 'admin' WHERE LOWER(email) = LOWER(?) AND (role IS NULL OR role != 'admin')")
-        .bind(email).run();
+      const role = (email.toLowerCase() === 'devconium@gmail.com') ? 'owner' : 'admin';
+      await db.prepare("UPDATE auth_users SET role = ? WHERE LOWER(email) = LOWER(?) AND (role IS NULL OR role != ?)")
+        .bind(role, email, role).run();
     }
   } catch (e) {}
   try {
@@ -57,7 +58,7 @@ async function ensureAdminMigration(db) {
 
 function isUserAdmin(user) {
   if (!user) return false;
-  if (user.role === 'admin') return true;
+  if (user.role === 'admin' || user.role === 'owner') return true;
   if (user.email && ADMIN_EMAILS.has(user.email.toLowerCase())) return true;
   return false;
 }

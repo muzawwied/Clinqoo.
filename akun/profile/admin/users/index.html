@@ -267,6 +267,7 @@
     }
 
     function statusBadge(u) {
+      if (u.role === 'owner') return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-black text-white dark:bg-white dark:text-black">Owner</span>';
       if (u.role === 'admin') return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-black text-white dark:bg-white dark:text-black">Admin</span>';
       if (u.status === 'suspended') return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400">Suspended</span>';
       if (u.status === 'deleted') return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-gray-100 dark:bg-[#1c1c1c] text-gray-500">Dihapus</span>';
@@ -279,8 +280,8 @@
       document.getElementById('users-empty').classList.toggle('hidden', list.length > 0);
 
       wrap.innerHTML = list.map(u => {
-        const isAdmin = u.role === 'admin';
-        const canAct = !isAdmin; // admin tidak bisa di-suspend/hapus dari UI
+        const isAdmin = u.role === 'admin' || u.role === 'owner'; // owner & admin tidak bisa di-suspend/hapus dari UI
+        const canAct = !isAdmin;
         const suspendBtn = u.status === 'suspended'
           ? `<button onclick="askConfirm('unsuspend', ${u.id})" ${canAct ? '' : 'disabled'} class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-[#262626] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-all flex items-center gap-1.5 cursor-pointer ${canAct ? '' : 'opacity-40 cursor-not-allowed'}"><i data-lucide="play" class="w-3.5 h-3.5"></i>Aktifkan</button>`
           : `<button onclick="askConfirm('suspend', ${u.id})" ${canAct ? '' : 'disabled'} class="text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all flex items-center gap-1.5 cursor-pointer ${canAct ? '' : 'opacity-40 cursor-not-allowed'}"><i data-lucide="pause" class="w-3.5 h-3.5"></i>Suspend</button>`;
