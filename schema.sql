@@ -97,3 +97,24 @@ CREATE TABLE IF NOT EXISTS topup_orders (
   created_at TEXT DEFAULT (datetime('now')),
   paid_at TEXT
 );
+
+-- ============================================================================
+-- Clincoo Admin Panel Schema Extensions
+-- Dokumentasi kolom baru pada auth_users:
+--   - role TEXT DEFAULT 'user' ('admin' | 'user')
+--   - status TEXT DEFAULT 'active' ('active' | 'suspended' | 'deleted')
+--   - suspend_reason TEXT (Alasan penangguhan akun)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS admin_reports (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT,
+  target_user_id INTEGER,
+  details TEXT,
+  status TEXT DEFAULT 'open',
+  source TEXT DEFAULT 'system',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_reports_status ON admin_reports(status);
+CREATE INDEX IF NOT EXISTS idx_admin_reports_created ON admin_reports(created_at);

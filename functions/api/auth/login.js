@@ -12,6 +12,9 @@ export async function onRequestPost({ request, env }) {
     const password = String(body.password || '');
     const user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email).first();
     if (!user) return json({ error: 'Email atau kata sandi salah' }, 401);
+    if (user.status === 'suspended' || user.status === 'deleted') {
+      return json({ error: 'Akun dinonaktifkan', suspended: true }, 401);
+    }
     const ok = await verifyPassword(password, user.password_hash);
     if (!ok) return json({ error: 'Email atau kata sandi salah' }, 401);
     const token = await createSession(db, user.id);
@@ -19,7 +22,11 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
         .bind('login', 'Login berhasil dari perangkat baru', user.id).run();
     } catch (e2) { /* aktivitas opsional */ }
-    return json({ success: true, token, user: publicUser(user) });
+    return json({
+      success: true,
+      token,
+      user: { ...publicUser(user), role: user.role || 'user', status: user.status || 'active' }
+    });
   } catch (e) {
     return json({ error: e.message }, 500);
   }
