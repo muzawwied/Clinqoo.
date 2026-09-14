@@ -1,4 +1,5 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { getMonthlyDeployCount } from './plan-helpers.js';
 import { getCpConnection, mirroredBalance, mirrorDelta } from './clincoopay-helpers.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
 
@@ -82,6 +83,26 @@ export async function onRequestGet({ request, env }) {
       }
     } catch(e) {}
 
+    // Pemakaian storage NYATA: total ukuran file workspace semua proyek milik user (GB)
+    let storageBytes = 0;
+    try {
+      if (user) {
+        const pr = await db.prepare('SELECT id FROM user_projects WHERE user_id = ?').bind(user.id).all();
+        for (const p of pr.results || []) {
+          const suf = String(p.id || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24) || 'default';
+          try {
+            const r = await db.prepare(`SELECT COALESCE(SUM(LENGTH(content)), 0) AS s FROM p_${suf}_project_files`).first();
+            storageBytes += (r?.s || 0);
+          } catch (eT) {}
+        }
+      }
+    } catch (eS) {}
+    const storageUsed = Math.round((storageBytes / 1e9) * 1000) / 1000;
+
+    // Deploy bulan ini (nyata, dari counter bulanan)
+    let deployUsed = 0;
+    try { if (user) deployUsed = await getMonthlyDeployCount(db, user.id); } catch (eD) {}
+
     return new Response(JSON.stringify({
       plan,
       billingCycle,
@@ -91,12 +112,11 @@ export async function onRequestGet({ request, env }) {
       price: planInfo.price,
       projectLimit: planInfo.projectLimit,
       storageLimit: planInfo.storageLimit,
-      bandwidthLimit: planInfo.bandwidthLimit,
       collaboratorLimit: planInfo.collaboratorLimit,
       deployLimit: planInfo.deployLimit,
       projectCount,
-      storageUsed: parseFloat(data.storage_used || '0'),
-      bandwidthUsed: parseFloat(data.bandwidth_used || '0'),
+      storageUsed,
+      deployUsed,
       collaboratorCount: parseInt(data.collaborator_count || '0')
     }), {
       headers: { 'Content-Type': 'application/json', ...CORS }
@@ -225,9 +245,26 @@ export async function onRequestPost({ request, env }) {
         }
       }
 
+      // Stacking periode: bila masih ada sisa masa aktif paket berbayar lama,
+      // periode baru dimulai saat masa aktif lama berakhir — sisa waktu tidak hangus.
+      let newStart = new Date();
+      if (planPrice > 0) {
+        try {
+          const cur = await db.prepare('SELECT key, value FROM subscription WHERE key IN (?, ?, ?)')
+            .bind(subPfx + 'plan', subPfx + 'start_date', subPfx + 'billing_cycle').all();
+          const m = {};
+          for (const r of cur.results || []) m[r.key.slice(subPfx.length)] = r.value;
+          const oldPaid = m.plan && PLANS[m.plan] && PLANS[m.plan].price > 0;
+          if (oldPaid && m.start_date) {
+            const days = (m.billing_cycle === 'Tahunan') ? 365 : 30;
+            const oldStart = new Date(String(m.start_date).replace(' ', 'T'));
+            const expiry = new Date(oldStart.getTime() + days * 86400000);
+            if (!isNaN(expiry.getTime()) && expiry > newStart) newStart = expiry;
+          }
+        } catch (eStack) {}
+      }
       await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'plan', validPlan).run();
-      const now = new Date().toISOString();
-      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'start_date', now).run();
+      await db.prepare("INSERT INTO subscription (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(subPfx + 'start_date', newStart.toISOString()).run();
     }
 
     if (billingCycle) {

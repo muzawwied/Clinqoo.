@@ -176,8 +176,8 @@
               <p id="stat-storage" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">2.4 / 50 GB</p>
             </div>
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
-              <p class="text-xs text-gray-500 dark:text-gray-400">Bandwidth</p>
-              <p id="stat-bandwidth" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">18 / 100 GB</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Deploy Bulan Ini</p>
+              <p id="stat-bandwidth" class="clincoo-shimmer text-lg font-bold text-gray-900 dark:text-white">0 / 5</p>
             </div>
             <div class="p-3 rounded-xl border border-gray-200 dark:border-slate-700">
               <p class="text-xs text-gray-500 dark:text-gray-400">Kolaborator</p>
@@ -312,7 +312,7 @@
         }
         setVal('stat-proyek', (d.projectCount || 0) + ' / ' + (d.projectLimit || 0));
         setVal('stat-storage', fmtID(d.storageUsed || 0) + ' / ' + fmtID(d.storageLimit || 0) + ' GB');
-        setVal('stat-bandwidth', fmtID(d.bandwidthUsed || 0) + ' / ' + fmtID(d.bandwidthLimit || 0) + ' GB');
+        setVal('stat-bandwidth', (d.deployUsed || 0) + ' / ' + (d.deployLimit === null || d.deployLimit === undefined ? 'Tak terbatas' : (d.deployLimit || 0)));
         setVal('stat-kolaborator', (d.collaboratorCount || 0) + ' / ' + (d.collaboratorLimit || 0));
 
         const price = d.price || 0;

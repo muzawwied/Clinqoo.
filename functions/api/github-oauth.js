@@ -1,13 +1,16 @@
 // Cloudflare Pages Functions - GitHub OAuth token exchange
 // Reads GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET from D1 database.
 // Exchanges an OAuth authorization code for an access token.
+// Gate paket: impor repository GitHub = fitur Pro & Bisnis (sesuai klaim kartu paket).
+import { currentUser } from './user-scope.js';
+import { getEffectivePlan, ADMIN_EMAILS } from './plan-helpers.js';
 
 export async function onRequestOptions() {
   return new Response(null, {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     }
   });
 }
@@ -51,6 +54,27 @@ async function getSecrets(env) {
 
 export async function onRequestPost({ request, env }) {
   try {
+    // Gate paket — harus login Clincoo & minimal paket Pro (admin bypass)
+    const user = await currentUser(env, request);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Silakan login Clincoo terlebih dahulu untuk menghubungkan GitHub.' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+    if (!ADMIN_EMAILS.has(String(user.email || '').toLowerCase())) {
+      const eff = await getEffectivePlan(env.DB, user);
+      if (eff.plan === 'Starter') {
+        return new Response(JSON.stringify({
+          error: 'Impor repository GitHub tersedia di paket Pro & Bisnis. Upgrade paket di halaman Langganan untuk mengaktifkan fitur ini.',
+          upgrade_needed: true
+        }), {
+          status: 402,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+      }
+    }
+
     const { clientId, clientSecret } = await getSecrets(env);
     if (!clientId || !clientSecret) {
       const missing = !clientId && !clientSecret ? 'Client ID dan Client Secret'

@@ -54,20 +54,23 @@ const OPENROUTER_MODELS = [
   'openrouter/free'
 ];
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const QUOTA_MSG = 'Kuota AI Clincoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
+const QUOTA_MSG_DAILY = 'Kuota AI Clincoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
+const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Kuota reset otomatis awal bulan depan — atau upgrade paket di halaman Langganan untuk kuota lebih besar.';
 
-const DAILY_LIMIT = 25; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
-const ADMIN_DAILY_LIMIT = 500;
+const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
+const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
 
-// Limit kuota AI harian sesuai paket langganan akun (Starter 25 / Pro 100 / Bisnis 300).
-// Admin selalu minimal ADMIN_DAILY_LIMIT.
-async function dailyAiLimit(env, user) {
+// Kuota AI sesuai paket langganan akun (bulanan + cap harian).
+// Starter 50/bln (10/hari) / Pro 500/bln (50/hari) / Bisnis 2.000/bln (150/hari). Admin lebih besar.
+async function aiLimits(env, user) {
+  const isAdmin = ADMIN_EMAILS.has(user.email);
   try {
     const eff = await getEffectivePlanByUserKey(env.DB, user.key);
-    const byPlan = (PLAN_AI_LIMITS[eff.plan] || DAILY_LIMIT);
-    return ADMIN_EMAILS.has(user.email) ? Math.max(ADMIN_DAILY_LIMIT, byPlan) : byPlan;
+    const byPlan = PLAN_AI_LIMITS[eff.plan] || FALLBACK_LIMITS;
+    if (isAdmin) return { monthly: Math.max(ADMIN_LIMITS.monthly, byPlan.monthly), daily: Math.max(ADMIN_LIMITS.daily, byPlan.daily) };
+    return byPlan;
   } catch (e) {
-    return ADMIN_EMAILS.has(user.email) ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
+    return isAdmin ? ADMIN_LIMITS : FALLBACK_LIMITS;
   }
 }
 
@@ -112,22 +115,40 @@ async function resolveUser(env, request) {
 }
 
 async function quotaCheck(env, user, cost = 1) {
-  const isAdmin = ADMIN_EMAILS.has(user.email);
-  const limit = await dailyAiLimit(env, user);
-  const day = new Date().toISOString().slice(0, 10);
+  const limits = await aiLimits(env, user);
+  const now = new Date();
+  const day = now.toISOString().slice(0, 10);
+  const month = now.toISOString().slice(0, 7); // counter bulanan disimpan sebagai day='YYYY-MM'
   try {
     await env.DB.prepare(
       'CREATE TABLE IF NOT EXISTS ai_quota (user_key TEXT, day TEXT, count INTEGER, PRIMARY KEY (user_key, day))'
     ).run();
-    const row = await env.DB.prepare('SELECT count FROM ai_quota WHERE user_key = ? AND day = ?').bind(user.key, day).first();
-    const count = row ? row.count : 0;
-    if (count + cost > limit) return { exceeded: true, limit, count };
-    await env.DB.prepare(
-      'INSERT INTO ai_quota (user_key, day, count) VALUES (?, ?, ?) ON CONFLICT(user_key, day) DO UPDATE SET count = count + ?'
-    ).bind(user.key, day, cost, cost).run();
-    return { exceeded: false, limit };
+    const rows = await env.DB.prepare(
+      'SELECT day, count FROM ai_quota WHERE user_key = ? AND day IN (?, ?)'
+    ).bind(user.key, day, month).all();
+    let dayCount = 0, monthCount = 0;
+    for (const r of rows.results || []) {
+      if (r.day === day) dayCount = r.count;
+      if (r.day === month) monthCount = r.count;
+    }
+    // Cek bulanan dulu (periode tagihan), lalu cap harian (anti-burst)
+    if (monthCount + cost > limits.monthly) {
+      return { exceeded: true, scope: 'monthly', limit: limits.monthly, count: monthCount, message: QUOTA_MSG_MONTHLY };
+    }
+    if (dayCount + cost > limits.daily) {
+      return { exceeded: true, scope: 'daily', limit: limits.daily, count: dayCount, message: QUOTA_MSG_DAILY };
+    }
+    await env.DB.batch([
+      env.DB.prepare(
+        'INSERT INTO ai_quota (user_key, day, count) VALUES (?, ?, ?) ON CONFLICT(user_key, day) DO UPDATE SET count = count + ?'
+      ).bind(user.key, day, cost, cost),
+      env.DB.prepare(
+        'INSERT INTO ai_quota (user_key, day, count) VALUES (?, ?, ?) ON CONFLICT(user_key, day) DO UPDATE SET count = count + ?'
+      ).bind(user.key, month, cost, cost)
+    ]);
+    return { exceeded: false, limit: limits };
   } catch (e) {
-    return { exceeded: false, limit }; // gagal DB ≠ blokir user
+    return { exceeded: false, limit: limits }; // gagal DB ≠ blokir user
   }
 }
 
@@ -668,7 +689,7 @@ export async function onRequestPost({ request, env }) {
     if (isFirstHop) {
       const q = await quotaCheck(env, user, body.team === true ? TEAM_COST : 1);
       if (q.exceeded) {
-        return new Response(JSON.stringify({ quota_exhausted: true, error: QUOTA_MSG }), {
+        return new Response(JSON.stringify({ quota_exhausted: true, error: q.message || QUOTA_MSG_MONTHLY, scope: q.scope, limit: q.limit, used: q.count }), {
           status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600', ...CORS }
         });
       }
@@ -763,7 +784,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (r.error && r.quotaExhausted) {
-      return new Response(JSON.stringify({ quota_exhausted: true, error: QUOTA_MSG }), {
+      return new Response(JSON.stringify({ quota_exhausted: true, error: 'Server AI sedang sibuk (limit provider). Coba lagi sebentar lagi.' }), {
         status: 429, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }

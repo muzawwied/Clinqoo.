@@ -1244,11 +1244,16 @@
       try {
         const resp = await fetch('https://clincoo-be2.pages.dev/api/github-oauth', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + clincooAuthToken() },
           body: JSON.stringify({ code, redirect_uri: window.location.origin + window.location.pathname })
         });
         const data = await resp.json();
 
+        if (data && data.upgrade_needed) {
+          addNotification('GitHub', data.error || 'Fitur ini tersedia di paket Pro & Bisnis.');
+          setTimeout(function(){ window.location.href = '../../akun/langganan/upgrade/'; }, 1800);
+          return;
+        }
         if (!resp.ok || !data.access_token) {
           throw new Error(data.error || 'Gagal mendapatkan access token');
         }
@@ -1798,7 +1803,7 @@
           items: [
             ['Hingga 3 proyek aktif', true],
             ['1 kolaborator per proyek', true],
-            ['Chat AI di setiap proyek', true],
+            ['Chat AI di setiap proyek (50 pesan/bulan)', true],
             ['3 template proyek siap pakai', true],
             ['Tugas terjadwal & notifikasi', true],
             ['Deploy web 5x per bulan', true],
@@ -2323,7 +2328,7 @@
     var plans = [
       { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
         items: [
-          ['Hingga 3 proyek aktif', true], ['1 kolaborator per proyek', true], ['Chat AI di setiap proyek', true],
+          ['Hingga 3 proyek aktif', true], ['1 kolaborator per proyek', true], ['Chat AI di setiap proyek (50 pesan/bulan)', true],
           ['3 template proyek siap pakai', true], ['Tugas terjadwal & notifikasi', true], ['Deploy web 5x per bulan', true],
           ['Kolaborasi tim lebih besar', false], ['Impor repository GitHub', false]
         ] },

@@ -11,8 +11,13 @@ export const PLAN_LIMITS = {
   Bisnis: { projectLimit: 50, collaboratorLimit: 20, deployLimit: null }
 };
 
-// Kuota chat AI per hari per paket (benar-benar diterapkan di /api/chat).
-export const PLAN_AI_LIMITS = { Starter: 25, Pro: 100, Bisnis: 300 };
+// Kuota chat AI per paket: bulanan (selaras periode tagihan) + cap harian (anti-burst).
+// Benar-benar diterapkan di /api/chat (dua-duanya dicek server-side).
+export const PLAN_AI_LIMITS = {
+  Starter: { monthly: 50, daily: 10 },
+  Pro: { monthly: 500, daily: 50 },
+  Bisnis: { monthly: 2000, daily: 150 }
+};
 
 // Email admin: bypass semua gate paket (kebijakan internal).
 export const ADMIN_EMAILS = new Set(['devconium@gmail.com', 'muzawwied@gmail.com']);
