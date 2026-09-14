@@ -1837,7 +1837,7 @@
         if (res.ok) {
           var d = await res.json();
           if (d && d.plan) {
-            try { localStorage.setItem('SUB_CACHE_KEY2', JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
+            try { localStorage.setItem(SUB_CACHE_KEY2, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
             refreshCollabBadge();
             if (d.plan !== 'Starter') {
               var mp = document.getElementById('upgrade-plans-modal');
