@@ -1,0 +1,35 @@
+# Bootstrap deploy mandiri Komunitas Clincoo (project Pages terpisah: clincoo-komunitas)
+# Dipicu manual via workflow_dispatch — kode yang dideploy dari repo muzawwied/Clincoo-Komunitas.
+# Setelah secret CLOUDFLARE_API_TOKEN ditambahkan di repo komunitas, workflow di repo itu
+# yang akan otomatis jalan saat push (tidak perju workflow ini lagi).
+name: Deploy Komunitas (bootstrap)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: pages-deploy-clincoo-komunitas
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo Komunitas
+        uses: actions/checkout@v4
+        with:
+          repository: muzawwied/Clincoo-Komunitas
+          ref: main
+
+      - name: Pasang wrangler
+        run: npm install -g wrangler
+
+      - name: Buat project Pages bila belum ada
+        run: npx wrangler pages project create clincoo-komunitas --production-branch=main || true
+
+      - name: Deploy ke Cloudflare Pages
+        run: npx wrangler pages deploy . --project-name=clincoo-komunitas --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
