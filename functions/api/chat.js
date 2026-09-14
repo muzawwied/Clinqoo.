@@ -12,6 +12,7 @@
 // akar bug "AI pura-pura membuat file". Mode tools = functionDeclarations saja.
 
 import { PLAN_AI_LIMITS, ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
+import { consumePackCredit } from './ai-packs.js';
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
 const CORS = {
@@ -55,7 +56,7 @@ const OPENROUTER_MODELS = [
 ];
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const QUOTA_MSG_DAILY = 'Kuota AI Clincoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
-const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Kuota reset otomatis awal bulan depan — atau upgrade paket di halaman Langganan untuk kuota lebih besar.';
+const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
 
 const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
@@ -131,11 +132,17 @@ async function quotaCheck(env, user, cost = 1) {
       if (r.day === day) dayCount = r.count;
       if (r.day === month) monthCount = r.count;
     }
-    // Cek bulanan dulu (periode tagihan), lalu cap harian (anti-burst)
+    // Cek bulanan dulu (periode tagihan), lalu cap harian (anti-burst).
+    // Kuota langganan habis → otomatis lanjut ke Paket Kredit AI yang dibeli user
+    // (bebas cap harian; paket paling cepat kadaluarsa dipakai duluan).
     if (monthCount + cost > limits.monthly) {
+      const pack = await consumePackCredit(env.DB, user.key, cost);
+      if (pack.ok) return { exceeded: false, limit: limits, source: 'pack' };
       return { exceeded: true, scope: 'monthly', limit: limits.monthly, count: monthCount, message: QUOTA_MSG_MONTHLY };
     }
     if (dayCount + cost > limits.daily) {
+      const pack = await consumePackCredit(env.DB, user.key, cost);
+      if (pack.ok) return { exceeded: false, limit: limits, source: 'pack' };
       return { exceeded: true, scope: 'daily', limit: limits.daily, count: dayCount, message: QUOTA_MSG_DAILY };
     }
     await env.DB.batch([
