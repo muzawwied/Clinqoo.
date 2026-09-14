@@ -89,7 +89,7 @@ export async function onRequestGet({ request, env }) {
   const db = env.DB;
   if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
   try {
-    const user = await currentUser(db, request);
+    const user = await currentUser(env, request);
     if (!user) return new Response(JSON.stringify({ error: 'Silakan login terlebih dahulu', need_login: true }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
     const userKey = 'u' + user.id;
 
@@ -113,7 +113,7 @@ export async function onRequestPost({ request, env }) {
   const db = env.DB;
   if (!db) return new Response(JSON.stringify({ error: 'D1 not bound' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
   try {
-    const user = await currentUser(db, request);
+    const user = await currentUser(env, request);
     if (!user) return new Response(JSON.stringify({ error: 'Silakan login terlebih dahulu', need_login: true }), { status: 401, headers: { 'Content-Type': 'application/json', ...CORS } });
 
     const body = await request.json().catch(() => ({}));
