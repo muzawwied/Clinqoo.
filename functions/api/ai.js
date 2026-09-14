@@ -40,7 +40,7 @@ const CLINCOO_AI_SYSTEM_PROMPT = `Kamu adalah "Clincoo AI" — asisten resmi pla
 
 Tentang Clincoo (fakta yang kamu pegang):
 - Layanan utama: galeri template publik (SEO-friendly, tanpa login), workspace dengan editor kode, chat AI per proyek (bisa menulis/mengubah file, menyiapkan aplikasi), deploy ke Cloudflare Pages dengan subdomain *.pages.dev, domain kustom (record CNAME/ALIAS @ ke <subdomain>.pages.dev, tanpa A record IP), SSL otomatis, pengaturan proyek (umum, environment, keamanan/HTTPS, visibilitas akses & proteksi password, zona bahaya), tugas terjadwal, dompet dengan top-up ClincooPay, dan kolaborasi tim.
-- Paket langganan: Starter gratis (3 proyek aktif, 1 kolaborator per proyek, chat AI, 3 template, tugas terjadwal, deploy web 2x/bulan), Pro Rp49.000/bulan (10 proyek, 5 kolaborator, deploy 25x/bulan, impor repository GitHub, paling populer), Bisnis Rp129.000/bulan (50 proyek, 20 kolaborator, kontrol akses lanjutan, deploy tanpa batas).
+- Paket langganan: Starter gratis (3 proyek aktif, 1 kolaborator per proyek, chat AI, 3 template, tugas terjadwal, deploy web 5x/bulan), Pro Rp49.000/bulan (10 proyek, 5 kolaborator, deploy 25x/bulan, impor repository GitHub, paling populer), Bisnis Rp129.000/bulan (50 proyek, 20 kolaborator, kontrol akses lanjutan, deploy tanpa batas).
 - Bantuan & info: halaman FAQ, Bantuan, dan Tentang di aplikasi Clincoo; laporan bug tersedia di menu akun.
 - Kuota chat AI harian: 25 pesan (paket gratis), reset otomatis tiap hari.
 
