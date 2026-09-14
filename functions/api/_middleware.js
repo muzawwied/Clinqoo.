@@ -82,8 +82,31 @@ export async function onRequest({ request, env, next }) {
   // 1. Rate limit per IP — kelas berbeda untuk auth & admin
   const ip = ipOf(request);
   if (!rateLimit('g:' + ip, RL.global)) return tooMany(60);
-  if (/^\/api\/auth(\/|$)/.test(path) && !rateLimit('a:' + ip, RL.auth)) return tooMany(60);
   if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) return tooMany(60);
+
+  // 1b. Rate limit DURABEL (D1) untuk request autentikasi yang mengubah data
+  //     (login/register/forgot/reset) — anti brute-force yang tahan lintas-isolate.
+  //     In-memory di atas tetap jadi lapisan pertama yang murah.
+  const mutatesNow = request.method !== 'GET' && request.method !== 'HEAD';
+  if (mutatesNow && /^\/api\/auth(\/|$)/.test(path) && env.DB) {
+    try {
+      const minute = Math.floor(Date.now() / 60000); // jendela 1 menit
+      const window = Math.floor(minute / 5);         // bucket 5 menit
+      const key = ip + '|' + window;
+      await env.DB.prepare('CREATE TABLE IF NOT EXISTS rl_auth (k TEXT PRIMARY KEY, c INTEGER DEFAULT 0, exp INTEGER)').run();
+      const row = await env.DB.prepare('SELECT c FROM rl_auth WHERE k = ?').bind(key).first();
+      const count = (row?.c || 0) + 1;
+      if (!row) {
+        await env.DB.prepare('INSERT INTO rl_auth (k, c, exp) VALUES (?, 1, ?)').bind(key, (window + 1) * 5 * 60000).run();
+      } else {
+        await env.DB.prepare('UPDATE rl_auth SET c = ? WHERE k = ?').bind(count, key).run();
+      }
+      if (count > 20) return tooMany(60); // 20 percobaan / 5 menit per IP
+      if (count === 1) { // bersihkan entri kedaluwarsa sesekali
+        try { await env.DB.prepare('DELETE FROM rl_auth WHERE exp < ?').bind(Date.now()).run(); } catch (e2) {}
+      }
+    } catch (e) { /* jangan blokir traffic karena DB gangguan */ }
+  }
 
   // 2. Anti-lintas-situs untuk request yang mengubah data di endpoint sensitif
   const mutates = request.method !== 'GET' && request.method !== 'HEAD';
