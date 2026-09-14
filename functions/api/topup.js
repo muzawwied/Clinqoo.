@@ -156,7 +156,7 @@ export async function onRequestPost({ request, env }) {
     external_id: orderId,
     amount: amount,
     currency: 'IDR',
-    description: 'Top Up Saldo Clincoo',
+    description: 'Top Up Saldo Clinqoo',
     invoice_duration: 3600,
     payment_methods: channel.methods
   });
@@ -211,26 +211,26 @@ export async function creditTopup(env, order) {
       nres.notif = await notifyEvent(db, owner, {
         source: 'Dompet', type: 'wallet',
         message: 'Top up ' + formatIDR(order.amount) + ' via ' + (order.method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
-        link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
+        link: 'https://muzawwied.github.io/Clinqoo./akun/dompet/'
       });
     } catch (e) {}
     if (owner.email) {
       try {
         nres.email = await sendEmail(env, {
           toEmail: owner.email, toName: owner.name || '',
-          subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(order.amount),
+          subject: 'Konfirmasi Top Up Clinqoo — ' + formatIDR(order.amount),
           html: emailTemplate(
             'Top Up Berhasil',
             owner.name || '',
-            'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
+            'Top up saldo Clinqoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
             [
               ['Jumlah Top Up', formatIDR(order.amount) + ' (' + (order.method || 'Xendit') + ')'],
               ['Saldo Saat Ini', formatIDR(balance)],
               ['Order ID', order.id]
             ],
             'Lihat Riwayat Dompet',
-            'https://muzawwied.github.io/Clincoo./akun/dompet/',
-            'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+            'https://muzawwied.github.io/Clinqoo./akun/dompet/',
+            'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clinqoo Anda.'
           )
         });
       } catch (e) {}

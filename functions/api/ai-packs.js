@@ -1,8 +1,8 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
-import { getCpConnection, mirroredBalance, mirrorDelta } from './clincoopay-helpers.js';
+import { getCpConnection, mirroredBalance, mirrorDelta } from './clinqoopay-helpers.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
 
-// Cloudflare Pages Functions — Paket Kredit AI Clincoo (ala kuota internet).
+// Cloudflare Pages Functions — Paket Kredit AI Clinqoo (ala kuota internet).
 // Dibeli di luar langganan (user langganan maupun gratis boleh beli).
 // Aturan pakai (di-enforce server-side di /api/chat):
 //   1. Kuota langganan dipakai lebih dulu; kalau habis → otomatis lanjut ke kredit paket.
@@ -72,7 +72,7 @@ export async function consumePackCredit(db, userKey, cost = 1) {
   } catch (e) { return { ok: false }; }
 }
 
-// Baca saldo dompet (dengan dukungan mirroring ClincooPay — pola sama dgn subscription.js)
+// Baca saldo dompet (dengan dukungan mirroring ClinqooPay — pola sama dgn subscription.js)
 async function readBalance(db, user) {
   const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
   const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
@@ -141,10 +141,10 @@ export async function onRequestPost({ request, env }) {
         .bind(txId, 'Paket Kredit AI ' + pack.name + ' (' + pack.days + ' hari)', pack.price, 'out', 'Saldo Dompet', uid).run();
       newBalance = balance - pack.price;
       if (conn) {
-        const mr = await mirrorDelta(conn, -pack.price, 'Clincoo: Paket Kredit AI ' + pack.name + ' (' + pack.days + ' hari)', txId);
+        const mr = await mirrorDelta(conn, -pack.price, 'Clinqoo: Paket Kredit AI ' + pack.name + ' (' + pack.days + ' hari)', txId);
         if (!mr.ok) {
           const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
-          return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClinqooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
         }
         newBalance = mr.balance;
       } else {
@@ -167,7 +167,7 @@ export async function onRequestPost({ request, env }) {
       await notifyEvent(db, user, {
         source: 'Kredit AI', type: 'credits',
         message: 'Paket Kredit AI ' + pack.name + ' aktif: ' + pack.credits + ' kredit selama ' + pack.days + ' hari. Total ' + formatIDR(pack.price) + ' dipotong dari Saldo Dompet.',
-        link: 'https://muzawwied.github.io/Clincoo./akun/langganan/kredit/'
+        link: 'https://muzawwied.github.io/Clinqoo./akun/langganan/kredit/'
       });
     } catch (e2) {}
     try {
@@ -192,8 +192,8 @@ export async function onRequestPost({ request, env }) {
               ['Saldo Dompet Tersisa', formatIDR(newBalance)]
             ],
             'Lihat Kredit Anda',
-            'https://muzawwied.github.io/Clincoo./akun/langganan/kredit/',
-            'Sisa kredit dapat dilihat di halaman Kredit AI pada akun Clincoo Anda. Kredit yang tidak terpakai hingga masa aktif berakhir akan hangus.'
+            'https://muzawwied.github.io/Clinqoo./akun/langganan/kredit/',
+            'Sisa kredit dapat dilihat di halaman Kredit AI pada akun Clinqoo Anda. Kredit yang tidak terpakai hingga masa aktif berakhir akan hangus.'
           )
         });
       } catch (e3) {}

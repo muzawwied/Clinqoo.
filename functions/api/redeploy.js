@@ -29,7 +29,7 @@ export async function onRequestPost({ env }) {
     // The API endpoint for creating a deployment requires a manifest, which we can't generate here
     // Instead, we'll use the "retry deployment" endpoint which retries the last deployment
     const res = await fetch(
-      'https://api.cloudflare.com/client/v4/accounts/' + accountId + '/pages/projects/clincoo/deployments',
+      'https://api.cloudflare.com/client/v4/accounts/' + accountId + '/pages/projects/clinqoo/deployments',
       {
         method: 'POST',
         headers: {
@@ -60,7 +60,7 @@ export async function onRequestPost({ env }) {
       // Return helpful message instead of error
       return new Response(JSON.stringify({ 
         success: false, 
-        message: 'Auto-redeploy requires Git integration. Use the Clincoo Auto Deploy workflow or run wrangler pages deploy manually.',
+        message: 'Auto-redeploy requires Git integration. Use the Clinqoo Auto Deploy workflow or run wrangler pages deploy manually.',
         errors: data.errors 
       }), { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
     }

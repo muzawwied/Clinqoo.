@@ -1,4 +1,4 @@
-// POST /api/auth/github {code, redirect_uri} — tukar code GitHub jadi sesi Clincoo
+// POST /api/auth/github {code, redirect_uri} — tukar code GitHub jadi sesi Clinqoo
 import { initTables, upsertOauthUser, createSession, publicUser, getEnvVarDb, json, CORS } from './shared.js';
 
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: CORS }); }
@@ -24,7 +24,7 @@ export async function onRequestPost({ request, env }) {
     if (!tokenData.access_token) return json({ error: 'Kode login GitHub tidak valid atau sudah dipakai' }, 401);
     const ghToken = tokenData.access_token;
 
-    const ghHeaders = { 'Authorization': 'Bearer ' + ghToken, 'Accept': 'application/vnd.github+json', 'User-Agent': 'clincoo' };
+    const ghHeaders = { 'Authorization': 'Bearer ' + ghToken, 'Accept': 'application/vnd.github+json', 'User-Agent': 'clinqoo' };
     const ghUser = await (await fetch('https://api.github.com/user', { headers: ghHeaders })).json();
     let email = ghUser.email;
     if (!email) {

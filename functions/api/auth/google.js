@@ -1,5 +1,5 @@
 // GET  /api/auth/google -> {client_id}
-// POST /api/auth/google {code, redirect_uri} -> tukar code Google jadi sesi Clincoo
+// POST /api/auth/google {code, redirect_uri} -> tukar code Google jadi sesi Clinqoo
 import { initTables, upsertOauthUser, createSession, publicUser, getEnvVarDb, json, CORS } from './shared.js';
 
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: CORS }); }

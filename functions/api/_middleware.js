@@ -53,7 +53,7 @@ function tooMany(retryAfter) {
 }
 
 // ---- 2. VALIDASI ORIGIN (anti-phishing / anti-lintas-situs) ----
-// Frontend resmi Clincoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clinco.co.
+// Frontend resmi Clinqoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clinco.co.
 // Browsers selalu mengirim Origin pada cross-site POST; absen Origin = klien non-browser (curl/webhook) → diizinkan (auth tetap dicek handler).
 const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clinco\.co$)/;
 function originOk(request) {

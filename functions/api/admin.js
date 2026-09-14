@@ -1,4 +1,4 @@
-// Cloudflare Pages Functions - Admin Panel Backend Clincoo (/api/admin)
+// Cloudflare Pages Functions - Admin Panel Backend Clinqoo (/api/admin)
 import { currentUser } from './user-scope.js';
 import { ADMIN_EMAILS } from './plan-helpers.js';
 import { initTables as initAuthTables } from './auth/shared.js';
@@ -31,7 +31,7 @@ async function ensureAdminMigration(db) {
   try { await db.prepare("ALTER TABLE auth_users ADD COLUMN suspend_reason TEXT").run(); } catch (e) {}
   try {
     for (const email of ADMIN_EMAILS) {
-      const role = (email.toLowerCase() === 'devconium@gmail.com') ? 'owner' : 'admin';
+      const role = (email.toLowerCase() === 'muzawwied@gmail.com') ? 'owner' : 'admin';
       await db.prepare("UPDATE auth_users SET role = ? WHERE LOWER(email) = LOWER(?) AND (role IS NULL OR role != ?)")
         .bind(role, email, role).run();
     }
@@ -368,7 +368,7 @@ async function handlePostUsers(db, adminUser, body, reqAction) {
     return json({ error: 'Pengguna tidak ditemukan' }, 404);
   }
 
-  const adminEmail = adminUser.email || 'admin@clincoo';
+  const adminEmail = adminUser.email || 'admin@clinqoo';
 
   if (action === 'suspend') {
     if (Number(targetUserId) === Number(adminUser.id)) {
@@ -543,7 +543,7 @@ async function handleGetReports(db) {
 
 async function handlePostReports(db, adminUser, body, reqAction) {
   const action = body.action || reqAction;
-  const adminEmail = adminUser.email || 'admin@clincoo';
+  const adminEmail = adminUser.email || 'admin@clinqoo';
 
   if (action === 'create') {
     const type = String(body.type || 'manual_report');

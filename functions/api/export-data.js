@@ -84,7 +84,7 @@ export async function onRequestGet({ request, env }) {
 
     const exportData = {
       export_date: new Date().toISOString(),
-      app_name: 'Clincoo',
+      app_name: 'Clinqoo',
       app_version: '2.4.0',
       account: { id: user.id, email: user.email, name: user.name },
       preferences,
@@ -105,7 +105,7 @@ export async function onRequestGet({ request, env }) {
     return new Response(JSON.stringify(exportData, null, 2), {
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': 'attachment; filename="clincoo_data_export.json"',
+        'Content-Disposition': 'attachment; filename="clinqoo_data_export.json"',
         ...CORS
       }
     });

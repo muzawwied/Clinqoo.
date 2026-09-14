@@ -1,10 +1,10 @@
-// ClincooPay — jembatan saldo Clincoo ↔ web Wallet (backend wallet-muz, D1 wallet-db)
-// Saldo terhubung 2 arah: wallet-muz jadi sumber kebenaran saldo; Clincoo baca live & tulis delta.
+// ClinqooPay — jembatan saldo Clinqoo ↔ web Wallet (backend wallet-muz, D1 wallet-db)
+// Saldo terhubung 2 arah: wallet-muz jadi sumber kebenaran saldo; Clinqoo baca live & tulis delta.
 const WALLET_API = 'https://wallet-muz.pages.dev/api/wallet';
 export { WALLET_API };
 
 export async function ensureCpTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS clincoopay_connections (
+  await db.prepare(`CREATE TABLE IF NOT EXISTS clinqoopay_connections (
     user_id TEXT PRIMARY KEY,
     wallet_address TEXT NOT NULL,
     token TEXT NOT NULL,
@@ -12,12 +12,12 @@ export async function ensureCpTable(db) {
   )`).run();
 }
 
-// Koneksi ClincooPay milik user (null = belum terhubung)
+// Koneksi ClinqooPay milik user (null = belum terhubung)
 export async function getCpConnection(db, uid) {
   if (!uid) return null;
   try {
     await ensureCpTable(db);
-    const row = await db.prepare('SELECT wallet_address, token FROM clincoopay_connections WHERE user_id = ?').bind(uid).first();
+    const row = await db.prepare('SELECT wallet_address, token FROM clinqoopay_connections WHERE user_id = ?').bind(uid).first();
     return row || null;
   } catch (e) { return null; }
 }
@@ -45,7 +45,7 @@ export async function mirrorDelta(conn, delta, note, txid) {
         action: 'external_delta',
         address: conn.wallet_address,
         token: conn.token,
-        app: 'clincoo',
+        app: 'clinqoo',
         delta: Math.round(delta),
         note: String(note || '').slice(0, 140),
         txid: String(txid || '').slice(0, 64)
@@ -53,8 +53,8 @@ export async function mirrorDelta(conn, delta, note, txid) {
     });
     const d = await r.json().catch(() => ({}));
     if (d && d.success) return { ok: true, balance: Number(d.balance) || 0 };
-    return { ok: false, error: (d && d.error) || 'Gagal sinkron ke ClincooPay' };
+    return { ok: false, error: (d && d.error) || 'Gagal sinkron ke ClinqooPay' };
   } catch (e) {
-    return { ok: false, error: 'Tidak dapat terhubung ke server ClincooPay' };
+    return { ok: false, error: 'Tidak dapat terhubung ke server ClinqooPay' };
   }
 }

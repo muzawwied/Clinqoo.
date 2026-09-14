@@ -1,25 +1,25 @@
 // ===== Sinkronisasi Workspace -> GitHub (Sync GitHub) =====
 // Engine bersama antara halaman workspace & editor.
 // Cara kerja:
-//  - Konfigurasi per-proyek: clincoo_syncgh_cfg_<pid> = { on, owner, repo, branch }
-//  - Snapshot per-proyek: clincoo_syncgh_snap_<pid> = { repo, files: { path: { sha, hash } } }
+//  - Konfigurasi per-proyek: clinqoo_syncgh_cfg_<pid> = { on, owner, repo, branch }
+//  - Snapshot per-proyek: clinqoo_syncgh_snap_<pid> = { repo, files: { path: { sha, hash } } }
 //  - schedule() dipanggil tiap workspace berubah (debounce 4 dtk) -> diff isi
 //    localStorage workspace vs snapshot -> push/delete via GitHub Contents API.
-//  - Token GitHub: clincoo_github_token (dipasang oleh koneksi GitHub di halaman workspace).
+//  - Token GitHub: clinqoo_github_token (dipasang oleh koneksi GitHub di halaman workspace).
 (function () {
-  var GITHUB_TOKEN_KEY = 'clincoo_github_token';
-  var CFG_PREFIX = 'clincoo_syncgh_cfg_';
-  var SNAP_PREFIX = 'clincoo_syncgh_snap_';
+  var GITHUB_TOKEN_KEY = 'clinqoo_github_token';
+  var CFG_PREFIX = 'clinqoo_syncgh_cfg_';
+  var SNAP_PREFIX = 'clinqoo_syncgh_snap_';
 
-  function pid() { try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; } }
+  function pid() { try { return localStorage.getItem('clinqoo_current_project_id') || ''; } catch (e) { return ''; } }
   function pkey(prefix) { return prefix + (pid() || 'global'); }
 
   function cfg() { try { return JSON.parse(localStorage.getItem(pkey(CFG_PREFIX)) || 'null') || null; } catch (e) { return null; } }
   function setCfg(c) { try { localStorage.setItem(pkey(CFG_PREFIX), JSON.stringify(c)); } catch (e) {} }
-  // PENGAMAN: repo Wallet (situs ClincooPay) dikunci — tidak boleh jadi target sync.
+  // PENGAMAN: repo Wallet (situs ClinqooPay) dikunci — tidak boleh jadi target sync.
   // Pernah 2x tertimpa file proyek lain karena salah sasaran konfigurasi (11 & 13 Sep 2026).
   var BLOCKED_TARGETS = {
-    'muzawwied/wallet': 'Repo Wallet (situs ClincooPay) dikunci dan tidak bisa dipakai sebagai target Sync GitHub.'
+    'muzawwied/wallet': 'Repo Wallet (situs ClinqooPay) dikunci dan tidak bisa dipakai sebagai target Sync GitHub.'
   };
   function blockedReason() {
     var c = cfg();
@@ -60,7 +60,7 @@
 
   function currentFiles() {
     try {
-      var raw = localStorage.getItem('clincoo_workspace_files_' + (pid() || 'global'));
+      var raw = localStorage.getItem('clinqoo_workspace_files_' + (pid() || 'global'));
       if (!raw) return null;
       var d = JSON.parse(raw);
       if (!d || typeof d !== 'object') return null;
@@ -103,7 +103,7 @@
   // PUT satu file; kalau sha salah (422) ambil sha remote lalu ulang sekali.
   function pushFile(p, content, knownSha) {
     var attempt = function (sha) {
-      var body = { message: 'Clincoo sync: update ' + p, content: b64(content), branch: cfg().branch || 'main' };
+      var body = { message: 'Clinqoo sync: update ' + p, content: b64(content), branch: cfg().branch || 'main' };
       if (sha) body.sha = sha;
       return gh('PUT', apiUrl(p), body).then(function (r) {
         if (r.status === 422 && !sha) return getRemoteSha(p).then(function (s) { return s ? attempt(s) : { ok: false, error: '422 tanpa sha' }; });
@@ -116,7 +116,7 @@
 
   function deleteFile(p, sha) {
     if (!sha) return Promise.resolve({ ok: false, error: 'sha tidak diketahui' });
-    return gh('DELETE', apiUrl(p).split('?')[0] + '?ref=' + encodeURIComponent(cfg().branch || 'main'), { message: 'Clincoo sync: hapus ' + p, sha: sha, branch: cfg().branch || 'main' })
+    return gh('DELETE', apiUrl(p).split('?')[0] + '?ref=' + encodeURIComponent(cfg().branch || 'main'), { message: 'Clinqoo sync: hapus ' + p, sha: sha, branch: cfg().branch || 'main' })
       .then(function (r) { return r.ok ? { ok: true } : { ok: false, error: 'HTTP ' + r.status }; })
       .catch(function (e) { return { ok: false, error: String(e) }; });
   }

@@ -3,7 +3,7 @@ main = "src/index.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# D1 yang sama dengan app Clincoo (akun be2) — task & event dibaca/tulis langsung
+# D1 yang sama dengan app Clinqoo (akun be2) — task & event dibaca/tulis langsung
 [[d1_databases]]
 binding = "DB"
 database_name = "clincoo-db"

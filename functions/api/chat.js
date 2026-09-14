@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — Backend Chat AI Clincoo (SELF-CONTAINED)
+// Cloudflare Pages Function — Backend Chat AI Clinqoo (SELF-CONTAINED)
 // Memanggil Gemini langsung dari project ini (TIDAK lagi mem-forward ke proxy lain —
 // self-forward adalah bug loop yang membakar kuota 25x per pesan).
 // Fitur:
@@ -55,8 +55,8 @@ const OPENROUTER_MODELS = [
   'openrouter/free'
 ];
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const QUOTA_MSG_DAILY = 'Kuota AI Clincoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
-const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
+const QUOTA_MSG_DAILY = 'Kuota AI Clinqoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
+const QUOTA_MSG_MONTHLY = 'Kuota AI Clinqoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
 
 const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
@@ -205,7 +205,7 @@ function toGeminiPayload(messages) {
 // ===== Deklarasi tools (dieksekusi LOKAL di browser klien) =====
 const WORKSPACE_FUNCTION_DECLARATIONS = [
   { name: 'list_items',
-    description: 'Lihat daftar file & folder di dalam sebuah folder workspace Clincoo milik user. Gunakan ini untuk melihat isi workspace atau folder sebelum melakukan operasi lain.',
+    description: 'Lihat daftar file & folder di dalam sebuah folder workspace Clinqoo milik user. Gunakan ini untuk melihat isi workspace atau folder sebelum melakukan operasi lain.',
     parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path folder. Contoh: "root" (folder utama), "js", "root/css/style". Default: root.' } } } },
   { name: 'read_file',
     description: 'Baca isi lengkap sebuah file di workspace. WAJIB dipakai sebelum mengedit file agar konten terbaru dan akurat.',
@@ -236,7 +236,7 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
     description: 'Cari informasi terbaru di web (search engine). Gunakan untuk pertanyaan yang butuh data real-time atau terkini: harga, berita, dokumentasi versi baru, dll.',
     parameters: { type: 'OBJECT', properties: { query: { type: 'STRING', description: 'Kata kunci pencarian.' } }, required: ['query'] } },
   { name: 'rename_project',
-    description: 'Ganti nama (judul) proyek Clincoo yang sedang aktif di percakapan ini.',
+    description: 'Ganti nama (judul) proyek Clinqoo yang sedang aktif di percakapan ini.',
     parameters: { type: 'OBJECT', properties: { new_name: { type: 'STRING', description: 'Nama baru proyek.' } }, required: ['new_name'] } },
   { name: 'deploy_project',
     description: 'Publish / deploy proyek yang sedang aktif ke internet (Cloudflare Pages) sehingga situsnya live. Gunakan saat user minta deploy, publish, atau membuat situsnya online.',
@@ -371,7 +371,7 @@ function orTools() {
     function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
   }));
 }
-// messages klien (format blok Clincoo) -> pesan OpenAI-compatible
+// messages klien (format blok Clinqoo) -> pesan OpenAI-compatible
 function orMessages(messages) {
   const out = [];
   const pushText = (role, text) => { if (text) out.push({ role, content: text }); };
@@ -408,7 +408,7 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
       if (tools) { payload.tools = tools; payload.tool_choice = 'auto'; }
       const res = await fetch(OPENROUTER_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clincoo' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clinqoo' },
         body: JSON.stringify(payload)
       });
       if (!res.ok) {
@@ -532,7 +532,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
 
   // Tahap 1: Arsitek menyusun rencana situs
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB senior di Tim AI Clincoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    'Kamu adalah ARSITEK WEB senior di Tim AI Clinqoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
@@ -540,7 +540,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
   const startedAt = Date.now();
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
-    'Kamu adalah PROGRAMMER WEB di Tim AI Clincoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
+    'Kamu adalah PROGRAMMER WEB di Tim AI Clinqoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
     'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS);
   if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer' };
   const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
@@ -562,7 +562,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
     return { transcript, tool_calls: draftCalls, text: '', fixModel: null };
   }
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
-    'Kamu adalah REVIEWER KODE ketat di Tim AI Clincoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
+    'Kamu adalah REVIEWER KODE ketat di Tim AI Clinqoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
     'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
   if (r3.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r3.quotaExhausted, transcript, tool_calls: draftCalls, stageFailed: 'reviewer' };
   const reviewText = (r3.text || '').trim();
@@ -574,7 +574,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   let fixModel = null;
   if (needsFix) {
     const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
-      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar dan tidak disebut reviewer.',
+      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar dan tidak disebut reviewer.',
       'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS);
     const fixCalls = (r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
     if (!r4.error && fixCalls.length) {
@@ -601,7 +601,7 @@ function teamTranscriptText(transcript) {
   }).join('\n\n');
 }
 
-// GET /api/chat — sisa kredit AI harian akun ini (dipakai UI, mis. halaman hubungkan ClincooPay)
+// GET /api/chat — sisa kredit AI harian akun ini (dipakai UI, mis. halaman hubungkan ClinqooPay)
 export async function onRequestGet({ request, env }) {
   try {
     const user = await resolveUser(env, request);

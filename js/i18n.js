@@ -1,11 +1,11 @@
-// Clincoo i18n — penerjemah UI otomatis berbasis kamus.
-// Bahasa tersimpan di localStorage 'clincoo_language' ('id' default, 'en', 'es').
+// Clinqoo i18n — penerjemah UI otomatis berbasis kamus.
+// Bahasa tersimpan di localStorage 'clinqoo_language' ('id' default, 'en', 'es').
 // Saat bahasa != id, semua node teks DOM diterjemahkan lewat kamus
-// (window.ClincooI18nDict), atribut placeholder/title/aria-label juga, lalu
+// (window.ClinqooI18nDict), atribut placeholder/title/aria-label juga, lalu
 // MutationObserver menerjemahkan konten yang dirender belakangan (JS/toast).
 (function () {
   'use strict';
-  var LANG_KEY = 'clincoo_language';
+  var LANG_KEY = 'clinqoo_language';
   var LANGS = { id: 'Bahasa Indonesia', en: 'English', es: 'Español' };
 
   function getLang() {
@@ -24,9 +24,9 @@
     },
     t: function (s) { return s; }
   };
-  window.ClincooI18n = api;
+  window.ClinqooI18n = api;
 
-  var DICT = (window.ClincooI18nDict || {})[getLang()];
+  var DICT = (window.ClinqooI18nDict || {})[getLang()];
   if (!DICT || getLang() === 'id') return; // Indonesia: tidak ada yang diubah
 
   // ---------- normalisasi & pencarian ----------

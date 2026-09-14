@@ -54,10 +54,10 @@ async function getSecrets(env) {
 
 export async function onRequestPost({ request, env }) {
   try {
-    // Gate paket — harus login Clincoo & minimal paket Pro (admin bypass)
+    // Gate paket — harus login Clinqoo & minimal paket Pro (admin bypass)
     const user = await currentUser(env, request);
     if (!user) {
-      return new Response(JSON.stringify({ error: 'Silakan login Clincoo terlebih dahulu untuk menghubungkan GitHub.' }), {
+      return new Response(JSON.stringify({ error: 'Silakan login Clinqoo terlebih dahulu untuk menghubungkan GitHub.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });

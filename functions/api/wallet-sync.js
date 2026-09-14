@@ -2,8 +2,8 @@
 //
 // Data wallet web disimpan di tabelnya SENDIRI di D1 (wallet_web_balance,
 // wallet_web_transactions, wallet_web_notifications) — terpisah penuh dari
-// data dompet Clincoo (wallet_balance / wallet_transactions) dan tidak
-// terhubung ke akun Clincoo sama sekali.
+// data dompet Clinqoo (wallet_balance / wallet_transactions) dan tidak
+// terhubung ke akun Clinqoo sama sekali.
 //
 // Identitas wallet = alamat wallet (0x + 40 hex) yang digenerate per
 // perangkat di web wallet dan tersimpan di localStorage-nya.

@@ -13,7 +13,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-const FRONTEND_BASE = 'https://muzawwied.github.io/Clincoo./akun/';
+const FRONTEND_BASE = 'https://muzawwied.github.io/Clinqoo./akun/';
 const INVITE_MAX_AGE_HOURS = 24;
 
 function j(data, status) {
@@ -107,7 +107,7 @@ export async function onRequestGet({ env, request }) {
     return j({
       success: true,
       invite: {
-        project: (proj && proj.title) || 'Proyek Clincoo',
+        project: (proj && proj.title) || 'Proyek Clinqoo',
         invited_by: inv.inviter_name || 'Pemilik proyek',
         role: inv.role,
         status: inv.status,
@@ -187,7 +187,7 @@ export async function onRequestPost({ env, request }) {
 
       return j({
         success: true,
-        project: { id: proj.id, title: proj.title || 'Proyek Clincoo' },
+        project: { id: proj.id, title: proj.title || 'Proyek Clinqoo' },
         members: ownerCard ? [ownerCard, ...members] : members,
         pending: (pendingRes.results || []).map(p => ({
           invite_id: p.id,
@@ -223,7 +223,7 @@ export async function onRequestPost({ env, request }) {
       }
 
       const byProj = {};
-      for (const p of projList) byProj[p.id] = { id: p.id, title: p.title || 'Proyek Clincoo', members: [], pending: [] };
+      for (const p of projList) byProj[p.id] = { id: p.id, title: p.title || 'Proyek Clinqoo', members: [], pending: [] };
       for (const r of (membersAll.results || [])) {
         if (!byProj[r.project_id]) continue;
         const u = profileMap[r.user_id];
@@ -305,7 +305,7 @@ export async function onRequestPost({ env, request }) {
         .bind(token, projectId, proj.user_id, inviterName, email, role, channel).run();
 
       const url = inviteUrl(token);
-      const projTitle = proj.title || 'Proyek Clincoo';
+      const projTitle = proj.title || 'Proyek Clinqoo';
 
       let emailSent = false;
       let emailReason = channel === 'email' ? 'skipped' : null;
@@ -330,7 +330,7 @@ export async function onRequestPost({ env, request }) {
         const res = await sendEmail(env, {
           toEmail: email,
           toName: inviteeUser ? inviteeUser.name : '',
-          subject: 'Undangan Kolaborasi Proyek "' + projTitle + '" — Clincoo',
+          subject: 'Undangan Kolaborasi Proyek "' + projTitle + '" — Clinqoo',
           html: html
         });
         emailSent = !!res.sent;
@@ -375,7 +375,7 @@ export async function onRequestPost({ env, request }) {
 
       if (action === 'accept') {
         const proj = await getProject(db, inv.project_id);
-        const projTitle = (proj && proj.title) || 'Proyek Clincoo';
+        const projTitle = (proj && proj.title) || 'Proyek Clinqoo';
         // Penegakan batas paket pemilik proyek saat penerimaan undangan
         const projOwner = await getUserById(db, inv.owner_id);
         if (projOwner) {
@@ -419,7 +419,7 @@ export async function onRequestPost({ env, request }) {
       if (Number(memberRow.owner_id) !== Number(user.id)) return j({ error: 'Hanya pemilik proyek yang dapat menghapus anggota' }, 403);
       await db.prepare('DELETE FROM project_members WHERE id = ?').bind(memberRow.id).run();
       const proj = await getProject(db, memberRow.project_id);
-      const projTitle = (proj && proj.title) || 'Proyek Clincoo';
+      const projTitle = (proj && proj.title) || 'Proyek Clinqoo';
       const member = await getUserById(db, memberRow.user_id);
       if (member) {
         await notifyEvent(db, member, {
@@ -442,7 +442,7 @@ export async function onRequestPost({ env, request }) {
       if (Number(memberRow.owner_id) !== Number(user.id)) return j({ error: 'Hanya pemilik proyek yang dapat mengubah peran' }, 403);
       await db.prepare('UPDATE project_members SET role = ? WHERE id = ?').bind(role, memberRow.id).run();
       const proj = await getProject(db, memberRow.project_id);
-      const projTitle = (proj && proj.title) || 'Proyek Clincoo';
+      const projTitle = (proj && proj.title) || 'Proyek Clinqoo';
       const member = await getUserById(db, memberRow.user_id);
       if (member) {
         await notifyEvent(db, member, {

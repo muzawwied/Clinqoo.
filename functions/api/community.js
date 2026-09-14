@@ -1,4 +1,4 @@
-// Cloudflare Pages Functions — Komunitas Clincoo (feed sosial)
+// Cloudflare Pages Functions — Komunitas Clinqoo (feed sosial)
 // Endpoint (wajib login — dijaga _middleware.js /api/*):
 //   GET  /api/community            -> feed postingan (limit 30)
 //   POST /api/community           -> buat postingan  { text }
@@ -45,7 +45,7 @@ function j(data, status) {
   });
 }
 
-// Nama tampilan: prioritas nama profil yang diedit user di halaman akun Clincoo
+// Nama tampilan: prioritas nama profil yang diedit user di halaman akun Clinqoo
 // (account_profile, key 'u<id>:name'), fallback ke nama pendaftaran / awalan email.
 async function authorLabel(db, user) {
   try {

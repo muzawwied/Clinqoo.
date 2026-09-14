@@ -57,7 +57,7 @@ export async function onRequestPost({ request, env }) {
     const ghHeaders = {
       'Authorization': 'Bearer ' + token,
       'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'Clincoo',
+      'User-Agent': 'Clinqoo',
       'Content-Type': 'application/json'
     };
 
@@ -76,7 +76,7 @@ export async function onRequestPost({ request, env }) {
 
       const putUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`;
       const putBody = {
-        message: body.commit_message || `Update ${path} via Clincoo workspace`,
+        message: body.commit_message || `Update ${path} via Clinqoo workspace`,
         content: b64EncodeUnicode(f.content || ''),
         branch: branch
       };

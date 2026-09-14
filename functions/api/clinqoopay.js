@@ -1,9 +1,9 @@
-// API ClincooPay — hubungkan / putuskan dompet web Wallet milik akun Clincoo
-// GET  /api/clincoopay            -> status koneksi
-// POST /api/clincoopay {action:'link', wallet_address, pin}  -> verifikasi PIN di server wallet, simpan token koneksi
-// POST /api/clincoopay {action:'unlink'}                    -> putuskan
+// API ClinqooPay — hubungkan / putuskan dompet web Wallet milik akun Clinqoo
+// GET  /api/clinqoopay            -> status koneksi
+// POST /api/clinqoopay {action:'link', wallet_address, pin}  -> verifikasi PIN di server wallet, simpan token koneksi
+// POST /api/clinqoopay {action:'unlink'}                    -> putuskan
 import { currentUser } from './user-scope.js';
-import { ensureCpTable, getCpConnection, mirroredBalance, WALLET_API } from './clincoopay-helpers.js';
+import { ensureCpTable, getCpConnection, mirroredBalance, WALLET_API } from './clinqoopay-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -47,7 +47,7 @@ export async function onRequestPost({ request, env }) {
       const r = await fetch(WALLET_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'connect_request', wallet_id: walletId, app: 'clincoo' })
+        body: JSON.stringify({ action: 'connect_request', wallet_id: walletId, app: 'clinqoo' })
       });
       const d = await r.json().catch(() => ({}));
       if (!d || !d.success) return j({ error: (d && d.error) || 'Gagal mengirim permintaan ke Wallet.' }, 404);
@@ -74,19 +74,19 @@ export async function onRequestPost({ request, env }) {
       const r = await fetch(WALLET_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'connect_finalize', request_id: rid, pin: pin, app: 'clincoo' })
+        body: JSON.stringify({ action: 'connect_finalize', request_id: rid, pin: pin, app: 'clinqoo' })
       });
       const d = await r.json().catch(() => ({}));
       if (!d || !d.success) return j({ error: (d && d.error) || 'Gagal menghubungkan dompet.' }, 401);
       if (!d.address) return j({ error: 'Respons Wallet tidak valid' }, 502);
-      await db.prepare('DELETE FROM clincoopay_connections WHERE user_id = ?').bind(user.id).run();
-      await db.prepare('INSERT INTO clincoopay_connections (user_id, wallet_address, token) VALUES (?, ?, ?)')
+      await db.prepare('DELETE FROM clinqoopay_connections WHERE user_id = ?').bind(user.id).run();
+      await db.prepare('INSERT INTO clinqoopay_connections (user_id, wallet_address, token) VALUES (?, ?, ?)')
         .bind(user.id, d.address, d.token).run();
       return j({ success: true, connected: true, wallet_address: d.address, wallet_balance: Number(d.balance) || 0 });
     }
 
     if (action === 'unlink') {
-      await db.prepare('DELETE FROM clincoopay_connections WHERE user_id = ?').bind(user.id).run();
+      await db.prepare('DELETE FROM clinqoopay_connections WHERE user_id = ?').bind(user.id).run();
       return j({ success: true, connected: false });
     }
 

@@ -1,11 +1,11 @@
 /**
- * Clincoo URL Path Router
+ * Clinqoo URL Path Router
  * Parses nested URLs like /workspace/{projectId}/pengaturan/{submenu}
- * Supports both Cloudflare Pages (root) and GitHub Pages (subpath /Clincoo/)
+ * Supports both Cloudflare Pages (root) and GitHub Pages (subpath /Clinqoo/)
  */
 
 // Detect if we're on GitHub Pages (subpath) vs Cloudflare Pages (root)
-const _BASE = (window.location.pathname.match(/^(\/Clincoo[.]?)/) || [''])[0] || '';
+const _BASE = (window.location.pathname.match(/^(\/Clinqoo[.]?)/) || [''])[0] || '';
 const _isGitHubPages = _BASE.length > 0;
 
 const PathRouter = {
@@ -52,7 +52,7 @@ const PathRouter = {
     },
 
     buildProjectUrl(subpath) {
-        const projectId = this.getProjectId() || localStorage.getItem('clincoo_current_project_id');
+        const projectId = this.getProjectId() || localStorage.getItem('clinqoo_current_project_id');
         if (!projectId) return _BASE + '/';
         if (_isGitHubPages) {
             // GitHub Pages: use pages/xxx.html?id=projectId
@@ -75,31 +75,31 @@ const PathRouter = {
             if (segments.length >= 4) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.ClincooBack(_BASE + '/proyek/' + segments[2] + '/?id=' + encodeURIComponent(pid));
+                    window.ClinqooBack(_BASE + '/proyek/' + segments[2] + '/?id=' + encodeURIComponent(pid));
                 } else {
-                    window.ClincooBack(_BASE + '/' + segments.slice(0, 3).join('/'));
+                    window.ClinqooBack(_BASE + '/' + segments.slice(0, 3).join('/'));
                 }
             } else if (segments.length >= 3) {
                 if (_isGitHubPages) {
                     const pid = this.getProjectId();
-                    window.ClincooBack(_BASE + '/proyek/workspace.html?id=' + encodeURIComponent(pid));
+                    window.ClinqooBack(_BASE + '/proyek/workspace.html?id=' + encodeURIComponent(pid));
                 } else {
-                    window.ClincooBack(_BASE + '/' + segments.slice(0, 2).join('/'));
+                    window.ClinqooBack(_BASE + '/' + segments.slice(0, 2).join('/'));
                 }
             } else if (segments.length >= 2) {
-                window.ClincooBack(_BASE + '/');
+                window.ClinqooBack(_BASE + '/');
             } else {
                 window.history.back();
             }
         } else if (segments[0] === 'profil') {
             if (segments.length >= 2) {
                 if (_isGitHubPages) {
-                    window.ClincooBack(_BASE + '/akun/profile/');
+                    window.ClinqooBack(_BASE + '/akun/profile/');
                 } else {
-                    window.ClincooBack(_BASE + '/profil');
+                    window.ClinqooBack(_BASE + '/profil');
                 }
             } else {
-                window.ClincooBack(_BASE + '/');
+                window.ClinqooBack(_BASE + '/');
             }
         } else {
             window.history.back();
@@ -109,14 +109,14 @@ const PathRouter = {
     persistProjectId() {
         const id = this.getProjectId();
         if (id) {
-            try { localStorage.setItem('clincoo_current_project_id', id); } catch(e) {}
+            try { localStorage.setItem('clinqoo_current_project_id', id); } catch(e) {}
         }
     },
 
     getProjectIdWithFallback() {
         let id = this.getProjectId();
         if (!id) {
-            try { id = localStorage.getItem('clincoo_current_project_id'); } catch(e) {}
+            try { id = localStorage.getItem('clinqoo_current_project_id'); } catch(e) {}
         }
         return id;
     },

@@ -126,7 +126,7 @@ async function geminiText(apiKey, prompt) {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: 'Anda asisten AI Clincoo, platform deploy Indonesia. Jalankan tugas terjadwal berikut dengan jawaban ringkas, padat, dan berguna dalam Bahasa Indonesia. PENTING: jawab dalam teks polos (plain text) SAJA — jawaban ini akan tampil langsung di email dan notifikasi yang tidak merender markdown. JANGAN pakai tanda **tebal**, ## judul/heading, garis --- pemisah, backtick `kode`, atau tabel bergaris |. Kalau perlu daftar, gunakan format bernomor biasa (1. 2. 3.) atau baris teks biasa.' }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: 'Anda asisten AI Clinqoo, platform deploy Indonesia. Jalankan tugas terjadwal berikut dengan jawaban ringkas, padat, dan berguna dalam Bahasa Indonesia. PENTING: jawab dalam teks polos (plain text) SAJA — jawaban ini akan tampil langsung di email dan notifikasi yang tidak merender markdown. JANGAN pakai tanda **tebal**, ## judul/heading, garis --- pemisah, backtick `kode`, atau tabel bergaris |. Kalau perlu daftar, gunakan format bernomor biasa (1. 2. 3.) atau baris teks biasa.' }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }] })
       });
       if (!res.ok) continue;
       const data = await res.json();
@@ -182,11 +182,11 @@ async function runTask(env, db, task) {
       try {
         await sendEmail(env, {
           toEmail: user.email, toName: user.name || '',
-          subject: 'Tugas Terjadwal Clincoo — ' + (task.name || 'Hasil Tugas'),
+          subject: 'Tugas Terjadwal Clinqoo — ' + (task.name || 'Hasil Tugas'),
           html: emailTemplate(
             'Tugas Terjadwal Selesai',
             user.name || '',
-            `Tugas “${task.name || 'Tugas'}” baru saja dijalankan otomatis oleh Clincoo. Berikut hasilnya:`,
+            `Tugas “${task.name || 'Tugas'}” baru saja dijalankan otomatis oleh Clinqoo. Berikut hasilnya:`,
             [['Hasil', toEmailHtml(output.length > 800 ? output.slice(0, 800) + '…' : output)], ['Jadwal', escHtml(task.when_description || (task.schedule_type === 'interval_minutes' ? 'setiap ' + (task.interval_minutes || 15) + ' menit' : 'setiap hari ' + (task.time_wib || '') + ' WIB'))]],
             'Lihat tugas', 'https://clincoo.pages.dev/akun/tugas-terjadwal.html',
             'Email ini dikirim otomatis karena Anda mengaktifkan notifikasi email pada tugas ini.'

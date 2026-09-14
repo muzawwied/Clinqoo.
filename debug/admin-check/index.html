@@ -20,7 +20,7 @@
     (async function () {
       const el = document.getElementById('result');
       const base = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
-      const token = (window.ClincooAuth && ClincooAuth.getToken) ? ClincooAuth.getToken() : null;
+      const token = (window.ClinqooAuth && ClinqooAuth.getToken) ? ClinqooAuth.getToken() : null;
 
       let html = '';
       html += '<p>Token tersimpan: ' + (token ? '<span class="ok">ADA</span> (' + token.slice(0,8) + '…)' : '<span class="bad">TIDAK ADA</span>') + '</p>';

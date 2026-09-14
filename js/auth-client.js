@@ -1,18 +1,18 @@
-// Clincoo Auth Client — gate login + injeksi token ke semua API call
+// Clinqoo Auth Client — gate login + injeksi token ke semua API call
 // Wajib dimuat PERTAMA di semua halaman (kecuali halaman auth di /auth/).
 (function () {
-  var TOKEN_KEY = 'clincoo_auth_token';
+  var TOKEN_KEY = 'clinqoo_auth_token';
   var isAuthPage = /\/auth\/(index\.html)?(\?|$)|akun\/auth\.html(\?|$)/.test(location.pathname + location.search);
   var AUTH_URL = (location.hostname.indexOf('github.io') !== -1)
-    ? '/Clincoo./auth/'
+    ? '/Clinqoo./auth/'
     : '/auth/';
 
 // ===== NAMESPACE DATA PER AKUN =====
-// Semua kunci localStorage (kecuali clincoo_auth_*) otomatis diawali u<id>:
+// Semua kunci localStorage (kecuali clinqoo_auth_*) otomatis diawali u<id>:
 // sehingga data tiap akun (proyek, chat, file workspace, preferensi) terpisah total.
 // Data lama (tanpa prefix) diklaim SEKALI oleh akun pertama yang login di device ini.
-var NS_USER_KEY = 'clincoo_auth_user';
-var NS_AUTH_RE = /^clincoo_auth_/;
+var NS_USER_KEY = 'clinqoo_auth_user';
+var NS_AUTH_RE = /^clinqoo_auth_/;
 var NS_NS_RE = /^u\d+:/;
 var NS_raw = window.localStorage;
 
@@ -101,7 +101,7 @@ try {
   function getToken() {
     try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
   }
-  window.ClincooAuth = {
+  window.ClinqooAuth = {
     getToken: getToken,
     authUrl: AUTH_URL,
     logout: function (ev) {
@@ -133,7 +133,7 @@ try {
 // - dibuka langsung/deep-link -> location.replace ke halaman induk (TANPA entri baru)
 // Sebelumnya beberapa tombol kembali pakai location.href = navigasi MAJU yang menambah
 // entri riwayat, sehingga bolak-balik klik kembali mantul antara dua halaman tanpa henti.
-window.ClincooBack = function (fallbackUrl) {
+window.ClinqooBack = function (fallbackUrl) {
   try {
     var sameOrigin = document.referrer && new URL(document.referrer).origin === location.origin;
     if (sameOrigin && history.length > 1) { window.history.back(); return; }
@@ -160,8 +160,8 @@ window.ClincooBack = function (fallbackUrl) {
             if (!prevUser || !prevUser.id || String(prevUser.id) !== String(d.user.id)) {
               NS_raw.setItem(NS_USER_KEY, JSON.stringify(d.user));
               // aktivasi namespace per akun butuh reload sekali
-              if (!sessionStorage.getItem('clincoo_ns_reload')) {
-                try { sessionStorage.setItem('clincoo_ns_reload', '1'); } catch (e2) {}
+              if (!sessionStorage.getItem('clinqoo_ns_reload')) {
+                try { sessionStorage.setItem('clinqoo_ns_reload', '1'); } catch (e2) {}
                 location.reload();
               }
             }
@@ -180,7 +180,7 @@ window.ClincooBack = function (fallbackUrl) {
     init = init || {};
     var url = '';
     try { url = typeof input === 'string' ? input : (input && input.url) || ''; } catch (e) {}
-    var isApi = url.indexOf('clincoo-be2.pages.dev/api') !== -1 || url.indexOf('clincoo.pages.dev/api') !== -1 || /^\/api\//.test(url) || /^https?:\/\/[^\/]*clincoo-be2\.pages\.dev\/api/.test(url);
+    var isApi = url.indexOf('clincoo-be2.pages.dev/api') !== -1 || url.indexOf('clincoo.pages.dev/api') !== -1 || /^\/api\//.test(url) || /^https?:\/\/[^\/]*clinqoo-be2\.pages\.dev\/api/.test(url);
     var isAuthApi = url.indexOf('/api/auth/') !== -1;
     if (isApi && !isAuthApi) {
       try {
@@ -205,7 +205,7 @@ window.ClincooBack = function (fallbackUrl) {
   // ---- FIX: project id yang benar harus IKUT di setiap link, bukan cuma di localStorage.
   // localStorage (walau sudah dinamespace per akun di atas) tetap dibagi oleh SEMUA TAB
   // dari akun yang sama -- kalau user punya banyak tab proyek berbeda terbuka, tab yang
-  // paling akhir aktif bisa menimpa 'clincoo_current_project_id' milik tab lain, sehingga
+  // paling akhir aktif bisa menimpa 'clinqoo_current_project_id' milik tab lain, sehingga
   // Deploy/Pengaturan dsb membaca proyek yang SALAH ("Proyek tidak ditemukan atau bukan
   // milik akun ini"). Solusi: begitu halaman proyek/ dimuat, ID dari URL (paling dipercaya)
   // dipatch ke semua link sesama halaman proyek/ supaya klik selanjutnya selalu bawa ?id=
@@ -218,9 +218,9 @@ window.ClincooBack = function (fallbackUrl) {
     if (!isAuthPage && location.pathname.indexOf('/proyek/') !== -1) {
       try {
         var qid = new URLSearchParams(location.search).get('id');
-        var pid = qid || (function () { try { return localStorage.getItem('clincoo_current_project_id') || ''; } catch (e) { return ''; } })();
+        var pid = qid || (function () { try { return localStorage.getItem('clinqoo_current_project_id') || ''; } catch (e) { return ''; } })();
         if (!pid) return;
-        try { localStorage.setItem('clincoo_current_project_id', pid); } catch (e) {}
+        try { localStorage.setItem('clinqoo_current_project_id', pid); } catch (e) {}
         var anchors = document.querySelectorAll('a[href]');
         for (var i = 0; i < anchors.length; i++) {
           var href = anchors[i].getAttribute('href') || '';

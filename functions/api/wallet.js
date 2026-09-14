@@ -1,7 +1,7 @@
 // Cloudflare Pages Functions - Wallet Backend (per-account)
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
-import { getCpConnection, mirroredBalance, mirrorDelta } from './clincoopay-helpers.js';
+import { getCpConnection, mirroredBalance, mirrorDelta } from './clinqoopay-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -63,7 +63,7 @@ export async function onRequestGet({ request, env }) {
 
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const row = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
-    // ClincooPay: dompet terhubung → saldo live dari web Wallet (mirroring 2 arah, frontend tidak berubah)
+    // ClinqooPay: dompet terhubung → saldo live dari web Wallet (mirroring 2 arah, frontend tidak berubah)
     if (user) {
       const conn = await getCpConnection(db, user.id);
       if (conn) {
@@ -115,14 +115,14 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(txId, title, parsedAmount, type, method || '', uid).run();
 
-      // ClincooPay: pengguna terhubung → saldo di web Wallet yang diubah (mirroring 2 arah)
+      // ClinqooPay: pengguna terhubung → saldo di web Wallet yang diubah (mirroring 2 arah)
       const cpConn = await getCpConnection(db, uid);
       if (cpConn && (type === 'in' || type === 'out')) {
         const delta = type === 'in' ? Math.abs(parsedAmount) : -Math.abs(parsedAmount);
-        const mr = await mirrorDelta(cpConn, delta, 'Clincoo: ' + String(title), txId);
+        const mr = await mirrorDelta(cpConn, delta, 'Clinqoo: ' + String(title), txId);
         if (!mr.ok) {
           const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
-          return j({ error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
+          return j({ error: kurang ? 'Saldo ClinqooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
         }
         return j({ success: true, id: txId, balance: mr.balance, mirrored: true });
       }
@@ -142,18 +142,18 @@ export async function onRequestPost({ request, env }) {
           nres.notif = await notifyEvent(db, user, {
             source: 'Dompet', type: 'wallet',
             message: 'Top up ' + formatIDR(parsedAmount) + ' via ' + (method || 'Xendit') + ' berhasil. Saldo sekarang ' + formatIDR(balance) + '.',
-            link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
+            link: 'https://muzawwied.github.io/Clinqoo./akun/dompet/'
           });
         } catch (e) { nres.notifErr = String(e && e.message || e); }
         if (user && user.email) {
           try {
             nres.email = await sendEmail(env, {
               toEmail: user.email, toName: user.name || '',
-              subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(parsedAmount),
+              subject: 'Konfirmasi Top Up Clinqoo — ' + formatIDR(parsedAmount),
               html: emailTemplate(
                 'Top Up Berhasil',
                 user.name || '',
-                'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
+                'Top up saldo Clinqoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
                 [
                   ['Jumlah Top Up', formatIDR(parsedAmount) + ' (' + (method || 'Xendit') + ')'],
                   ['Saldo Saat Ini', formatIDR(balance)],
@@ -161,8 +161,8 @@ export async function onRequestPost({ request, env }) {
                   ['Order ID', orderId]
                 ],
                 'Lihat Riwayat Dompet',
-                'https://muzawwied.github.io/Clincoo./akun/dompet/',
-                'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+                'https://muzawwied.github.io/Clinqoo./akun/dompet/',
+                'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clinqoo Anda.'
               )
             });
           } catch (e) { nres.emailErr = String(e && e.message || e); }
@@ -183,7 +183,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === 'transfer') {
-      // Kirim saldo ke pengguna Clincoo lain (via email) — double-entry: out pengirim, in penerima
+      // Kirim saldo ke pengguna Clinqoo lain (via email) — double-entry: out pengirim, in penerima
       const toEmail = String(body.to_email || '').trim().toLowerCase();
       const amount = Math.floor(parseFloat(body.amount));
       const note = String(body.note || '').slice(0, 140);
@@ -191,12 +191,12 @@ export async function onRequestPost({ request, env }) {
       if (!amount || amount < 1000) return j({ error: 'Minimal kirim saldo 1.000' }, 400);
       if (String(user.email || '').toLowerCase() === toEmail) return j({ error: 'Tidak bisa mengirim ke akun sendiri' }, 400);
       const target = await getUserByEmail(db, toEmail);
-      if (!target) return j({ error: 'Akun penerima tidak ditemukan. Pastikan email sudah terdaftar di Clincoo.' }, 404);
+      if (!target) return j({ error: 'Akun penerima tidak ditemukan. Pastikan email sudah terdaftar di Clinqoo.' }, 404);
 
       const senderBalKey = await scopedKey(db, 'wallet_balance', user, 'balance');
       const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(senderBalKey).first();
       let balance = parseFloat(balRow?.value || '0');
-      // ClincooPay: pengirim terhubung → cek saldo live web Wallet
+      // ClinqooPay: pengirim terhubung → cek saldo live web Wallet
       const senderConn = await getCpConnection(db, uid);
       if (senderConn) {
         const wb = await mirroredBalance(senderConn);
@@ -220,24 +220,24 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(txIdIn, titleIn, amount, 'in', 'Terima Saldo', target.id).run();
 
-      // ClincooPay: mirror debit pengirim ke web Wallet (idempotent via txIdOut)
+      // ClinqooPay: mirror debit pengirim ke web Wallet (idempotent via txIdOut)
       if (senderConn) {
-        const mr = await mirrorDelta(senderConn, -amount, 'Clincoo: ' + titleOut, txIdOut);
+        const mr = await mirrorDelta(senderConn, -amount, 'Clinqoo: ' + titleOut, txIdOut);
         if (!mr.ok) {
           const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
-          return j({ error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
+          return j({ error: kurang ? 'Saldo ClinqooPay tidak cukup.' : mr.error }, kurang ? 402 : 502);
         }
         newBalance = mr.balance;
       }
-      // ClincooPay: mirror kredit penerima bila terhubung
+      // ClinqooPay: mirror kredit penerima bila terhubung
       const recvConn = await getCpConnection(db, target.id);
       let recvBalance = parseFloat(recvRow?.value || '0') + amount;
       if (recvConn) {
-        const mr2 = await mirrorDelta(recvConn, amount, 'Clincoo: ' + titleIn, txIdIn);
+        const mr2 = await mirrorDelta(recvConn, amount, 'Clinqoo: ' + titleIn, txIdIn);
         if (mr2.ok) recvBalance = mr2.balance;
       }
 
-      // Update saldo kedua pihak (hanya yang LOKAL — pengguna terhubung ClincooPay dikelola web Wallet)
+      // Update saldo kedua pihak (hanya yang LOKAL — pengguna terhubung ClinqooPay dikelola web Wallet)
       if (!senderConn) {
         await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
           .bind(senderBalKey, String(newBalance)).run();
@@ -252,14 +252,14 @@ export async function onRequestPost({ request, env }) {
         await notifyEvent(db, user, {
           source: 'Dompet', type: 'wallet',
           message: 'Kirim ' + formatIDR(amount) + ' ke ' + targetLabel + ' berhasil. Saldo sekarang ' + formatIDR(newBalance) + '.',
-          link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
+          link: 'https://muzawwied.github.io/Clinqoo./akun/dompet/'
         });
       } catch (e) {}
       try {
         await notifyEvent(db, target, {
           source: 'Dompet', type: 'wallet',
           message: 'Anda menerima ' + formatIDR(amount) + ' dari ' + senderLabel + '. Saldo sekarang ' + formatIDR(recvBalance) + '.',
-          link: 'https://muzawwied.github.io/Clincoo./akun/dompet/'
+          link: 'https://muzawwied.github.io/Clinqoo./akun/dompet/'
         });
       } catch (e) {}
 
@@ -268,11 +268,11 @@ export async function onRequestPost({ request, env }) {
         try {
           await sendEmail(env, {
             toEmail: target.email, toName: target.name || '',
-            subject: 'Anda Menerima Saldo Clincoo — ' + formatIDR(amount),
+            subject: 'Anda Menerima Saldo Clinqoo — ' + formatIDR(amount),
             html: emailTemplate(
               'Saldo Diterima',
               target.name || '',
-              'Anda baru saja menerima saldo dari pengguna Clincoo lain. Berikut rinciannya:',
+              'Anda baru saja menerima saldo dari pengguna Clinqoo lain. Berikut rinciannya:',
               [
                 ['Pengirim', senderLabel],
                 ['Jumlah', formatIDR(amount)],
@@ -280,8 +280,8 @@ export async function onRequestPost({ request, env }) {
                 ['ID Transaksi', txIdIn]
               ],
               'Lihat Riwayat Dompet',
-              'https://muzawwied.github.io/Clincoo./akun/dompet/',
-              'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
+              'https://muzawwied.github.io/Clinqoo./akun/dompet/',
+              'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clinqoo Anda.'
             )
           });
         } catch (e) {}
@@ -299,7 +299,7 @@ export async function onRequestPost({ request, env }) {
       const conn0 = await getCpConnection(db, uid);
       if (conn0) {
         const live = await mirroredBalance(conn0);
-        const mr = await mirrorDelta(conn0, Math.round(balance - (live || 0)), 'Clincoo: set saldo', 'CP-SET-' + Date.now());
+        const mr = await mirrorDelta(conn0, Math.round(balance - (live || 0)), 'Clinqoo: set saldo', 'CP-SET-' + Date.now());
         if (!mr.ok) return j({ error: mr.error }, 502);
         return j({ success: true, balance: mr.balance, mirrored: true });
       }

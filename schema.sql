@@ -1,4 +1,4 @@
--- Clincoo D1 Database Schema
+-- Clinqoo D1 Database Schema
 -- Run via: wrangler d1 execute clincoo-db --remote --file=schema.sql
 
 CREATE TABLE IF NOT EXISTS notifications (
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS topup_orders (
 );
 
 -- ============================================================================
--- Clincoo Admin Panel Schema Extensions
+-- Clinqoo Admin Panel Schema Extensions
 -- Dokumentasi kolom baru pada auth_users:
 --   - role TEXT DEFAULT 'user' ('admin' | 'user')
 --   - status TEXT DEFAULT 'active' ('active' | 'suspended' | 'deleted')

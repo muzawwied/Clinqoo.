@@ -1,5 +1,5 @@
-# Clincoo — robots.txt
+# Clinqoo — robots.txt
 User-agent: *
 Allow: /
 
-Sitemap: https://muzawwied.github.io/Clincoo./sitemap.xml
+Sitemap: https://muzawwied.github.io/Clinqoo./sitemap.xml

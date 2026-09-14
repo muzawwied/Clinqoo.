@@ -1,4 +1,4 @@
-// Clincoo API Helper - Connects to Cloudflare D1 edge functions
+// Clinqoo API Helper - Connects to Cloudflare D1 edge functions
 // On GitHub Pages, API calls will fail gracefully (no server-side functions)
 const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api';
 
@@ -9,11 +9,11 @@ function getCurrentProjectId() {
     if (pid) return pid;
   }
   try {
-    return localStorage.getItem('clincoo_current_project_id') || '';
+    return localStorage.getItem('clinqoo_current_project_id') || '';
   } catch(e) { return ''; }
 }
 
-const ClincooAPI = {
+const ClinqooAPI = {
   // Environment Variables
   async getEnvVars() {
     const pid = getCurrentProjectId();
@@ -182,12 +182,12 @@ const ClincooAPI = {
 
 // ---- Alias methods for pages that use the older API names ----
 // (getSecurity/updateSecurity dipakai halaman keamanan-https & visibilitas-akses)
-ClincooAPI.getSecurity = async function() {
+ClinqooAPI.getSecurity = async function() {
   const pid = getCurrentProjectId();
   const res = await fetch(API_BASE + '/security?project_id=' + encodeURIComponent(pid));
   return res.json();
 };
-ClincooAPI.updateSecurity = async function(key, value) {
+ClinqooAPI.updateSecurity = async function(key, value) {
   const res = await fetch(API_BASE + '/security', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

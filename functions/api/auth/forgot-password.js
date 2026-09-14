@@ -45,11 +45,11 @@ export async function onRequestPost({ request, env }) {
       try {
         await sendEmail(env, {
           toEmail: user.email, toName: user.name || '',
-          subject: 'Atur Ulang Kata Sandi Clincoo',
+          subject: 'Atur Ulang Kata Sandi Clinqoo',
           html: emailTemplate(
             'Atur Ulang Kata Sandi',
             user.name || '',
-            'Kami menerima permintaan untuk mengatur ulang kata sandi akun Clincoo Anda. Klik tombol di bawah untuk membuat kata sandi baru — tautan ini hanya berlaku 1 jam.',
+            'Kami menerima permintaan untuk mengatur ulang kata sandi akun Clinqoo Anda. Klik tombol di bawah untuk membuat kata sandi baru — tautan ini hanya berlaku 1 jam.',
             [['Email akun', user.email], ['Berlaku hingga', '1 jam sejak email ini dikirim']],
             'Atur Kata Sandi Baru', resetLink,
             'Jika Anda tidak meminta perubahan ini, abaikan email ini — kata sandi Anda tetap aman.'

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: pages-deploy-clincoo
+  group: pages-deploy-clinqoo
   cancel-in-progress: true
 
 jobs:

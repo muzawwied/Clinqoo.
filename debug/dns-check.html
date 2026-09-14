@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex">
-<title>Debug DNS 2 — Clincoo</title>
+<title>Debug DNS 2 — Clinqoo</title>
 </head>
 <body style="font-family: monospace; background:#000; color:#0f0; padding:16px; word-break: break-all;">
 <pre id="out">memulai...</pre>
@@ -13,8 +13,8 @@
   const out = [];
   const log = (k, v) => { try { out.push(k + ': ' + (typeof v === 'string' ? v : JSON.stringify(v))); } catch (e) { out.push(k + ': <unserializable>'); } };
   const base = 'https://clincoo-be2.pages.dev/api';
-  const pid = localStorage.getItem('clincoo_current_project_id') || '';
-  const tok = localStorage.getItem('clincoo_auth_token') || '';
+  const pid = localStorage.getItem('clinqoo_current_project_id') || '';
+  const tok = localStorage.getItem('clinqoo_auth_token') || '';
 
   async function timedFetch(label, url, headers) {
     const t0 = performance.now();

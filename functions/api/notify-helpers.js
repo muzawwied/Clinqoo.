@@ -1,4 +1,4 @@
-// Helpers notifikasi in-app & email (Brevo) Clincoo — template profesional, per-akun.
+// Helpers notifikasi in-app & email (Brevo) Clinqoo — template profesional, per-akun.
 // JANGAN pakai prefix "_" pada nama file (wrangler mengecualikannya dari bundle).
 import { rowScope } from './user-scope.js';
 
@@ -25,7 +25,7 @@ export async function getUserByEmail(db, email) {
   } catch (e) { return null; }
 }
 
-// Template email profesional Clincoo (logo + rincian + CTA + footer privasi)
+// Template email profesional Clinqoo (logo + rincian + CTA + footer privasi)
 export function emailTemplate(title, name, introText, details, ctaText, ctaLink, footerNote) {
   const sapaan = name ? ('Halo ' + name + ',') : 'Halo,';
   const tgl = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
@@ -46,8 +46,8 @@ export function emailTemplate(title, name, introText, details, ctaText, ctaLink,
   return '<div style="background:#f4f5f7;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;border-collapse:separate;overflow:hidden">' +
       '<tr><td style="background:#0a0a0a;padding:22px 32px">' +
-        '<img src="https://base44.app/api/apps/6a8bb7d04e18a36f9c03702c/files/mp/public/6a8bb7d04e18a36f9c03702c/d29b4d44e_clincoo-logo.png" width="34" height="34" alt="Clincoo" style="display:inline-block;vertical-align:middle;border-radius:8px;margin-right:12px">' +
-        '<span style="color:#ffffff;font-size:19px;font-weight:bold;letter-spacing:2px;vertical-align:middle">Clincoo</span>' +
+        '<img src="https://base44.app/api/apps/6a8bb7d04e18a36f9c03702c/files/mp/public/6a8bb7d04e18a36f9c03702c/d29b4d44e_clinqoo-logo.png" width="34" height="34" alt="Clinqoo" style="display:inline-block;vertical-align:middle;border-radius:8px;margin-right:12px">' +
+        '<span style="color:#ffffff;font-size:19px;font-weight:bold;letter-spacing:2px;vertical-align:middle">Clinqoo</span>' +
       '</td></tr>' +
       '<tr><td style="padding:32px">' +
         '<h1 style="margin:0 0 6px;font-size:18px;color:#111827;font-weight:bold">' + title + '</h1>' +
@@ -60,8 +60,8 @@ export function emailTemplate(title, name, introText, details, ctaText, ctaLink,
       '<tr><td style="padding:18px 32px;background:#f9fafb;border-top:1px solid #eceef1">' +
         footer +
         '<div style="border-top:1px solid #eceef1;padding-top:12px;margin-top:10px">' +
-          '<p style="margin:0 0 6px;color:#6b7280;font-size:11px;line-height:1.6"><b style="color:#374151">Privasi Anda terlindungi.</b> Clincoo tidak membagikan data pribadi Anda kepada pihak ketiga. Email ini dikirim otomatis oleh sistem Clincoo — mohon jangan dibalas.</p>' +
-          '<p style="margin:0;color:#9ca3af;font-size:11px">&copy; 2026 Clincoo &middot; Semua hak dilindungi</p>' +
+          '<p style="margin:0 0 6px;color:#6b7280;font-size:11px;line-height:1.6"><b style="color:#374151">Privasi Anda terlindungi.</b> Clinqoo tidak membagikan data pribadi Anda kepada pihak ketiga. Email ini dikirim otomatis oleh sistem Clinqoo — mohon jangan dibalas.</p>' +
+          '<p style="margin:0;color:#9ca3af;font-size:11px">&copy; 2026 Clinqoo &middot; Semua hak dilindungi</p>' +
         '</div>' +
       '</td></tr>' +
     '</table>' +
@@ -74,7 +74,7 @@ export async function sendEmail(env, opts) {
   if (!apiKey || !opts || !opts.toEmail) return { sent: false, via: null, reason: 'no_api_key_or_recipient' };
   const senderEmail = await getSecret(env, 'BREVO_SENDER_EMAIL');
   if (!senderEmail) return { sent: false, via: null, reason: 'no_sender' };
-  const senderName = (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clincoo';
+  const senderName = (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clinqoo';
   try {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',

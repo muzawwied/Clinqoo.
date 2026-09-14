@@ -16,12 +16,12 @@ function stripMd(text) {
         .trim();
 }
 /**
- * Clincoo Project Management
+ * Clinqoo Project Management
  */
 
 // Detect GitHub Pages subpath
-const _isGHPages = window.location.pathname.includes('/Clincoo');
-const _BASE = _isGHPages ? '/Clincoo.' : '';
+const _isGHPages = window.location.pathname.includes('/Clinqoo');
+const _BASE = _isGHPages ? '/Clinqoo.' : '';
 
 // === Sinkronisasi D1 per akun (Cloudflare) ===
 // Token Bearer diinjeksi otomatis oleh js/auth-client.js pada semua call /api/.
@@ -34,7 +34,7 @@ function showPlanLimitModal(d) {
     if (document.getElementById('plan-limit-modal')) return;
     var m = document.createElement('div');
     m.id = 'plan-limit-modal';
-    var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
+    var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
     m.innerHTML =
         '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
         '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +
@@ -83,7 +83,7 @@ async function syncProjectsFromServer() {
             return;
         }
         if (JSON.stringify(list) !== JSON.stringify(local)) {
-            try { localStorage.setItem('clincoo_projects', JSON.stringify(list)); } catch (e) {}
+            try { localStorage.setItem('clinqoo_projects', JSON.stringify(list)); } catch (e) {}
             renderProjects();
         }
     } catch (e) {}
@@ -120,14 +120,14 @@ function timeAgo(dateStr) {
 function getProjects() {
     let projects = [];
     try {
-        const stored = localStorage.getItem('clincoo_projects');
+        const stored = localStorage.getItem('clinqoo_projects');
         if (stored) projects = JSON.parse(stored);
     } catch(e) {}
     return projects;
 }
 
 function saveProjects(projects) {
-    try { localStorage.setItem('clincoo_projects', JSON.stringify(projects)); } catch(e) {}
+    try { localStorage.setItem('clinqoo_projects', JSON.stringify(projects)); } catch(e) {}
     pushProjectsToServer(projects); // simpan per akun di D1
 }
 
@@ -188,8 +188,8 @@ function openProject(id) {
     const projects = getProjects();
     const proj = projects.find(p => p.id === id);
     if (proj) {
-        localStorage.setItem('clincoo_current_chat_msg', proj.prompt || '');
-        localStorage.setItem('clincoo_current_project_id', id);
+        localStorage.setItem('clinqoo_current_chat_msg', proj.prompt || '');
+        localStorage.setItem('clinqoo_current_project_id', id);
         if (_isGHPages) {
             window.location.href = _BASE + '/proyek/workspace/?id=' + encodeURIComponent(id);
         } else {
@@ -213,9 +213,9 @@ function _showToast(msg, kind) {
 }
 function _ensureDeleteModal() {
     if (document.getElementById('confirm-delete-modal')) return;
-    if (!document.getElementById('clincoo-delete-spin-css')) {
+    if (!document.getElementById('clinqoo-delete-spin-css')) {
         const st = document.createElement('style');
-        st.id = 'clincoo-delete-spin-css';
+        st.id = 'clinqoo-delete-spin-css';
         st.textContent = '.cc-spin{animation:cc-spin .8s linear infinite}@keyframes cc-spin{to{transform:rotate(360deg)}}.cc-deleting{opacity:.45;pointer-events:none;filter:grayscale(.3)}';
         document.head.appendChild(st);
     }
@@ -292,7 +292,7 @@ function deleteProject(id) {
 }
 async function _doDeleteProject(id) {
     // tarik publish-an: situs + link publik (Cloudflare Pages) ikut dihapus (non-fatal)
-    const tok = (function () { try { return localStorage.getItem('clincoo_auth_token') || ''; } catch (e) { return ''; } })();
+    const tok = (function () { try { return localStorage.getItem('clinqoo_auth_token') || ''; } catch (e) { return ''; } })();
     const hdrs = { 'Content-Type': 'application/json' };
     if (tok) hdrs['Authorization'] = 'Bearer ' + tok;
     const apiRoot = PROJECTS_API.replace(/\/projects$/, '');
@@ -307,14 +307,14 @@ async function _doDeleteProject(id) {
 
     // data lokal proyek (chat, file workspace, penunjuk aktif)
     try {
-        localStorage.removeItem('clincoo_ls_chat_' + id);
-        localStorage.removeItem('clincoo_workspace_files_' + id);
-        if (localStorage.getItem('clincoo_current_project_id') === id) localStorage.removeItem('clincoo_current_project_id');
+        localStorage.removeItem('clinqoo_ls_chat_' + id);
+        localStorage.removeItem('clinqoo_workspace_files_' + id);
+        if (localStorage.getItem('clinqoo_current_project_id') === id) localStorage.removeItem('clinqoo_current_project_id');
     } catch (e) {}
 
     let projects = getProjects();
     projects = projects.filter(p => p.id !== id);
-    try { localStorage.setItem('clincoo_projects', JSON.stringify(projects)); } catch (e) {}
+    try { localStorage.setItem('clinqoo_projects', JSON.stringify(projects)); } catch (e) {}
 
     try {
         fetch('https://clincoo-be2.pages.dev/api/activity', {
@@ -354,9 +354,9 @@ function processPromptSubmission() {
     if (!prompt) return;
     
     try {
-        localStorage.removeItem('clincoo_current_chat_msg');
-        localStorage.removeItem('clincoo_current_project_id');
-        localStorage.removeItem('clincoo_current_attachments');
+        localStorage.removeItem('clinqoo_current_chat_msg');
+        localStorage.removeItem('clinqoo_current_project_id');
+        localStorage.removeItem('clinqoo_current_attachments');
     } catch(e) {}
     
     const projectId = 'proj_' + Date.now();
@@ -370,8 +370,8 @@ function processPromptSubmission() {
     
     try {
         saveProjects(projects);
-        localStorage.setItem('clincoo_current_chat_msg', prompt);
-        localStorage.setItem('clincoo_current_project_id', projectId);
+        localStorage.setItem('clinqoo_current_chat_msg', prompt);
+        localStorage.setItem('clinqoo_current_project_id', projectId);
         const filePreviewContainer = document.getElementById('file-preview-container');
         const fileChips = filePreviewContainer ? filePreviewContainer.querySelectorAll('.file-chip') : [];
         if (fileChips.length > 0) {
@@ -379,7 +379,7 @@ function processPromptSubmission() {
                 const nameEl = chip.querySelector('span');
                 return { name: nameEl ? nameEl.textContent : 'file', type: 'document' };
             });
-            localStorage.setItem('clincoo_current_attachments', JSON.stringify(attachments));
+            localStorage.setItem('clinqoo_current_attachments', JSON.stringify(attachments));
         }
     } catch(e) {}
     if (_isGHPages) {
