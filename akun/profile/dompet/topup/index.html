@@ -811,12 +811,6 @@
             if (res.qr_image) {
                 // BuatQris: QR sudah berupa gambar siap tampil
                 box.innerHTML = '<img src="' + res.qr_image + '" alt="QRIS" class="w-[220px] h-[220px] object-contain">';
-                if (res.payment_url) {
-                    var pWrap = document.createElement('p');
-                    pWrap.className = 'text-center mt-2';
-                    pWrap.innerHTML = '<a href="' + res.payment_url + '" target="_blank" rel="noopener" class="text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 underline">Buka halaman bayar di tab baru</a>';
-                    box.parentElement.appendChild(pWrap);
-                }
             } else {
                 try {
                     new QRCode(box, { text: res.qr_string, width: 220, height: 220, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
