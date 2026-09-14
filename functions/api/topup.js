@@ -187,7 +187,7 @@ export async function onRequestPost({ request, env }) {
 }
 
 // Kredit saldo D1 — dipakai webhook & live status (idempotent via status order)
-// Di-export untuk dipakai juga oleh topup-qris.js (QRIS Pakasir)
+// Di-export untuk dipakai juga oleh topup-qris.js (QRIS BuatQris)
 export async function creditTopup(env, order) {
   const db = env.DB;
   const owner = await getUserById(db, order.user_id);

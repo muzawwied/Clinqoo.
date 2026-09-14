@@ -58,9 +58,16 @@ async function claimOrder(db, orderId) {
 }
 
 async function ensureQrisColumns(db) {
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_qr TEXT').run(); } catch (e) {}
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_total REAL').run(); } catch (e) {}
-  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN pakasir_expired TEXT').run(); } catch (e) {}
+  // Kolom netral (provider-agnostic); migrasi dari kolom lama pakasir_* bila ada
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN qr_url TEXT').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN bill_total REAL').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN expires_at TEXT').run(); } catch (e) {}
+  try { await db.prepare('UPDATE topup_orders SET qr_url = pakasir_qr WHERE qr_url IS NULL AND pakasir_qr IS NOT NULL').run(); } catch (e) {}
+  try { await db.prepare('UPDATE topup_orders SET bill_total = pakasir_total WHERE bill_total IS NULL AND pakasir_total IS NOT NULL').run(); } catch (e) {}
+  try { await db.prepare('UPDATE topup_orders SET expires_at = pakasir_expired WHERE expires_at IS NULL AND pakasir_expired IS NOT NULL').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders DROP COLUMN pakasir_qr').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders DROP COLUMN pakasir_total').run(); } catch (e) {}
+  try { await db.prepare('ALTER TABLE topup_orders DROP COLUMN pakasir_expired').run(); } catch (e) {}
 }
 
 // GET /api/topup-qris?action=ping           -> status konfigurasi (untuk UI)
@@ -200,7 +207,7 @@ export async function onRequestPost({ request, env }) {
   const total = parseInt(p.total || p.amount || p.total_payment || amount, 10) || amount;
 
   await db.prepare(
-    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id, pakasir_qr, pakasir_total, pakasir_expired) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)'
+    'INSERT INTO topup_orders (id, amount, method, status, xendit_id, invoice_url, user_id, qr_url, bill_total, expires_at) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)'
   ).bind(orderId, amount, 'QRIS (BuatQris)', 'pending', p.payment_url || null, tpUser.id, p.qr_url, total, new Date(Date.now() + 15 * 60 * 1000).toISOString()).run();
 
   try {
