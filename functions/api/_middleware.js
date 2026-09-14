@@ -7,26 +7,126 @@
 //   - /api/wallet-sync*  (endpoint memvalidasi sendiri: config wajib Bearer; jalur eksternal wajib api_key)
 //   - /api/collab*        (GET info undangan publik via token rahasia; POST divalidasi sendiri di collab.js)
 //   - /api/chat*          (PROXY kuota AI per-user — validasi sendiri: token lokal atau be2)
+//   - /api/wa*            (webhook WhatsApp Meta: verifikasi hub.challenge + struktur payload; kirim manual wajib Bearer admin)
 //   - preflight OPTIONS  (CORS)
 // Respons 401 sama seperti versi production: {"error":"Login diperlukan","need_login":true}
+//
+// ===== LAPISAN KEAMANAN GLOBAL (anti-DDoS L7, anti-phishing, anti-celah umum) =====
+//   1. Rate limit per IP (global, auth, admin) — sliding window in-memory per isolate.
+//      Serangan volumetrik (L3/L4) diserap Cloudflare; lapisan ini melindungi aplikasi (L7).
+//   2. Validasi Origin untuk request yang mengubah data (POST/PUT/PATCH/DELETE) ke
+//      /api/auth dan /api/admin — mencegah request lintas situs dari halaman phishing.
+//   3. Cap ukuran body (1.5 MB) — mencegah flood payload besar.
+//   4. Blokir cepat path scanner umum (.env, wp-login, .php, .git, phpmyadmin).
+//   5. Security headers di semua respons API + Cache-Control: no-store untuk /api/admin
+//      (data sensitif tidak pernah nempel di cache).
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
-//   - /api/wa*            (webhook WhatsApp Meta: verifikasi hub.challenge + struktur payload; kirim manual wajib Bearer admin)
-const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(-qris)?(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/, /^\/api\/wa(\/|$)/]; // chat: proxy kuota AI per-user, validasi sendiri (token lokal ATAU be2)
+const PUBLIC = [/^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(-qris)?(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/, /^\/api\/wa(\/|$)/];
+
+// ---- 1. RATE LIMIT (anti-DDoS L7 / anti-brute-force) ----
+const _buckets = new Map(); // key -> array timestamp
+const RL = {
+  global: { limit: 400, window: 5 * 60 * 1000 },   // per IP: semua /api/*
+  auth:   { limit: 40,  window: 5 * 60 * 1000 },   // per IP: /api/auth/* (anti brute-force login)
+  admin:  { limit: 180, window: 5 * 60 * 1000 }    // per IP: /api/admin/*
+};
+function rateLimit(key, cfg) {
+  const now = Date.now();
+  let arr = (_buckets.get(key) || []).filter(t => now - t < cfg.window);
+  if (arr.length >= cfg.limit) { _buckets.set(key, arr); return false; }
+  arr.push(now);
+  _buckets.set(key, arr);
+  if (_buckets.size > 8000) { // gc ringan agar memori isolate tidak membengkak
+    for (const [k, v] of _buckets) if (!v.some(t => now - t < cfg.window)) _buckets.delete(k);
+  }
+  return true;
+}
+function ipOf(request) {
+  return (request.headers.get('cf-connecting-ip') || (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown');
+}
+function tooMany(retryAfter) {
+  return new Response(JSON.stringify({ error: 'Terlalu banyak permintaan. Coba lagi nanti.' }), {
+    status: 429,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Retry-After': String(retryAfter) }
+  });
+}
+
+// ---- 2. VALIDASI ORIGIN (anti-phishing / anti-lintas-situs) ----
+// Frontend resmi Clincoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clinco.co.
+// Browsers selalu mengirim Origin pada cross-site POST; absen Origin = klien non-browser (curl/webhook) → diizinkan (auth tetap dicek handler).
+const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clinco\.co$)/;
+function originOk(request) {
+  const origin = request.headers.get('origin');
+  if (!origin) return true; // curl / webhook server (BuatQris, e-wallet) — tanpa browser
+  try {
+    const o = new URL(origin);
+    const host = new URL(request.url).host;
+    return o.host === host || ORIGIN_ALLOW.test(o.host);
+  } catch { return false; }
+}
+
+// ---- 4. PATH SCANNER ----
+const SCANNER = /(\.env|wp-login|\.php|\.git|phpmyadmin|wp-admin)/i;
 
 export async function onRequest({ request, env, next }) {
   if (request.method === 'OPTIONS') return next();
-  const path = new URL(request.url).pathname;
-  for (const re of PUBLIC) if (re.test(path)) return next();
-  try {
-    if (env.DB) {
-      await initAuthTables(env.DB);
-      const user = await getUserByToken(env.DB, getToken(request));
-      if (user) return next();
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  // 4. Blokir path scanner umum dengan cepat (tanpa beban D1)
+  if (SCANNER.test(path)) {
+    return new Response(JSON.stringify({ error: 'not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // 1. Rate limit per IP — kelas berbeda untuk auth & admin
+  const ip = ipOf(request);
+  if (!rateLimit('g:' + ip, RL.global)) return tooMany(60);
+  if (/^\/api\/auth(\/|$)/.test(path) && !rateLimit('a:' + ip, RL.auth)) return tooMany(60);
+  if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) return tooMany(60);
+
+  // 2. Anti-lintas-situs untuk request yang mengubah data di endpoint sensitif
+  const mutates = request.method !== 'GET' && request.method !== 'HEAD';
+  if (mutates && (/^\/api\/(auth|admin)(\/|$)/.test(path)) && !originOk(request)) {
+    return new Response(JSON.stringify({ error: 'Permintaan lintas situs ditolak.' }), {
+      status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+
+  // 3. Cap ukuran body (anti flood payload besar)
+  const cl = parseInt(request.headers.get('content-length') || '0', 10);
+  if (cl > 1500000) {
+    return new Response(JSON.stringify({ error: 'Payload terlalu besar.' }), { status: 413, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  let publicRoute = false;
+  for (const re of PUBLIC) if (re.test(path)) { publicRoute = true; break; }
+
+  if (!publicRoute) {
+    try {
+      if (env.DB) {
+        await initAuthTables(env.DB);
+        const user = await getUserByToken(env.DB, getToken(request));
+        if (user) publicRoute = true; // lolos auth
+      }
+    } catch (e) { /* lanjut ke 401 */ }
+    if (!publicRoute) {
+      return new Response(JSON.stringify({ error: 'Login diperlukan', need_login: true }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
     }
-  } catch (e) { /* lanjut ke 401 */ }
-  return new Response(JSON.stringify({ error: 'Login diperlukan', need_login: true }), {
-    status: 401,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-  });
+  }
+
+  // 5. Security headers + no-store untuk data sensitif admin
+  const res = await next();
+  try {
+    const h = new Headers(res.headers);
+    h.set('X-Content-Type-Options', 'nosniff');
+    h.set('X-Frame-Options', 'DENY');
+    h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    if (/^\/api\/(admin|auth|topup|wallet)(\/|$)/.test(path)) h.set('Cache-Control', 'no-store');
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+  } catch (e) { return res; }
 }
