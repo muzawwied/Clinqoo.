@@ -815,7 +815,7 @@ export async function onRequestPost({ request, env }) {
               text: (t.tool_calls && t.tool_calls.length
                 ? '\u{1F9E9} Tim AI selesai berdiskusi & membangun:\n' + teamTranscriptText(t.transcript || []) + '\n\n\u2705 Semua file sudah selesai dibuat \u2014 cek hasilnya di halaman Workspace, atau balas di sini kalau masih ada yang mau diubah.'
                 : (t.text || 'Tim AI selesai.') + '\n' + teamTranscriptText(t.transcript || [])),
-              model: 'Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)',
+              model: t.chatOnly ? 'Clinqoo AI' : ('Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)'),
               session_id: body.session_id || ('ls_' + Date.now())
             };
             if (t.tool_calls && t.tool_calls.length) out.tool_calls = t.tool_calls;
@@ -843,7 +843,7 @@ export async function onRequestPost({ request, env }) {
         text: (t.tool_calls && t.tool_calls.length
           ? '\u{1F9E9} Tim AI selesai berdiskusi & membangun:\n' + teamTranscriptText(t.transcript || []) + '\n\n\u2705 Semua file sudah selesai dibuat \u2014 cek hasilnya di halaman Workspace, atau balas di sini kalau masih ada yang mau diubah.'
           : (t.text || 'Tim AI selesai.') + '\n' + teamTranscriptText(t.transcript || [])),
-        model: 'Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)',
+        model: t.chatOnly ? 'Clinqoo AI' : ('Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)'),
         session_id: body.session_id || ('ls_' + Date.now())
       };
       if (t.tool_calls && t.tool_calls.length) out.tool_calls = t.tool_calls;
