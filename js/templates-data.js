@@ -209,27 +209,14 @@ var ClinqooTemplates = (function () {
   }
   function isProPlan() { var p = planFromCache(); return p === 'Pro' || p === 'Bisnis'; }
 
-  function upgradeUrlPro() {
-    var base = location.origin + (location.hostname.indexOf('github.io') !== -1 ? '/Clinqoo.' : '');
-    return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
-  }
 
-  function showProLockTemplate(name) {
-    var old = document.getElementById('clinqoo-tmpl-prolock');
-    if (old) old.remove();
-    var ov = document.createElement('div');
-    ov.id = 'clinqoo-tmpl-prolock';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,-apple-system,sans-serif;';
-    ov.innerHTML = '<div style="background:#fff;border-radius:18px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);">'
-      + '<div style="font-size:30px;margin-bottom:8px;">\u1F512</div>'
-      + '<h3 style="margin:0 0 6px;font-size:17px;font-weight:700;color:#111;">Template Premium</h3>'
-      + '<p style="margin:0 0 18px;font-size:13px;color:#555;line-height:1.5;">Template \u201C' + name + '\u201D hanya tersedia untuk Paket Pro dan Bisnis. Upgrade untuk membuka semua template premium.</p>'
-      + '<a href="' + upgradeUrlPro() + '" style="display:block;background:#111;color:#fff;border-radius:12px;padding:11px;font-size:14px;font-weight:600;text-decoration:none;">Upgrade ke Pro</a>'
-      + '<button type="button" id="clinqoo-tmpl-prolock-x" style="margin-top:10px;background:none;border:0;font-size:13px;color:#777;cursor:pointer;padding:8px;">Nanti saja</button>'
-      + '</div>';
-    document.body.appendChild(ov);
-    document.getElementById('clinqoo-tmpl-prolock-x').onclick = function () { ov.remove(); };
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+  function showProLockTemplate() {
+    // Popup kartu lama dihapus -> pakai carousel daftar paket (konsisten dengan popup Kolaborasi AI & Sync GitHub).
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem('clinqoo_subscription_cache') || 'null') || null; } catch (e) {}
+    if (typeof tmShowCollabPlansModal === 'function') {
+      tmShowCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
+    }
   }
 
   // ---------- GUNAKAN TEMPLATE: pasang file web jadi langsung ----------
@@ -240,7 +227,7 @@ var ClinqooTemplates = (function () {
     var site = files[key];
     if (!t || !site) return;
     if (PRO_TEMPLATES.indexOf(key) !== -1 && !isProPlan()) {
-      showProLockTemplate(t.name);
+      showProLockTemplate();
       return;
     }
 
