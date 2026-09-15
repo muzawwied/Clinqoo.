@@ -134,6 +134,49 @@
             100% { background-position: 200% center; }
         }
 
+        /* ===== Kartu langkah "thinking" Tim AI — step cards ===== */
+        .ai-think-card {
+            border: 1px solid #262626;
+            border-radius: 0.75rem;
+            padding: 0.625rem 0.875rem;
+            background: #141414;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+            max-width: 100%;
+        }
+        .ai-step { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.8125rem; line-height: 1.4; }
+        .ai-step-ico {
+            width: 1.05rem; height: 1.05rem; border-radius: 9999px; flex: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.625rem; margin-top: 0.1rem;
+        }
+        .ai-step.done .ai-step-ico { background: #1f2937; color: #34d399; }
+        .ai-step.done .ai-step-text { color: #737373; }
+        .ai-step.active .ai-step-ico {
+            background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+            background-size: 200% auto;
+            animation: shimmerBg 1.2s linear infinite;
+            color: #818cf8;
+        }
+        .ai-step.active .ai-step-text {
+            background: linear-gradient(90deg, #6b7280 0%, #f3f4f6 50%, #6b7280 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shimmerText 2s linear infinite;
+            font-weight: 500;
+        }
+        .ai-step-text {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        @keyframes shimmerBg {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
         @keyframes bounceDot {
             0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
             40% { transform: scale(1); opacity: 1; }
@@ -1418,9 +1461,11 @@
                     if (msg.isProcessing) {
                         if (msg.processType === 'team') {
                             const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            const liveLines = (msg.liveProgress || []).slice(-6).map(l => '<div class="text-[12px] text-gray-400 mt-0.5 truncate w-full max-w-full">' + esc(l) + '</div>').join('');
-                            const think = msg.liveThink ? esc(String(msg.liveThink).replace(/\s+/g, ' ').trim().slice(-110)) : 'Tim AI sedang berpikir\u2026';
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${think}</span></div>` + (liveLines ? `<div class="mt-1 w-full max-w-full">${liveLines}</div>` : '');
+                            const doneSteps = (msg.stepFeed || []).slice(-7).map(s => `<div class="ai-step done"><span class="ai-step-ico">\u2713</span><span class="ai-step-text w-full">${esc(s)}</span></div>`).join('');
+                            const active = msg.stepActive
+                                ? `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">${esc(msg.stepActive)}</span></div>`
+                                : `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">Tim AI sedang berpikir\u2026</span></div>`;
+                            processIndicator = `<div class="ai-think-card">${doneSteps}${active}</div>`;
                         } else if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
                         } else if (msg.processType === 'read') {
@@ -2043,28 +2088,41 @@ function showCollabPlansModal(sub) {
         // hanya menampilkannya begitu sampai.
         function handleTeamEvent(d, aiMsgObj) {
             try {
-                aiMsgObj.liveProgress = aiMsgObj.liveProgress || [];
+                aiMsgObj.stepFeed = aiMsgObj.stepFeed || [];
                 if (d.type === 'stage') {
-                    aiMsgObj.liveProgress.push('\u25B6 ' + (d.label || 'Tahap') + ' bekerja\u2026');
-                    aiMsgObj.liveThink = '';
+                    aiMsgObj.stepActive = (d.label || 'Tim AI') + '\u2026';
+                    aiMsgObj._sentDoneLen = 0;
                     renderMessages();
                 } else if (d.type === 'think') {
-                    // teks pikiran ASLI model — mengalir token per token dari server
-                    aiMsgObj.liveThink = String(d.text || '');
-                    renderMessages();
-                } else if (d.type === 'stage_done' || d.type === 'progress') {
-                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 160);
-                    if (short) {
-                        aiMsgObj.liveProgress.push((d.type === 'progress' ? '\u2713 ' : '\u2713 ') + (d.label ? d.label + ': ' : '') + short);
-                        renderMessages();
+                    // teks pikiran ASLI model: tiap kalimat selesai jadi langkah \u2713,
+                    // kalimat yang sedang ditulis jadi langkah aktif yang shimmer.
+                    const text = String(d.text || '');
+                    let prev = aiMsgObj._sentDoneLen || 0;
+                    if (text.length < prev) { prev = 0; aiMsgObj._sentDoneLen = 0; }
+                    const fresh = text.slice(prev);
+                    const m = fresh.match(/^[\s\S]*[.!?\n;:\u2026]/);
+                    if (m) {
+                        const donePart = m[0];
+                        aiMsgObj._sentDoneLen = prev + donePart.length;
+                        donePart.split(/[\n]+/).forEach(function (seg) {
+                            seg.trim().split(/(?<=[.!?\u2026;])\s+/).forEach(function (s) {
+                                s = s.trim();
+                                if (s) aiMsgObj.stepFeed.push(s.slice(0, 110));
+                            });
+                        });
                     }
-                }
-                const statusEl = document.getElementById('status-text-' + aiMsgObj.id);
-                if (statusEl) {
-                    if (d.type === 'think') statusEl.textContent = String(d.text || '').replace(/\s+/g, ' ').slice(-110);
-                    else if (d.type === 'stage') statusEl.textContent = (d.label || 'Tim AI') + ' sedang berpikir\u2026';
-                    else if (d.type === 'progress') statusEl.textContent = 'Tim AI sedang menulis: ' + String(d.text || '').slice(0, 70);
-                    else if (d.type === 'stage_done') statusEl.textContent = (d.label || 'Tahap') + ' selesai \u2713';
+                    aiMsgObj.stepActive = text.slice(aiMsgObj._sentDoneLen || 0).replace(/\s+/g, ' ').trim().slice(0, 120);
+                    renderMessages();
+                } else if (d.type === 'stage_done') {
+                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 110);
+                    if (short) aiMsgObj.stepFeed.push((d.label ? d.label + ' \u2014 ' : '') + short);
+                    aiMsgObj.stepActive = '';
+                    aiMsgObj._sentDoneLen = 0;
+                    renderMessages();
+                } else if (d.type === 'progress') {
+                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 110);
+                    if (short) aiMsgObj.stepFeed.push('\u2705 menulis: ' + short);
+                    renderMessages();
                 }
             } catch (e) {}
         }
