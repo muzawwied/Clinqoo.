@@ -134,47 +134,31 @@
             100% { background-position: 200% center; }
         }
 
-        /* ===== Kartu langkah "thinking" Tim AI — step cards ===== */
-        .ai-think-card {
-            border: none;
-            border-radius: 0;
-            padding: 0;
-            background: transparent;
+        /* ===== Baris "thinking" Tim AI — satu baris, transparan, ikon titik + teks shimmer ===== */
+        .ai-think-line {
             display: flex;
-            flex-direction: column;
-            gap: 0.45rem;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
             max-width: 100%;
         }
-        .ai-step { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.8125rem; line-height: 1.4; }
-        .ai-step-ico {
-            width: 1.05rem; height: 1.05rem; border-radius: 9999px; flex: none;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 0.625rem; margin-top: 0.1rem;
+        .ai-think-dots { display: inline-flex; gap: 0.2rem; flex: none; }
+        .ai-think-dots span {
+            width: 0.32rem; height: 0.32rem; border-radius: 9999px; background: #9ca3af;
+            animation: aiDotPulse 1.3s ease-in-out infinite;
         }
-        .ai-step.done .ai-step-ico { background: #1f2937; color: #34d399; }
-        .ai-step.done .ai-step-text { color: #9ca3af; }
-        .ai-step.active .ai-step-ico {
-            background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
-            background-size: 200% auto;
-            animation: shimmerBg 1.2s linear infinite;
-            color: #818cf8;
-        }
-        .ai-step.active .ai-step-text {
+        .ai-think-dots span:nth-child(2) { animation-delay: 0.18s; }
+        .ai-think-dots span:nth-child(3) { animation-delay: 0.36s; }
+        @keyframes aiDotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+        .ai-think-text {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+            font-size: 0.9rem; font-weight: 500;
             background: linear-gradient(90deg, #6b7280 0%, #f3f4f6 50%, #6b7280 100%);
             background-size: 200% auto;
             color: transparent;
             -webkit-background-clip: text;
             background-clip: text;
             animation: shimmerText 2s linear infinite;
-            font-weight: 500;
-        }
-        .ai-step-text {
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            max-width: 100%;
-        }
-        @keyframes shimmerBg {
-            0% { background-position: 200% center; }
-            100% { background-position: -200% center; }
         }
 
         @keyframes bounceDot {
@@ -1461,11 +1445,8 @@
                     if (msg.isProcessing) {
                         if (msg.processType === 'team') {
                             const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            const doneSteps = (msg.stepFeed || []).slice(-3).map(s => `<div class="ai-step done"><span class="ai-step-ico">\u2713</span><span class="ai-step-text w-full">${esc(s)}</span></div>`).join('');
-                            const active = msg.stepActive
-                                ? `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">${esc(msg.stepActive)}</span></div>`
-                                : `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">Tim AI sedang berpikir\u2026</span></div>`;
-                            processIndicator = `<div class="ai-think-card">${doneSteps}${active}</div>`;
+                            const label = msg.stepActive ? esc(msg.stepActive) : 'Tim AI sedang berpikir\u2026';
+                            processIndicator = `<div class="ai-think-line"><span class="ai-think-dots"><span></span><span></span><span></span></span><span class="ai-think-text" id="status-text-${msg.id}">${label}</span></div>`;
                         } else if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
                         } else if (msg.processType === 'read') {
