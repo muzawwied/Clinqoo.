@@ -434,6 +434,56 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
   return { error: lastError || 'Semua model OpenRouter gagal', statuses, quotaExhausted };
 }
 
+// Stream token ASLI OpenRouter (SSE): setiap potongan teks yang di-generate model
+// dikirim real-time lewat onDelta(teksMenumpuk). Dipakai tahap teks Tim AI (Arsitek/
+// Reviewer) supaya progres yang tampil di chat adalah kata-kata AI-nya sendiri,
+// bukan label statis. Tanpa tools — tahap ber-tools tetap non-stream (aman untuk
+// fragmentasi tool_call).
+async function tryOpenRouterStream(apiKey, messages, models, onDelta) {
+  const statuses = [];
+  let lastError = null;
+  for (const model of (models || OPENROUTER_MODELS)) {
+    try {
+      const res = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clinqoo' },
+        body: JSON.stringify({ model, messages, stream: true })
+      });
+      if (!res.ok || !res.body) {
+        const reason = res.status === 429 ? 'limit tercapai' : (res.status >= 500 ? 'server bermasalah' : 'gagal (' + res.status + ')');
+        lastError = 'OpenRouter ' + model + ': ' + reason; statuses.push(res.status); continue;
+      }
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = ''; let text = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf('\n')) !== -1) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (line.indexOf('data:') !== 0 || line === 'data: [DONE]') continue;
+          try {
+            const d = JSON.parse(line.slice(5).trim());
+            const delta = d.choices && d.choices[0] && d.choices[0].delta;
+            if (!delta) continue;
+            let chunk = '';
+            if (typeof delta.reasoning === 'string') chunk += delta.reasoning; // proses pikir model (bila provider kirim)
+            if (typeof delta.content === 'string') chunk += delta.content;
+            if (chunk) { text += chunk; if (onDelta) { try { onDelta(text); } catch (e) {} } }
+          } catch (e) {}
+        }
+      }
+      if (text) return { text, model };
+      lastError = 'OpenRouter ' + model + ': respons kosong'; statuses.push(0);
+    } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
+  }
+  const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
+  return { error: lastError || 'Semua model OpenRouter gagal', statuses, quotaExhausted };
+}
+
 // ===== MODE TIM AI: beberapa model berdiskusi lalu membangun web =====
 // Alur: Arsitek (rencana) -> Programmer (tulis file via tools) -> Reviewer (kritik)
 // -> Perbaikan (programmer revisi). Hasil akhir = tool_calls write_file yang
@@ -453,14 +503,27 @@ const TEAM_LABELS = {
 };
 
 // satu panggilan model peran (OR dulu, Gemini cadangan) — tanpa loop, untuk tahap teks (arsitek/reviewer)
-async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools) {
+async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools, emit) {
   const messages = [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: userText }
   ];
   let r = null;
   let orQuotaExhausted = false;
-  if (orKey) { r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]); orQuotaExhausted = !!(r && r.quotaExhausted); }
+  if (orKey) {
+    if (emit && !tools) {
+      // progres real-time: potongan teks ASLI model dikirim begitu di-generate (throttle 300ms)
+      let lastEmit = 0;
+      r = await tryOpenRouterStream(orKey, messages, TEAM_STAGE_MODELS[stage], (soFar) => {
+        const now = Date.now();
+        if (now - lastEmit >= 300) { lastEmit = now; emit({ type: 'think', stage: stage, label: TEAM_LABELS[stage] || stage, text: soFar }); }
+      });
+      if (r && !r.error && r.text) emit({ type: 'think', stage: stage, label: TEAM_LABELS[stage] || stage, text: r.text }); // teks utuh terakhir
+    } else {
+      r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]);
+    }
+    orQuotaExhausted = !!(r && r.quotaExhausted);
+  }
   if ((!r || r.error) && apiKey) {
     // cadangan Gemini (format konversi sederhana; tools Gemini pakai functionDeclarations)
     const { systemInstruction, contents } = toGeminiPayload(messages);
@@ -538,7 +601,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, emit) {
   emit({ type: 'stage', stage: 'arsitek', label: 'Arsitek', detail: 'menyusun rencana situs' });
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
     'Kamu adalah ARSITEK WEB senior di Tim AI Clinqoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
-    userPrompt, null);
+    userPrompt, null, emit);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
   emit({ type: 'stage_done', stage: 'arsitek', label: 'Arsitek', text: (r1.text || '').slice(0, 900) });
@@ -572,7 +635,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, emit) {
   emit({ type: 'stage', stage: 'reviewer', label: 'Reviewer', detail: 'mengaudit hasil kerja' });
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
     'Kamu adalah REVIEWER KODE ketat di Tim AI Clinqoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
-    'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
+    'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null, emit);
   if (r3.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r3.quotaExhausted, transcript, tool_calls: draftCalls, stageFailed: 'reviewer' };
   const reviewText = (r3.text || '').trim();
   transcript.push({ stage: 'reviewer', model: r3.model, text: reviewText.slice(0, 1000) });

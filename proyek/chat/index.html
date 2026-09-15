@@ -1419,7 +1419,8 @@
                         if (msg.processType === 'team') {
                             const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                             const liveLines = (msg.liveProgress || []).slice(-6).map(l => '<div class="text-[12px] text-gray-400 mt-0.5 truncate w-full max-w-full">' + esc(l) + '</div>').join('');
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Tim AI menyusun tim\u2026</span></div>` + (liveLines ? `<div class="mt-1 w-full max-w-full">${liveLines}</div>` : '');
+                            const think = msg.liveThink ? esc(String(msg.liveThink).replace(/\s+/g, ' ').trim().slice(-110)) : 'Tim AI sedang berpikir\u2026';
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${think}</span></div>` + (liveLines ? `<div class="mt-1 w-full max-w-full">${liveLines}</div>` : '');
                         } else if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
                         } else if (msg.processType === 'read') {
@@ -2044,8 +2045,12 @@ function showCollabPlansModal(sub) {
             try {
                 aiMsgObj.liveProgress = aiMsgObj.liveProgress || [];
                 if (d.type === 'stage') {
-                    const line = '\u25B6 ' + (d.label || '') + ' ' + (d.detail || 'bekerja\u2026');
-                    aiMsgObj.liveProgress.push(line);
+                    aiMsgObj.liveProgress.push('\u25B6 ' + (d.label || 'Tahap') + ' bekerja\u2026');
+                    aiMsgObj.liveThink = '';
+                    renderMessages();
+                } else if (d.type === 'think') {
+                    // teks pikiran ASLI model — mengalir token per token dari server
+                    aiMsgObj.liveThink = String(d.text || '');
                     renderMessages();
                 } else if (d.type === 'stage_done' || d.type === 'progress') {
                     const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 160);
@@ -2056,7 +2061,8 @@ function showCollabPlansModal(sub) {
                 }
                 const statusEl = document.getElementById('status-text-' + aiMsgObj.id);
                 if (statusEl) {
-                    if (d.type === 'stage') statusEl.textContent = (d.label || 'Tim AI') + ' ' + (d.detail || 'bekerja\u2026');
+                    if (d.type === 'think') statusEl.textContent = String(d.text || '').replace(/\s+/g, ' ').slice(-110);
+                    else if (d.type === 'stage') statusEl.textContent = (d.label || 'Tim AI') + ' sedang berpikir\u2026';
                     else if (d.type === 'progress') statusEl.textContent = 'Tim AI sedang menulis: ' + String(d.text || '').slice(0, 70);
                     else if (d.type === 'stage_done') statusEl.textContent = (d.label || 'Tahap') + ' selesai \u2713';
                 }
