@@ -136,10 +136,10 @@
 
         /* ===== Kartu langkah "thinking" Tim AI — step cards ===== */
         .ai-think-card {
-            border: 1px solid #2e2e2e;
-            border-radius: 0.75rem;
-            padding: 0.625rem 0.875rem;
-            background: #161616;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
             display: flex;
             flex-direction: column;
             gap: 0.45rem;
@@ -1461,7 +1461,7 @@
                     if (msg.isProcessing) {
                         if (msg.processType === 'team') {
                             const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            const doneSteps = (msg.stepFeed || []).slice(-7).map(s => `<div class="ai-step done"><span class="ai-step-ico">\u2713</span><span class="ai-step-text w-full">${esc(s)}</span></div>`).join('');
+                            const doneSteps = (msg.stepFeed || []).slice(-3).map(s => `<div class="ai-step done"><span class="ai-step-ico">\u2713</span><span class="ai-step-text w-full">${esc(s)}</span></div>`).join('');
                             const active = msg.stepActive
                                 ? `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">${esc(msg.stepActive)}</span></div>`
                                 : `<div class="ai-step active"><span class="ai-step-ico">\u2726</span><span class="ai-step-text w-full" id="status-text-${msg.id}">Tim AI sedang berpikir\u2026</span></div>`;

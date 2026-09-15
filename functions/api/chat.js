@@ -600,11 +600,19 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, emit) {
   // Tahap 1: Arsitek menyusun rencana situs
   emit({ type: 'stage', stage: 'arsitek', label: 'Arsitek', detail: 'menyusun rencana situs' });
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB senior di Tim AI Clinqoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    'Kamu adalah ARSITEK di Tim AI Clinqoo. Pertama, NILAI permintaan user: jika TIDAK memerlukan pembuatan/perubahan web atau aplikasi (misal menyapa, bertanya, mengobrol, minta penjelasan), balas HANYA dengan baris awal [CHAT] diikuti jawaban ramah dalam bahasa Indonesia seperti asisten AI pada umumnya — TANPA rencana, TANPA menyebut tim atau file. Jika permintaan memang butuh web, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null, emit);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
-  transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
-  emit({ type: 'stage_done', stage: 'arsitek', label: 'Arsitek', text: (r1.text || '').slice(0, 900) });
+  // Gerbang chat: prompt yang tidak butuh web (sapaan/pertanyaan) dijawab langsung
+  // seperti AI pada umumnya — tidak memicu pembangunan file apa pun.
+  const rawPlan = (r1.text || '').trim();
+  if (/^\[?chat\]?/i.test(rawPlan)) {
+    const chatAnswer = rawPlan.replace(/^\s*\[?chat\]?\s*/i, '').trim();
+    emit({ type: 'stage_done', stage: 'arsitek', label: 'Jawaban', text: chatAnswer.slice(0, 1500) });
+    return { text: chatAnswer || 'Halo! Ada yang bisa kubantu?', transcript: [], chatOnly: true };
+  }
+  transcript.push({ stage: 'arsitek', model: r1.model, text: rawPlan.slice(0, 1500) });
+  emit({ type: 'stage_done', stage: 'arsitek', label: 'Arsitek', text: rawPlan.slice(0, 900) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
   const startedAt = Date.now();
