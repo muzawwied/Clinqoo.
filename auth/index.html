@@ -284,40 +284,13 @@
             
             <!-- Tampilan Login -->
             <div id="view-login" class="w-full animate-fade-in block">
-                <form id="form-login" class="space-y-5" onsubmit="handleAuth(event, 'login')">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Email</label>
-                        <input type="email" id="login-email" required placeholder="nama@email.com" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 shadow-sm shadow-black/[0.02] dark:shadow-none hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Kata Sandi</label>
-                        <div class="relative group">
-                            <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 shadow-sm shadow-black/[0.02] dark:shadow-none hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                            <!-- Hitbox tombol mata diperbesar agar mudah diklik -->
-                            <button type="button" onclick="togglePassword('login-pass', 'icon-login-pass')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
-                                <i id="icon-login-pass" data-lucide="eye" class="w-[18px] h-[18px]"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-end pt-2.5 px-2">
-                            <a href="../akun/lupa-sandi/" class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Lupa sandi?</a>
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <button type="submit" id="btn-login" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
-                            <span class="btn-text">Masuk Sekarang</span>
-                        </button>
-                    </div>
-                </form>
-
                 <!-- Pemisah -->
                 <div class="mt-8 mb-6 relative">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-gray-200 dark:border-white/10"></div>
                     </div>
                     <div class="relative flex justify-center text-[11px] uppercase tracking-wider font-bold">
-                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Atau masuk dengan</span>
+                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Masuk dengan</span>
                     </div>
                 </div>
 
@@ -342,7 +315,7 @@
 
                 <!-- Navigasi Bawah -->
                 <div class="text-center pb-2">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? <a href="../akun/daftar/" class="font-bold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Daftar sekarang</a></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Belum punya akun? Masuk dengan Google atau GitHub di atas — akun otomatis dibuat.</p>
                 </div>
             </div>
 

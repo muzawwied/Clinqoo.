@@ -262,67 +262,20 @@
         <!-- Header Section -->
         <div class="px-2 sm:px-8 pt-10 pb-6 text-center">
             <h1 id="page-title" class="font-extrabold text-3xl text-gray-900 dark:text-white tracking-tight font-['Space_Grotesk']">Bergabung ke Clinqoo</h1>
-            <p id="page-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-2.5">Buat akun Clinqoo baru</p>
+            <p id="page-desc" class="text-sm text-gray-500 dark:text-gray-400 mt-2.5">Buat akun dengan Google atau GitHub</p>
         </div>
 
         <div class="px-2 sm:px-8 pb-10 relative">
             
             <!-- Tampilan Login -->
             <div id="view-register" class="w-full animate-fade-in block">
-                <form id="form-register" class="space-y-5" onsubmit="handleAuth(event, 'register')">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Nama Lengkap</label>
-                        <input type="text" id="reg-name" required placeholder="John Doe" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Email</label>
-                        <input type="email" id="reg-email" required placeholder="nama@email.com" class="w-full px-5 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Kata Sandi</label>
-                        <div class="relative group">
-                            <input type="password" id="reg-pass" required placeholder="Min. 8 karakter" minlength="8" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                            <button type="button" onclick="togglePassword('reg-pass', 'icon-reg-pass')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
-                                <i id="icon-reg-pass" data-lucide="eye" class="w-[18px] h-[18px]"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 pl-2">Konfirmasi Sandi</label>
-                        <div class="relative group">
-                            <input type="password" id="reg-pass-confirm" required placeholder="Ulangi kata sandi" minlength="8" class="w-full pl-5 pr-12 py-3.5 bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white rounded-xl text-sm placeholder-gray-400 dark:placeholder-gray-600 hover:border-gray-300 dark:hover:border-white/[0.18] focus:outline-none focus:bg-white dark:focus:bg-[#0a0a0a] focus:border-gray-400 dark:focus:border-white/30 focus:ring-2 focus:ring-gray-900/5 dark:focus:ring-white/10 transition-all duration-200">
-                            <button type="button" onclick="togglePassword('reg-pass-confirm', 'icon-reg-pass-confirm')" class="absolute inset-y-0 right-1 flex items-center justify-center w-10 h-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus:outline-none">
-                                <i id="icon-reg-pass-confirm" data-lucide="eye" class="w-[18px] h-[18px]"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start px-2 pt-1 pb-1">
-                        <div class="flex items-center h-5">
-                            <input id="terms" type="checkbox" required class="w-4 h-4 border border-gray-300 rounded bg-gray-50 dark:bg-white/[0.05] dark:border-white/10 accent-gray-900 dark:accent-white cursor-pointer transition-all">
-                        </div>
-                        <label for="terms" class="ml-3 text-[13px] font-medium text-gray-600 dark:text-gray-400 cursor-pointer leading-tight pt-[2px]">
-                            Saya menyetujui <a href="https://muzawwied.github.io/Clinqoo-Legal/syarat-ketentuan.html" target="_blank" rel="noopener" class="text-gray-900 dark:text-white hover:underline">Syarat & Ketentuan</a> serta <a href="https://muzawwied.github.io/Clinqoo-Legal/kebijakan-privasi.html" target="_blank" rel="noopener" class="text-gray-900 dark:text-white hover:underline">Kebijakan Privasi</a>.
-                        </label>
-                    </div>
-
-                    <div class="pt-2">
-                        <button type="submit" id="btn-register" class="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-sm hover:bg-gray-800 dark:hover:bg-gray-100 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
-                            <span class="btn-text">Buat Akun</span>
-                        </button>
-                    </div>
-                </form>
-
                 <!-- Pemisah -->
                 <div class="mt-8 mb-6 relative">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-gray-200 dark:border-white/10"></div>
                     </div>
                     <div class="relative flex justify-center text-[11px] uppercase tracking-wider font-bold">
-                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Atau daftar dengan</span>
+                        <span class="px-4 bg-white dark:bg-[#050505] text-gray-400 dark:text-gray-500">Daftar dengan</span>
                     </div>
                 </div>
 
