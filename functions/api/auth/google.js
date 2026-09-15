@@ -41,7 +41,7 @@ export async function onRequestPost({ request, env }) {
     const info = await infoRes.json().catch(() => ({}));
     if (!info.email) return json({ error: 'Tidak bisa mendapatkan email dari Google' }, 401);
 
-    const user = await upsertOauthUser(db, 'google', info.sub, info.email.toLowerCase(), info.name || info.given_name || '', info.picture || '');
+    const user = await upsertOauthUser(db, 'google', info.sub, info.email.toLowerCase(), info.name || info.given_name || '', info.picture || '', null, null, env);
     const token = await createSession(db, user.id);
     return json({ success: true, token, user: publicUser(user) });
   } catch (e) {

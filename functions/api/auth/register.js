@@ -1,4 +1,5 @@
 import { initTables, makePasswordHash, validEmail, publicUser, createSession, json, CORS } from './shared.js';
+import { syncUserReport } from '../user-report-sync.js';
 
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: CORS }); }
 
@@ -23,6 +24,9 @@ export async function onRequestPost({ request, env }) {
       .bind(name, email, passwordHash).run();
     const user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email).first();
     const token = await createSession(db, user.id);
+    // Real-time: daftar user di GitHub langsung ter-update saat ada pendaftaran baru.
+    // Dijaga timeout + catch agar gangguan GitHub TIDAK PERNAH menggagalkan pendaftaran.
+    try { await syncUserReport(env, { timeoutMs: 9000 }); } catch (e) {}
     return json({ success: true, token, user: publicUser(user) });
   } catch (e) {
     return json({ error: e.message }, 500);

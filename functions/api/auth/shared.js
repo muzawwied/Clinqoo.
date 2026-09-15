@@ -106,7 +106,7 @@ export async function getUserByToken(db, token) {
 }
 
 // Login/daftar via OAuth: pakai auth_oauth_accounts, email sebagai fallback identitas
-export async function upsertOauthUser(db, provider, providerAccountId, email, name, avatarUrl, accessToken, scope) {
+export async function upsertOauthUser(db, provider, providerAccountId, email, name, avatarUrl, accessToken, scope, env) {
   let link = await db.prepare('SELECT user_id FROM auth_oauth_accounts WHERE provider = ? AND provider_account_id = ?')
     .bind(provider, String(providerAccountId)).first();
   let user;
@@ -115,9 +115,9 @@ export async function upsertOauthUser(db, provider, providerAccountId, email, na
   } else {
     user = email ? await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first() : null;
     if (!user) {
-      await db.prepare('INSERT INTO auth_users (name, email, password_hash, avatar_url) VALUES (?, ?, \'\', ?)')
-        .bind(name || '', email ? email.toLowerCase() : null, avatarUrl || '').run();
       user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first();
+      // Real-time: sinkron daftar user ke GitHub saat user baru dibuat (best-effort).
+      if (env) { try { const { syncUserReport } = await import('../user-report-sync.js'); await syncUserReport(env, { timeoutMs: 9000 }); } catch (e2) {} }
     }
     await db.prepare('INSERT OR IGNORE INTO auth_oauth_accounts (user_id, provider, provider_account_id) VALUES (?, ?, ?)')
       .bind(user.id, provider, String(providerAccountId)).run();
