@@ -2071,13 +2071,20 @@ function showCollabPlansModal(sub) {
             try {
                 aiMsgObj.stepFeed = aiMsgObj.stepFeed || [];
                 if (d.type === 'stage') {
-                    aiMsgObj.stepActive = (d.label || 'Tim AI') + '\u2026';
+                    // Tahap Arsitek dulu MENILAI dulu apakah ini pertanyaan biasa atau butuh
+                    // pembangunan web — sebelum tahu hasilnya, jangan pamer istilah internal
+                    // "Arsitek" untuk pertanyaan yang mungkin cuma obrolan biasa.
+                    aiMsgObj.stepActive = (d.stage === 'arsitek') ? 'AI sedang berpikir\u2026' : (d.label || 'Tim AI') + '\u2026';
                     aiMsgObj._sentDoneLen = 0;
                     renderMessages();
                 } else if (d.type === 'think') {
                     // teks pikiran ASLI model: tiap kalimat selesai jadi langkah \u2713,
                     // kalimat yang sedang ditulis jadi langkah aktif yang shimmer.
-                    const text = String(d.text || '');
+                    let text = String(d.text || '');
+                    // Tahap Arsitek bisa mulai jawaban dengan tag internal [CHAT] saat
+                    // pertanyaan ternyata biasa (bukan build) — jangan tampilkan tag itu,
+                    // biar progres yang muncul murni jawaban asli, bukan jargon internal.
+                    if (d.stage === 'arsitek') text = text.replace(/^\s*\[?chat\]?\s*/i, '');
                     let prev = aiMsgObj._sentDoneLen || 0;
                     if (text.length < prev) { prev = 0; aiMsgObj._sentDoneLen = 0; }
                     const fresh = text.slice(prev);
