@@ -136,10 +136,10 @@
 
         /* ===== Kartu langkah "thinking" Tim AI — step cards ===== */
         .ai-think-card {
-            border: 1px solid #262626;
+            border: 1px solid #2e2e2e;
             border-radius: 0.75rem;
             padding: 0.625rem 0.875rem;
-            background: #141414;
+            background: #161616;
             display: flex;
             flex-direction: column;
             gap: 0.45rem;
@@ -152,7 +152,7 @@
             font-size: 0.625rem; margin-top: 0.1rem;
         }
         .ai-step.done .ai-step-ico { background: #1f2937; color: #34d399; }
-        .ai-step.done .ai-step-text { color: #737373; }
+        .ai-step.done .ai-step-text { color: #9ca3af; }
         .ai-step.active .ai-step-ico {
             background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
             background-size: 200% auto;
@@ -2100,27 +2100,27 @@ function showCollabPlansModal(sub) {
                     let prev = aiMsgObj._sentDoneLen || 0;
                     if (text.length < prev) { prev = 0; aiMsgObj._sentDoneLen = 0; }
                     const fresh = text.slice(prev);
-                    const m = fresh.match(/^[\s\S]*[.!?\n;:\u2026]/);
+                    const m = fresh.match(/^[\s\S]*[.!?\n]/);
                     if (m) {
                         const donePart = m[0];
                         aiMsgObj._sentDoneLen = prev + donePart.length;
                         donePart.split(/[\n]+/).forEach(function (seg) {
-                            seg.trim().split(/(?<=[.!?\u2026;])\s+/).forEach(function (s) {
+                            seg.trim().split(/(?<=[.!?])\s+/).forEach(function (s) {
                                 s = s.trim();
-                                if (s) aiMsgObj.stepFeed.push(s.slice(0, 110));
+                                if (s) aiMsgObj.stepFeed.push(s.slice(0, 200));
                             });
                         });
                     }
                     aiMsgObj.stepActive = text.slice(aiMsgObj._sentDoneLen || 0).replace(/\s+/g, ' ').trim().slice(0, 120);
                     renderMessages();
                 } else if (d.type === 'stage_done') {
-                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 110);
+                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 150);
                     if (short) aiMsgObj.stepFeed.push((d.label ? d.label + ' \u2014 ' : '') + short);
                     aiMsgObj.stepActive = '';
                     aiMsgObj._sentDoneLen = 0;
                     renderMessages();
                 } else if (d.type === 'progress') {
-                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 110);
+                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 150);
                     if (short) aiMsgObj.stepFeed.push('\u2705 menulis: ' + short);
                     renderMessages();
                 }
