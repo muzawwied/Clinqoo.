@@ -1445,7 +1445,7 @@
                     if (msg.isProcessing) {
                         if (msg.processType === 'team') {
                             const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            const label = msg.stepActive ? esc(msg.stepActive) : 'Tim AI sedang berpikir\u2026';
+                            const label = msg.stepActive ? esc(msg.stepActive) : 'Thinking\u2026';
                             processIndicator = `<div class="ai-think-line"><span class="ai-think-dots"><span></span><span></span><span></span></span><span class="ai-think-text" id="status-text-${msg.id}">${label}</span></div>`;
                         } else if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
@@ -2071,10 +2071,11 @@ function showCollabPlansModal(sub) {
             try {
                 aiMsgObj.stepFeed = aiMsgObj.stepFeed || [];
                 if (d.type === 'stage') {
-                    // Tahap Arsitek dulu MENILAI dulu apakah ini pertanyaan biasa atau butuh
-                    // pembangunan web — sebelum tahu hasilnya, jangan pamer istilah internal
-                    // "Arsitek" untuk pertanyaan yang mungkin cuma obrolan biasa.
-                    aiMsgObj.stepActive = (d.stage === 'arsitek') ? 'AI sedang berpikir\u2026' : (d.label || 'Tim AI') + '\u2026';
+                    // Menunggu keluaran ASLI model: status netral "Thinking..." untuk semua
+                    // tahap — tanpa nama peran, tanpa label rekaan. Begitu teks model
+                    // mengalir (event 'think'/'progress'), baris ini otomatis diganti
+                    // kalimat asli yang sedang ditulis model saat itu.
+                    aiMsgObj.stepActive = 'Thinking\u2026'; // netral; otomatis diganti teks asli model begitu 'think'/'progress' mengalir
                     aiMsgObj._sentDoneLen = 0;
                     renderMessages();
                 } else if (d.type === 'think') {
