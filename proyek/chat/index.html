@@ -1416,7 +1416,11 @@
                     
                     let processIndicator = '';
                     if (msg.isProcessing) {
-                        if (msg.processType === 'search') {
+                        if (msg.processType === 'team') {
+                            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            const liveLines = (msg.liveProgress || []).slice(-6).map(l => '<div class="text-[12px] text-gray-400 mt-0.5 truncate w-full max-w-full">' + esc(l) + '</div>').join('');
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Tim AI menyusun tim\u2026</span></div>` + (liveLines ? `<div class="mt-1 w-full max-w-full">${liveLines}</div>` : '');
+                        } else if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
                         } else if (msg.processType === 'read') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Reading URL...</span></div>`;
@@ -2032,6 +2036,62 @@ function showCollabPlansModal(sub) {
         const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clinqoo (kuota 25/hari user gratis, 500/hari admin)
 
+        // ===== STREAMING PROGRES TIM AI (SSE) =====
+        // Progres BUKAN teks hardcode: backend mengirim output ASLI tiap tahap
+        // (Arsitek/Programmer/Reviewer/Perbaikan) secara real-time; halaman ini
+        // hanya menampilkannya begitu sampai.
+        function handleTeamEvent(d, aiMsgObj) {
+            try {
+                aiMsgObj.liveProgress = aiMsgObj.liveProgress || [];
+                if (d.type === 'stage') {
+                    const line = '\u25B6 ' + (d.label || '') + ' ' + (d.detail || 'bekerja\u2026');
+                    aiMsgObj.liveProgress.push(line);
+                    renderMessages();
+                } else if (d.type === 'stage_done' || d.type === 'progress') {
+                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+                    if (short) {
+                        aiMsgObj.liveProgress.push((d.type === 'progress' ? '\u2713 ' : '\u2713 ') + (d.label ? d.label + ': ' : '') + short);
+                        renderMessages();
+                    }
+                }
+                const statusEl = document.getElementById('status-text-' + aiMsgObj.id);
+                if (statusEl) {
+                    if (d.type === 'stage') statusEl.textContent = (d.label || 'Tim AI') + ' ' + (d.detail || 'bekerja\u2026');
+                    else if (d.type === 'progress') statusEl.textContent = 'Tim AI sedang menulis: ' + String(d.text || '').slice(0, 70);
+                    else if (d.type === 'stage_done') statusEl.textContent = (d.label || 'Tahap') + ' selesai \u2713';
+                }
+            } catch (e) {}
+        }
+
+        async function streamTeamResponse(response, aiMsgObj) {
+            const ctype = (response.headers && response.headers.get('content-type')) || '';
+            if (ctype.indexOf('application/json') !== -1) return await response.json(); // backend lama: fallback JSON utuh
+            const reader = response.body.getReader();
+            const dec = new TextDecoder();
+            let buf = '';
+            let finalData = null;
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buf += dec.decode(value, { stream: true });
+                let idx;
+                while ((idx = buf.indexOf('\n\n')) !== -1) {
+                    const block = buf.slice(0, idx);
+                    buf = buf.slice(idx + 2);
+                    for (const line of block.split('\n')) {
+                        if (line.indexOf('data:') !== 0) continue;
+                        let d = null;
+                        try { d = JSON.parse(line.slice(5).trim()); } catch (e) {}
+                        if (!d) continue;
+                        if (d.type === 'done') finalData = d;
+                        else if (d.type === 'error') finalData = { error: d.error || 'Tim AI gagal memproses tugas.', quota_exhausted: !!d.quota_exhausted };
+                        else handleTeamEvent(d, aiMsgObj);
+                    }
+                }
+            }
+            return finalData || { error: 'Sambungan terputus saat Tim AI bekerja. Coba kirim ulang pesanmu.' };
+        }
+
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with ../workspace/) =====
         // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
         function wsFilesKey() {
@@ -2569,6 +2629,7 @@ function showCollabPlansModal(sub) {
             else if (requiresImage) processType = 'image';
             else if (requiresSearch) processType = 'search';
             else if (hasAttachment) processType = 'file';
+            if (teamModeOn) processType = 'team';
 
             const aiMsgObj = { 
                 id: generateId(), 
@@ -2806,6 +2867,7 @@ function showCollabPlansModal(sub) {
                                     project_id: currentProjectId || undefined,
                                     workspace_tools: true,
                                     team: teamModeOn && hop === 0,
+                                    stream: teamModeOn && hop === 0,
                                     save_user_message: hop === 0
                                 }),
                                 signal: abortController.signal
@@ -2826,8 +2888,17 @@ function showCollabPlansModal(sub) {
                             break;
                         }
 
-                        resultJson = await response.json();
+                        if (teamModeOn && hop === 0) {
+                            resultJson = await streamTeamResponse(response, aiMsgObj);
+                        } else {
+                            resultJson = await response.json();
+                        }
                         if (resultJson.session_id) currentSessionId = resultJson.session_id;
+                        if (resultJson.error && (!resultJson.tool_calls || resultJson.tool_calls.length === 0)) {
+                            if (resultJson.quota_exhausted) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = resultJson.error; }
+                            else { hopError = new Error(resultJson.error || 'Tim AI gagal memproses tugas.'); }
+                            break;
+                        }
 
                         // Tidak ada tool call → jawaban final, keluar dari loop
                         if (!resultJson.tool_calls || resultJson.tool_calls.length === 0) break;

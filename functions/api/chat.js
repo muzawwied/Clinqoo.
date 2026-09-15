@@ -477,7 +477,8 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
 // balasan sintetis "sukses" agar dia lanjut menulis file berikutnya — sama seperti
 // loop function-calling di sisi klien (MAX_TOOL_HOPS), tapi berjalan di server untuk
 // tahap Tim AI. Berhenti saat model tidak lagi memanggil tool, atau maxHops tercapai.
-async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline) {
+async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline, emit) {
+  emit = emit || function () {};
   const messages = [
     { role: 'system', content: systemPrompt + '\n\nPENTING: panggil tool write_file untuk BEBERAPA file SEKALIGUS dalam satu giliran bila memungkinkan (paralel). Kalau konten terlalu panjang untuk satu giliran, lanjutkan file berikutnya di giliran sesudahnya sampai SEMUA file dari rencana selesai. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".' },
     { role: 'user', content: userText }
@@ -514,12 +515,14 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
 
     const rawList = r.raw_tool_calls || r.tool_calls.map((tc, i) => ({ id: 'call_h' + hop + '_' + i, type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.args || {}) } }));
     messages.push({ role: 'assistant', content: r.text || null, tool_calls: rawList });
+    const newPaths = [];
     for (let i = 0; i < r.tool_calls.length; i++) {
       const tc = r.tool_calls[i];
-      if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+      if (tc.args && tc.args.path) { collected.set(tc.name + ':' + tc.args.path, tc); newPaths.push(tc.args.path); }
       const callId = (rawList[i] && rawList[i].id) || tc.id || ('call_h' + hop + '_' + i);
       messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify({ success: true }) });
     }
+    if (newPaths.length) emit({ type: 'progress', stage: stage, label: TEAM_LABELS[stage] || stage, text: newPaths.join(', ') });
   }
   // limit provider "penuh" hanya bila tidak ada file yang berhasil dibuat SAMA SEKALI
   // dan kedua provider (yang dicoba) memang kena 429
@@ -527,21 +530,25 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted };
 }
 
-async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
+async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, emit) {
   const transcript = [];
+  emit = emit || function () {};
 
   // Tahap 1: Arsitek menyusun rencana situs
+  emit({ type: 'stage', stage: 'arsitek', label: 'Arsitek', detail: 'menyusun rencana situs' });
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
     'Kamu adalah ARSITEK WEB senior di Tim AI Clinqoo. Dari permintaan user, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
+  emit({ type: 'stage_done', stage: 'arsitek', label: 'Arsitek', text: (r1.text || '').slice(0, 900) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
   const startedAt = Date.now();
+  emit({ type: 'stage', stage: 'programmer', label: 'Programmer', detail: 'membangun file web' });
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
     'Kamu adalah PROGRAMMER WEB di Tim AI Clinqoo. Kerjakan rencana arsitek berikut SECARA PENUH: buat SEMUA file web (HTML/CSS/JS) yang disebut di rencana memakai tool write_file — konten lengkap per file, siap jalan, rapi, dan responsif.',
-    'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS);
+    'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS, emit);
   if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer' };
   const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
   if (!draftCalls.length) {
@@ -549,6 +556,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
     return { error: r2.quotaExhausted ? TEAM_BUSY_MSG : 'Programmer tidak menghasilkan file', quotaExhausted: !!r2.quotaExhausted, transcript, text: r2.text };
   }
   transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => 'write_file: ' + tc.args.path).join(', ') });
+  emit({ type: 'stage_done', stage: 'programmer', label: 'Programmer', text: draftCalls.map(tc => 'write_file: ' + tc.args.path).join(', ') });
 
   // Tahap 3: Reviewer mengaudit hasil
   const filesDigest = draftCalls.filter(tc => tc.name === 'write_file').map(tc => {
@@ -561,21 +569,24 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
     transcript.push({ stage: 'reviewer', model: null, text: '(dilewati — batas waktu tercapai)' });
     return { transcript, tool_calls: draftCalls, text: '', fixModel: null };
   }
+  emit({ type: 'stage', stage: 'reviewer', label: 'Reviewer', detail: 'mengaudit hasil kerja' });
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
     'Kamu adalah REVIEWER KODE ketat di Tim AI Clinqoo. Audit file web berikut terhadap rencana arsitek. Laporkan HANYA masalah yang benar-benar fatal atau penting (link/asset rusak, fitur hilang, HTML rusak, JS error, tidak responsif) — maks 150 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
     'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
   if (r3.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r3.quotaExhausted, transcript, tool_calls: draftCalls, stageFailed: 'reviewer' };
   const reviewText = (r3.text || '').trim();
   transcript.push({ stage: 'reviewer', model: r3.model, text: reviewText.slice(0, 1000) });
+  emit({ type: 'stage_done', stage: 'reviewer', label: 'Reviewer', text: reviewText.slice(0, 700) });
 
   // Tahap 4: Perbaikan hanya jika reviewer menemukan masalah
   const needsFix = reviewText.length > 0 && !/^semua ok/i.test(reviewText);
   let finalCalls = draftCalls;
   let fixModel = null;
   if (needsFix) {
+    emit({ type: 'stage', stage: 'perbaikan', label: 'Perbaikan', detail: 'menuliskan ulang file bermasalah' });
     const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
       'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo. Temuan reviewer di bawah harus dibereskan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki). Jangan mengulang file yang sudah benar dan tidak disebut reviewer.',
-      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS);
+      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS, emit);
     const fixCalls = (r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
     if (!r4.error && fixCalls.length) {
       // gabung: draft + revisi (revisi menimpa path sama)
@@ -585,6 +596,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
       finalCalls = [...byPath.values()];
       fixModel = r4.model;
       transcript.push({ stage: 'perbaikan', model: r4.model, text: fixCalls.map(tc => 'revisi: ' + tc.args.path).join(', ') });
+      emit({ type: 'stage_done', stage: 'perbaikan', label: 'Perbaikan', text: fixCalls.map(tc => 'revisi: ' + tc.args.path).join(', ') });
     }
   }
 
@@ -711,6 +723,39 @@ export async function onRequestPost({ request, env }) {
       const userPrompt = (typeof lastUser?.content === 'string' ? lastUser.content : (Array.isArray(lastUser?.content) ? (lastUser.content.find(b => b && b.type === 'text') || {}).text : '')) || '';
       if (!userPrompt) {
         return new Response(JSON.stringify({ error: 'Pesan kosong' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+      }
+      // === STREAMING PROGRES REAL-TIME (SSE) ===
+      // Klien meminta stream -> tiap tahap Tim AI mengirim output ASLINYA begitu selesai,
+      // bukan teks statis: progres datang dari model sungguhan secara real-time.
+      if (body.stream === true) {
+        const { readable, writable } = new TransformStream();
+        const writer = writable.getWriter();
+        const enc = new TextEncoder();
+        const emit = (ev) => writer.write(enc.encode('data: ' + JSON.stringify(ev) + '\n\n')).catch(() => {});
+        (async () => {
+          try {
+            const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null, emit);
+            if (t.error && !t.tool_calls) {
+              if (t.quotaExhausted) await emit({ type: 'error', quota_exhausted: true, error: TEAM_BUSY_MSG });
+              else await emit({ type: 'error', error: TEAM_ERROR_MSG });
+              return;
+            }
+            const out = {
+              text: (t.tool_calls && t.tool_calls.length
+                ? '\u{1F9E9} Tim AI selesai berdiskusi & membangun:\n' + teamTranscriptText(t.transcript || []) + '\n\n\u2705 Semua file sudah selesai dibuat \u2014 cek hasilnya di halaman Workspace, atau balas di sini kalau masih ada yang mau diubah.'
+                : (t.text || 'Tim AI selesai.') + '\n' + teamTranscriptText(t.transcript || [])),
+              model: 'Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)',
+              session_id: body.session_id || ('ls_' + Date.now())
+            };
+            if (t.tool_calls && t.tool_calls.length) out.tool_calls = t.tool_calls;
+            await emit({ type: 'done', ...out });
+          } catch (e) {
+            await emit({ type: 'error', error: TEAM_ERROR_MSG });
+          } finally {
+            writer.close().catch(() => {});
+          }
+        })();
+        return new Response(readable, { headers: { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache', ...CORS } });
       }
       const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null);
       if (t.error && !t.tool_calls) {
