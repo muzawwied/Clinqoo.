@@ -542,7 +542,7 @@
     <script>
         // Library render QR dari string QRIS (ringan, tanpa dependency)
         document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');
-        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+        const API_BASE = ['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev' : '';
         var TOPUP_API = API_BASE + '/api/topup';
         let selectedNominalAmount = 0;
 

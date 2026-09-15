@@ -723,7 +723,7 @@
     });
 
     // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
-    const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+    const WS_CLOUD_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
 
     // Token login wajib untuk sinkronisasi D1 (guardProject menolak tanpa auth)
     function wsAuthHeaders() {
@@ -1758,7 +1758,7 @@
     })();
 
     async function checkPlanThenOpenGithub() {
-      const apiBase = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+      const apiBase = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
       const cached = readSubCache();
       const fresh = cached && cached.plan && (Date.now() - (cached.ts || 0)) < SUB_CACHE_TTL;
       // jalur cepat: cache masih segar -> modal carousel langsung tampil tanpa nunggu server
@@ -2260,7 +2260,7 @@
 
 <script>
 (function () {
-  function clinqooApiBase() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : ''; }
+  function clinqooApiBase() { return (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : ''; }
   function clinqooAuthToken() {
     try { return localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) { return ''; }
   }

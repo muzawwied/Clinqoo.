@@ -352,7 +352,7 @@
     }
   
     // API base: same-origin di Cloudflare Pages; be2 hanya utk GitHub Pages (konsisten dgn js/api.js)
-    const DEPLOY_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    const DEPLOY_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
     let lastPagesUrl = ''; // URL <project>.pages.dev asli dari hasil deploy (untuk nilai record DNS)
 
     // Cache instan per proyek: data domain tampil LANGSUNG dari localStorage, lalu diperbarui dari server

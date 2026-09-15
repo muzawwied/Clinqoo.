@@ -108,7 +108,7 @@
     </div>
 
     <script>
-        var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+        var API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
         var selected = null; // { id, title }
 
         function goBack() {

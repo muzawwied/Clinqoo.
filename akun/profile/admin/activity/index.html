@@ -112,7 +112,7 @@
   </div>
 
   <script>
-    const API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+    const API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
     let allActivities = [];
 
     function esc(t) { const d = document.createElement('div'); d.textContent = String(t ?? ''); return d.innerHTML; }

@@ -276,7 +276,7 @@
     const staticShareLink = window.location.origin + window.location.pathname;
 
     // API kolaborasi (D1 Clinqoo) — anggota & undangan terikat proyek, per akun
-    var API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    var API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
     const COLLAB_API = API_BASE + '/collab';
     const PROJECTS_API = API_BASE + '/projects';
 
@@ -705,7 +705,7 @@
     }
 
     // Kartu "Pembaruan Hari Ini": jumlah aktivitas akun hari ini (zona WIB)
-    var ACTIVITY_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+    var ACTIVITY_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
     function actCountKey() {
         var u = null;
         try { u = JSON.parse(localStorage.getItem('clinqoo_auth_user') || 'null'); } catch (e) {}

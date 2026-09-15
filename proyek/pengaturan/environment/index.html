@@ -606,7 +606,7 @@
 </body>
 <script>
 (function () {
-  function clinqooApiBase() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : ''; }
+  function clinqooApiBase() { return (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : ''; }
   function clinqooAuthToken() {
     try { return localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) { return ''; }
   }

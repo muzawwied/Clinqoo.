@@ -178,7 +178,7 @@
 </div>
 <script>
 (function () {
-  function apiRoot() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api'; }
+  function apiRoot() { return (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api'; }
   function homeUrl() { return (location.hostname.indexOf('github.io') !== -1) ? '/Clinqoo./' : '/'; }
   var confirmCb = null, statusCb = null, busy = false;
   function askConfirm(title, msg, okLabel, cb) {

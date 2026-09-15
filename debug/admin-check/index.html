@@ -19,7 +19,7 @@
   <script>
     (async function () {
       const el = document.getElementById('result');
-      const base = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+      const base = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
       const token = (window.ClinqooAuth && ClinqooAuth.getToken) ? ClinqooAuth.getToken() : null;
 
       let html = '';

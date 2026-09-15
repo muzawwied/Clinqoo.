@@ -1737,7 +1737,7 @@
                                     // Dorong nama & deskripsi buatan AI ke server (D1) agar sinkron
                                     // antar device — dipakai juga deploy engine untuk subdomain otomatis.
                                     try {
-                                        var _pushBase = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+                                        var _pushBase = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
                                         fetch(_pushBase + '/api/projects', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
@@ -2029,7 +2029,7 @@ function showCollabPlansModal(sub) {
             document.addEventListener('click', function () { toggleTeamMenu(false); });
         }
 
-        const TOOL_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+        const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clinqoo (kuota 25/hari user gratis, 500/hari admin)
 
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with ../workspace/) =====
@@ -2065,7 +2065,7 @@ function showCollabPlansModal(sub) {
 
 
         // ===== Sinkronisasi workspace ke Cloudflare D1 (data per-proyek) =====
-        const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+        const WS_CLOUD_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
 
         function wsProjectId() {
             try { return (typeof currentProjectId !== 'undefined' && currentProjectId) ? String(currentProjectId) : ''; } catch (e) { return ''; }
@@ -3263,7 +3263,7 @@ if (loadChatLog()) {
 
 <script>
 (function () {
-  function clinqooApiBase() { return (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : ''; }
+  function clinqooApiBase() { return (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : ''; }
   function clinqooAuthToken() {
     try { return localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) { return ''; }
   }

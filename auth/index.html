@@ -522,9 +522,9 @@
         // OAuth tetap diarahkan ke alamat lama yang terdaftar (akun/auth.html), yang
         // kini cuma pengalih ke sini — jadi tidak perlu daftar ulang di Google/GitHub.
         function oauthRedirectUri() {
-            return (location.hostname.indexOf('github.io') !== -1)
-                ? 'https://muzawwied.github.io/Clinqoo./akun/auth.html'
-                : window.location.origin + window.location.pathname;
+            return (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? window.location.origin + window.location.pathname
+                : 'https://muzawwied.github.io/Clinqoo./akun/auth.html';
         }
         function startOAuth(provider) {
             const redirectUri = oauthRedirectUri();

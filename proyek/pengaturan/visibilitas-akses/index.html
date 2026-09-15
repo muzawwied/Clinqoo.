@@ -172,7 +172,7 @@
 
     function visApiBase() {
       if (typeof API_BASE !== 'undefined' && API_BASE) return API_BASE;
-      return location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api';
+      return ['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api';
     }
     function visAuthHeaders(extra) {
       const hdr = Object.assign({}, extra || {});

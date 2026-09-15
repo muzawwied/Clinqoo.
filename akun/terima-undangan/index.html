@@ -80,7 +80,7 @@
     </footer>
 
     <script>
-    var COLLAB_API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api/collab' : '/api/collab';
+    var COLLAB_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api/collab' : '/api/collab';
 
     // Header auth wajib untuk semua aksi kolaborasi (Bearer token login)
     function authHeaders() {

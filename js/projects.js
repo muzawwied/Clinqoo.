@@ -25,7 +25,7 @@ const _BASE = _isGHPages ? '/Clinqoo.' : '';
 
 // === Sinkronisasi D1 per akun (Cloudflare) ===
 // Token Bearer diinjeksi otomatis oleh js/auth-client.js pada semua call /api/.
-const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
+const PROJECTS_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
 let _pushTimer = null;
 
 // Modal batas proyek per paket langganan (server menolak sinkronisasi karena limit)

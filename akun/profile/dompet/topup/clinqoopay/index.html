@@ -293,7 +293,7 @@
     </div>
 
     <script>
-        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+        const API_BASE = ['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev' : '';
         const CP_API = API_BASE + '/api/clinqoopay';
         var currentRequestId = null;
         var pollTimer = null;

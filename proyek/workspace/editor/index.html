@@ -264,7 +264,7 @@
   </div>
 
     <script>
-    const WS_CLOUD_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+    const WS_CLOUD_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
     let currentFolderPath = 'root';
     let editingFileName = null;
     let projectFilesData = { 'root': [] };

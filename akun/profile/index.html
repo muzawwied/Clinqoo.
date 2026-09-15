@@ -640,7 +640,7 @@
   }
   function check(){
     try {
-      var base = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+      var base = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
       var token = window.ClinqooAuth && ClinqooAuth.getToken ? ClinqooAuth.getToken() : null;
       fetch(base + '/api/admin/ping', { headers: token ? { 'Authorization': 'Bearer ' + token } : {} })
         .then(function(r){ return r.ok ? r.json() : null; })

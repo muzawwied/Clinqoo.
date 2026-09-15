@@ -7,7 +7,7 @@ var ClinqooTemplates = (function () {
   var inAkun = location.pathname.indexOf('/akun/') !== -1;
   var IMG_BASE = inAkun ? '../assets/templates/' : 'assets/templates/';
   var WS_URL = inAkun ? '../proyek/workspace.html' : 'proyek/workspace.html';
-  var API_BASE = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+  var API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
 
   var list = {
       "portfolio": {

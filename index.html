@@ -837,7 +837,7 @@
 
         // Muat profil dari database per akun (D1) — sinkron lintas perangkat
         try {
-            const PROFILE_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/account-profile';
+            const PROFILE_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/account-profile';
             fetch(PROFILE_API).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
                 if (!d) return;
                 const nm = d.name || '', em = d.email || '', av = d.avatar || '';
@@ -1200,7 +1200,7 @@
         }
         // ===== MODE TIM AI: kapsul dropdown di samping tombol kirim (sama seperti di halaman chat) =====
         // Pilihan tersimpan di localStorage 'clinqoo_team_mode' dan otomatis dipakai halaman chat saat pindah.
-        const TM_API_BASE = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+        const TM_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         let teamModeOn = false;
         try { teamModeOn = localStorage.getItem('clinqoo_team_mode') === '1'; } catch (e) {}
         const teamCapsule = document.getElementById('team-mode-capsule');
@@ -1680,7 +1680,7 @@ function tmShowCollabPlansModal(sub) {
         }
         async function doDeleteProject(id) {
             const tok = localStorage.getItem('clinqoo_auth_token') || '';
-            const API_ROOT = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+            const API_ROOT = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
             const authHdr = { 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) };
             // tarik publish-an: situs + link publik (Cloudflare Pages) dihapus (non-fatal)
             try {
@@ -1764,7 +1764,7 @@ function tmShowCollabPlansModal(sub) {
             }
         }
         // === Sinkronisasi daftar proyek per akun ke D1 (Cloudflare) ===
-        const PROJECTS_API = (location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
+        const PROJECTS_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/projects';
         let _pushTimer = null;
         function showPlanLimitModal(d) {
             if (!d || !d.upgrade_needed) return;

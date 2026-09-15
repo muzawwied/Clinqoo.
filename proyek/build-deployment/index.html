@@ -176,7 +176,7 @@
         // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
         // API deploy engine: same-origin di Cloudflare Pages; be2 hanya utk GitHub Pages
         // (konsisten dgn dashboard & js/api.js — mencegah data domain terpecah antar backend)
-        const API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+        const API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
         const pid = () => localStorage.getItem('clinqoo_current_project_id') || '';
         let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
 

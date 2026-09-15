@@ -277,7 +277,7 @@
 
         // ===================== DEPLOY ASLI (Cloudflare Pages) =====================
         // Deploy engine: same-origin di Cloudflare Pages; clinqoo-be2 hanya untuk frontend GitHub Pages (tanpa Functions).
-        const API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
+        const API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
         const pid = () => localStorage.getItem('clinqoo_current_project_id') || '';
         let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
 

@@ -106,7 +106,7 @@ try {
     authUrl: AUTH_URL,
     logout: function (ev) {
       if (ev && ev.preventDefault) { try { ev.preventDefault(); } catch (e) {} }
-      var API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+      var API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
       var done = false;
       var finish = function () {
         if (done) return;
@@ -150,7 +150,7 @@ window.ClinqooBack = function (fallbackUrl) {
 
   // Validasi token ke backend: token mati (logout perangkat / reset) -> auth ulang
   if (!isAuthPage && getToken()) {
-    var API = (location.hostname.indexOf('github.io') !== -1) ? 'https://clincoo-be2.pages.dev' : '';
+    var API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
     origFetch(API + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } })
       .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
       .then(function (d) {

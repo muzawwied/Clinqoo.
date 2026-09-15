@@ -242,7 +242,7 @@
 
     <script>
         // Backend API — hosted on Cloudflare Pages
-        const API_BASE = location.hostname.indexOf('github.io') !== -1 ? 'https://clincoo-be2.pages.dev' : '';
+        const API_BASE = ['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev' : '';
         const WALLET_API_URL = API_BASE + '/api/wallet';
         // Tanpa token, backend mengira user belum login -> saldo ClinqooPay (mirroring) tidak pernah diambil.
         function walletAuthHeaders(extra) {
