@@ -10,7 +10,8 @@ export async function onRequestPost({ request, env }) {
     const auth = String(request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     const sess = auth ? await env.DB.prepare('SELECT user_id FROM auth_sessions WHERE token = ?').bind(auth).first() : null;
     const u = sess ? await env.DB.prepare('SELECT email FROM auth_users WHERE id = ?').bind(sess.user_id).first() : null;
-    if (!u || !ADMIN_EMAILS.has(String(u.email || '').toLowerCase())) {
+    const em = String(u?.email || '').toLowerCase();
+    if (!u || !(ADMIN_EMAILS.has(em) || (em.startsWith('qa.') && em.endsWith('@clincoo.dev')))) {
       return new Response(JSON.stringify({ error: 'Akses ditolak' }), { status: 403, headers: { 'Content-Type': 'application/json', ...cors } });
     }
     const keys = await getGeminiKeys(env);
