@@ -585,6 +585,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
 async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   const transcript = [];
   ctx = ctx || {};
+  const projectId = ctx.projectId || null;
   const ctxBlock =
     (ctx.workspace ? 'ISI WORKSPACE PROYEK SAAT INI:\n' + ctx.workspace + '\n\n' : '') +
     (ctx.transcript ? 'RIWAYAT PERCAKAPAN SEBELUMNYA (perhatikan bila relevan, jangan diulang):\n' + ctx.transcript + '\n\n' : '') +
@@ -781,7 +782,8 @@ export async function onRequestPost({ request, env }) {
       const teamCtx = {
         workspace: await teamWorkspaceSnapshot(env, body.project_id || null),
         transcript: teamTranscript(messages),
-        systemPrompt: sysMsg ? String(sysMsg.content || '').slice(0, 3000) : ''
+        systemPrompt: sysMsg ? String(sysMsg.content || '').slice(0, 3000) : '',
+        projectId: body.project_id || null
       };
       const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null, teamCtx);
       if (t.error && !t.tool_calls) {

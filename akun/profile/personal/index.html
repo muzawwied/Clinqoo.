@@ -207,58 +207,6 @@
           </div>
         </div>
 
-        <!-- Bahasa (Popover) -->
-        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <h4 class="text-base font-semibold text-gray-900">Bahasa</h4>
-            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Bahasa tampilan antarmuka</p>
-          </div>
-          <div class="w-full sm:w-80 relative">
-            <button id="lang-btn" type="button" onclick="togglePopoverMenu('lang-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
-              <span id="lang-text" class="truncate">Bahasa Indonesia</span>
-              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
-            </button>
-            <div id="lang-popover" class="hidden absolute top-full mt-1 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden transform origin-top transition-all py-1">
-              <button type="button" onclick="selectOption('lang', 'Bahasa Indonesia', 'id', event)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
-                <span>Bahasa Indonesia</span>
-                <i data-lucide="check" class="w-4 h-4 text-black opacity-100 lang-check"></i>
-              </button>
-              <button type="button" onclick="selectOption('lang', 'English', 'en', event)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
-                <span>English</span>
-                <i data-lucide="check" class="w-4 h-4 text-black opacity-0 lang-check"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Zona Waktu (Popover) -->
-        <div class="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <h4 class="text-base font-semibold text-gray-900">Zona Waktu</h4>
-            <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Untuk jadwal dan notifikasi</p>
-          </div>
-          <div class="w-full sm:w-80 relative">
-            <button id="tz-btn" type="button" onclick="togglePopoverMenu('tz-popover')" class="w-full px-3.5 py-2 text-sm rounded-lg border border-gray-300 flex items-center justify-between bg-white focus:outline-none hover:bg-gray-50 transition-colors">
-              <span id="tz-text" class="truncate">WIB - Asia/Jakarta (UTC+07:00)</span>
-              <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 flex-shrink-0"></i>
-            </button>
-            <div id="tz-popover" class="hidden absolute top-full mt-1 left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-y-auto max-h-60 transform origin-top transition-all py-1">
-              <button type="button" onclick="selectOption('tz', 'WIB - Asia/Jakarta (UTC+07:00)', 'Asia/Jakarta', event)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
-                <span class="truncate pr-2">WIB - Asia/Jakarta (UTC+07:00)</span>
-                <i data-lucide="check" class="w-4 h-4 text-black opacity-100 tz-check flex-shrink-0"></i>
-              </button>
-              <button type="button" onclick="selectOption('tz', 'WITA - Asia/Makassar (UTC+08:00)', 'Asia/Makassar', event)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
-                <span class="truncate pr-2">WITA - Asia/Makassar (UTC+08:00)</span>
-                <i data-lucide="check" class="w-4 h-4 text-black opacity-0 tz-check flex-shrink-0"></i>
-              </button>
-              <button type="button" onclick="selectOption('tz', 'WIT - Asia/Jayapura (UTC+09:00)', 'Asia/Jayapura', event)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-between">
-                <span class="truncate pr-2">WIT - Asia/Jayapura (UTC+09:00)</span>
-                <i data-lucide="check" class="w-4 h-4 text-black opacity-0 tz-check flex-shrink-0"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Notifikasi Email Switch -->
         <div class="py-5 flex items-center justify-between gap-4">
           <div class="min-w-0 flex-1">
@@ -290,7 +238,6 @@
         try { lucide.createIcons(); } catch (e) {}
 
         let isEdited = false;
-        let activePopover = null;
 
         function showActionButtons() {
             if (!isEdited) {
@@ -323,27 +270,12 @@
                     if (name) payload.name = name;
                     if (email) payload.email = email;
                     if (pic && pic.length < 700000) payload.avatar = pic;
-                    const lang = document.getElementById('lang-text');
-                    const tz = document.getElementById('tz-text');
-                    if (lang && lang.textContent) payload.language = lang.textContent.trim();
-                    if (tz && tz.textContent) payload.timezone = tz.textContent.trim();
                     if (Object.keys(payload).length > 0) {
                         fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
                             .catch(function(){}).then(resolve, resolve);
                     } else { resolve(); }
                 } catch(e) { resolve(); }
             });
-        }
-
-        // Simpan preferensi bahasa/zona waktu REAL-TIME saat dipilih (tanpa tombol Simpan)
-        function savePrefRealtime(type, text) {
-            try {
-                const key = type === 'lang' ? 'language' : 'timezone';
-                const body = {};
-                body[key] = String(text || '').trim();
-                if (!body[key]) return;
-                fetch(PROFILE_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(function(){});
-            } catch(e) {}
         }
 
         // Kompres gambar (maks 512px, JPEG) supaya avatar selalu lolos simpan ke D1 (<700KB)
@@ -402,11 +334,6 @@
                         avatarContainer.classList.remove('bg-accent');
                         if (avatarInitial) avatarInitial.style.display = 'none';
                     }
-                    // Bahasa & zona waktu juga tersinkron real-time dari D1
-                    const langText = document.getElementById('lang-text');
-                    const tzText = document.getElementById('tz-text');
-                    if (d.language && langText && activePopover !== 'lang-popover' && langText.innerText.trim() !== d.language) langText.innerText = d.language;
-                    if (d.timezone && tzText && activePopover !== 'tz-popover' && tzText.innerText.trim() !== d.timezone) tzText.innerText = d.timezone;
                 }).catch(function(){});
             } catch(e) {}
         }
@@ -465,55 +392,6 @@
             });
         }
 
-        // Popover Logic
-        function togglePopoverMenu(id) {
-            const popover = document.getElementById(id);
-            if (!popover) return;
-            
-            // Close other active popover
-            if (activePopover && activePopover !== id) {
-                const otherPopover = document.getElementById(activePopover);
-                if (otherPopover) otherPopover.classList.add('hidden');
-            }
-
-            if (popover.classList.contains('hidden')) {
-                popover.classList.remove('hidden');
-                activePopover = id;
-            } else {
-                popover.classList.add('hidden');
-                activePopover = null;
-            }
-        }
-
-        function selectOption(type, text, value, event) {
-            const textElem = document.getElementById(`${type}-text`);
-            if (textElem) textElem.innerText = text;
-            savePrefRealtime(type, text);
-            
-            // Reset checkmarks for this group
-            const checkmarks = document.querySelectorAll(`.${type}-check`);
-            checkmarks.forEach(icon => {
-                icon.classList.remove('opacity-100');
-                icon.classList.add('opacity-0');
-            });
-            
-            // Highlight checkmark on selected option
-            if (event && event.currentTarget) {
-                const checkmark = event.currentTarget.querySelector(`.${type}-check`);
-                if (checkmark) {
-                    checkmark.classList.remove('opacity-0');
-                    checkmark.classList.add('opacity-100');
-                }
-            }
-
-            // Close popover
-            const popover = document.getElementById(`${type}-popover`);
-            if (popover) popover.classList.add('hidden');
-            activePopover = null;
-
-            showActionButtons();
-        }
-
         // Toggle switch handler
         function toggleSwitch(idPrefix) {
             showActionButtons();
@@ -530,20 +408,6 @@
                 knob.classList.add('translate-x-5');
             }
         }
-
-        // Close popovers on click outside
-        document.addEventListener('click', function(event) {
-            if (activePopover) {
-                const btnId = activePopover.replace('popover', 'btn');
-                const popover = document.getElementById(activePopover);
-                const btn = document.getElementById(btnId);
-                
-                if (popover && btn && !popover.contains(event.target) && !btn.contains(event.target)) {
-                    popover.classList.add('hidden');
-                    activePopover = null;
-                }
-            }
-        });
 
         // Event listener for inputs to show action buttons
         document.addEventListener('DOMContentLoaded', () => {
