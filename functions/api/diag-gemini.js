@@ -1,7 +1,20 @@
 // Diagnostik internal: uji kunci Gemini langsung dari runtime produksi.
 // Hanya untuk email admin (ADMIN_EMAILS) — memakai getGeminiKeys() chat.js.
 import { ADMIN_EMAILS } from './plan-helpers.js';
-import { getGeminiKeys } from './chat.js';
+
+// salinan getGeminiKeys() dari chat.js (tidak di-export di sana)
+async function getGeminiKeys(env) {
+  const keys = [];
+  const seen = new Set();
+  const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
+  add(env.GEMINI_API_KEY);
+  if (!env.DB) return keys;
+  try {
+    const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3')").all();
+    for (const r of rows.results || []) add(r.value);
+  } catch {}
+  return keys;
+}
 
 export async function onRequestPost({ request, env }) {
   const cors = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
