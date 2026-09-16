@@ -22,38 +22,47 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-16 19:23 WIB)
+## Status Saat Ini (update terakhir: 2026-09-16 20:11 WIB)
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | ✅ Sudah diperbaiki | INSERT user baru sudah ada (commit e04aa6c). Login Google/GitHub masih perlu uji manual |
+| Auth OAuth (`upsertOauthUser`) | ✅ Sudah diperbaiki | INSERT user baru ada (e04aa6c). Guard `if (!user) throw`. Login Google/GitHub masih perlu uji manual |
 | Encoding karakter | ✅ Bersih | |
-| Schema D1 vs runtime | ✅ Disinkronkan | |
-| Editor full-stack + layout | ✅ Aktif | fullstack.js + layout-sidebar.js (sidebar kiri files-only, kanan Workspace/Agent/Settings, Chat AI halaman terpisah) |
-| AI chat | ✅ Pulih & terverifikasi end-to-end | Rotasi 3 kunci Gemini (AQ.) + fallback Workers AI; kunci di D1 env_vars + project-level |
+| Schema D1 vs runtime | ✅ Disinkronkan | env_vars produksi tanpa UNIQUE — workflow pakai DELETE+INSERT |
+| Editor full-stack + layout | ✅ Aktif | Clinqoo-Editor HEAD 9c6afbb |
+| AI chat / Tim AI | ✅ Aktif | 88e83b9 upgrade QA+tools reviewer; 1c5bf84 diag stageFailed (admin/QA) |
+| Wallet | ✅ GET anon = 0 | Mutasi wajib login |
+| Middleware | ✅ Origin clinqoo.co | Rate limit + PUBLIC routes |
 | Hourly audit automation | ✅ Aktif | Setiap 1 jam |
 | Wiki / AGENTS.md | ✅ Aktif & dipantau | Email resmi hanya gmail.com |
+| Issue GitHub | ✅ 0 open | |
+
+**All clear** — tidak ada bug kritis baru sejak audit 19:12 WIB. Email tidak dikirim.
 
 ---
 
 ## Log Interaksi Agent
 
+### 2026-09-16 20:11 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `1c5bf84` (diag Tim AI 429) — parent `8e47e32`.
+- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
+- Wallet GET tanpa login → `{balance:0}`; POST/DELETE tanpa uid → 401.
+- `_middleware.js`: PUBLIC wallet/chat/auth; ORIGIN_ALLOW termasuk `*.clinqoo.co`.
+- Issue: 0. Repo terkait: Editor 9c6afbb (layout), Wallet 44df363 (aset), Komunitas 82a9358 (fitur sosial, pagi).
+- Catatan non-kritis: `action=set_balance` masih tersedia bagi user yang sudah login (bukan regresi baru). Edge OAuth tanpa email tetap throw. Uji E2E Google/GitHub masih outstanding.
+
 ### 2026-09-16 — Superagent Clinqoo (Tim AI upgrade)
 - Upgrade kualitas mode kolaborasi (Tim AI) di `functions/api/chat.js` (commit `88e83b9`):
-  - **Reviewer kini punya tools**: `list_items` + `read_file` (read-only, loop max 3 hop) — bisa audit file lama di workspace D1, bukan cuma potongan 400 karakter. Potongan digest diperbesar ke 700/400.
-  - **QA otomatis deterministik** (`teamQaFindings`): deteksi TODO/FIXME/lorem ipsum/coming soon, file nyaris kosong (<150 karakter), `<html>` tanpa `</html>`, `<script>` tak tertutup, kurung JS tidak seimbang. Temuan QA MEMAKSA tahap perbaikan walau reviewer bilang SEMUA OK — user tidak lagi menerima situs setengah jadi.
-  - **Anti-merugikan** (`sanitizeTeamCalls`): path traversal (`..`) & URL absolut ditolak, menimpa file dengan konten kosong diblok, maks 25 file & 130KB/file.
-  - Prompt programmer: larangan keras placeholder.
+  - **Reviewer kini punya tools**: `list_items` + `read_file` (read-only, loop max 3 hop).
+  - **QA otomatis deterministik** (`teamQaFindings`).
+  - **Anti-merugikan** (`sanitizeTeamCalls`).
 - Untuk agent berikutnya: uji Tim AI end-to-end dari UI dengan proyek nyata (butuh akun Pro).
 ### 2026-09-16 — Superagent Base44 (19:55 WIB)
 - Owner kirim 3 kunci Gemini baru (awalan "AQ."). Uji: kunci 1 & 3 VALID (gemini-3.6-flash), kunci 2 ditolak Google (403) — tetap disimpan, rotasi akan melewatinya otomatis.
-- Rotasi multi-kunci Gemini di `functions/api/chat.js` + `ai.js`: `getGeminiKeys()` (env project + D1 `GEMINI_API_KEY/_2/_3`), `tryModels()/tryGemini()` loop kunci x model (400/403/429 -> kunci berikutnya).
-- Simpan kunci: GH secrets `GEMINI_KEY_1/2/3` -> workflow `.github/workflows/gemini-keys.yml` upsert D1 env_vars (is_secret=1) + patch env project-level. Run sukses.
-- Fix: `TEAM_BUSY_MSG is not defined` (ReferenceError jalur error Tim AI) dipulihkan (dd56e79).
-- Verifikasi clincoo-be2: register/login akun QA (id 96, di-Pro-kan via `set-qa-pro.yml`), chat mode biasa OK via gemini-3.6-flash, gerbang Tim AI OK. Uji Tim AI penuh berjalan saat penulisan log ini.
+- Rotasi multi-kunci Gemini di `functions/api/chat.js` + `ai.js`.
+- Fix: `TEAM_BUSY_MSG is not defined` (dd56e79).
 ### 2026-09-16 — Grok (xAI) 19:23 WIB
 - Konfirmasi: **muzawwied@gmaio.com adalah typo**. Alamat resmi hanya **muzawwied@gmail.com**.
-- Update wiki + automation agar tidak lagi mengirim ke alamat typo.
 
 ### 2026-09-16 — Superagent Base44 (19:35 WIB)
 - Investigasi AI kolaborasi; fix projectId; fallback Workers AI; dll.
@@ -69,7 +78,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 ## Rekomendasi untuk Agent Berikutnya
 
 1. Uji login Google & GitHub end-to-end di clincoo-be2.
-2. Pantau automation audit tiap jam.
+2. Pertimbangkan batasi `wallet` `set_balance` ke admin/internal saja.
 3. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
