@@ -12,7 +12,7 @@
 // akar bug "AI pura-pura membuat file". Mode tools = functionDeclarations saja.
 
 import { PLAN_AI_LIMITS, ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
-import { consumePackCredit } from './ai-packs.js';
+import { consumePackCredit, getActivePacks } from './ai-packs.js';
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
 const CORS = {
@@ -757,7 +757,8 @@ function teamTranscriptText(transcript) {
   }).join('\n\n');
 }
 
-// GET /api/chat — sisa kredit AI harian akun ini (dipakai UI, mis. halaman hubungkan ClinqooPay)
+// GET /api/chat — status kredit AI akun ini (dipakai UI: ClinqooPay top-up + banner kredit habis)
+// read-only, TIDAK memakai/mengurangi kuota atau kredit paket (beda dari quotaCheck yg dipanggil saat kirim pesan).
 export async function onRequestGet({ request, env }) {
   try {
     const user = await resolveUser(env, request);
@@ -766,17 +767,36 @@ export async function onRequestGet({ request, env }) {
         status: 401, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
-    const limit = await dailyAiLimit(env, user);
-    const day = new Date().toISOString().slice(0, 10);
-    let used = 0;
+    const limits = await aiLimits(env, user);
+    const now = new Date();
+    const day = now.toISOString().slice(0, 10);
+    const month = now.toISOString().slice(0, 7);
+    let dayUsed = 0, monthUsed = 0;
     try {
       await env.DB.prepare(
         'CREATE TABLE IF NOT EXISTS ai_quota (user_key TEXT, day TEXT, count INTEGER, PRIMARY KEY (user_key, day))'
       ).run();
-      const row = await env.DB.prepare('SELECT count FROM ai_quota WHERE user_key = ? AND day = ?').bind(user.key, day).first();
-      used = row ? row.count : 0;
+      const rows = await env.DB.prepare('SELECT day, count FROM ai_quota WHERE user_key = ? AND day IN (?, ?)').bind(user.key, day, month).all();
+      for (const r of rows.results || []) {
+        if (r.day === day) dayUsed = r.count;
+        if (r.day === month) monthUsed = r.count;
+      }
     } catch (e) {}
-    return new Response(JSON.stringify({ success: true, limit, used, remaining: Math.max(0, limit - used), day }), {
+    let creditsLeftTotal = 0;
+    try {
+      const active = await getActivePacks(env.DB, user.key);
+      creditsLeftTotal = active.reduce((s, p) => s + (p.credits_left || 0), 0);
+    } catch (e) {}
+    const subscriptionExhausted = monthUsed >= limits.monthly || dayUsed >= limits.daily;
+    const exhausted = subscriptionExhausted && creditsLeftTotal <= 0;
+    return new Response(JSON.stringify({
+      success: true,
+      limit: limits.daily, used: dayUsed, remaining: Math.max(0, limits.daily - dayUsed), day,
+      monthly_limit: limits.monthly, monthly_used: monthUsed,
+      credits_left_total: creditsLeftTotal,
+      exhausted,
+      message: exhausted ? (monthUsed >= limits.monthly ? QUOTA_MSG_MONTHLY : QUOTA_MSG_DAILY) : null
+    }), {
       headers: { 'Content-Type': 'application/json', ...CORS }
     });
   } catch (e) {
