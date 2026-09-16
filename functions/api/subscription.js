@@ -1,4 +1,5 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
+import { ensurePromoTable, PROMO_EARLY } from './promo.js';
 import { getMonthlyDeployCount } from './plan-helpers.js';
 import { getCpConnection, mirroredBalance, mirrorDelta } from './clinqoopay-helpers.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
@@ -159,7 +160,32 @@ export async function onRequestPost({ request, env }) {
       const validPlan = PLANS[plan] ? plan : 'Starter';
       const planPrice = PLANS[validPlan].price;
       const billing = billingCycle || 'Bulanan';
-      const totalPrice = billing === 'Tahunan' ? planPrice * 10 : planPrice; // Tahunan: bayar 10 bulan, dapat 12
+      let totalPrice = billing === 'Tahunan' ? planPrice * 10 : planPrice; // Tahunan: bayar 10 bulan, dapat 12
+
+      // PROMO 100 USER PERTAMA: Pro Bulanan jadi Rp5.000 utk 100 klaim pertama.
+      // Slot di-klaim atomik via INSERT OR IGNORE (PK user_key) SEBELUM pembayaran;
+      // bila pembayaran gagal, slot dilepas lagi (cleanup) — lihat return path 402/500 di bawah.
+      let promoApplied = false;
+      let promoUserKey = null;
+      if (validPlan === 'Pro' && billing === 'Bulanan' && user) {
+        try {
+          await ensurePromoTable(db);
+          promoUserKey = 'u' + user.id;
+          const already = await db.prepare('SELECT 1 FROM promo_early_pro WHERE user_key = ?').bind(promoUserKey).first();
+          if (!already) {
+            const cnt = await db.prepare('SELECT COUNT(*) AS c FROM promo_early_pro').first();
+            if (((cnt && cnt.c) || 0) < PROMO_EARLY.maxUsers) {
+              const ins = await db.prepare('INSERT OR IGNORE INTO promo_early_pro (user_key, claimed_at) VALUES (?, ?)').bind(promoUserKey, new Date().toISOString()).run();
+              if (ins && ins.meta && ins.meta.changes > 0) { promoApplied = true; totalPrice = PROMO_EARLY.price; }
+            }
+          }
+        } catch (ePromo) {}
+      }
+      const releasePromoSlot = async () => {
+        if (promoApplied && promoUserKey) {
+          try { await db.prepare('DELETE FROM promo_early_pro WHERE user_key = ?').bind(promoUserKey).run(); } catch (e) {}
+        }
+      };
 
       // Check wallet balance for paid plans
       if (planPrice > 0) {
@@ -174,6 +200,7 @@ export async function onRequestPost({ request, env }) {
             if (wb !== null) balance = wb;
           }
           if (balance < totalPrice) {
+            await releasePromoSlot();
             return new Response(JSON.stringify({ 
               success: false, 
               error: 'Saldo tidak cukup',
@@ -192,6 +219,7 @@ export async function onRequestPost({ request, env }) {
             const mr = await mirrorDelta(subConn, -totalPrice, 'Clinqoo: Langganan ' + validPlan + ' (' + billing + ')', subTxId);
             if (!mr.ok) {
               const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
+              await releasePromoSlot();
               return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClinqooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
             }
             newBalance = mr.balance;
@@ -204,7 +232,7 @@ export async function onRequestPost({ request, env }) {
           try {
             await notifyEvent(db, user, {
               source: 'Langganan', type: 'subscription',
-              message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.',
+              message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.' + (promoApplied ? ' [PROMO 100 User Pertama — Pro Rp5.000]' : ''),
               link: 'https://clinqoo.pages.dev/akun/langganan/'
             });
           } catch (e2) {}
@@ -238,6 +266,7 @@ export async function onRequestPost({ request, env }) {
           }
         } catch(e) {
           // If wallet tables don't exist, still allow free plans but block paid
+          await releasePromoSlot();
           return new Response(JSON.stringify({ 
             success: false, 
             error: 'Gagal memverifikasi saldo dompet'
@@ -293,7 +322,9 @@ export async function onRequestPost({ request, env }) {
       billingCycle: data.billing_cycle || 'Bulanan',
       startDate: data.start_date,
       paymentMethod: data.payment_method || '',
-      price: planInfo.price
+      price: planInfo.price,
+      promo_applied: promoApplied,
+      paid: promoApplied ? PROMO_EARLY.price : totalPrice
     }), {
       headers: { 'Content-Type': 'application/json', ...CORS }
     });

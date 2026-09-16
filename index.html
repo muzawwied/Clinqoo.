@@ -403,6 +403,17 @@
         </div>
     </header>
     <main id="page-home" class="page-view hidden flex-1 w-full max-w-3xl mx-auto px-5 pt-8 pb-10 flex flex-col justify-start">
+        <div id="promo-early-banner" class="hidden items-center gap-3 mb-6 rounded-2xl bg-gray-50 border border-gray-100 px-4 py-3">
+            <div class="w-9 h-9 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-lg shrink-0" aria-hidden="true">🎉</div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900" style="font-family: 'Space Grotesk', sans-serif;">Promo 100 User Pertama</p>
+                <p class="text-[11px] sm:text-xs text-gray-500 leading-snug">Paket Pro cuma Rp5.000/bulan <span class="line-through">Rp49.000</span> — sisa <span id="promo-early-remaining">…</span>/100 slot</p>
+            </div>
+            <a href="#" id="promo-early-cta" class="text-[11px] sm:text-xs font-semibold text-gray-900 shrink-0 inline-flex items-center gap-0.5 hover:opacity-60 transition-opacity whitespace-nowrap">Ambil Promo</a>
+            <button id="promo-early-close" type="button" aria-label="Tutup promo" class="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors cursor-pointer shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path></svg>
+            </button>
+        </div>
         <div class="mb-10 text-center">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight" style="font-family: 'Space Grotesk', sans-serif;">
                 <span id="typing-text" class="text-black"></span>
@@ -1516,6 +1527,32 @@ function tmShowCollabPlansModal(sub) {
         }
         clinqooCheckQuotaBanner();
         setInterval(clinqooCheckQuotaBanner, 3 * 60 * 1000);
+
+        // PROMO 100 USER PERTAMA — banner di bawah header; X menutup utk sesi ini.
+        (function () {
+            var banner = document.getElementById('promo-early-banner');
+            if (!banner) return;
+            try { if (sessionStorage.getItem('clinqoo_promo_early_dismissed') === '1') return; } catch (e) {}
+            var apiBase = (['clincoo-be2.pages.dev', 'localhost', '127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
+            fetch(apiBase + '/api/promo', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (p) {
+                if (!p || p.active !== true || p.remaining <= 0) return;
+                var rem = document.getElementById('promo-early-remaining');
+                if (rem) rem.textContent = String(p.remaining);
+                var cta = document.getElementById('promo-early-cta');
+                if (cta) {
+                    cta.href = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo./akun/langganan/upgrade/' : '/akun/langganan/upgrade/';
+                    if (p.loggedIn) cta.textContent = p.eligible ? 'Klaim Rp5.000' : 'Lihat Paket';
+                    else cta.textContent = 'Daftar & Klaim';
+                }
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            }).catch(function () {});
+            var closeBtn = document.getElementById('promo-early-close');
+            if (closeBtn) closeBtn.addEventListener('click', function () {
+                try { sessionStorage.setItem('clinqoo_promo_early_dismissed', '1'); } catch (e) {}
+                banner.classList.add('hidden');
+            });
+        })();
         function processPromptSubmission(customTitle) {
             if(!mainPromptInput) return;
             if(quotaLocked) { try { window.location.href = upgradeUrl(); } catch(e) {} return; }

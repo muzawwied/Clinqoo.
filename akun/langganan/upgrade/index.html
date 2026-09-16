@@ -323,6 +323,23 @@
         try { lucide.createIcons(); } catch (e) {}
 
         const SUB_API = 'https://clincoo-be2.pages.dev/api/subscription';
+        const PROMO_API = 'https://clincoo-be2.pages.dev/api/promo';
+        // PROMO 100 User Pertama: utk user yang eligible, kartu Pro tampil Rp5.000 (coret 49.000)
+        (function(){
+          fetch(PROMO_API, { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(p){
+            if (!p || p.active !== true || p.remaining <= 0) return;
+            var card = document.getElementById('btn-pro');
+            if (!card) return;
+            if (p.eligible) {
+              card.previousElementSibling.insertAdjacentHTML('afterend',
+                '<p class="text-center text-sm mb-4"><span class="font-bold text-emerald-600 dark:text-emerald-400" style="font-family:\'Space Grotesk\',sans-serif">Rp5.000/bln</span> <span class="text-xs text-gray-400 line-through">Rp49.000</span><br><span class="text-[11px] text-gray-500">PROMO 100 user pertama — sisa ' + p.remaining + ' slot</span></p>');
+              card.textContent = 'Ambil Promo Pro Rp5.000';
+            } else {
+              card.insertAdjacentHTML('beforebegin',
+                '<p class="text-center text-[11px] text-gray-500 mb-4">Promo 100 user pertama: Pro Rp5.000/bln — sisa ' + p.remaining + ' slot</p>');
+            }
+          }).catch(function(){});
+        })();
         let currentActivePlan = 'Starter';
         let selectedPlan = '';
         let subData = null;

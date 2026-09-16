@@ -301,6 +301,8 @@
     const SUB_API = 'https://clincoo-be2.pages.dev/api/subscription';
     const WALLET_API = 'https://clincoo-be2.pages.dev/api/wallet';
     const PRICES = { 'Starter': 0, 'Pro': 49000, 'Bisnis': 129000 };
+    const PROMO_API = 'https://clincoo-be2.pages.dev/api/promo';
+    let PROMO = null; // status promo 100 user pertama (Pro Rp5.000)
     const fmtID = function(n){ return Number(n).toLocaleString('id-ID'); };
 
     const params = new URLSearchParams(window.location.search);
@@ -310,10 +312,15 @@
       BILLING = (cycle === 'Tahunan') ? 'Tahunan' : 'Bulanan';
       renderOrder();
     }
+    function promoPrice(){
+      return (PROMO && PROMO.eligible && PLAN === 'Pro' && BILLING === 'Bulanan') ? PROMO.price : null;
+    }
     function renderOrder(){
+      const pp = promoPrice();
       totalPrice = BILLING === 'Tahunan' ? PRICES[PLAN] * 10 : PRICES[PLAN];
+      if (pp !== null) totalPrice = pp;
       setVal('order-billing', BILLING);
-      setVal('order-total', totalPrice === 0 ? 'Gratis' : fmtID(totalPrice));
+      setVal('order-total', totalPrice === 0 ? 'Gratis' : fmtID(totalPrice) + (pp !== null ? ' (PROMO 100 User Pertama, reguler ' + fmtID(PROMO.original) + ')' : ''));
       const bal = (typeof lastBalance === 'number') ? lastBalance : null;
       if (bal !== null) {
         setVal('wallet-after', totalPrice === 0 ? fmtID(bal) : fmtID(bal - totalPrice));
@@ -377,11 +384,15 @@
       let sub = null, wallet = null;
       try { const r = await fetch(SUB_API); sub = await r.json(); } catch(e) {}
       try { const r = await fetch(WALLET_API); wallet = await r.json(); } catch(e) {}
+      if (PLAN === 'Pro' && BILLING === 'Bulanan') {
+        try { const r = await fetch(PROMO_API, { cache: 'no-store' }); PROMO = await r.json(); } catch(e) { PROMO = null; }
+      }
 
       const badge = document.getElementById('order-plan-badge');
       badge.className = 'inline-flex items-center self-start sm:self-auto px-3 py-1 rounded-full text-xs font-medium ' + planBadgeClass(PLAN);
       setVal('order-plan-badge', PLAN);
-      setVal('order-price', PRICES[PLAN] === 0 ? 'Gratis' : fmtID(PRICES[PLAN]) + '/bulan');
+      const pp0 = promoPrice();
+      setVal('order-price', PRICES[PLAN] === 0 ? 'Gratis' : (pp0 !== null ? fmtID(pp0) + '/bulan — PROMO 100 User Pertama (reguler ' + fmtID(PRICES[PLAN]) + ')' : fmtID(PRICES[PLAN]) + '/bulan'));
 
       const balance = (wallet && typeof wallet.balance === 'number') ? wallet.balance : 0;
       lastBalance = balance;
