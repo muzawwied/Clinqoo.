@@ -120,13 +120,19 @@ async function teamModeAllowed(env, user) {
   }
 }
 
-async function getApiKey(env) {
-  if (env.GEMINI_API_KEY) return env.GEMINI_API_KEY;
-  if (!env.DB) return null;
+// Gemini multi-kunci: utama (GEMINI_API_KEY) + cadangan (_2, _3).
+// Nilai boleh berawalan "AQ." — Google menerima apa adanya. Rotasi otomatis di tryModels.
+async function getGeminiKeys(env) {
+  const keys = [];
+  const seen = new Set();
+  const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
+  add(env.GEMINI_API_KEY);
+  if (!env.DB) return keys;
   try {
-    const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('GEMINI_API_KEY').first();
-    return row?.value || null;
-  } catch { return null; }
+    const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3')").all();
+    for (const r of rows.results || []) add(r.value);
+  } catch {}
+  return keys;
 }
 
 async function getOpenRouterKey(env) {
@@ -330,13 +336,19 @@ async function fetchGemini(apiKey, model, systemInstruction, contents, tools) {
   return { data: await res.json() };
 }
 
-async function tryModels(apiKey, systemInstruction, contents, tools) {
+async function tryModels(apiKeys, systemInstruction, contents, tools) {
+  const keys = Array.isArray(apiKeys) ? apiKeys.filter(Boolean) : [apiKeys].filter(Boolean);
   let lastError = null;
   const statuses = [];
+  for (const apiKey of keys) {
   for (const model of PREFERRED_MODELS) {
     try {
       const r = await fetchGemini(apiKey, model, systemInstruction, contents, tools);
-      if (r.error) { lastError = r.error; statuses.push(r.status || 0); continue; }
+      if (r.error) {
+        lastError = r.error; statuses.push(r.status || 0);
+        if (r.status === 400 || r.status === 403) break; // kunci invalid/denied -> coba kunci berikutnya
+        continue;
+      }
       const parts = r.data?.candidates?.[0]?.content?.parts || [];
       const text = parts.map(p => p.text || '').join('');
       const toolCalls = parts
@@ -350,6 +362,7 @@ async function tryModels(apiKey, systemInstruction, contents, tools) {
       lastError = err.message;
       statuses.push(0);
     }
+  }
   }
   const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
   return { error: lastError || 'All models failed', quotaExhausted };
@@ -542,7 +555,7 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
   let r = null;
   let orQuotaExhausted = false;
   if (orKey) { r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]); orQuotaExhausted = !!(r && r.quotaExhausted); }
-  if ((!r || r.error) && apiKey) {
+  if ((!r || r.error) && apiKey.length) {
     // cadangan Gemini (format konversi sederhana; tools Gemini pakai functionDeclarations)
     const { systemInstruction, contents } = toGeminiPayload(messages);
     const gTools = tools ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] : null;
@@ -574,7 +587,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
     if (deadline && Date.now() > deadline) break; // jaga total waktu orkestrasi
     let r = null;
     if (orKey && !usedGeminiFallback) { r = await tryOpenRouter(orKey, messages, orBuildTools(), TEAM_STAGE_MODELS[stage]); if (r && r.error) orQuotaExhausted = !!r.quotaExhausted; }
-    if ((!r || r.error) && apiKey) {
+    if ((!r || r.error) && apiKey.length) {
       // Gemini cadangan: satu kali percobaan non-loop (format tool berbeda), lalu hentikan loop
       const { systemInstruction, contents } = toGeminiPayload(messages.filter(m => m.role !== 'tool' && !(m.role === 'assistant' && !m.content)));
       const gTools = [{ functionDeclarations: BUILD_FUNCTION_DECLARATIONS }];
@@ -798,7 +811,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const orKey = await getOpenRouterKey(env);
-    const apiKey = await getApiKey(env);
+    const apiKey = await getGeminiKeys(env); // array kunci Gemini (utama + cadangan)
 
     // ===== MODE TIM AI: diskusi multi-model lalu bangun web =====
     if (body.team === true) {
@@ -837,7 +850,7 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', ...CORS } });
     }
 
-    if (!orKey && !apiKey && !env.AI) {
+    if (!orKey && !apiKey.length && !env.AI) {
       return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
       });
@@ -866,7 +879,7 @@ export async function onRequestPost({ request, env }) {
       if (orKey && !hasImages) {
         r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
       }
-      if ((!r || r.error) && apiKey) {
+      if ((!r || r.error) && apiKey.length) {
         const { systemInstruction, contents } = toGeminiPayload(workMessages);
         r = await tryModels(apiKey, systemInstruction, contents, gTools);
       }
@@ -895,7 +908,7 @@ export async function onRequestPost({ request, env }) {
       }
       // semua tool server -> minta giliran model berikutnya (lanjut loop)
     }
-    if (!r || (r.error && !apiKey)) {
+    if (!r || (r.error && !apiKey.length && !env.AI)) {
       if (!r) r = { error: 'Tidak ada provider AI tersedia' };
     }
 

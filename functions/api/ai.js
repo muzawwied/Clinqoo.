@@ -95,6 +95,21 @@ async function getEnvKey(env, name) {
   } catch { return null; }
 }
 
+// Gemini multi-kunci: utama (GEMINI_API_KEY) + cadangan (_2, _3); prefiks "AQ." dipakai apa adanya.
+async function getGeminiKeys(env) {
+  const keys = [];
+  const seen = new Set();
+  const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
+  add(env.GEMINI_API_KEY);
+  if (env.DB) {
+    try {
+      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3')").all();
+      for (const r of rows.results || []) add(r.value);
+    } catch {}
+  }
+  return keys;
+}
+
 // ===== Normalisasi pesan klien -> [{role, content(text)}] =====
 function textFromContent(content) {
   if (typeof content === 'string') return content;
@@ -176,10 +191,12 @@ async function tryOpenRouter(key, messages) {
 // ===== Provider 3: Gemini (cadangan — pola chat.js) =====
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
-async function tryGemini(key, messages) {
+async function tryGemini(keys, messages) {
+  const keyList = Array.isArray(keys) ? keys.filter(Boolean) : [keys].filter(Boolean);
   const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
   const contents = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   let lastErr = null;
+  for (const key of keyList) {
   for (const model of GEMINI_MODELS) {
     try {
       const body = { contents };
@@ -190,13 +207,14 @@ async function tryGemini(key, messages) {
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) { lastErr = `Model ${model}: HTTP ${res.status}`; continue; }
+      if (!res.ok) { lastErr = `Model ${model}: HTTP ${res.status}`; if (res.status === 400 || res.status === 403) break; continue; }
       const text = ((data?.candidates?.[0]?.content?.parts) || []).map(p => p.text || '').join('');
       if (text) return { text, model };
       lastErr = `Model ${model}: respons kosong`;
     } catch (e) {
       lastErr = `Model ${model}: ${e && e.message}`;
     }
+  }
   }
   return { error: lastErr || 'Gemini gagal' };
 }
@@ -211,14 +229,14 @@ export async function onRequestGet({ request, env }) {
   const user = await resolveUser(env, request);
   if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
   const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
-  const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
+  const gemKey = await getGeminiKeys(env); // array kunci (utama + cadangan)
   return json({
     ok: true,
     persona: 'Clinqoo AI',
     providers: {
       workers_ai: !!env.AI,
       openrouter: !!orKey,
-      gemini: !!gemKey
+      gemini: !!(gemKey && gemKey.length)
     },
     models: {
       workers_ai: WORKERS_AI_MODELS,
@@ -258,13 +276,13 @@ export async function onRequestPost({ request, env }) {
 
   const stream = body?.stream === true;
   const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
-  const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
+  const gemKey = await getGeminiKeys(env); // array kunci (utama + cadangan)
 
   // Provider utama: Workers AI (binding, tanpa API key)
   let r = null;
   if (env.AI) r = await tryWorkersAI(env, finalMessages, stream);
   if ((!r || r.error) && orKey) r = await tryOpenRouter(orKey, finalMessages);
-  if ((!r || r.error) && gemKey) r = await tryGemini(gemKey, finalMessages);
+  if ((!r || r.error) && gemKey.length) r = await tryGemini(gemKey, finalMessages);
 
   if (!r || r.error) {
     return json({ error: 'Tidak ada provider AI tersedia. Aktifkan binding Workers AI atau set kunci OpenRouter/Gemini di Pengaturan → Environment.' }, 502);
