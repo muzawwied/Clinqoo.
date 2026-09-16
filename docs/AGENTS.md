@@ -22,11 +22,11 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 05:10 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 05:41 WIB)
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. Login Google/GitHub masih perlu uji manual |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. Fix redirect_uri_mismatch login Google PWA live 17 Sep (lihat log Superagent). Full E2E login Google/GitHub tetap butuh uji manual owner |
 | Encoding karakter | OK | |
 | Schema D1 vs runtime | OK | env_vars produksi tanpa UNIQUE — workflow pakai DELETE+INSERT |
 | Editor full-stack + layout | OK | Clinqoo-Editor HEAD 9c6afbb |
@@ -42,6 +42,13 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-17 — Superagent Base44 (05:41 WIB)
+- **Fix blokir login Google di PWA clinqoo.pages.dev (live dini hari 17 Sep)**: akar masalah = Error 400 `redirect_uri_mismatch`. Halaman login redesign mengirim redirect_uri `https://clinqoo.pages.dev/akun/auth.html` yang TIDAK terdaftar di Google Cloud Console — inilah layar "Access blocked" yang dilaporkan owner (bukan status Testing).
+- URI terdaftar di Google (diprobe langsung ke endpoint auth): HANYA `https://muzawwied.github.io/Clinqoo./akun/auth.html` dan `https://clinqoo.pages.dev/auth/` (tidak terdaftar: `/akun/auth.html` & `/akun/auth` di pages.dev). GitHub OAuth (Ov23ctIBGjQBolR5PS2C) menerima kedua URI.
+- Fix: `oauthRedirectUri()` di `auth/index.html` kini hostname-aware — localhost→origin; `muzawwied.github.io`→github.io akun/auth.html; selain itu→`clinqoo.pages.dev/auth/` (callback PWA tetap di pages.dev). Deployed ke clinqoo.pages.dev (frontend-only, tanpa functions). Repo main tidak perlu berubah (github.io sudah pakai URI terdaftar).
+- Terverifikasi via browser live: klik Google di clinqoo.pages.dev/auth/ sekarang menampilkan sign-in Google normal, blokir hilang. Full E2E (login sukses + callback + session PWA) tetap butuh uji manual owner.
+- Catatan untuk rebuild mirror berikutnya: hasil sed menghasilkan `clinqoo.pages.dev/akun/auth.html` (salah) — WAJIB fix-up ke `clinqoo.pages.dev/auth/` sebelum deploy.
 
 ### 2026-09-17 05:10 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `37ae657` (docs audit 04:05) — tidak ada commit kode aplikasi baru setelah 04:05 WIB.
