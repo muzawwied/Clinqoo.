@@ -275,6 +275,10 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
   { name: 'review_code',
     description: 'Periksa SEMUA kode proyek di workspace untuk menemukan error, bug, kelemahan keamanan, dan masalah logika — laporan per file dengan saran perbaikan. Gunakan saat user minta cek/review/debug/cari bug kode proyek.',
     parameters: { type: 'OBJECT', properties: { question: { type: 'STRING', description: 'Fokus review khusus (opsional), contoh: "kenapa tombol simpan tidak berfungsi".' } } } },
+  { name: 'push_to_github',
+    description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clinqoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
+    parameters: { type: 'OBJECT', properties: { repo: { type: 'STRING', description: 'Repo target format owner/name, contoh "muzawwied/situs-ku". Opsional — kosongkan untuk memakai repo yang sudah terhubung di pengaturan proyek.' }, commit_message: { type: 'STRING', description: 'Pesan commit singkat dan deskriptif, contoh "Update halaman utama".' } }, required: ['commit_message'] }
+  },
   { name: 'take_screenshot',
     description: 'Ambil screenshot halaman web dari sebuah URL dan kembalikan LINK gambar pratinjau yang bisa dibagikan ke user. Gunakan saat user minta screenshot/preview situs, baik situs user maupun situs lain.',
     parameters: { type: 'OBJECT', properties: {
@@ -360,9 +364,9 @@ function orParam(schema) {
   if (schema && Array.isArray(schema.required)) out.required = schema.required;
   return out;
 }
-// Subset tools khusus tahap membangun (write_file + create_folder saja) — mencegah
-// programmer/perbaikan tersesat memanggil list_items/read_file/dll saat harusnya nulis file.
-const BUILD_FUNCTION_DECLARATIONS = WORKSPACE_FUNCTION_DECLARATIONS.filter(d => d.name === 'write_file' || d.name === 'create_folder');
+// Tools tahap membangun: menulis + MEMBACA workspace (list/read dijalankan server-side
+// dari D1) agar programmer bisa melihat & mengedit file lama secara akurat.
+const BUILD_FUNCTION_DECLARATIONS = WORKSPACE_FUNCTION_DECLARATIONS.filter(d => ['write_file', 'create_folder', 'read_file', 'list_items'].includes(d.name));
 function orBuildTools() {
   return BUILD_FUNCTION_DECLARATIONS.map(d => ({
     type: 'function',
@@ -456,6 +460,42 @@ const TEAM_LABELS = {
   arsitek: 'Arsitek', programmer: 'Programmer', reviewer: 'Reviewer', perbaikan: 'Perbaikan'
 };
 
+
+// ===== KONTEKS MODE TIM AI: Tim melihat workspace & riwayat seperti mode biasa =====
+// File proyek tersinkron di D1 (project_files) — bisa dibaca langsung server-side.
+async function teamWorkspaceSnapshot(env, projectId) {
+  try {
+    if (!projectId || !env.DB) return '(workspace proyek tidak diketahui)';
+    const rows = await env.DB.prepare('SELECT path, LENGTH(content) AS size FROM project_files WHERE project_id = ? ORDER BY path').bind(projectId).all();
+    const files = (rows && rows.results) || [];
+    if (!files.length) return '(workspace masih kosong — semua file akan dibuat baru)';
+    return files.length + ' file:\n' + files.map(f => '- ' + f.path + ' (' + (f.size || 0) + ' karakter)').join('\n');
+  } catch (e) { return '(workspace tidak bisa dibaca)'; }
+}
+async function teamReadFile(env, projectId, path) {
+  try {
+    if (!projectId || !env.DB || !path) return { success: false, error: 'Parameter path wajib.' };
+    const p = String(path).replace(/^\/+/, '');
+    const row = await env.DB.prepare('SELECT content FROM project_files WHERE project_id = ? AND path = ?').bind(projectId, p).first();
+    if (!row) return { success: false, error: 'File tidak ditemukan di workspace: ' + p };
+    return { success: true, path: p, content: String(row.content || '').slice(0, 12000) };
+  } catch (e) { return { success: false, error: e.message }; }
+}
+// Riwayat percakapan (teks user & AI saja) supaya Tim AI punya konteks penuh.
+function teamTranscript(messages) {
+  const parts = [];
+  for (const m of (messages || [])) {
+    if (!m || m.role === 'system') continue;
+    let text = '';
+    if (typeof m.content === 'string') text = m.content;
+    else if (Array.isArray(m.content)) text = m.content.filter(b => b && b.type === 'text').map(b => b.text).join('\n');
+    if (!text) continue;
+    parts.push((m.role === 'user' ? 'USER' : 'CLINQOO') + ': ' + String(text).slice(0, 4000));
+    if (parts.join('\n').length > 9000) break;
+  }
+  return parts.join('\n\n');
+}
+
 // satu panggilan model peran (OR dulu, Gemini cadangan) — tanpa loop, untuk tahap teks (arsitek/reviewer)
 async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools) {
   const messages = [
@@ -481,7 +521,7 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
 // balasan sintetis "sukses" agar dia lanjut menulis file berikutnya — sama seperti
 // loop function-calling di sisi klien (MAX_TOOL_HOPS), tapi berjalan di server untuk
 // tahap Tim AI. Berhenti saat model tidak lagi memanggil tool, atau maxHops tercapai.
-async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline) {
+async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline, projectId) {
   const messages = [
     { role: 'system', content: systemPrompt + '\n\nPENTING: panggil tool write_file untuk BEBERAPA file SEKALIGUS dalam satu giliran bila memungkinkan (paralel). Kalau konten terlalu panjang untuk satu giliran, lanjutkan file berikutnya di giliran sesudahnya sampai SEMUA file dari rencana selesai. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".' },
     { role: 'user', content: userText }
@@ -504,7 +544,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
       const rg = await tryModels(apiKey, systemInstruction, contents, gTools);
       if (!rg.error) {
         usedModel = rg.model; lastText = rg.text || lastText;
-        for (const tc of (rg.tool_calls || [])) if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+        for (const tc of (rg.tool_calls || [])) if ((tc.name === 'write_file' || tc.name === 'create_folder') && tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
       } else {
         geminiQuotaExhausted = !!rg.quotaExhausted;
       }
@@ -520,9 +560,13 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
     messages.push({ role: 'assistant', content: r.text || null, tool_calls: rawList });
     for (let i = 0; i < r.tool_calls.length; i++) {
       const tc = r.tool_calls[i];
-      if (tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
+      if ((tc.name === 'write_file' || tc.name === 'create_folder') && tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
       const callId = (rawList[i] && rawList[i].id) || tc.id || ('call_h' + hop + '_' + i);
-      messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify({ success: true }) });
+      // Tim AI bisa MEMBACA workspace: list/read dijalankan server-side dari D1
+      let toolResult = { success: true };
+      if (tc.name === 'read_file') toolResult = await teamReadFile(env, projectId, (tc.args || {}).path);
+      else if (tc.name === 'list_items') toolResult = { success: true, listing: await teamWorkspaceSnapshot(env, projectId) };
+      messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify(toolResult).slice(0, 13000) });
     }
   }
   // limit provider "penuh" hanya bila tidak ada file yang berhasil dibuat SAMA SEKALI
@@ -531,21 +575,26 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted };
 }
 
-async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
+async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   const transcript = [];
+  ctx = ctx || {};
+  const ctxBlock =
+    (ctx.workspace ? 'ISI WORKSPACE PROYEK SAAT INI:\n' + ctx.workspace + '\n\n' : '') +
+    (ctx.transcript ? 'RIWAYAT PERCAKAPAN SEBELUMNYA (perhatikan bila relevan, jangan diulang):\n' + ctx.transcript + '\n\n' : '') +
+    (ctx.systemPrompt ? 'IDENTITAS & KEMAMPUAN PLATFORM (untuk konteks saja):\n' + ctx.systemPrompt + '\n\n' : '');
 
   // Tahap 1: Arsitek menyusun rencana situs
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB paling senior di Tim AI Clinqoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
-    userPrompt, null);
+    'Kamu adalah ARSITEK WEB paling senior di Tim AI Clinqoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JIKA workspace di konteks sudah berisi file, rencanakan EDIT/menimpa file itu (programmer bisa membacanya dengan tool read_file) alih-alih memaksakan semua file baru. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    ctxBlock + 'PERMINTAAN USER:\n' + userPrompt, null);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
   const startedAt = Date.now();
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
-    'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat.',
-    'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS);
+    'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat. Tool list_items dan read_file tersedia untuk MEMBACA isi workspace yang sudah ada — WAJIB dipakai sebelum mengubah file lama supaya konten aslinya tidak hilang.',
+    ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS, projectId);
   if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer' };
   const draftCalls = (r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
   if (!draftCalls.length) {
@@ -567,7 +616,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   }
   const r3 = await teamStage(env, orKey, apiKey, 'reviewer',
     'Kamu adalah REVIEWER KODE paling ketat di Tim AI Clinqoo — audit berbasis bukti, bukan opini. Bandingkan file web berikut terhadap rencana arsitek, POTONGAN ISI FILE yang diberikan, dan data permintaan user. Periksa sistematis: (1) apakah semua file di rencana sudah dibuat, (2) link & navigasi antar file valid, (3) HTML tidak rusak (tag tidak tertutup, struktur rusak), (4) JS tidak ada error sintaks/logika yang jelas, (5) fitur inti rencana benar-benar ada, bukan cuma teks pengganti, (6) konten sesuai data/asumsi rencana — tidak ada konten yang jelas-jelas dikarang atau bertentangan. Laporkan HANYA masalah fatal/penting dengan menyebut bukti persisnya (nama file + kutipan singkat) — maks 180 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
-    'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
+    ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest, null);
   if (r3.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r3.quotaExhausted, transcript, tool_calls: draftCalls, stageFailed: 'reviewer' };
   const reviewText = (r3.text || '').trim();
   transcript.push({ stage: 'reviewer', model: r3.model, text: reviewText.slice(0, 1000) });
@@ -579,7 +628,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools) {
   if (needsFix) {
     const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
       'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — presisi tinggi. Setiap temuan reviewer di bawah harus dibereskan SESUAI BUKTI yang ia sebutkan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki, tetap menjaga bagian file yang sudah benar). Jangan mengulang file yang sudah benar dan tidak disebut reviewer, jangan mengubah gaya/struktur yang tidak dikeluhkan. Baca ulang temuan reviewer satu per satu dan pastikan semuanya tertangani.',
-      'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS);
+      ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + reviewText, 4, startedAt + TEAM_DEADLINE_MS, projectId);
     const fixCalls = (r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content);
     if (!r4.error && fixCalls.length) {
       // gabung: draft + revisi (revisi menimpa path sama)
@@ -720,7 +769,14 @@ export async function onRequestPost({ request, env }) {
       if (!userPrompt) {
         return new Response(JSON.stringify({ error: 'Pesan kosong' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
       }
-      const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null);
+      // Konteks penuh Tim AI: workspace (D1) + riwayat percakapan + identitas platform
+      const sysMsg = messages.find(m => m && m.role === 'system');
+      const teamCtx = {
+        workspace: await teamWorkspaceSnapshot(env, body.project_id || null),
+        transcript: teamTranscript(messages),
+        systemPrompt: sysMsg ? String(sysMsg.content || '').slice(0, 3000) : ''
+      };
+      const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null, teamCtx);
       if (t.error && !t.tool_calls) {
         // limit/kuota provider penuh -> kunci komposer di klien (sama seperti kuota harian habis)
         if (t.quotaExhausted) {
