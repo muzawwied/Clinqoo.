@@ -22,7 +22,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-16 19:11 WIB, oleh Superagent Clinqoo)
+## Status Saat Ini (update terakhir: 2026-09-16 19:35 WIB, oleh Superagent Base44)
 
 | Area | Status | Catatan |
 |------|--------|--------|
@@ -30,6 +30,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 | Encoding karakter | ✅ Bersih | Audit ulang seluruh functions/ — tidak ada mojibake/invalid UTF-8 |
 | Schema D1 vs runtime | ✅ Disinkronkan | Tabel topup_orders kini dibuat runtime (self-heal, init-db.js + topup-qris.js) & schema.sql diperbarui (commit 38fb0b4). Kolom user_id/qr_url/bill_total/expires_at sudah lengkap |
 | Editor full-stack | ✅ Aktif | `<script src="fullstack.js" defer>` sudah dipasang di index.html; fungsi esc() yang rusak oleh unescape entitas HTML sudah dipulihkan (repo Clinqoo-Editor, commit 9a17171) |
+| AI chat (mode biasa + kolaborasi) | ✅ Mode biasa pulih; kolaborasi fix projectId | Root cause: (1) ReferenceError `projectId` di `teamOrchestrate` — FIXED (e9c95b6); (2) kunci GEMINI_API_KEY project-level (secret) INVALID → 400 semua model; (3) OPENROUTER_API_KEY valid tapi free-tier 50/hari HABIS (429). Fallback Workers AI (tanpa kunci) ditambahkan di chat.js (c250f92). Ganti kunci Gemini + topup OpenRouter masih perlu owner |
 | Hourly audit automation | ✅ Aktif | Setiap 1 jam (Asia/Jakarta). Next run ~ top of hour |
 | Wiki / AGENTS.md | ✅ Aktif & dipantau | File ini selalu dicek di awal sesi |
 
@@ -37,6 +38,14 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ## Log Interaksi Agent
 
+### 2026-09-16 — Superagent Base44 (19:35 WIB)
+- Investigasi "AI kolaborasi eror": fix bug `projectId is not defined` di `teamOrchestrate` (chat.js) — sebelumnya teamCtx tidak membawa project_id (commit e9c95b6).
+- Diagnostik kunci AI via workflow GitHub Actions (`.github/workflows/diag-ai.yml`, bisa dipicu ulang kapan saja):
+  - D1 `GEMINI_API_KEY`: TIDAK ADA. Pages project-level `GEMINI_API_KEY` (secret_text): ADA tapi INVALID → Gemini 400 di semua model.
+  - `OPENROUTER_API_KEY`: valid, tapi free-tier 50 req/hari sudah HABIS (429, reset ~00:00 UTC).
+- Fix: fallback **Workers AI** (binding `AI` sudah ada di wrangler.toml, tanpa kunci) ditambahkan ke chat.js jalur single — saat OpenRouter limit & Gemini gagal, chat teks tetap jalan (commit c250f92).
+- Hapus fitur Bahasa & Zona Waktu di akun/profile/personal (tidak dipakai backend mana pun, sesuai permintaan owner) + perbaiki bracket sisa penghapusan (e9c95b6).
+- catatan AGENTS: file lama "docs/AGENTS.md" via upload web pernah tertimpa — edit lewat git/MCP saja.
 ### 2026-09-16 — Superagent Clinqoo
 - Memverifikasi bug `upsertOauthUser` → SUDAH diperbaiki sebelumnya hari ini (commit `e04aa6c`, live di clincoo-be2): INSERT user baru + guard null sudah ada di `functions/api/auth/shared.js`.
 - Audit ulang encoding seluruh `functions/` → bersih, tidak ada mojibake.
