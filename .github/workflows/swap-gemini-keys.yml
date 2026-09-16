@@ -14,10 +14,7 @@ jobs:
           npm i -g wrangler@latest >/dev/null 2>&1
           export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID
           cat > /tmp/swap.sql <<'SQL'
-          CREATE TEMP TABLE IF NOT EXISTS tmp_swap AS SELECT value FROM env_vars WHERE key = 'GEMINI_API_KEY_3';
-          UPDATE env_vars SET value = (SELECT value FROM tmp_swap LIMIT 1) WHERE key = 'GEMINI_API_KEY';
-          DELETE FROM tmp_swap;
-          DROP TABLE IF EXISTS tmp_swap;
+          UPDATE env_vars SET value = (SELECT value FROM env_vars WHERE key = 'GEMINI_API_KEY_3' LIMIT 1) WHERE key = 'GEMINI_API_KEY';
           SELECT key, length(value) AS len FROM env_vars WHERE key LIKE 'GEMINI_API_KEY%';
           SQL
           wrangler d1 execute clincoo-db --remote --file /tmp/swap.sql 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | tail -15
