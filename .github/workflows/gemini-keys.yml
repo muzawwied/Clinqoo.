@@ -13,15 +13,25 @@ jobs:
           K2: ${{ secrets.GEMINI_KEY_2 }}
           K3: ${{ secrets.GEMINI_KEY_3 }}
         run: |
+          set -euo pipefail
           npm i -g wrangler@latest >/dev/null 2>&1
           export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID
           echo "--- Upsert 3 kunci (dengan prefiks AQ.) ke D1 env_vars:"
           for PAIR in "GEMINI_API_KEY:$K1" "GEMINI_API_KEY_2:$K2" "GEMINI_API_KEY_3:$K3"; do
             NAME="${PAIR%%:*}"; VAL="${PAIR#*:}"
             if [ -z "$VAL" ]; then echo "$NAME: skip (secret kosong)"; continue; fi
-            wrangler d1 execute clincoo-db --remote --json --command "INSERT INTO env_vars (key, value, is_secret, updated_at) VALUES ('$NAME', '$VAL', 1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, is_secret = excluded.is_secret, updated_at = excluded.updated_at" 2>&1 | tail -3 \
-              && echo "$NAME: tersimpan di D1 (len ${#VAL})" || echo "$NAME: GAGAL (lihat output di atas)"
+            cat > /tmp/key.sql <<SQL
+          INSERT INTO env_vars (key, value, is_secret, updated_at) VALUES ('$NAME', '$VAL', 1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, is_secret = excluded.is_secret, updated_at = excluded.updated_at;
+          SQL
+            if wrangler d1 execute clincoo-db --remote --file /tmp/key.sql >/tmp/wr.out 2>&1; then
+              echo "$NAME: tersimpan di D1 (len ${#VAL})"
+            else
+              echo "$NAME: GAGAL:"; tail -20 /tmp/wr.out; exit 1
+            fi
+            rm -f /tmp/key.sql
           done
+          echo "--- Verifikasi baris terbaca:"
+          wrangler d1 execute clincoo-db --remote --json --command "SELECT key, length(value) AS len FROM env_vars WHERE key LIKE 'GEMINI_API_KEY%'" | python3 -c "import json,sys; d=json.load(sys.stdin); print([ [r['key'], r['len']] for r in d[0]['results']])" || true
           echo "--- Patch env var project-level GEMINI_API_KEY (production) dengan kunci utama:"
           if [ -n "$K1" ]; then
             BODY=$(printf '{"deployment_configs":{"production":{"env_vars":{"GEMINI_API_KEY":{"type":"secret_text","value":"%s"}}}}}' "$K1")
