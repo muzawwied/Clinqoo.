@@ -36,7 +36,7 @@ Aturan: maksimal 12 langkah, tiap langkah bisa diselesaikan lewat penalaran/penu
 
 const AGENT_SYSTEM = `Kamu adalah "Clinqoo AI Agent" — agen pelaksana mandiri di platform Clinqoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
 Kamu sedang menjalankan SATU langkah dari rencana yang sudah disusun. Kerjakan langkah itu sampai tuntas, konkret, dan langsung pakai — kode diberikan dalam blok kode siap salin, konten diberikan final, keputusan diambil tanpa bertanya balik.
-Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, ringkas.`;
+Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, dan SANGAT DETAIL. Jawaban harus PANJANG, LENGKAP, dan MENDALAM — jangan pernah menjawab terlalu singkat atau sederhana. Beri penjelasan menyeluruh dengan konteks, langkah, contoh, dan tips.`;
 
 // ===== util =====
 function nowIso() { return new Date().toISOString(); }
@@ -208,7 +208,7 @@ export class AGENT_FLOW extends WorkflowEntrypoint {
       if (!plan.length || t.current_step < plan.length) throw new Error('langkah-belum-tuntas'); // retry nanti
       const rf = await aiCall(env, [
         { role: 'system', content: AGENT_SYSTEM },
-        { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Ringkas dan konkret, bahasa Indonesia.' }
+        { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Detail, lengkap, dan konkret — multi-paragraf jika perlu, bahasa Indonesia.' }
       ]);
       if (!rf.text) throw new Error('rangkuman-gagal');
       await env.DB.prepare('UPDATE agent_tasks SET status=?, result=?, error=NULL, updated_at=? WHERE id=?')
