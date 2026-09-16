@@ -63,7 +63,7 @@ Aturan: maksimal 12 langkah, tiap langkah bisa diselesaikan lewat penalaran/penu
 
 const AGENT_SYSTEM = `Kamu adalah "Clinqoo AI Agent" — agen pelaksana mandiri di platform Clinqoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
 Kamu sedang menjalankan SATU langkah dari rencana yang sudah disusun. Kerjakan langkah itu sampai tuntas, konkret, dan langsung pakai — kode diberikan dalam blok kode siap salin, konten diberikan final, keputusan diambil tanpa bertanya balik.
-Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, ringkas.`;
+Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, dan SANGAT DETAIL. Jawaban harus PANJANG, LENGKAP, dan MENDALAM — jangan pernah menjawab terlalu singkat atau sederhana. Beri penjelasan menyeluruh dengan konteks, langkah, contoh, dan tips.`;
 
 // ===== D1 =====
 async function ensureTable(DB) {
@@ -250,7 +250,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
   // Tahap 3: rangkum hasil akhir
   const doneMsgs = [
     { role: 'system', content: AGENT_SYSTEM },
-    { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Ringkas dan konkret, bahasa Indonesia.' }
+    { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Detail, lengkap, dan konkret — multi-paragraf jika perlu, bahasa Indonesia.' }
   ];
   const rf = await aiCall(doneMsgs, orKey, gemKey);
   t.result = rf.text || rf.error || '(rangkuman dilewati)';
@@ -356,13 +356,13 @@ export async function onRequestPost({ request, env }) {
     };
     await env.DB.prepare('INSERT INTO agent_tasks (id, user_key, project_id, goal, status, plan, transcript, current_step, result, error, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
       .bind(t.id, t.user_key, t.project_id, t.goal, t.status, t.plan, t.transcript, t.current_step, t.result, t.error, t.created_at, t.updated_at).run();
-
+    addEvent(env.DB, t.id, t.user_key, 'start', 'Tugas dimulai.');
     const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
     const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
-    const budget = Math.min(parseInt(body?.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
+    const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
     const done = await agentTick(env, t, budget, orKey, gemKey);
     return json({ ok: true, task: taskJson(done) });
   } catch (e) {
-    return json({ error: 'Server error: ' + e.message }, 500);
+    return json({ error: 'Server error: ' + (e && e.message) }, 500);
   }
 }
