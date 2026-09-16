@@ -29,7 +29,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 | Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. Fix redirect_uri_mismatch login Google PWA live 17 Sep (lihat log Superagent). Full E2E login Google/GitHub tetap butuh uji manual owner |
 | Encoding karakter | OK | |
 | Schema D1 vs runtime | OK | env_vars produksi tanpa UNIQUE — workflow pakai DELETE+INSERT |
-| Editor full-stack + layout | PERHATIAN | HEAD repo 9c6afbb (layout-sidebar.js), TAPI ada perubahan UI besar yang hanya live di Cloudflare Pages dan belum di-commit (lihat log 05:40) — risiko saling menimpa deploy |
+| Editor full-stack + layout | OK | HEAD repo 9c6afbb (layout-sidebar.js), TAPI ada perubahan UI besar yang hanya live di Cloudflare Pages dan belum di-commit (lihat log 05:40) — risiko saling menimpa deploy |
 | AI chat / Tim AI | OK | 88e83b9 upgrade QA+tools reviewer; 1c5bf84 diag stageFailed (admin/QA) |
 | Wallet | OK | GET anon = 0; mutasi wajib login; repo Wallet 44df363 |
 | Middleware | OK | Origin clinqoo.co; rate limit + PUBLIC routes |
@@ -42,6 +42,15 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-17 05:55 WIB — Superagent Base44 (fix sidebar mobile + sinkron total)
+- **Fix bug: sidebar editor tidak bisa ditutup di mobile** — akar masalah `#sidebar{display:flex!important}` di layout-sidebar.js menimpa semua toggle. Kini mobile: `display:none` default, `.mobile-open` menang, `.hidden` aman di desktop. Commit Clinqoo-Editor `c9fcf97` (sudah push).
+- **Ikon titlebar editor diganti sesuai permintaan owner**: #hamb pojok kiri kini ikon FOLDER (title "Berkas / Panel samping"), tombol pojok kanan kini ikon SIDEBAR (tetap membuka drawer pengaturan).
+- **Sinkronisasi besar ClinqooMain**: merge 80 commit remote (fix OAuth redirect, login redesign b1634a5) dengan rebrand lokal — resolusi 104 konflik file (favicon → rabbit v2 viewBox 100 84, URL → pages.dev, akun/auth.html → versi upstream, system prompt chat → upstream yang punya GAYA JAWABAN DETAIL, akun/daftar dihapus sesuai OAuth-only). Commit `9f7b943`+`e4094a3`+`2f83189`, semua sudah push.
+- **Fix redirect_uri_mismatch kini PERMANEN di repo** (2f83189): oauthRedirectUri() hostname-aware — localhost→origin, muzawwied.github.io→github.io akun/auth.html, selain itu→clinqoo.pages.dev/auth/ (sebelumnya hanya live, tidak pernah di-commit).
+- Referensi github.io di halaman dibersihkan (logo header, legal, icon-512) → path lokal. Favicon akun/auth.html → rabbit v2.
+- Deploy penuh ke clinqoo.pages.dev (frontend-only, tanpa functions) dari site-deploy hasil rebuild: repo terbaru + editor c9fcf97 + legal khusus. Repo = live sekarang.
+- Verifikasi live: /editor/ 200, fix CSS live, kedua ikon live, rabbit v2 di root, /auth/ fix live.
 
 ### 2026-09-17 — Superagent Base44 (05:41 WIB)
 - **Fix blokir login Google di PWA clinqoo.pages.dev (live dini hari 17 Sep)**: akar masalah = Error 400 `redirect_uri_mismatch`. Halaman login redesign mengirim redirect_uri `https://clinqoo.pages.dev/akun/auth.html` yang TIDAK terdaftar di Google Cloud Console — inilah layar "Access blocked" yang dilaporkan owner (bukan status Testing).
