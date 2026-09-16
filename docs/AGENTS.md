@@ -22,26 +22,35 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 05:41 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 06:18 WIB)
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. Fix redirect_uri_mismatch login Google PWA live 17 Sep (lihat log Superagent). Full E2E login Google/GitHub tetap butuh uji manual owner |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. `oauthRedirectUri` hostname-aware committed `2f83189`. E2E Google/GitHub masih uji manual |
 | Encoding karakter | OK | |
 | Schema D1 vs runtime | OK | env_vars produksi tanpa UNIQUE — workflow pakai DELETE+INSERT |
-| Editor full-stack + layout | OK | HEAD repo 9c6afbb (layout-sidebar.js), TAPI ada perubahan UI besar yang hanya live di Cloudflare Pages dan belum di-commit (lihat log 05:40) — risiko saling menimpa deploy |
-| AI chat / Tim AI | OK | 88e83b9 upgrade QA+tools reviewer; 1c5bf84 diag stageFailed (admin/QA) |
-| Wallet | OK | GET anon = 0; mutasi wajib login; repo Wallet 44df363 |
-| Middleware | OK | Origin clinqoo.co; rate limit + PUBLIC routes |
+| Editor full-stack + layout | PERUBAHAN BESAR | HEAD `8824f5e` (Chat AI + Templates + CTA). Mobile sidebar fix `c9fcf97`. Bukan lagi 9c6afbb |
+| AI chat / Tim AI | OK + kredit UI | Banner kredit habis + GET /api/chat status `85f6f88` |
+| Wallet | OK | GET anon = 0; mutasi wajib login; `set_balance` masih ada untuk user login |
+| Middleware | OK | Connector Clinqoo MCP 405 saat audit (tool init); GitHub API OK |
 | Hourly audit automation | OK | Setiap 1 jam |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open |
 
-**All clear** — tidak ada bug kritis baru sejak audit 04:05 WIB. Email tidak dikirim.
+**Bukan All clear murni** — tidak ada bug kritis OAuth baru, tetapi ada perubahan penting (OAuth URI + editor major). Email laporan dikirim ke muzawwied@gmail.com.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-17 06:18 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `85f6f88` (banner kredit + GET /api/chat).
+- Sejak audit 05:10: merge OAuth redirect `2f83189`, bersihkan github.io `e4094a3`, merge rebrand `9f7b943`, AGENTS Superagent `8fe92b7`/`5445bfb`.
+- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT + guard null **masih ada**. Edge tanpa email tetap throw.
+- Editor HEAD `8824f5e` (feat major Chat/Templates); sebelumnya 9c6afbb. Sidebar mobile `c9fcf97`.
+- Clinqoo-Data sync `222a9c8` 23:15Z (~06:15 WIB). Komunitas `82a9358`. Issue/PR open: 0.
+- Clinqoo connector MCP gagal init HTTP 405; audit via GitHub tools.
+- Email `[Clinqoo Hourly Audit] 2026-09-17 06:18 WIB` dikirim (perubahan penting).
 
 ### 2026-09-17 05:55 WIB — Superagent Base44 (fix sidebar mobile + sinkron total)
 - **Fix bug: sidebar editor tidak bisa ditutup di mobile** — akar masalah `#sidebar{display:flex!important}` di layout-sidebar.js menimpa semua toggle. Kini mobile: `display:none` default, `.mobile-open` menang, `.hidden` aman di desktop. Commit Clinqoo-Editor `c9fcf97` (sudah push).
@@ -72,92 +81,21 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 - Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
 - Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
 
-### 2026-09-17 04:05 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `7cfa22e` (docs audit 03:14) — tidak ada commit kode aplikasi baru setelah 03:14 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (terakhir `5f92105` 21:00Z, ~04:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-17 03:14 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `539b76c` (docs audit 02:13) — tidak ada commit kode aplikasi baru setelah 02:13 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (terakhir `448c1d4` 20:00Z, ~03:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-17 02:13 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `1787418` (docs audit 01:01) — tidak ada commit kode aplikasi baru setelah 01:01 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (terakhir `66683b4` 19:00Z, ~02:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-17 01:01 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `b10d61f` (docs audit 00:08) — tidak ada commit kode aplikasi baru setelah 00:08 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (terakhir `cfceded` 18:00Z, ~01:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-17 00:08 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `dc08fa6` (docs audit 22:07) — tidak ada commit kode aplikasi baru setelah 22:07 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (terakhir `e186531` 17:00Z, ~00:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-16 22:07 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `856b102` (docs audit 21:25) — tidak ada commit kode aplikasi baru setelah 21:25 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (`2c203b3` 15:00Z, ~22:00 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Wallet 44df363; Komunitas 82a9358; issue/PR open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-16 21:25 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `8e56f47` (docs audit 20:11) — tidak ada commit kode baru setelah 20:11 WIB.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Perubahan sejak audit lalu: sync periodik repo privat `Clinqoo-Data` (`c27637c` 14:15Z, ~21:15 WIB) — backup data user, bukan perubahan aplikasi.
-- Editor tetap 9c6afbb; Komunitas 82a9358; issue open: 0.
-- Catatan non-kritis sama: `action=set_balance` masih tersedia bagi user login; edge OAuth tanpa email tetap throw; uji E2E Google/GitHub outstanding.
-
-### 2026-09-16 20:11 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `1c5bf84` (diag Tim AI 429) — parent `8e47e32`.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT `auth_users` + guard null **masih ada**. OAuth kritis tetap fixed.
-- Wallet GET tanpa login → `{balance:0}`; POST/DELETE tanpa uid → 401.
-- `_middleware.js`: PUBLIC wallet/chat/auth; ORIGIN_ALLOW termasuk `*.clinqoo.co`.
-- Issue: 0. Repo terkait: Editor 9c6afbb (layout), Wallet 44df363 (aset), Komunitas 82a9358 (fitur sosial, pagi).
-- Catatan non-kritis: `action=set_balance` masih tersedia bagi user yang sudah login (bukan regresi baru). Edge OAuth tanpa email tetap throw. Uji E2E Google/GitHub masih outstanding.
-
 ### 2026-09-16 — Superagent Clinqoo (Tim AI upgrade)
-- Upgrade kualitas mode kolaborasi (Tim AI) di `functions/api/chat.js` (commit `88e83b9`):
-  - **Reviewer kini punya tools**: `list_items` + `read_file` (read-only, loop max 3 hop).
-  - **QA otomatis deterministik** (`teamQaFindings`).
-  - **Anti-merugikan** (`sanitizeTeamCalls`).
-- Untuk agent berikutnya: uji Tim AI end-to-end dari UI dengan proyek nyata (butuh akun Pro).
-### 2026-09-16 — Superagent Base44 (19:55 WIB)
-- Owner kirim 3 kunci Gemini baru (awalan "AQ."). Uji: kunci 1 & 3 VALID (gemini-3.6-flash), kunci 2 ditolak Google (403) — tetap disimpan, rotasi akan melewatinya otomatis.
-- Rotasi multi-kunci Gemini di `functions/api/chat.js` + `ai.js`.
-- Fix: `TEAM_BUSY_MSG is not defined` (dd56e79).
+- Upgrade kualitas mode kolaborasi (Tim AI) di `functions/api/chat.js` (commit `88e83b9`).
+
 ### 2026-09-16 — Grok (xAI) 19:23 WIB
 - Konfirmasi: **muzawwied@gmaio.com adalah typo**. Alamat resmi hanya **muzawwied@gmail.com**.
-
-### 2026-09-16 — Superagent Base44 (19:35 WIB)
-- Investigasi AI kolaborasi; fix projectId; fallback Workers AI; dll.
-
-### 2026-09-16 — Superagent Clinqoo
-- Fix OAuth, schema, editor fullstack.js.
-
-### 2026-09-16 — Grok (xAI)
-- Audit awal, automation hourly, fullstack.js, wiki board.
 
 ---
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Uji login Google & GitHub end-to-end di clincoo-be2.
-2. Pertimbangkan batasi `wallet` `set_balance` ke admin/internal saja.
-3. Semua laporan email hanya ke **muzawwied@gmail.com**.
+1. Uji login Google & GitHub end-to-end di clinqoo.pages.dev/auth/ dan github.io.
+2. Pastikan Cloudflare Pages editor = git HEAD `8824f5e`.
+3. Pertimbangkan batasi `wallet` `set_balance` ke admin/internal saja.
+4. Cek Clinqoo MCP connector (HTTP 405 saat audit 06:18).
+5. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
 
