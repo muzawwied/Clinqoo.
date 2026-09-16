@@ -45,6 +45,36 @@ function clientIp(request) {
 
 const PREFERRED_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
+// ===== FALLBACK TERAKHIR: Workers AI (binding, tanpa API key, teks saja) =====
+// Dipakai saat OpenRouter limit & Gemini gagal/tanpa kunci — chat tetap jalan.
+const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
+function textOf(m) {
+  if (typeof m.content === 'string') return m.content;
+  if (Array.isArray(m.content)) return m.content.filter(b => b && b.type === 'text').map(b => b.text).join('\n');
+  return '';
+}
+async function tryWorkersAIText(env, messages) {
+  if (!env || !env.AI) return null;
+  const system = messages.some(m => m.role === 'system') ? messages.filter(m => m.role === 'system').map(textOf).join('\n\n') : '';
+  const chatMsgs = [];
+  for (const m of messages) {
+    if (m.role === 'system') continue;
+    const t = textOf(m);
+    if (t) chatMsgs.push({ role: m.role, content: t });
+  }
+  for (const model of WORKERS_AI_MODELS) {
+    try {
+      const payload = { messages: chatMsgs };
+      if (system) payload.system = system;
+      const result = await env.AI.run(model, payload);
+      const raw = (result && (result.response || (typeof result === 'string' ? result : ''))) || '';
+      const text = raw || ((result && Array.isArray(result.choices) && result.choices[0] && result.choices[0].message && result.choices[0].message.content) || '');
+      if (text) return { text, model: model.split('/').pop() + ' (Workers AI)' };
+    } catch (e) { /* coba model berikutnya */ }
+  }
+  return null;
+}
+
 // ===== PROVIDER UTAMA: OpenRouter (model gratis, tool calling) =====
 // Rantai fallback: nemotron-3-super (nalar+tools terkuat) -> nemotron-3.5-lightning
 // (eksekusi agent cepat) -> openrouter/free (router, tahan model delist).
@@ -807,7 +837,7 @@ export async function onRequestPost({ request, env }) {
       return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', ...CORS } });
     }
 
-    if (!orKey && !apiKey) {
+    if (!orKey && !apiKey && !env.AI) {
       return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
       });
@@ -839,6 +869,11 @@ export async function onRequestPost({ request, env }) {
       if ((!r || r.error) && apiKey) {
         const { systemInstruction, contents } = toGeminiPayload(workMessages);
         r = await tryModels(apiKey, systemInstruction, contents, gTools);
+      }
+      // Fallback terakhir: Workers AI (teks saja, tanpa kunci) — chat gak mati total
+      if ((!r || r.error) && env.AI && !hasImages) {
+        const w = await tryWorkersAIText(env, workMessages);
+        if (w) r = w;
       }
       if (!r || r.error) break; // error/kutipan ditangani di bawah seperti biasa
       const stCalls = (r.tool_calls || []).filter(tc => SERVER_TOOLS.has(tc.name));

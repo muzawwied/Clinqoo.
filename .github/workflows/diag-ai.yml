@@ -5,7 +5,7 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: Check keys in D1 + test live
+      - name: Check keys (D1 + Pages project env) and test live
         env:
           CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -14,21 +14,23 @@ jobs:
           export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID
           GEM=$(wrangler d1 execute clincoo-db --remote --json --command "SELECT value FROM env_vars WHERE key='GEMINI_API_KEY'" 2>/dev/null | jq -r '.[0].results[0].value // empty')
           ORK=$(wrangler d1 execute clincoo-db --remote --json --command "SELECT value FROM env_vars WHERE key='OPENROUTER_API_KEY'" 2>/dev/null | jq -r '.[0].results[0].value // empty')
-          echo "GEMINI_API_KEY: $([ -n "$GEM" ] && echo "SET (len ${#GEM})" || echo 'NOT SET')"
-          echo "OPENROUTER_API_KEY: $([ -n "$ORK" ] && echo "SET (len ${#ORK})" || echo 'NOT SET')"
-          if [ -n "$GEM" ]; then
-            echo "--- Gemini list-models HTTP status:"
-            curl -s -o /tmp/gm.json -w "%{http_code}\n" "https://generativelanguage.googleapis.com/v1beta/models?key=$GEM" || true
-            for M in gemini-3.6-flash gemini-3-flash-preview gemini-2.5-flash; do
-              ST=$(curl -s -o /dev/null -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models/$M?key=$GEM")
-              echo "model $M exists -> HTTP $ST"
-            done
-            echo "--- Gemini generateContent test (gemini-3.6-flash):"
-            ST=$(curl -s -o /tmp/g2.json -w "%{http_code}" -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$GEM" -H 'Content-Type: application/json' -d '{"contents":[{"parts":[{"text":"balas: ok"}]}]}')
-            echo "HTTP $ST"; head -c 400 /tmp/g2.json; echo
+          echo "D1 GEMINI_API_KEY: $([ -n "$GEM" ] && echo "SET (len ${#GEM})" || echo 'NOT SET')"
+          echo "D1 OPENROUTER_API_KEY: $([ -n "$ORK" ] && echo "SET (len ${#ORK})" || echo 'NOT SET')"
+          echo "--- Pages project 'clincoo' env vars (production):"
+          curl -s -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/clincoo" \
+            | jq -r '.result.deployment_configs.production.env_vars // {} | to_entries[] | "\(.key): \(.value.type // "?")"'
+          PGEM=$(curl -s -H "Authorization: Bearer $CF_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/clincoo" | jq -r '.result.deployment_configs.production.env_vars.GEMINI_API_KEY.value // empty')
+          if [ -n "$PGEM" ]; then
+            echo "--- Testing project-level GEMINI_API_KEY (len ${#PGEM}):"
+            ST=$(curl -s -o /tmp/pg.json -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=$PGEM")
+            echo "list-models HTTP: $ST"; head -c 300 /tmp/pg.json; echo
           fi
+          if [ -n "$GEM" ]; then
+            ST=$(curl -s -o /tmp/dg.json -w "%{http_code}" "https://generativelanguage.googleapis.com/v1beta/models?key=$GEM")
+            echo "D1 gemini key list-models HTTP: $ST"; head -c 200 /tmp/dg.json; echo
+          fi
+          echo "--- OpenRouter free-tier status:"
           if [ -n "$ORK" ]; then
-            echo "--- OpenRouter test (nemotron free):"
-            ST=$(curl -s -o /tmp/or.json -w "%{http_code}" -X POST https://openrouter.ai/api/v1/chat/completions -H "Authorization: Bearer $ORK" -H 'Content-Type: application/json' -d '{"model":"nvidia/nemotron-3-super-120b-a12b:free","messages":[{"role":"user","content":"hi"}],"max_tokens":5}')
-            echo "HTTP $ST"; head -c 400 /tmp/or.json; echo
+            ST=$(curl -s -o /tmp/or2.json -w "%{http_code}" https://openrouter.ai/api/v1/chat/completions -H "Authorization: Bearer $ORK" -H 'Content-Type: application/json' -d '{"model":"nvidia/nemotron-3.5-lightning:free","messages":[{"role":"user","content":"hi"}],"max_tokens":5}')
+            echo "HTTP $ST"; head -c 300 /tmp/or2.json; echo
           fi
