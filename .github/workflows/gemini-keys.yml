@@ -21,7 +21,8 @@ jobs:
             NAME="${PAIR%%:*}"; VAL="${PAIR#*:}"
             if [ -z "$VAL" ]; then echo "$NAME: skip (secret kosong)"; continue; fi
             cat > /tmp/key.sql <<SQL
-          INSERT INTO env_vars (key, value, is_secret, updated_at) VALUES ('$NAME', '$VAL', 1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, is_secret = excluded.is_secret, updated_at = excluded.updated_at;
+          DELETE FROM env_vars WHERE key = '$NAME';
+          INSERT INTO env_vars (key, value, is_secret, updated_at) VALUES ('$NAME', '$VAL', 1, datetime('now'));
           SQL
             if wrangler d1 execute clincoo-db --remote --file /tmp/key.sql >/tmp/wr.out 2>&1; then
               echo "$NAME: tersimpan di D1 (len ${#VAL})"
