@@ -497,6 +497,8 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
 // -> Perbaikan (programmer revisi). Hasil akhir = tool_calls write_file yang
 // dieksekusi klien seperti biasa. Biaya kuota: 5 (tugas gede), lihat TEAM_COST.
 const TEAM_COST = 5;
+// Pesan saat provider AI kena limit (dipakai di beberapa titik jalur Tim AI).
+const TEAM_BUSY_MSG = 'Server AI sedang sibuk (limit provider). Coba lagi sebentar lagi.';
 // Batas waktu total orkestrasi (ms) — harus di bawah timeout klien 300s.
 // Tahap yang belum jalan saat deadline lewat dilewati (draft tetap dikirim).
 const TEAM_DEADLINE_MS = 150_000;
