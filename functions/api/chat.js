@@ -365,7 +365,7 @@ async function tryModels(apiKeys, systemInstruction, contents, tools) {
   }
   }
   const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
-  return { error: lastError || 'All models failed', quotaExhausted };
+  return { error: lastError || 'All models failed', quotaExhausted, statuses };
 }
 
 // ===== OpenRouter: konversi format =====
@@ -563,7 +563,7 @@ async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tool
     const gTools = tools ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] : null;
     r = await tryModels(apiKey, systemInstruction, contents, gTools);
     // limit provider hanya benar-benar "penuh" bila OpenRouter DAN Gemini cadangan sama-sama 429
-    if (r) r.quotaExhausted = orQuotaExhausted && !!r.quotaExhausted;
+    if (r) { r.quotaExhausted = orQuotaExhausted && !!r.quotaExhausted; r.dbgStatuses = r.statuses || null; }
   }
   return r || { error: 'Tidak ada provider AI tersedia' };
 }
@@ -629,6 +629,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   let usedGeminiFallback = false;
   let orQuotaExhausted = false;
   let geminiQuotaExhausted = false;
+  let geminiStatuses = null;
 
   for (let hop = 0; hop < maxHops; hop++) {
     if (deadline && Date.now() > deadline) break; // jaga total waktu orkestrasi
@@ -645,6 +646,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
         for (const tc of (rg.tool_calls || [])) if (!readOnly && (tc.name === 'write_file' || tc.name === 'create_folder') && tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
       } else {
         geminiQuotaExhausted = !!rg.quotaExhausted;
+        if (!geminiStatuses && rg.statuses) geminiStatuses = rg.statuses;
       }
       usedGeminiFallback = true;
       break; // Gemini fallback tidak diloop (format function_call beda skema)
@@ -671,7 +673,7 @@ async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, 
   // limit provider "penuh" hanya bila tidak ada file yang berhasil dibuat SAMA SEKALI
   // dan kedua provider (yang dicoba) memang kena 429
   const quotaExhausted = collected.size === 0 && (orQuotaExhausted || geminiQuotaExhausted);
-  return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted };
+  return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted, dbgStatuses: geminiStatuses || null };
 }
 
 async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
@@ -687,7 +689,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
     'Kamu adalah ARSITEK WEB paling senior di Tim AI Clinqoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JIKA workspace di konteks sudah berisi file, rencanakan EDIT/menimpa file itu (programmer bisa membacanya dengan tool read_file) alih-alih memaksakan semua file baru. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     ctxBlock + 'PERMINTAAN USER:\n' + userPrompt, null);
-  if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
+  if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek', dbgStatuses: r1.dbgStatuses || null };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
 
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
@@ -695,7 +697,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
     'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. DILARANG KERAS menulis TODO, FIXME, "lorem ipsum", "coming soon", atau teks pengganti lain — QA otomatis server akan menolaknya dan hasilmu dikembalikan untuk diperbaiki. Konten nyata dan lengkap di setiap file. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat. Tool list_items dan read_file tersedia untuk MEMBACA isi workspace yang sudah ada — WAJIB dipakai sebelum mengubah file lama supaya konten aslinya tidak hilang.',
     ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS, projectId);
-  if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer' };
+  if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer', dbgStatuses: r2.dbgStatuses || null };
   const draftCalls = sanitizeTeamCalls((r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content), 25);
   if (!draftCalls.length) {
     // programmer cuma ngobrol tanpa bikin file valid -> gagal tahap ini
@@ -882,7 +884,9 @@ export async function onRequestPost({ request, env }) {
       if (t.error && !t.tool_calls) {
         // limit/kuota provider penuh -> kunci komposer di klien (sama seperti kuota harian habis)
         if (t.quotaExhausted) {
-          return new Response(JSON.stringify({ quota_exhausted: true, error: TEAM_BUSY_MSG }), {
+          return new Response(JSON.stringify({ quota_exhausted: true, error: TEAM_BUSY_MSG,
+            stage_failed: t.stageFailed || null,
+            debug: (ADMIN_EMAILS.has(user.email) || String(user.email).startsWith('qa.')) ? { statuses: t.dbgStatuses || null, err: String(t.error || '').slice(0, 200) } : undefined }), {
             status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '120', ...CORS }
           });
         }
