@@ -275,10 +275,6 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
   { name: 'review_code',
     description: 'Periksa SEMUA kode proyek di workspace untuk menemukan error, bug, kelemahan keamanan, dan masalah logika — laporan per file dengan saran perbaikan. Gunakan saat user minta cek/review/debug/cari bug kode proyek.',
     parameters: { type: 'OBJECT', properties: { question: { type: 'STRING', description: 'Fokus review khusus (opsional), contoh: "kenapa tombol simpan tidak berfungsi".' } } } },
-  { name: 'push_to_github',
-    description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clinqoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
-    parameters: { type: 'OBJECT', properties: { repo: { type: 'STRING', description: 'Repo target format owner/name, contoh "muzawwied/situs-ku". Opsional — kosongkan untuk memakai repo yang sudah terhubung di pengaturan proyek.' }, commit_message: { type: 'STRING', description: 'Pesan commit singkat dan deskriptif, contoh "Update halaman utama".' } }, required: ['commit_message'] }
-  },
   { name: 'take_screenshot',
     description: 'Ambil screenshot halaman web dari sebuah URL dan kembalikan LINK gambar pratinjau yang bisa dibagikan ke user. Gunakan saat user minta screenshot/preview situs, baik situs user maupun situs lain.',
     parameters: { type: 'OBJECT', properties: {
@@ -373,8 +369,19 @@ function orBuildTools() {
     function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
   }));
 }
-function orTools() {
-  return WORKSPACE_FUNCTION_DECLARATIONS.map(d => ({
+// push_to_github HANYA tersedia di mode Kolaborasi (Tim AI + hop lanjutannya:
+// klien mengirim team_followup=true selama mode kolaborasi aktif).
+const GITHUB_PUSH_DECLARATION = { name: 'push_to_github',
+  description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clinqoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
+  parameters: { type: 'OBJECT', properties: { repo: { type: 'STRING', description: 'Repo target format owner/name, contoh "muzawwied/situs-ku". Opsional — kosongkan untuk memakai repo yang sudah terhubung di pengaturan proyek.' }, commit_message: { type: 'STRING', description: 'Pesan commit singkat dan deskriptif, contoh "Update halaman utama".' } }, required: ['commit_message'] }
+};
+function workspaceDecls(body) {
+  return (body && (body.team === true || body.team_followup === true))
+    ? WORKSPACE_FUNCTION_DECLARATIONS.concat(GITHUB_PUSH_DECLARATION)
+    : WORKSPACE_FUNCTION_DECLARATIONS;
+}
+function orTools(list) {
+  return (list || WORKSPACE_FUNCTION_DECLARATIONS).map(d => ({
     type: 'function',
     function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
   }));
@@ -807,10 +814,11 @@ export async function onRequestPost({ request, env }) {
     // Mode workspace tools.
     // Jalur Gemini: HANYA functionDeclarations (tanpa google_search — kombinasi
     // keduanya ditolak Gemini API dan memicu bug JSON palsu).
+    const decls = workspaceDecls(body);
     const gTools = body.workspace_tools === true
-      ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }]
+      ? [{ functionDeclarations: decls }]
       : null;
-    const oTools = body.workspace_tools === true ? orTools() : null;
+    const oTools = body.workspace_tools === true ? orTools(decls) : null;
 
     // Payload bergambar -> langsung Gemini (model gratis OpenRouter non-vision).
     const hasImages = messages.some(m => Array.isArray(m?.content) && m.content.some(b => b && b.type === 'image_url' && b.image_url?.url));
