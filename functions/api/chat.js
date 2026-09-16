@@ -58,6 +58,28 @@ const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const QUOTA_MSG_DAILY = 'Kuota AI Clinqoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
 const QUOTA_MSG_MONTHLY = 'Kuota AI Clinqoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
 
+// --- Anti-bocor proses berpikir: model gratis kadang menulis reasoning di konten
+function stripThinking(t) {
+  if (!t) return t;
+  t = String(t).replace(/[\s\S]*?<\/think>/gi, '').trim();
+  const m = t.match(/^here's a thinking process:?\s*([\s\S]*)$/i);
+  if (m) {
+    const rest = m[1];
+    const fm = rest.match(/\*\*(?:final(?:\s+(?:answer|response))?|jawaban(?:\s+(?:akhir|final))?|kesimpulan)\*\*[:\uFF1A]?\s*([\s\S]*)$/i);
+    if (fm) t = fm[1];
+    else {
+      const paras = rest.split(/\n{2,}/).filter(p => p.trim());
+      const clean = paras.filter(p => !/^\s*(\d+[.)\]]|[-\u2022*]|\*\*\d)/.test(p.trim()));
+      t = (clean.length ? clean[clean.length - 1] : (paras.length ? paras[paras.length - 1] : rest)).trim();
+    }
+  }
+  return t.trim();
+}
+
+// System prompt mode biasa (single-agent). Sebelumnya TIDAK ADA -> model nyasar:
+// nulis kode sebagai teks obrolan, bahasa asing, dsb.
+const SINGLE_SYSTEM_PROMPT = 'Kamu adalah Clinqoo AI, asisten web-builder Clinqoo. Bahasa: Indonesia. ATURAN: (1) Jika user meminta dibuatkan situs/halaman/aplikasi web atau mengubah file proyek, WAJIB memanggil tool write_file untuk setiap file (path + konten lengkap siap jalan) — DILARANG menulis kode HTML/CSS/JS sebagai teks obrolan. (2) Jika user hanya menyapa, bertanya, atau mengobrol, jawab langsung ringkas dan ramah — tanpa menyebut file atau tim. (3) Jangan pernah menampilkan proses berpikir internal (misal menulis "Here\'s a thinking process" atau langkah analisis) — mulai langsung dari inti jawaban.';
+
 const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
 
@@ -309,7 +331,7 @@ async function tryModels(apiKey, systemInstruction, contents, tools) {
         .filter(p => p.functionCall)
         .map(p => ({ name: p.functionCall.name, args: p.functionCall.args || {}, thought_signature: p.thoughtSignature || undefined }));
       if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model };
-      if (text) return { text, model };
+      if (text) return { text: stripThinking(text), model };
       lastError = `Model ${model} returned empty response`;
       statuses.push(0);
     } catch (err) {
@@ -425,8 +447,8 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
         try { args = JSON.parse(tc.function?.arguments || '{}'); } catch (e) {}
         return { name: tc.function?.name || '', args, id: tc.id };
       }).filter(tc => tc.name);
-      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model, raw_tool_calls: rawToolCalls };
-      if (text) return { text, model };
+      if (toolCalls.length > 0) return { tool_calls: toolCalls, text: stripThinking(text), model, raw_tool_calls: rawToolCalls };
+      if (text) return { text: stripThinking(text), model };
       lastError = `OpenRouter ${model} returned empty response`; statuses.push(0);
     } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
   }
@@ -455,7 +477,7 @@ async function tryOpenRouterStream(apiKey, messages, models, onDelta) {
       }
       const reader = res.body.getReader();
       const dec = new TextDecoder();
-      let buf = ''; let text = '';
+      let buf = ''; let text = ''; let display = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -469,14 +491,19 @@ async function tryOpenRouterStream(apiKey, messages, models, onDelta) {
             const d = JSON.parse(line.slice(5).trim());
             const delta = d.choices && d.choices[0] && d.choices[0].delta;
             if (!delta) continue;
-            let chunk = '';
-            if (typeof delta.reasoning === 'string') chunk += delta.reasoning; // proses pikir model (bila provider kirim)
-            if (typeof delta.content === 'string') chunk += delta.content;
-            if (chunk) { text += chunk; if (onDelta) { try { onDelta(text); } catch (e) {} } }
+            // REASONING DIPISAH dari konten: reasoning hanya untuk tampilan live,
+            // tidak boleh masuk jawaban final (bug "Here's a thinking process").
+            let contentChunk = (typeof delta.content === 'string') ? delta.content : '';
+            let reasoningChunk = (typeof delta.reasoning === 'string') ? delta.reasoning : '';
+            if (contentChunk || reasoningChunk) {
+              text += contentChunk;            // jawaban final: hanya konten asli
+              display += reasoningChunk + contentChunk; // tampilan live boleh sertakan reasoning
+              if (onDelta) { try { onDelta(display); } catch (e) {} }
+            }
           } catch (e) {}
         }
       }
-      if (text) return { text, model };
+      if (text) return { text: stripThinking(text), model };
       lastError = 'OpenRouter ' + model + ': respons kosong'; statuses.push(0);
     } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
   }
@@ -600,16 +627,22 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, emit) {
   // Tahap 1: Arsitek menyusun rencana situs
   emit({ type: 'stage', stage: 'arsitek', label: 'Arsitek', detail: 'menyusun rencana situs' });
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK di Tim AI Clinqoo. Pertama, NILAI permintaan user: jika TIDAK memerlukan pembuatan/perubahan web atau aplikasi (misal menyapa, bertanya, mengobrol, minta penjelasan), balas HANYA dengan baris awal [CHAT] diikuti jawaban ramah dalam bahasa Indonesia seperti asisten AI pada umumnya — TANPA rencana, TANPA menyebut tim atau file. Jika permintaan memang butuh web, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    'Kamu adalah ARSITEK di Tim AI Clinqoo. Pertama, NILAI permintaan user: jika TIDAK memerlukan pembuatan/perubahan web atau aplikasi (misal menyapa, bertanya, mengobrol, minta penjelasan), balas HANYA dengan baris awal [CHAT] diikuti jawaban ramah dalam bahasa Indonesia seperti asisten AI pada umumnya — TANPA rencana, TANPA menyebut tim atau file. PENTING: mulai respons LANGSUNG — DILARANG menulis proses berpikir, analisis bertahap, atau kalimat seperti \"Here's a thinking process\". Jika permintaan memang butuh web, susun rencana situs web yang akan dibangun. Format ringkas dan padat (maks 200 kata): 1) Tujuan & gaya visual, 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat), 3) Fitur penting tiap halaman. Rencana ini akan dikerjakan oleh programmer, jadi harus spesifik dan bisa langsung dieksekusi. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     userPrompt, null, emit);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek' };
   // Gerbang chat: prompt yang tidak butuh web (sapaan/pertanyaan) dijawab langsung
   // seperti AI pada umumnya — tidak memicu pembangunan file apa pun.
-  const rawPlan = (r1.text || '').trim();
+  const rawPlan = stripThinking(r1.text || '').trim();
   if (/^\[?chat\]?/i.test(rawPlan)) {
     const chatAnswer = rawPlan.replace(/^\s*\[?chat\]?\s*/i, '').trim();
     emit({ type: 'stage_done', stage: 'arsitek', label: 'Jawaban', text: chatAnswer.slice(0, 1500) });
     return { text: chatAnswer || 'Halo! Ada yang bisa kubantu?', transcript: [], chatOnly: true };
+  }
+  // Fallback: model lupa awalan [CHAT] -> nilai niat dari pesan user sendiri.
+  // Sapaan/pertanyaan TIDAK PERNAH memicu pembangunan web.
+  if (!/(bikin|buat|bangun|bikinin|ganti|ubah|tambahkan|tambah|hapus|edit|landing|situs|website|web\b|halaman|aplikasi|toko|dashboard|portofolio|portfolio|form|desain|redesign|repo|komponen)/i.test(userPrompt || '')) {
+    emit({ type: 'stage_done', stage: 'arsitek', label: 'Jawaban', text: rawPlan.slice(0, 1500) });
+    return { text: rawPlan || 'Halo! Ada yang bisa kubantu?', transcript: [], chatOnly: true };
   }
   transcript.push({ stage: 'arsitek', model: r1.model, text: rawPlan.slice(0, 1500) });
   emit({ type: 'stage_done', stage: 'arsitek', label: 'Arsitek', text: rawPlan.slice(0, 900) });
@@ -876,10 +909,10 @@ export async function onRequestPost({ request, env }) {
     for (let sHop = 0; sHop <= 4; sHop++) {
       r = null;
       if (orKey && !hasImages) {
-        r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
+        r = await tryOpenRouter(orKey, orMessages([{ role: 'system', content: SINGLE_SYSTEM_PROMPT }, ...workMessages]), oTools);
       }
       if ((!r || r.error) && apiKey) {
-        const { systemInstruction, contents } = toGeminiPayload(workMessages);
+        const { systemInstruction, contents } = toGeminiPayload([{ role: 'system', content: SINGLE_SYSTEM_PROMPT }, ...workMessages]);
         r = await tryModels(apiKey, systemInstruction, contents, gTools);
       }
       if (!r || r.error) break; // error/kutipan ditangani di bawah seperti biasa
