@@ -95,7 +95,11 @@ CREATE TABLE IF NOT EXISTS topup_orders (
   xendit_id TEXT,
   invoice_url TEXT,
   created_at TEXT DEFAULT (datetime('now')),
-  paid_at TEXT
+  paid_at TEXT,
+  user_id TEXT,
+  qr_url TEXT,
+  bill_total REAL,
+  expires_at TEXT
 );
 
 -- ============================================================================

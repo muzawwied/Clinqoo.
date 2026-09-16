@@ -57,6 +57,25 @@ async function claimOrder(db, orderId) {
   return (r.meta?.changes || 0) > 0;
 }
 
+async function ensureTopupTable(db) {
+  // Tabel topup_orders kini dibuat runtime (sebelumnya hanya ada di schema.sql —
+  // produksi bisa kehilangan tabel ini dan INSERT QRIS gagal "no such table").
+  await db.prepare(`CREATE TABLE IF NOT EXISTS topup_orders (
+    id TEXT PRIMARY KEY,
+    amount REAL NOT NULL,
+    method TEXT,
+    status TEXT DEFAULT 'pending',
+    xendit_id TEXT,
+    invoice_url TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    paid_at TEXT,
+    user_id TEXT,
+    qr_url TEXT,
+    bill_total REAL,
+    expires_at TEXT
+  )`).run();
+}
+
 async function ensureQrisColumns(db) {
   // Kolom netral (provider-agnostic); migrasi dari kolom lama pakasir_* bila ada
   try { await db.prepare('ALTER TABLE topup_orders ADD COLUMN qr_url TEXT').run(); } catch (e) {}
@@ -201,6 +220,7 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'buatqris_error', message: (pay && pay.message) || (pay && pay.msg) || 'Gagal membuat QRIS di BuatQris (cek saldo/akun/konfigurasi API).' }, 502);
   }
 
+  await ensureTopupTable(db);
   await ensureQrisColumns(db);
 
   // total tagihan (jika BuatQris menambahkan kode unik, pakai nilai dari mereka)
