@@ -1759,16 +1759,23 @@
 
     async function checkPlanThenOpenGithub() {
       const apiBase = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+      // Popup carousel paket HANYA untuk user Starter (terverifikasi).
+      // Paket sudah diketahui dari init halaman -> putuskan instan tanpa kedipan popup.
+      if (window.clinqooEditorPlan && window.clinqooEditorPlan !== 'Starter') { openCreateModal('github'); return; }
+      if (window.clinqooEditorPlan === 'Starter') {
+        const c2 = readSubCache();
+        showUpgradePlansModal(c2 && c2.plan ? { plan: 'Starter', billingCycle: c2.billingCycle } : null);
+        return;
+      }
       const cached = readSubCache();
       const fresh = cached && cached.plan && (Date.now() - (cached.ts || 0)) < SUB_CACHE_TTL;
-      // jalur cepat: cache masih segar -> modal carousel langsung tampil tanpa nunggu server
       if (fresh) {
         if (cached.plan !== 'Starter') { openCreateModal('github'); return; }
         showUpgradePlansModal({ plan: cached.plan, billingCycle: cached.billingCycle });
-      } else {
-        showUpgradePlansModal(null); // tampil instan dulu (default Starter), data disegarkan di bawah
+        return;
       }
-      // revalidasi di background: cache diperbarui & modal ditutup bila paket sudah Pro
+      // Cache basi & paket belum diketahui: tanya server dulu, baru putuskan.
+      // (Sebelumnya popup tampil dulu utk semua user lalu ditutup bila ternyata Pro -> kedip.)
       try {
         const token = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || '';
         const res = await fetch(apiBase + '/subscription', { cache: 'no-store', headers: token ? { Authorization: 'Bearer ' + token } : {} });
@@ -1776,14 +1783,14 @@
           const d = await res.json();
           if (d && d.plan) {
             writeSubCache(d);
-            if (d.plan !== 'Starter') {
-              var m0 = document.getElementById('upgrade-plans-modal');
-              if (m0) m0.remove();
-              openCreateModal('github');
-            }
+            window.clinqooEditorPlan = d.plan;
+            if (d.plan !== 'Starter') { openCreateModal('github'); } else { showUpgradePlansModal({ plan: d.plan, billingCycle: d.billingCycle }); }
+            return;
           }
         }
       } catch (e) {}
+      // Server tidak terjangkau: fail-open ke modal impor (paket tetap divalidasi backend saat impor).
+      openCreateModal('github');
     }
 
     // Popup daftar paket (carousel 3 kartu, bisa digeser/swap) untuk fitur Impor GitHub.
