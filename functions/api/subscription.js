@@ -1,5 +1,5 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
-import { ensurePromoTable, PROMO_EARLY } from './promo.js';
+import { ensurePromoTable, PROMO_EARLY, isPromoNewUser } from './promo.js';
 import { getMonthlyDeployCount } from './plan-helpers.js';
 import { getCpConnection, mirroredBalance, mirrorDelta } from './clinqoopay-helpers.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent } from './notify-helpers.js';
@@ -172,7 +172,8 @@ export async function onRequestPost({ request, env }) {
           await ensurePromoTable(db);
           promoUserKey = 'u' + user.id;
           const already = await db.prepare('SELECT 1 FROM promo_early_pro WHERE user_key = ?').bind(promoUserKey).first();
-          if (!already) {
+          const newUser = await isPromoNewUser(db, user);
+          if (!already && newUser) {
             const cnt = await db.prepare('SELECT COUNT(*) AS c FROM promo_early_pro').first();
             if (((cnt && cnt.c) || 0) < PROMO_EARLY.maxUsers) {
               const ins = await db.prepare('INSERT OR IGNORE INTO promo_early_pro (user_key, claimed_at) VALUES (?, ?)').bind(promoUserKey, new Date().toISOString()).run();

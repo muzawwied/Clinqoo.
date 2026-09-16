@@ -1536,6 +1536,7 @@ function tmShowCollabPlansModal(sub) {
             var apiBase = (['clincoo-be2.pages.dev', 'localhost', '127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
             fetch(apiBase + '/api/promo', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (p) {
                 if (!p || p.active !== true || p.remaining <= 0) return;
+                if (p.loggedIn && !p.eligible) return; // user lama / sudah klaim: banner disembunyikan
                 var rem = document.getElementById('promo-early-remaining');
                 if (rem) rem.textContent = String(p.remaining);
                 var cta = document.getElementById('promo-early-cta');

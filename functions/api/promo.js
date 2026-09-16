@@ -12,6 +12,18 @@ const CORS = {
 };
 
 export const PROMO_EARLY = { plan: 'Pro', billing: 'Bulanan', price: 5000, original: 49000, maxUsers: 100 };
+// Promo hanya utk USER BARU: akun yang terdaftar mulai 17 Sep 2026 00:00 WIB (user lama tidak eligible).
+export const PROMO_START = '2026-09-16T17:00:00.000Z';
+
+export async function isPromoNewUser(db, user) {
+  if (!user || !user.id) return false;
+  try {
+    const row = await db.prepare('SELECT created_at FROM auth_users WHERE id = ?').bind(user.id).first();
+    if (!row || !row.created_at) return false;
+    const d = new Date(String(row.created_at).replace(' ', 'T') + (String(row.created_at).includes('Z') ? '' : 'Z'));
+    return !isNaN(d.getTime()) && d.getTime() >= new Date(PROMO_START).getTime();
+  } catch (e) { return false; }
+}
 
 export async function ensurePromoTable(db) {
   await db.prepare('CREATE TABLE IF NOT EXISTS promo_early_pro (user_key TEXT PRIMARY KEY, claimed_at TEXT)').run();
@@ -32,9 +44,11 @@ export async function onRequestGet({ request, env }) {
     const user = await currentUser(env, request);
     const userKey = user ? ('u' + user.id) : null;
     let hasClaimed = false;
+    let newUser = false;
     if (userKey) {
       const row = await db.prepare('SELECT 1 FROM promo_early_pro WHERE user_key = ?').bind(userKey).first();
       hasClaimed = !!row;
+      newUser = await isPromoNewUser(db, user);
     }
     return json({
       success: true,
@@ -49,7 +63,8 @@ export async function onRequestGet({ request, env }) {
       remaining,
       loggedIn: !!userKey,
       hasClaimed,
-      eligible: !!(userKey && !hasClaimed && remaining > 0)
+      newUser,
+      eligible: !!(userKey && newUser && !hasClaimed && remaining > 0)
     });
   } catch (e) {
     return json({ error: e.message }, 500);
