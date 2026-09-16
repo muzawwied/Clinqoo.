@@ -2,7 +2,7 @@
 
 Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (Grok, AI lain, human operator) yang bekerja di ekosistem Clinqoo.
 
-> Update file ini setiap kali agent melakukan audit, fix, atau menemukan insight penting.
+> **Aturan**: Setiap agent **wajib** membaca file ini di awal sesi dan meng-update status setelah bekerja.
 
 ---
 
@@ -16,21 +16,22 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ### Channel lain yang tersedia
 - GitHub Issues di repo `muzawwied/Clinqoo.`
-- Automation hourly audit (task: Clinqoo Hourly Audit)
-- Email laporan: muzawwied@gmail.com
+- Automation hourly audit (taskId: `d0562740-c5bd-4743-b98d-8c2d3dcf4077`)
+- Email laporan: muzawwied@gmail.com / muzawwied@gmaio.com
 - MCP / Clinqoo connector tools (list_repos, read_file, write_file, dll)
 
 ---
 
-## Status Saat Ini (update terakhir)
+## Status Saat Ini (update terakhir: 2026-09-16 19:08 WIB)
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (upsertOauthUser) | ⚠️ Bug kritis masih ada | User baru Google/GitHub gagal karena tidak ada INSERT user |
+| Auth OAuth (`upsertOauthUser`) | ⚠️ Bug kritis masih ada | User baru Google/GitHub gagal karena tidak ada INSERT user |
 | Encoding karakter | ⚠️ Mojibake di beberapa file backend | |
 | Schema D1 vs runtime | ⚠️ Tidak sinkron | |
-| Editor full-stack | ✅ fullstack.js ditambahkan | Database panel + API Tester (file terpisah) |
-| Hourly audit automation | ✅ Aktif | Setiap jam |
+| Editor full-stack | ✅ fullstack.js sudah ada | Database panel + API Tester (file terpisah). Perlu `<script src="fullstack.js" defer></script>` di index.html |
+| Hourly audit automation | ✅ Aktif | Setiap 1 jam (Asia/Jakarta). Next run ~ top of hour |
+| Wiki / AGENTS.md | ✅ Aktif & dipantau | File ini selalu dicek di awal sesi |
 
 ---
 
@@ -39,9 +40,10 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 ### 2026-09-16 — Grok (xAI)
 - Melakukan audit menyeluruh Clinqoo.
 - Menemukan bug kritis di `functions/api/auth/shared.js` → `upsertOauthUser`.
-- Membuat automation hourly audit.
+- Membuat automation hourly audit (taskId: d0562740-c5bd-4743-b98d-8c2d3dcf4077).
 - Menambahkan `fullstack.js` ke Clinqoo-Editor (Database + API Tester) tanpa merusak style.
 - Membuat file ini sebagai wiki/board kolaborasi.
+- **19:08 WIB**: Konfirmasi wiki + automation selalu dicek. Update status & encoding di file ini.
 
 ---
 
@@ -51,7 +53,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 2. Normalisasi encoding file backend ke UTF-8 murni.
 3. Update `schema.sql` agar sesuai production.
 4. Setelah fix OAuth, uji login Google & GitHub.
-5. Pertimbangkan menambahkan halaman wiki GitHub resmi (Settings → Features → Wikis) jika ingin format wiki klasik.
+5. Tambahkan baris `<script src="fullstack.js" defer></script>` ke `index.html` di Clinqoo-Editor agar panel Database & API Tester otomatis muncul.
 
 ---
 
@@ -68,3 +70,4 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 ---
 
 *File ini hidup. Silakan diedit oleh agent manapun yang memiliki akses write ke repo.*
+*Wiki + automation selalu dicek di setiap sesi.*
