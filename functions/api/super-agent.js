@@ -1,12 +1,14 @@
-// Clinqoo Super Agent v2
-// Orchestrates a durable multi-role pipeline on top of the existing agent_tasks/AGENT_FLOW.
-// POST /api/super-agent { action:'start', goal, project_id?, budget_seconds? }
-// GET  /api/super-agent?task_id=... -> status + events
+// Cloudflare Pages Function — /api/super-agent
+// Backend-only Super Agent facade. Frontend is intentionally untouched.
+// Reuses the existing /api/agent durable engine so auth, quota, retries,
+// persistence and Cloudflare Worker/Workflow execution stay in one place.
 //
-// The endpoint intentionally reuses the existing durable Agent Worker instead of creating
-// a second execution engine. This keeps retries/resume semantics in one place.
+// POST /api/super-agent
+//   { action: 'start', goal, project_id?, budget_seconds? }
+// GET /api/super-agent?task_id=...
+// POST /api/super-agent { action: 'resume', task_id, budget_seconds? }
 
-import { currentUser } from './user-scope.js';
+import { onRequestPost as agentPost, onRequestGet as agentGet } from './agent.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -14,167 +16,83 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-const DAILY_LIMIT = 25;
-const ADMIN_DAILY_LIMIT = 500;
-const ADMIN_EMAILS = new Set(['muzawwied@gmail.com']);
-const MAX_GOAL = 12000;
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS }
-  });
+function withCors(response) {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
+  return new Response(response.body, { status: response.status, headers });
 }
 
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS });
 }
 
-async function quotaSpend(db, user, cost = 1) {
-  const day = new Date().toISOString().slice(0, 10);
-  const limit = ADMIN_EMAILS.has(String(user.email || '').toLowerCase())
-    ? ADMIN_DAILY_LIMIT : DAILY_LIMIT;
-  await db.prepare(`CREATE TABLE IF NOT EXISTS ai_quota (
-    user_key TEXT, day TEXT, count INTEGER,
-    PRIMARY KEY (user_key, day)
-  )`).run();
-  const row = await db.prepare(
-    'SELECT count FROM ai_quota WHERE user_key = ? AND day = ?'
-  ).bind(user.key, day).first();
-  const current = Number(row?.count || 0);
-  if (current + cost > limit) return false;
-  await db.prepare(`INSERT INTO ai_quota (user_key, day, count)
-    VALUES (?, ?, ?)
-    ON CONFLICT(user_key, day) DO UPDATE SET count = count + ?`
-  ).bind(user.key, day, cost, cost).run();
-  return true;
-}
-
-function superPlan(goal) {
+function buildSuperGoal(goal) {
   return [
-    {
-      title: 'Strategist — pahami tujuan dan definisikan acceptance criteria',
-      detail: `Peran STRATEGIST. Uraikan tujuan pengguna menjadi masalah yang harus diselesaikan. Tetapkan output final yang konkret, asumsi yang dipakai, batasan, risiko, dan acceptance criteria. Tujuan asli: ${goal}`
-    },
-    {
-      title: 'Researcher — kumpulkan fakta, opsi, dan pendekatan',
-      detail: `Peran RESEARCHER. Gunakan pengetahuan model yang tersedia untuk mengumpulkan fakta relevan, alternatif solusi, dependensi, dan trade-off. Jangan mengarang sumber atau fakta terbaru. Tandai bagian yang perlu verifikasi eksternal. Tujuan asli: ${goal}`
-    },
-    {
-      title: 'Builder — susun solusi yang dapat langsung dipakai',
-      detail: `Peran BUILDER/CODER. Berdasarkan strategi dan hasil research sebelumnya, bangun solusi konkret. Jika berupa software, berikan arsitektur, struktur file, kode siap pakai, konfigurasi, dan langkah implementasi. Jika bukan software, hasilkan deliverable final yang sesuai. Hindari placeholder yang tidak perlu. Tujuan asli: ${goal}`
-    },
-    {
-      title: 'Reviewer — audit hasil dan perbaiki kelemahan',
-      detail: `Peran REVIEWER/CRITIC. Audit semua hasil sebelumnya terhadap acceptance criteria. Cari bug, asumsi lemah, kontradiksi, keamanan, edge case, dan bagian yang belum selesai. Lakukan perbaikan konkret; jangan hanya memberi kritik. Tujuan asli: ${goal}`
-    },
-    {
-      title: 'Finalizer — satukan hasil menjadi deliverable final',
-      detail: `Peran FINALIZER. Satukan hasil terbaik dari seluruh peran menjadi output final yang koheren. Pastikan acceptance criteria terpenuhi, beri instruksi penggunaan yang jelas, dan nyatakan apa yang masih memerlukan verifikasi manusia. Tujuan asli: ${goal}`
-    }
-  ];
+    'SUPER AGENT MODE — ORKESTRASI MULTI-ROLE.',
+    '',
+    'Tujuan utama pengguna:',
+    goal,
+    '',
+    'Kerjakan sebagai satu pipeline autonomous dengan lima peran berikut secara berurutan:',
+    '1. STRATEGIST: pahami tujuan, constraint, acceptance criteria, risiko, dan rencana eksekusi.',
+    '2. RESEARCHER: kumpulkan fakta/opsi yang relevan, cek dependensi, tandai informasi yang perlu verifikasi dan jangan mengarang sumber.',
+    '3. BUILDER: hasilkan implementasi/deliverable konkret yang siap dipakai. Untuk software, sertakan arsitektur, struktur file, konfigurasi, dan kode lengkap yang diperlukan.',
+    '4. REVIEWER: audit hasil terhadap acceptance criteria, cari bug, security issue, edge case, kontradiksi, dan lakukan perbaikan konkret.',
+    '5. FINALIZER: satukan hasil terbaik menjadi deliverable final yang koheren, ringkas, dan siap digunakan.',
+    '',
+    'ATURAN ORKESTRASI:',
+    '- Setiap fase harus menggunakan hasil fase sebelumnya.',
+    '- Jangan berhenti hanya karena satu pendekatan gagal; cari alternatif yang masuk akal.',
+    '- Jangan mengklaim tindakan eksternal sudah dilakukan jika memang belum dilakukan.',
+    '- Jangan mengarang hasil tool, sumber, angka, atau file.',
+    '- Jika pekerjaan membutuhkan tindakan yang tidak tersedia pada backend agent, keluarkan instruksi/artefak yang paling konkret dan tandai keterbatasannya.',
+    '- Simpan konteks penting dari fase sebelumnya dalam transcript agar task dapat di-resume.',
+    '- Jawaban final harus menyebutkan apa yang selesai, apa yang belum, dan verifikasi yang masih diperlukan.',
+    '',
+    'Jalankan pipeline ini secara autonomous; pengguna tidak perlu memberi instruksi per fase.'
+  ].join('\n');
 }
 
-function taskJson(t) {
-  return {
-    id: t.id,
-    project_id: t.project_id,
-    goal: t.goal,
-    status: t.status,
-    plan: typeof t.plan === 'string' ? JSON.parse(t.plan || '[]') : (t.plan || []),
-    current_step: Number(t.current_step || 0),
-    result: t.result || null,
-    error: t.error || null,
-    created_at: t.created_at,
-    updated_at: t.updated_at
-  };
-}
-
-async function loadTask(db, id, userKey) {
-  return db.prepare(
-    'SELECT * FROM agent_tasks WHERE id = ? AND user_key = ?'
-  ).bind(id, userKey).first();
-}
-
-export async function onRequestGet({ env, request }) {
-  const user = await currentUser(env, request);
-  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
-  const id = new URL(request.url).searchParams.get('task_id') || '';
-  if (!id) return json({ error: 'task_id wajib' }, 400);
-  try {
-    const t = await loadTask(env.DB, id, 'u' + user.id);
-    if (!t) return json({ error: 'Task tidak ditemukan' }, 404);
-    const events = await env.DB.prepare(
-      'SELECT kind, text, created_at FROM agent_events WHERE task_id = ? AND user_key = ? ORDER BY id ASC LIMIT 100'
-    ).bind(id, 'u' + user.id).all();
-    return json({ ok: true, task: taskJson(t), events: events.results || [] });
-  } catch (e) {
-    return json({ error: 'Server error: ' + e.message }, 500);
-  }
+async function readJson(response) {
+  try { return await response.clone().json(); } catch { return null; }
 }
 
 export async function onRequestPost({ env, request }) {
-  const user0 = await currentUser(env, request);
-  if (!user0) return json({ error: 'Login diperlukan', need_login: true }, 401);
-  const user = { id: user0.id, key: 'u' + user0.id, email: user0.email };
+  let body;
+  try { body = await request.json(); }
+  catch { return new Response(JSON.stringify({ error: 'Body JSON tidak valid' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } }); }
 
-  const body = await request.json().catch(() => null);
-  if (!body || body.action !== 'start') {
-    return json({ error: 'action harus start' }, 400);
+  if (body?.action === 'start') {
+    const goal = String(body.goal || '').trim();
+    if (goal.length < 3) return new Response(JSON.stringify({ error: 'Tulis tujuan tugas (minimal 3 karakter).' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+    if (goal.length > 12000) return new Response(JSON.stringify({ error: 'Tujuan terlalu panjang (maksimal 12.000 karakter).' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+    // Delegasikan ke engine agent yang sudah dipakai Clinqoo.
+    // Ini sengaja tidak membuat tabel/kuota/worker kedua.
+    const forwarded = new Request(request.url.replace('/api/super-agent', '/api/agent'), {
+      method: 'POST',
+      headers: request.headers,
+      body: JSON.stringify({
+        action: body.background === false ? 'start' : 'start_bg',
+        goal: buildSuperGoal(goal),
+        project_id: body.project_id || undefined,
+        budget_seconds: body.budget_seconds || undefined,
+        wa_number: body.wa_number || undefined
+      })
+    });
+    return withCors(await agentPost({ env, request: forwarded }));
   }
 
-  const goal = String(body.goal || '').trim();
-  if (goal.length < 3) return json({ error: 'Tujuan minimal 3 karakter.' }, 400);
-  if (goal.length > MAX_GOAL) return json({ error: 'Tujuan terlalu panjang.' }, 400);
-
-  if (!(await quotaSpend(env.DB, user, 1))) {
-    return json({
-      quota_exhausted: true,
-      error: 'Kuota AI Clinqoo hari ini sudah habis.'
-    }, 429);
+  if (body?.action === 'resume' || body?.action === 'status') {
+    return withCors(await agentPost({ env, request }));
   }
 
-  const projectId = String(body.project_id || '').trim() || null;
-  if (projectId) {
-    const project = await env.DB.prepare(
-      'SELECT id FROM user_projects WHERE id = ? AND user_id = ?'
-    ).bind(projectId, user.id).first();
-    if (!project) return json({ error: 'Proyek tidak ditemukan atau bukan milik Anda.' }, 403);
-  }
+  return new Response(JSON.stringify({
+    error: 'action harus start, resume, atau status'
+  }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+}
 
-  const now = new Date().toISOString();
-  const id = 'sup_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  const plan = superPlan(goal).map(x => ({ ...x, done: false }));
-
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS agent_tasks (
-    id TEXT PRIMARY KEY, user_key TEXT, project_id TEXT, goal TEXT,
-    status TEXT, plan TEXT, transcript TEXT, current_step INTEGER DEFAULT 0,
-    result TEXT, error TEXT, created_at TEXT, updated_at TEXT
-  )`).run();
-
-  await env.DB.prepare(`INSERT INTO agent_tasks
-    (id,user_key,project_id,goal,status,plan,transcript,current_step,result,error,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
-  ).bind(
-    id, user.key, projectId, goal, 'queued', JSON.stringify(plan), '[]', 0,
-    null, null, now, now
-  ).run();
-
-  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS agent_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    task_id TEXT, user_key TEXT, kind TEXT, text TEXT, created_at TEXT
-  )`).run();
-  await env.DB.prepare(
-    'INSERT INTO agent_events (task_id,user_key,kind,text,created_at) VALUES (?,?,?,?,?)'
-  ).bind(id, user.key, 'super_queued', 'Super Agent v2 masuk antrean: Strategist → Researcher → Builder → Reviewer → Finalizer.', now).run();
-
-  return json({
-    ok: true,
-    background: true,
-    task: taskJson({
-      id, project_id: projectId, goal, status: 'queued', plan,
-      current_step: 0, result: null, error: null, created_at: now, updated_at: now
-    }),
-    message: 'Super Agent masuk antrean. Existing Agent Worker akan menjalankan pipeline secara durable.'
-  });
+export async function onRequestGet({ env, request }) {
+  // Status task Super Agent menggunakan task store /api/agent yang sama.
+  return withCors(await agentGet({ env, request }));
 }
