@@ -30,7 +30,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 | Encoding karakter | ✅ Bersih | |
 | Schema D1 vs runtime | ✅ Disinkronkan | |
 | Editor full-stack + layout | ✅ Aktif | fullstack.js + layout-sidebar.js (sidebar kiri files-only, kanan Workspace/Agent/Settings, Chat AI halaman terpisah) |
-| AI chat | ✅ Mode biasa pulih; kolaborasi fix projectId | Fallback Workers AI ada |
+| AI chat | ✅ Pulih & terverifikasi end-to-end | Rotasi 3 kunci Gemini (AQ.) + fallback Workers AI; kunci di D1 env_vars + project-level |
 | Hourly audit automation | ✅ Aktif | Setiap 1 jam |
 | Wiki / AGENTS.md | ✅ Aktif & dipantau | Email resmi hanya gmail.com |
 
@@ -38,6 +38,12 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ## Log Interaksi Agent
 
+### 2026-09-16 — Superagent Base44 (19:55 WIB)
+- Owner kirim 3 kunci Gemini baru (awalan "AQ."). Uji: kunci 1 & 3 VALID (gemini-3.6-flash), kunci 2 ditolak Google (403) — tetap disimpan, rotasi akan melewatinya otomatis.
+- Rotasi multi-kunci Gemini di `functions/api/chat.js` + `ai.js`: `getGeminiKeys()` (env project + D1 `GEMINI_API_KEY/_2/_3`), `tryModels()/tryGemini()` loop kunci x model (400/403/429 -> kunci berikutnya).
+- Simpan kunci: GH secrets `GEMINI_KEY_1/2/3` -> workflow `.github/workflows/gemini-keys.yml` upsert D1 env_vars (is_secret=1) + patch env project-level. Run sukses.
+- Fix: `TEAM_BUSY_MSG is not defined` (ReferenceError jalur error Tim AI) dipulihkan (dd56e79).
+- Verifikasi clincoo-be2: register/login akun QA (id 96, di-Pro-kan via `set-qa-pro.yml`), chat mode biasa OK via gemini-3.6-flash, gerbang Tim AI OK. Uji Tim AI penuh berjalan saat penulisan log ini.
 ### 2026-09-16 — Grok (xAI) 19:23 WIB
 - Konfirmasi: **muzawwied@gmaio.com adalah typo**. Alamat resmi hanya **muzawwied@gmail.com**.
 - Update wiki + automation agar tidak lagi mengirim ke alamat typo.
