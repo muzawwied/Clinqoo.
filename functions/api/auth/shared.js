@@ -115,10 +115,14 @@ export async function upsertOauthUser(db, provider, providerAccountId, email, na
   } else {
     user = email ? await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first() : null;
     if (!user) {
+      // User baru via OAuth: BUAT dulu baris auth_users, lalu ambil kembali (fix: sebelumnya tidak ada INSERT).
+      await db.prepare("INSERT INTO auth_users (name, email, password_hash, avatar_url) VALUES (?, ?, '', ?)")
+        .bind(name || '', email ? email.toLowerCase() : null, avatarUrl || '').run();
       user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first();
       // Real-time: sinkron daftar user ke GitHub saat user baru dibuat (best-effort).
       if (env) { try { const { syncUserReport } = await import('../user-report-sync.js'); await syncUserReport(env, { timeoutMs: 9000 }); } catch (e2) {} }
     }
+    if (!user) throw new Error('Gagal membuat user OAuth (email tidak tersedia)');
     await db.prepare('INSERT OR IGNORE INTO auth_oauth_accounts (user_id, provider, provider_account_id) VALUES (?, ?, ?)')
       .bind(user.id, provider, String(providerAccountId)).run();
   }

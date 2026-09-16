@@ -61,6 +61,7 @@ export async function onRequestGet({ request, env }) {
       return j({ transactions: txs.results || [] });
     }
 
+    if (!user) return j({ balance: 0 }); // tanpa login: jangan bocorkan saldo legacy bersama (key non-scoped)
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const row = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
     // ClinqooPay: dompet terhubung → saldo live dari web Wallet (mirroring 2 arah, frontend tidak berubah)
