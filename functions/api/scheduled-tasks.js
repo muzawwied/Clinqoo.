@@ -188,7 +188,7 @@ async function runTask(env, db, task) {
             user.name || '',
             `Tugas “${task.name || 'Tugas'}” baru saja dijalankan otomatis oleh Clinqoo. Berikut hasilnya:`,
             [['Hasil', toEmailHtml(output.length > 800 ? output.slice(0, 800) + '…' : output)], ['Jadwal', escHtml(task.when_description || (task.schedule_type === 'interval_minutes' ? 'setiap ' + (task.interval_minutes || 15) + ' menit' : 'setiap hari ' + (task.time_wib || '') + ' WIB'))]],
-            'Lihat tugas', 'https://clincoo.pages.dev/akun/tugas-terjadwal.html',
+            'Lihat tugas', 'https://clinqoo.pages.dev/akun/tugas-terjadwal.html',
             'Email ini dikirim otomatis karena Anda mengaktifkan notifikasi email pada tugas ini.'
           )
         });
