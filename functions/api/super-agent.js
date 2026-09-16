@@ -2,11 +2,6 @@
 // Backend-only Super Agent facade. Frontend is intentionally untouched.
 // Reuses the existing /api/agent durable engine so auth, quota, retries,
 // persistence and Cloudflare Worker/Workflow execution stay in one place.
-//
-// POST /api/super-agent
-//   { action: 'start', goal, project_id?, budget_seconds? }
-// GET /api/super-agent?task_id=...
-// POST /api/super-agent { action: 'resume', task_id, budget_seconds? }
 
 import { onRequestPost as agentPost, onRequestGet as agentGet } from './agent.js';
 
@@ -15,6 +10,10 @@ const CORS = {
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
+
+function json(obj, status = 200) {
+  return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', ...CORS } });
+}
 
 function withCors(response) {
   const headers = new Headers(response.headers);
@@ -28,47 +27,46 @@ export async function onRequestOptions() {
 
 function buildSuperGoal(goal) {
   return [
-    'SUPER AGENT MODE — ORKESTRASI MULTI-ROLE.',
+    'SUPER_AGENT_V2 = TRUE',
+    'MODE: autonomous multi-role orchestration',
     '',
-    'Tujuan utama pengguna:',
-    goal,
+    'TUJUAN UTAMA PENGGUNA:', goal,
     '',
-    'Kerjakan sebagai satu pipeline autonomous dengan lima peran berikut secara berurutan:',
-    '1. STRATEGIST: pahami tujuan, constraint, acceptance criteria, risiko, dan rencana eksekusi.',
-    '2. RESEARCHER: kumpulkan fakta/opsi yang relevan, cek dependensi, tandai informasi yang perlu verifikasi dan jangan mengarang sumber.',
-    '3. BUILDER: hasilkan implementasi/deliverable konkret yang siap dipakai. Untuk software, sertakan arsitektur, struktur file, konfigurasi, dan kode lengkap yang diperlukan.',
-    '4. REVIEWER: audit hasil terhadap acceptance criteria, cari bug, security issue, edge case, kontradiksi, dan lakukan perbaikan konkret.',
-    '5. FINALIZER: satukan hasil terbaik menjadi deliverable final yang koheren, ringkas, dan siap digunakan.',
+    'WAJIB BUAT DAN JALANKAN TEPAT 5 FASE BERURUTAN:',
+    '1) STRATEGIST — definisikan outcome, constraint, acceptance criteria, risiko, dan execution plan.',
+    '2) RESEARCHER — kumpulkan fakta, dependency, opsi, dan bukti yang relevan. Jangan mengarang sumber atau fakta.',
+    '3) BUILDER — ubah hasil riset menjadi deliverable konkret. Untuk software: arsitektur, struktur file, konfigurasi, dan implementasi lengkap yang diperlukan.',
+    '4) REVIEWER — uji deliverable terhadap acceptance criteria; cari bug, security issue, edge case, konflik, dan kekurangan; lakukan revisi konkret.',
+    '5) FINALIZER — integrasikan hasil yang telah direview menjadi output final yang koheren dan siap digunakan.',
     '',
-    'ATURAN ORKESTRASI:',
-    '- Setiap fase harus menggunakan hasil fase sebelumnya.',
-    '- Jangan berhenti hanya karena satu pendekatan gagal; cari alternatif yang masuk akal.',
-    '- Jangan mengklaim tindakan eksternal sudah dilakukan jika memang belum dilakukan.',
-    '- Jangan mengarang hasil tool, sumber, angka, atau file.',
-    '- Jika pekerjaan membutuhkan tindakan yang tidak tersedia pada backend agent, keluarkan instruksi/artefak yang paling konkret dan tandai keterbatasannya.',
-    '- Simpan konteks penting dari fase sebelumnya dalam transcript agar task dapat di-resume.',
-    '- Jawaban final harus menyebutkan apa yang selesai, apa yang belum, dan verifikasi yang masih diperlukan.',
+    'KONTRAK FASE:',
+    '- Fase berikutnya WAJIB menggunakan hasil fase sebelumnya.',
+    '- Jangan mengulang pekerjaan tanpa alasan; lanjutkan dari artefak terakhir.',
+    '- Jika pendekatan gagal, gunakan alternatif yang masuk akal dan catat keterbatasannya.',
+    '- Jangan mengklaim file dibuat, deploy dilakukan, API dipanggil, atau tindakan eksternal berhasil jika backend belum melakukannya.',
+    '- Jangan mengarang tool, sumber, output tool, kredensial, atau status sistem.',
+    '- Semua artefak penting harus ditulis lengkap di output fase agar dapat dipakai fase berikutnya.',
+    '- Finalizer wajib membedakan: SELESAI, BELUM DILAKUKAN, dan PERLU VERIFIKASI.',
     '',
-    'Jalankan pipeline ini secara autonomous; pengguna tidak perlu memberi instruksi per fase.'
+    'KETERBATASAN WORKSPACE:',
+    'Backend Super Agent tidak mengklaim memiliki akses langsung ke browser/editor user. Jika tindakan hanya tersedia melalui tool frontend/client, hasilkan artefak atau instruksi eksekusi paling konkret dan nyatakan tindakan tersebut masih menunggu tool client.',
+    '',
+    'Jalankan seluruh pipeline secara autonomous tanpa meminta user memberi instruksi di antara fase.'
   ].join('\n');
-}
-
-async function readJson(response) {
-  try { return await response.clone().json(); } catch { return null; }
 }
 
 export async function onRequestPost({ env, request }) {
   let body;
   try { body = await request.json(); }
-  catch { return new Response(JSON.stringify({ error: 'Body JSON tidak valid' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } }); }
+  catch { return json({ error: 'Body JSON tidak valid' }, 400); }
 
-  if (body?.action === 'start') {
+  const action = body?.action || 'start';
+
+  if (action === 'start') {
     const goal = String(body.goal || '').trim();
-    if (goal.length < 3) return new Response(JSON.stringify({ error: 'Tulis tujuan tugas (minimal 3 karakter).' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-    if (goal.length > 12000) return new Response(JSON.stringify({ error: 'Tujuan terlalu panjang (maksimal 12.000 karakter).' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+    if (goal.length < 3) return json({ error: 'Tulis tujuan tugas (minimal 3 karakter).' }, 400);
+    if (goal.length > 12000) return json({ error: 'Tujuan terlalu panjang (maksimal 12.000 karakter).' }, 400);
 
-    // Delegasikan ke engine agent yang sudah dipakai Clinqoo.
-    // Ini sengaja tidak membuat tabel/kuota/worker kedua.
     const forwarded = new Request(request.url.replace('/api/super-agent', '/api/agent'), {
       method: 'POST',
       headers: request.headers,
@@ -83,16 +81,10 @@ export async function onRequestPost({ env, request }) {
     return withCors(await agentPost({ env, request: forwarded }));
   }
 
-  if (body?.action === 'resume' || body?.action === 'status') {
-    return withCors(await agentPost({ env, request }));
-  }
-
-  return new Response(JSON.stringify({
-    error: 'action harus start, resume, atau status'
-  }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
+  if (action === 'resume' || action === 'status') return withCors(await agentPost({ env, request }));
+  return json({ error: 'action harus start, resume, atau status' }, 400);
 }
 
 export async function onRequestGet({ env, request }) {
-  // Status task Super Agent menggunakan task store /api/agent yang sama.
   return withCors(await agentGet({ env, request }));
 }
