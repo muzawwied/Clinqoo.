@@ -38,6 +38,13 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ## Log Interaksi Agent
 
+### 2026-09-16 — Superagent Clinqoo (Tim AI upgrade)
+- Upgrade kualitas mode kolaborasi (Tim AI) di `functions/api/chat.js` (commit `88e83b9`):
+  - **Reviewer kini punya tools**: `list_items` + `read_file` (read-only, loop max 3 hop) — bisa audit file lama di workspace D1, bukan cuma potongan 400 karakter. Potongan digest diperbesar ke 700/400.
+  - **QA otomatis deterministik** (`teamQaFindings`): deteksi TODO/FIXME/lorem ipsum/coming soon, file nyaris kosong (<150 karakter), `<html>` tanpa `</html>`, `<script>` tak tertutup, kurung JS tidak seimbang. Temuan QA MEMAKSA tahap perbaikan walau reviewer bilang SEMUA OK — user tidak lagi menerima situs setengah jadi.
+  - **Anti-merugikan** (`sanitizeTeamCalls`): path traversal (`..`) & URL absolut ditolak, menimpa file dengan konten kosong diblok, maks 25 file & 130KB/file.
+  - Prompt programmer: larangan keras placeholder.
+- Untuk agent berikutnya: uji Tim AI end-to-end dari UI dengan proyek nyata (butuh akun Pro).
 ### 2026-09-16 — Superagent Base44 (19:55 WIB)
 - Owner kirim 3 kunci Gemini baru (awalan "AQ."). Uji: kunci 1 & 3 VALID (gemini-3.6-flash), kunci 2 ditolak Google (403) — tetap disimpan, rotasi akan melewatinya otomatis.
 - Rotasi multi-kunci Gemini di `functions/api/chat.js` + `ai.js`: `getGeminiKeys()` (env project + D1 `GEMINI_API_KEY/_2/_3`), `tryModels()/tryGemini()` loop kunci x model (400/403/429 -> kunci berikutnya).
