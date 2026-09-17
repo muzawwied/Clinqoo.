@@ -164,7 +164,7 @@ export async function onRequestPost({ request, env }) {
 
       // PROMO 100 USER PERTAMA: Pro Bulanan jadi Rp5.000 utk 100 klaim pertama.
       // Slot di-klaim atomik via INSERT OR IGNORE (PK user_key) SEBELUM pembayaran;
-      // bila pembayaran gagal, slot dilepas lagi (cleanup) — lihat return path 402/500 di bawah.
+      // bila pembayaran gagal, slot dilepas lagi (cleanup) â lihat return path 402/500 di bawah.
       let promoApplied = false;
       let promoUserKey = null;
       if (validPlan === 'Pro' && billing === 'Bulanan' && user) {
@@ -194,7 +194,7 @@ export async function onRequestPost({ request, env }) {
           const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
           const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
           let balance = parseFloat(balRow?.value || '0');
-          // ClinqooPay: dompet terhubung → saldo live web Wallet
+          // ClinqooPay: dompet terhubung â saldo live web Wallet
           const subConn = await getCpConnection(db, user.id);
           if (subConn) {
             const wb = await mirroredBalance(subConn);
@@ -209,13 +209,19 @@ export async function onRequestPost({ request, env }) {
               required: totalPrice
             }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
-          // Deduct from wallet
+
+          // PERBAIKAN: potong saldo NYATA dulu (ClinqooPay atau lokal), baru catat riwayat
+          // transaksi di Clinqoo. Sebelumnya urutan terbalik â baris wallet_transactions
+          // "keluar" sudah tercatat di Clinqoo SEBELUM tahu hasil mirrorDelta() ke ClinqooPay.
+          // Akibatnya kalau mirrorDelta gagal (token invalid/expired, race, server Wallet
+          // lambat), Clinqoo sudah menampilkan seolah saldo terpotong padahal saldo asli
+          // di ClinqooPay tidak pernah berkurang â persis gejala "di Clinqoo kepotong,
+          // di ClinqooPay tidak" yang dilaporkan. Sekarang riwayat baru dicatat setelah
+          // potongan beneran berhasil di salah satu sisi.
           const subUid = await rowScope(db, 'wallet_transactions', user);
           const subTxId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
-          await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
-            .bind(subTxId, 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet', subUid).run();
           let newBalance = balance - totalPrice;
-          // ClinqooPay: dompet terhubung → potong saldo di web Wallet (mirroring 2 arah)
+          // ClinqooPay: dompet terhubung â potong saldo di web Wallet (mirroring 2 arah)
           if (subConn) {
             const mr = await mirrorDelta(subConn, -totalPrice, 'Clinqoo: Langganan ' + validPlan + ' (' + billing + ')', subTxId);
             if (!mr.ok) {
@@ -228,25 +234,28 @@ export async function onRequestPost({ request, env }) {
             await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
               .bind(balKey, String(newBalance)).run();
           }
+          // Baru catat riwayat transaksi lokal SETELAH potongan beneran berhasil.
+          await db.prepare('INSERT INTO wallet_transactions (id, title, amount, type, method, user_id) VALUES (?, ?, ?, ?, ?, ?)')
+            .bind(subTxId, 'Langganan ' + validPlan + ' (' + billing + ')', totalPrice, 'out', 'Saldo Dompet', subUid).run();
 
           // Notifikasi in-app + email konfirmasi aktivasi langganan
           try {
             await notifyEvent(db, user, {
               source: 'Langganan', type: 'subscription',
-              message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.' + (promoApplied ? ' [PROMO 100 User Pertama — Pro Rp5.000]' : ''),
+              message: 'Langganan ' + validPlan + ' (' + billing + ') berhasil diaktifkan. Total ' + formatIDR(totalPrice) + ' dipotong dari Saldo Dompet. Saldo sekarang ' + formatIDR(newBalance) + '.' + (promoApplied ? ' [PROMO 100 User Pertama â Pro Rp5.000]' : ''),
               link: 'https://clinqoo.pages.dev/akun/langganan/'
             });
           } catch (e2) {}
           // Catat aktivitas langganan di halaman Aktivitas (per-akun)
           try {
             await db.prepare('INSERT INTO activity_log (action, details, user_id) VALUES (?, ?, ?)')
-              .bind('subscription', 'Langganan ' + validPlan + ' (' + billing + ') aktif — ' + formatIDR(totalPrice) + ' dari Saldo Dompet', subUid).run();
+              .bind('subscription', 'Langganan ' + validPlan + ' (' + billing + ') aktif â ' + formatIDR(totalPrice) + ' dari Saldo Dompet', subUid).run();
           } catch (eSub) {}
           if (user && user.email) {
             try {
               await sendEmail(env, {
                 toEmail: user.email, toName: user.name || '',
-                subject: 'Langganan Clinqoo Aktif — ' + validPlan,
+                subject: 'Langganan Clinqoo Aktif â ' + validPlan,
                 html: emailTemplate(
                   'Langganan Aktif',
                   user.name || '',
@@ -276,7 +285,7 @@ export async function onRequestPost({ request, env }) {
       }
 
       // Stacking periode: bila masih ada sisa masa aktif paket berbayar lama,
-      // periode baru dimulai saat masa aktif lama berakhir — sisa waktu tidak hangus.
+      // periode baru dimulai saat masa aktif lama berakhir â sisa waktu tidak hangus.
       let newStart = new Date();
       if (planPrice > 0) {
         try {
