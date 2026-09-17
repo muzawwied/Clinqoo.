@@ -64,6 +64,10 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ## Log Interaksi Agent
 
+### 2026-09-17 — Superagent Clinqoo (UI label promo Pro + deploy clinqoo.pages.dev)
+- **UI**: `akun/langganan/upgrade/index.html` — label harga promo "Rp5.000/bln" dipindah ke area harga utama kartu Pro (sejajar "49K", dicoret jadi Rp49.000), sebelumnya nongol aneh di bawah dekat tombol. Badge "Discount" hilangkan emoji 🏷️. Commit `084d945`.
+- Deploy manual ke project Pages `clinqoo` (akun Vylonium, direct-upload — lihat catatan sebelumnya) sudah dijalankan & diverifikasi live di clinqoo.pages.dev dan clincoo-be2.pages.dev.
+
 ### 2026-09-17 — Superagent Clinqoo (perbaiki halaman auth + deploy clinqoo.pages.dev)
 - **FIX KORUP**: `auth/index.html` kehilangan seluruh `<head>` (title, meta, Tailwind, font, style) + 4 div pembungkus sejak merge lama → halaman /auth/ render tanpa CSS di clinqoo.pages.dev. Direkonstruksi persis dari kembarannya `akun/auth.html`; logic OAuth tak diubah. Commit `0f20136`.
 - **UI**: hapus baris "Belum punya akun? Daftar sekarang" (link akun/daftar/ sudah mati). Commit `bb2acf6`.
