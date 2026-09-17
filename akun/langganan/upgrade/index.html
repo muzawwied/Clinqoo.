@@ -235,7 +235,7 @@
                     <h3 class="text-lg font-bold text-accent">Pro</h3>
                     <p class="text-xs text-gray-500 mt-1">Untuk profesional dan kreator aktif.</p>
                 </div>
-                <div class="mb-6 flex items-baseline">
+                <div class="mb-6 flex items-baseline" id="pro-price-block">
                     <span class="text-3xl font-extrabold tracking-tight text-gray-900">49K</span>
                     <span class="text-sm font-medium text-gray-500 ml-1">/bln</span>
                 </div>
@@ -331,8 +331,16 @@
             var card = document.getElementById('btn-pro');
             if (!card) return;
             if (p.eligible) {
-              card.insertAdjacentHTML('beforebegin',
-                '<div class="text-center mb-4"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">\u{1F3F7}\u{FE0F} Discount</span><p class="text-sm mt-2"><span class="font-bold text-emerald-600 dark:text-emerald-400" style="font-family:\'Space Grotesk\',sans-serif">Rp5.000/bln</span> <span class="text-xs text-gray-400 line-through">Rp49.000</span></p></div>');
+              var priceBlock = document.getElementById('pro-price-block');
+              if (priceBlock) {
+                priceBlock.outerHTML =
+                  '<div class="mb-2 flex items-baseline gap-2 flex-wrap" id="pro-price-block">' +
+                    '<span class="text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400" style="font-family:\'Space Grotesk\',sans-serif">Rp5.000</span>' +
+                    '<span class="text-sm font-medium text-gray-500">/bln</span>' +
+                    '<span class="text-sm text-gray-400 line-through">Rp49.000</span>' +
+                  '</div>' +
+                  '<div class="mb-4"><span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold">Discount</span></div>';
+              }
               card.textContent = 'Ambil Promo Pro Rp5.000';
             }
           }).catch(function(){});
