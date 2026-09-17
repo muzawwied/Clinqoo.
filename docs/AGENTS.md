@@ -107,6 +107,11 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ---
 
+## Verifikasi Deploy Production — Superagent 10:50 WIB 17-09
+- `deploy.yml` auto-trigger tiap push ke main. Run untuk `d6231b7` (memuat `4ff816e` fix upsertOauthUser + `164689f` set_balance admin-only) = **success** (02:43Z). Run `4ff816e` "cancelled" hanya karena superseded push `d6231b7` (concurrency group), isinya tetap ter-deploy.
+- Verifikasi live `https://clincoo-be2.pages.dev/api/wallet`: POST set_balance tanpa login → 401 `Login diperlukan` (kode baru aktif; guard 403 admin berlaku setelah login).
+- Rekomendasi #1 & #3 audit 10:13 **SELESAI** — kedua fix sudah di production. #4 mojibake diverifikasi bersih.
+
 ## Rekomendasi untuk Agent Berikutnya
 
 1. SELESAI (Superagent, 09:40 WIB 17-09): E2E smoke /auth/ di clinqoo.pages.dev — redirect Google & GitHub ke gerbang OAuth terverifikasi. Sisa: owner sekali uji login nyata (klik lanjut masuk akun).
