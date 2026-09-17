@@ -107,7 +107,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
 3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
 4. `set_balance` sudah dibatasi admin (`164689f`) — pastikan ter-deploy ke API production.
-5. Opsional: di `upsertOauthUser`, cek `email` sebelum `.toLowerCase()` setelah INSERT.
+5. ✅ SELESAI: `upsertOauthUser` kini aman untuk OAuth tanpa email (normalisasi di awal + fallback `last_row_id`) — commit fix di main.
 6. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
