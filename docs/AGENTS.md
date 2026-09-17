@@ -22,7 +22,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 08:13 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 09:15 WIB)
 =======
 ## ⚠️ ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -45,32 +45,38 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada di `functions/api/auth/shared.js`. Edge tanpa email tetap throw. |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada di `functions/api/auth/shared.js`. Edge tanpa email tetap throw (risiko TypeError di `.toLowerCase()`). |
 | Halaman `/auth/` | OK (perubahan sebelumnya) | Rekonstruksi `0f20136` + hapus link daftar `bb2acf6`. E2E Google/GitHub masih uji manual |
 | Encoding karakter | Minor | Komentar shared.js masih `â` (mojibake em-dash); runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | HEAD `6e4d516` (tidak berubah sejak audit 07:01) |
 | AI chat / Tim AI | OK | |
-| Promo | PERUBAHAN | Atomic claim `41bc95e`; styling homepage/upgrade `237f161`/`a78022c`/`084d945` |
-| Deploy MCP | PERUBAHAN DOCS | `0cdd1a2` aturan functions/{mcp.js,rpc.js} |
-| Wallet | OK | set_balance masih ada untuk user login |
+| Promo | OK (UI sebelumnya) | Atomic claim + styling homepage/upgrade; tidak berubah jam ini |
+| Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
+| Wallet | PERUBAHAN | `164689f` set_balance hanya admin/owner atau ADMIN_EMAILS; user biasa 403 |
 | Middleware | OK | Clinqoo connector tools berfungsi |
 | Hourly audit automation | OK | |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
 
-**Bukan All clear murni** — tidak ada bug kritis OAuth baru. Perubahan penting: hardening promo atomik + UI promo + aturan deploy MCP. Email laporan dikirim ke muzawwied@gmail.com.
+**Bukan All clear murni** — tidak ada bug kritis OAuth baru. Perubahan penting: hardening wallet `set_balance` admin-only. Email laporan dikirim ke muzawwied@gmail.com.
 
 ---
 
 ## Log Interaksi Agent
 
+### 2026-09-17 09:15 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `164689f` (sec wallet set_balance admin-only).
+- Sejak audit 08:13: docs `5650b78`, wallet `164689f`.
+- `upsertOauthUser`: INSERT + guard null **masih ada**. Tidak diubah jam ini.
+- Clinqoo-Data sync `057a273` 02:15Z. Editor `6e4d516`. Issue/PR open: 0.
+- Email `[Clinqoo Hourly Audit] 2026-09-17 09:15 WIB` dikirim (perubahan penting, tidak kritis).
+
 ### 2026-09-17 08:13 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `237f161` (kartu Pro homepage promo Rp5.000).
-- Sejak audit 07:01: atomic promo `41bc95e`, UI upgrade/home `084d945`/`a78022c`/`237f161`, docs deploy MCP `0cdd1a2`, auth copy `bb2acf6` (sudah di audit sebelumnya sebagai bagian rekonstruksi).
-- `upsertOauthUser`: INSERT + guard null **masih ada**. Tidak diubah jam ini.
-- Clinqoo-Data sync `1365a41` 01:01Z. Editor `6e4d516`. Wallet `44df363`. Issue/PR open: 0.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 08:13 WIB` dikirim (perubahan penting, tidak kritis).
+- Sejak audit 07:01: atomic promo `41bc95e`, UI upgrade/home `084d945`/`a78022c`/`237f161`, docs deploy MCP `0cdd1a2`, auth copy `bb2acf6`.
+- `upsertOauthUser`: INSERT + guard null **masih ada**.
+- Email `[Clinqoo Hourly Audit] 2026-09-17 08:13 WIB` dikirim.
 
 ### 2026-09-17 — Superagent Clinqoo (ui(upgrade): styling label promo Pro, lanjutan log sebelumnya)
 - `akun/langganan/upgrade/index.html` (SIMPAN SOLUSI): harga promo Rp5.000 kini `text-gray-900 dark:text-white` (putih di dark mode, bukan emerald), badge "Discount" bawah dihapus total, pita pojok kartu Pro `Paling Populer` → `Discount` (SEMENTARA selama promo — kembalikan jadi "Paling Populer" saat promo berakhir). Semua class emerald di halaman upgrade sudah nol. Sudah deploy ke clinqoo (Vylonium, direct-upload) & terverifikasi live di kedua domain. Commit `084d945..HEAD` cabang repo utama.
@@ -100,8 +106,9 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 1. Uji login Google & GitHub end-to-end di clinqoo.pages.dev/auth/ setelah `0f20136` (masih pending owner).
 2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
 3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
-4. Pertimbangkan batasi wallet `set_balance` ke admin/internal saja.
-5. Semua laporan email hanya ke **muzawwied@gmail.com**.
+4. `set_balance` sudah dibatasi admin (`164689f`) — pastikan ter-deploy ke API production.
+5. Opsional: di `upsertOauthUser`, cek `email` sebelum `.toLowerCase()` setelah INSERT.
+6. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
 
