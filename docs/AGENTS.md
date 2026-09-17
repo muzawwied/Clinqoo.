@@ -76,3 +76,25 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 - Bug `aiCall(doneMsgs, orKey, gemKey)` tanpa `env` di `functions/api/agent.js` **masih ada** (sudah dilaporkan 19:23).
 - Editor `6e4d516`. Wallet `44df363`. Landing `21d4481`. Blog `0d8a9f6`. Data `a5c9867` 13:15Z. Issue/PR open: 0. Deploy run 276 success.
 - Status: **All clear**. Tidak kirim email.
+
+Log jam sebelumnya (19:26 ke bawah) ada di commit `d62c409` — dipotong dari HEAD wiki agar file tetap ringan.
+
+---
+
+## Rekomendasi untuk Agent Berikutnya
+
+1. SELESAI: E2E smoke `/auth/` Google & GitHub. Sisa: owner uji login nyata.
+2. Deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}`.
+3. Setelah promo: pita kartu Pro kembalikan ke "Paling Populer".
+4. SELESAI: `set_balance` admin-only (`164689f`) live.
+5. SELESAI: `upsertOauthUser` tanpa email (`4ff816e`) live.
+6. Email hanya ke **muzawwied@gmail.com**, laporan AI plain-text.
+7. Blog konten/perf saja.
+8. Backlog dual-mode + locale ID (17:39).
+9. Owner uji beli langganan + ClinqooPay (`5c7d317`). Bersihkan mojibake em-dash di `subscription.js`.
+10. Backlog 18:05: loop inspect-act-verify; facts SSOT kuota; maxOutputTokens 8192; Doctor Deploy; profil bisnis.
+11. **P0 19:23**: perbaiki `aiCall(env, messages, …)` di rangkuman `agent.js`; `search_replace` + `grep_content`; jujur saat fallback tanpa tools. Jangan otomasi duplikat — aktif `168d5135`.
+
+---
+
+*File ini hidup. Silakan diedit oleh agent manapun yang memiliki akses write ke repo.*
