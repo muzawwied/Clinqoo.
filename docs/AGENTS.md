@@ -20,10 +20,11 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 - Email laporan: **muzawwied@gmail.com** (satu-satunya alamat resmi; gmaio.com adalah typo)
 - MCP / Clinqoo connector tools (list_repos, read_file, write_file, dll)
 - Automation Report to AGENTS.md (taskId: `db0bb063-107c-4fb5-92be-fdb29e0e5ba6`)
+- Automation Tingkatkan Kualitas AI Clinqoo (setiap 60 menit WIB)
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 18:01 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 18:05 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -50,7 +51,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string baru di subscription.js (`5c7d317`); runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | HEAD `6e4d516` |
-| AI chat / Tim AI | OK | Saran dual-mode system prompt (log 17:39) — backlog, bukan bug |
+| AI chat / Tim AI | OK | Dual-mode (17:39) + loop verify/facts SSOT/maxOutputTokens (18:05) — backlog, bukan bug |
 | Promo | OK | Tidak berubah jam ini |
 | Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
 | Wallet / langganan | OK — fix urutan tx | `5c7d317` catat wallet_transactions setelah potongan berhasil; live via run 270 |
@@ -67,6 +68,14 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-17 18:05 WIB — Grok (xAI) saran kualitas AI (jam ini)
+- Sumber: automation "Tingkatkan Kualitas AI Clinqoo". Saran **baru** (bukan mengulang dual-mode 17:39).
+- Temuan kode: `SINGLE_SYSTEM_PROMPT` di `functions/api/chat.js` tidak punya loop inspect→act→verify; `CLINQOO_AI_SYSTEM_PROMPT` di `functions/api/ai.js` kontradiksi kuota (25/hari vs Starter 10/hari, 50/bulan); `toGeminiPayload` memotong konteks ke 30 pesan; Gemini/OpenRouter tanpa `maxOutputTokens`; `/api/agent` tidak punya tools workspace.
+- 3 ide prompt: (1) loop inspect→act→verify + larangan klaim palsu; (2) facts SSOT (`PLAN_AI_LIMITS` + promo + Kredit AI + QRIS); (3) kontrak debug/deploy (`deploy_project` wajib, jangan klaim sukses tanpa hasil tool).
+- 2 fitur: Doctor Deploy (`get_deploy_logs` + `capture_preview`); Profil Bisnis Lokal (`set_business_profile` + `apply_template`).
+- Token: `maxOutputTokens: 8192` + snapshot pohon file + ringkasan percakapan lama di D1, ganti splice 30 pesan.
+- Status: saran implementasi, bukan bug. Email plain-text dikirim ke muzawwied@gmail.com (perbaikan vs run 17:39 yang body_text kosong).
 
 ### 2026-09-17 18:01 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly Audit 18:00 WIB. Status PERUBAHAN PENTING (positif). Tidak ada bug kritis baru. HEAD `d371519`. Fix `5c7d317` (subscription): INSERT `wallet_transactions` hanya setelah potongan saldo (mirrorDelta / lokal) berhasil — memperbaiki gejala "di Clinqoo kepotong, di ClinqooPay tidak". Side effect encoding em-dash di `subscription.js`. OAuth tetap FIXED (`4ff816e`). Editor `6e4d516`. Wallet tidak ada commit baru. Clinqoo-Data `59f3e95`. Blog `84a2101`. Landing tidak berubah. Issue/PR 0. Deploy run 270 success — `5c7d317` live di clincoo-be2.
@@ -198,10 +207,11 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
 4. SELESAI: `set_balance` admin-only (`164689f`) live di clincoo-be2.
 5. SELESAI: `upsertOauthUser` aman untuk OAuth tanpa email (`4ff816e`) live di clincoo-be2.
-6. Semua laporan email hanya ke **muzawwied@gmail.com**.
+6. Semua laporan email hanya ke **muzawwied@gmail.com**. Laporan kualitas AI wajib plain-text (jangan HTML-only — run 17:39 body_text kosong).
 7. Blog (`muzawwied/Clinqoo-Blog`) konten/perf saja — pantau jika nanti di-wire ke auth/wallet.
-8. Pertimbangkan saran system prompt dual-mode (non-coder vs developer) + locale ID dari automation "Tingkatkan Kualitas AI Clinqoo" — tetap backlog, bukan bug.
-9. **Baru**: Owner uji 1x beli langganan Saldo Dompet + ClinqooPay — pastikan `5c7d317` sinkron (tidak ada riwayat "keluar" jika `mirrorDelta` gagal). Bersihkan mojibake em-dash di `subscription.js`.
+8. Pertimbangkan saran system prompt dual-mode (non-coder vs developer) + locale ID dari automation "Tingkatkan Kualitas AI Clinqoo" 17:39 — tetap backlog, bukan bug.
+9. Owner uji 1x beli langganan Saldo Dompet + ClinqooPay — pastikan `5c7d317` sinkron (tidak ada riwayat "keluar" jika `mirrorDelta` gagal). Bersihkan mojibake em-dash di `subscription.js`.
+10. **Baru 18:05**: backlog kualitas AI — (a) loop inspect→act→verify di `SINGLE_SYSTEM_PROMPT`; (b) facts SSOT supaya `ai.js` / `agent.js` tidak kontradiksi kuota 25 vs 10/hari; (c) `generationConfig.maxOutputTokens = 8192` + ganti splice 30 pesan; (d) tools Doctor Deploy dari `/api/deploy-logs` + `/api/screenshot`; (e) `set_business_profile` untuk UMKM.
 
 ---
 
