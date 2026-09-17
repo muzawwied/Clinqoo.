@@ -107,18 +107,26 @@ export async function getUserByToken(db, token) {
 
 // Login/daftar via OAuth: pakai auth_oauth_accounts, email sebagai fallback identitas
 export async function upsertOauthUser(db, provider, providerAccountId, email, name, avatarUrl, accessToken, scope, env) {
+  // Normalisasi sekali di awal — email null/undefined tidak boleh memicu TypeError di .toLowerCase().
+  const emailNorm = email ? String(email).trim().toLowerCase() : null;
   let link = await db.prepare('SELECT user_id FROM auth_oauth_accounts WHERE provider = ? AND provider_account_id = ?')
     .bind(provider, String(providerAccountId)).first();
   let user;
   if (link) {
     user = await db.prepare('SELECT * FROM auth_users WHERE id = ?').bind(link.user_id).first();
   } else {
-    user = email ? await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first() : null;
+    user = emailNorm ? await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(emailNorm).first() : null;
     if (!user) {
       // User baru via OAuth: BUAT dulu baris auth_users, lalu ambil kembali (fix: sebelumnya tidak ada INSERT).
-      await db.prepare("INSERT INTO auth_users (name, email, password_hash, avatar_url) VALUES (?, ?, '', ?)")
-        .bind(name || '', email ? email.toLowerCase() : null, avatarUrl || '').run();
-      user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(email.toLowerCase()).first();
+      const ins = await db.prepare("INSERT INTO auth_users (name, email, password_hash, avatar_url) VALUES (?, ?, '', ?)")
+        .bind(name || '', emailNorm, avatarUrl || '').run();
+      if (emailNorm) {
+        user = await db.prepare('SELECT * FROM auth_users WHERE email = ?').bind(emailNorm).first();
+      } else {
+        // OAuth tanpa email (mis. GitHub private email): ambil baris baru via last_row_id — bukan TypeError.
+        const rid = ins && ins.meta && ins.meta.last_row_id;
+        user = rid ? await db.prepare('SELECT * FROM auth_users WHERE id = ?').bind(rid).first() : null;
+      }
       // Real-time: sinkron daftar user ke GitHub saat user baru dibuat (best-effort).
       if (env) { try { const { syncUserReport } = await import('../user-report-sync.js'); await syncUserReport(env, { timeoutMs: 9000 }); } catch (e2) {} }
     }
