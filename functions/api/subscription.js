@@ -174,11 +174,11 @@ export async function onRequestPost({ request, env }) {
           const already = await db.prepare('SELECT 1 FROM promo_early_pro WHERE user_key = ?').bind(promoUserKey).first();
           const newUser = await isPromoNewUser(db, user);
           if (!already && newUser) {
-            const cnt = await db.prepare('SELECT COUNT(*) AS c FROM promo_early_pro').first();
-            if (((cnt && cnt.c) || 0) < PROMO_EARLY.maxUsers) {
-              const ins = await db.prepare('INSERT OR IGNORE INTO promo_early_pro (user_key, claimed_at) VALUES (?, ?)').bind(promoUserKey, new Date().toISOString()).run();
-              if (ins && ins.meta && ins.meta.changes > 0) { promoApplied = true; totalPrice = PROMO_EARLY.price; }
-            }
+            // Klaim atomik: cek kuota & insert dalam SATU statement (anti race dua request bersamaan)
+            const ins = await db.prepare(
+              'INSERT OR IGNORE INTO promo_early_pro (user_key, claimed_at) SELECT ?, ? WHERE (SELECT COUNT(*) FROM promo_early_pro) < ?'
+            ).bind(promoUserKey, new Date().toISOString(), PROMO_EARLY.maxUsers).run();
+            if (ins && ins.meta && ins.meta.changes > 0) { promoApplied = true; totalPrice = PROMO_EARLY.price; }
           }
         } catch (ePromo) {}
       }
