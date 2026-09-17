@@ -22,7 +22,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 07:01 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 08:13 WIB)
 =======
 ## ⚠️ ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -45,76 +45,50 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada. `oauthRedirectUri` hostname-aware tetap di `/auth/` setelah rekonstruksi `0f20136`. E2E Google/GitHub masih uji manual |
-| Halaman `/auth/` | PERUBAHAN PENTING | `0f20136` pulihkan `<head>` + layout yang korup (tanpa CSS di pages.dev) |
-| Encoding karakter | OK | |
-| Schema D1 vs runtime | OK | env_vars produksi tanpa UNIQUE — workflow pakai DELETE+INSERT |
-| Editor full-stack + layout | PERUBAHAN | HEAD `6e4d516` (klik chat CTA). Major UI `8824f5e`. Mobile sidebar `c9fcf97` |
-| AI chat / Tim AI | OK + kredit UI | Banner kredit habis + GET /api/chat status `85f6f88` |
-| Promo | BARU | `61f41af` 100 user pertama; `0f910f4` Rp5.000 user baru (gate created_at) |
-| Wallet | OK | GET anon = 0; mutasi wajib login; `set_balance` masih ada untuk user login |
-| Middleware | OK | Clinqoo connector tools berfungsi di audit ini |
-| Hourly audit automation | OK | Setiap 1 jam |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada di `functions/api/auth/shared.js`. Edge tanpa email tetap throw. |
+| Halaman `/auth/` | OK (perubahan sebelumnya) | Rekonstruksi `0f20136` + hapus link daftar `bb2acf6`. E2E Google/GitHub masih uji manual |
+| Encoding karakter | Minor | Komentar shared.js masih `â` (mojibake em-dash); runtime tidak terpengaruh |
+| Schema D1 vs runtime | OK | |
+| Editor full-stack | OK | HEAD `6e4d516` (tidak berubah sejak audit 07:01) |
+| AI chat / Tim AI | OK | |
+| Promo | PERUBAHAN | Atomic claim `41bc95e`; styling homepage/upgrade `237f161`/`a78022c`/`084d945` |
+| Deploy MCP | PERUBAHAN DOCS | `0cdd1a2` aturan functions/{mcp.js,rpc.js} |
+| Wallet | OK | set_balance masih ada untuk user login |
+| Middleware | OK | Clinqoo connector tools berfungsi |
+| Hourly audit automation | OK | |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
-| Issue GitHub | OK | 0 open |
+| Issue GitHub | OK | 0 open, 0 PR open |
 
-**Bukan All clear murni** — tidak ada bug kritis OAuth baru, tetapi ada perubahan penting (rekonstruksi /auth/, promo, brand PNG, editor CTA). Email laporan dikirim ke muzawwied@gmail.com.
+**Bukan All clear murni** — tidak ada bug kritis OAuth baru. Perubahan penting: hardening promo atomik + UI promo + aturan deploy MCP. Email laporan dikirim ke muzawwied@gmail.com.
 
 ---
 
 ## Log Interaksi Agent
 
+### 2026-09-17 08:13 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `237f161` (kartu Pro homepage promo Rp5.000).
+- Sejak audit 07:01: atomic promo `41bc95e`, UI upgrade/home `084d945`/`a78022c`/`237f161`, docs deploy MCP `0cdd1a2`, auth copy `bb2acf6` (sudah di audit sebelumnya sebagai bagian rekonstruksi).
+- `upsertOauthUser`: INSERT + guard null **masih ada**. Tidak diubah jam ini.
+- Clinqoo-Data sync `1365a41` 01:01Z. Editor `6e4d516`. Wallet `44df363`. Issue/PR open: 0.
+- Email `[Clinqoo Hourly Audit] 2026-09-17 08:13 WIB` dikirim (perubahan penting, tidak kritis).
+
 ### 2026-09-17 — Superagent Clinqoo (ui(upgrade): styling label promo Pro, lanjutan log sebelumnya)
 - `akun/langganan/upgrade/index.html` (SIMPAN SOLUSI): harga promo Rp5.000 kini `text-gray-900 dark:text-white` (putih di dark mode, bukan emerald), badge "Discount" bawah dihapus total, pita pojok kartu Pro `Paling Populer` → `Discount` (SEMENTARA selama promo — kembalikan jadi "Paling Populer" saat promo berakhir). Semua class emerald di halaman upgrade sudah nol. Sudah deploy ke clinqoo (Vylonium, direct-upload) & terverifikasi live di kedua domain. Commit `084d945..HEAD` cabang repo utama.
 
 ### 2026-09-17 — Superagent Clinqoo (UI label promo Pro + deploy clinqoo.pages.dev)
-- **UI**: `akun/langganan/upgrade/index.html` — label harga promo "Rp5.000/bln" dipindah ke area harga utama kartu Pro (sejajar "49K", dicoret jadi Rp49.000), sebelumnya nongol aneh di bawah dekat tombol. Badge "Discount" hilangkan emoji 🏷️. Commit `084d945`.
-- Deploy manual ke project Pages `clinqoo` (akun Vylonium, direct-upload — lihat catatan sebelumnya) sudah dijalankan & diverifikasi live di clinqoo.pages.dev dan clincoo-be2.pages.dev.
+- **UI**: `akun/langganan/upgrade/index.html` — label harga promo "Rp5.000/bln" dipindah ke area harga utama kartu Pro (sejajar "49K", dicoret jadi Rp49.000), sebelumnya nongol aneh di bawah dekat tombol. Badge "Discount" hilangkan emoji. Commit `084d945`.
+- Deploy manual ke project Pages `clinqoo` (akun Vylonium, direct-upload) sudah dijalankan & diverifikasi live di clinqoo.pages.dev dan clincoo-be2.pages.dev.
 
 ### 2026-09-17 — Superagent Clinqoo (perbaiki halaman auth + deploy clinqoo.pages.dev)
-- **FIX KORUP**: `auth/index.html` kehilangan seluruh `<head>` (title, meta, Tailwind, font, style) + 4 div pembungkus sejak merge lama → halaman /auth/ render tanpa CSS di clinqoo.pages.dev. Direkonstruksi persis dari kembarannya `akun/auth.html`; logic OAuth tak diubah. Commit `0f20136`.
-- **UI**: hapus baris "Belum punya akun? Daftar sekarang" (link akun/daftar/ sudah mati). Commit `bb2acf6`.
-- **PENTING buat agent lain**: project Pages `clinqoo` (clinqoo.pages.dev) ada di akun Cloudflare *Vylonium* (account id a393734931f2dcee965874fab656c1bd) — **direct-upload, TANPA koneksi git**, jadi push ke repo TIDAK meng-update domain itu. Deploy manual: `wrangler pages deploy . --project-name=clinqoo` dengan exclude `functions/` + `wrangler.toml` (binding D1 milik akun be2, akan gagal di akun Vylonium). Backend/frontend produksi tetap clincoo-be2.pages.dev. Akun Vylonium juga punya project: clinqoo-editor, clinqoo-wallet, clinqoo-legal.
-- Untuk agent berikutnya: uji login Google/GitHub end-to-end di clinqoo.pages.dev/auth/ (fix visual sudah live, alur OAuth belum dicek manual).
+- **FIX KORUP**: `auth/index.html` kehilangan seluruh `<head>` + 4 div pembungkus sejak merge lama. Direkonstruksi dari `akun/auth.html`; logic OAuth tak diubah. Commit `0f20136`.
+- **UI**: hapus baris "Belum punya akun? Daftar sekarang". Commit `bb2acf6`.
+- **PENTING**: project Pages `clinqoo` ada di akun Cloudflare *Vylonium* — **direct-upload, TANPA koneksi git**.
 
 ### 2026-09-17 07:01 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `0f20136` (rekonstruksi /auth/ yang korup).
-- Sejak audit 06:18: promo `61f41af`/`0f910f4`, brand PNG `7053a70`/`baeb100` (+ revert og-image), docs `bd2bceb`.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT + guard null **masih ada**. Edge tanpa email tetap throw.
-- `oauthRedirectUri()` di `auth/index.html` tetap hostname-aware setelah restore.
-- Editor HEAD `6e4d516` (CTA chat); major `8824f5e`.
-- Clinqoo-Data sync `930ffd0` 00:01Z. Komunitas `82a9358`. Wallet `44df363`. Issue/PR open: 0.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 07:01 WIB` dikirim (perubahan penting).
+- HEAD saat itu `0f20136`. Email dikirim (perubahan penting).
 
 ### 2026-09-17 06:18 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `85f6f88` (banner kredit + GET /api/chat).
-- Sejak audit 05:10: merge OAuth redirect `2f83189`, bersihkan github.io `e4094a3`, merge rebrand `9f7b943`, AGENTS Superagent `8fe92b7`/`5445bfb`.
-- `upsertOauthUser` di `functions/api/auth/shared.js`: INSERT + guard null **masih ada**. Edge tanpa email tetap throw.
-- Editor HEAD `8824f5e` (feat major Chat/Templates); sebelumnya 9c6afbb. Sidebar mobile `c9fcf97`.
-- Clinqoo-Data sync `222a9c8` 23:15Z (~06:15 WIB). Komunitas `82a9358`. Issue/PR open: 0.
-- Clinqoo connector MCP gagal init HTTP 405; audit via GitHub tools.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 06:18 WIB` dikirim (perubahan penting).
-
-### 2026-09-17 05:55 WIB — Superagent Base44 (fix sidebar mobile + sinkron total)
-- **Fix bug: sidebar editor tidak bisa ditutup di mobile** — akar masalah `#sidebar{display:flex!important}` di layout-sidebar.js menimpa semua toggle. Kini mobile: `display:none` default, `.mobile-open` menang, `.hidden` aman di desktop. Commit Clinqoo-Editor `c9fcf97` (sudah push).
-- **Ikon titlebar editor diganti sesuai permintaan owner**: #hamb pojok kiri kini ikon FOLDER (title "Berkas / Panel samping"), tombol pojok kanan kini ikon SIDEBAR (tetap membuka drawer pengaturan).
-- **Sinkronisasi besar ClinqooMain**: merge 80 commit remote (fix OAuth redirect, login redesign b1634a5) dengan rebrand lokal — resolusi 104 konflik file. Commit `9f7b943`+`e4094a3`+`2f83189`, semua sudah push.
-- **Fix redirect_uri_mismatch kini PERMANEN di repo** (`2f83189`): oauthRedirectUri() hostname-aware.
-- Deploy penuh ke clinqoo.pages.dev (frontend-only, tanpa functions) dari site-deploy hasil rebuild: repo terbaru + editor c9fcf97 + legal khusus.
-
-### 2026-09-17 — Superagent Base44 (05:41 WIB)
-- **Fix blokir login Google di PWA clinqoo.pages.dev**: Error 400 `redirect_uri_mismatch`.
-- URI terdaftar di Google: HANYA `https://muzawwied.github.io/Clinqoo./akun/auth.html` dan `https://clinqoo.pages.dev/auth/`.
-- Full E2E (login sukses + callback + session PWA) tetap butuh uji manual owner.
-
-### 2026-09-17 05:40 WIB — Superagent Base44 (temuan penting: editor divergen)
-- **Perubahan UI editor besar** kemudian di-commit sebagai `8824f5e` + follow-up CTA.
-
-### 2026-09-17 05:10 WIB — Grok (xAI) hourly audit
-- HEAD saat itu `37ae657`. OAuth kritis tetap fixed.
-
-### 2026-09-16 — Superagent Clinqoo (Tim AI upgrade)
-- Upgrade kualitas mode kolaborasi (Tim AI) di `functions/api/chat.js` (commit `88e83b9`).
+- HEAD saat itu `85f6f88`.
 
 ### 2026-09-16 — Grok (xAI) 19:23 WIB
 - Konfirmasi: **muzawwied@gmaio.com adalah typo**. Alamat resmi hanya **muzawwied@gmail.com**.
@@ -123,10 +97,10 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Uji login Google & GitHub end-to-end di clinqoo.pages.dev/auth/ setelah `0f20136`.
-2. Pastikan Cloudflare Pages = git HEAD `0f20136` + editor `6e4d516`.
-3. Pertimbangkan batasi `wallet` `set_balance` ke admin/internal saja.
-4. Review anti-abuse promo 100 slot + gate `created_at`.
+1. Uji login Google & GitHub end-to-end di clinqoo.pages.dev/auth/ setelah `0f20136` (masih pending owner).
+2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
+3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
+4. Pertimbangkan batasi wallet `set_balance` ke admin/internal saja.
 5. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
