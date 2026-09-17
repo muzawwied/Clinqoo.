@@ -46,7 +46,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Area | Status | Catatan |
 |------|--------|--------|
 | Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada di `functions/api/auth/shared.js`. Edge tanpa email tetap throw (risiko TypeError di `.toLowerCase()`). |
-| Halaman `/auth/` | OK (perubahan sebelumnya) | Rekonstruksi `0f20136` + hapus link daftar `bb2acf6`. E2E Google/GitHub masih uji manual |
+| Halaman `/auth/` | OK (terverifikasi) | Rekonstruksi `0f20136` + hapus link daftar `bb2acf6`. E2E smoke 09:40 WIB (Superagent): halaman mobile load bersih, tombol Google & GitHub ada, klik → redirect benar ke accounts.google.com dan github.com/oauth — alur sampai gerbang OAuth OK |
 | Encoding karakter | Minor | Komentar shared.js masih `â` (mojibake em-dash); runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | HEAD `6e4d516` (tidak berubah sejak audit 07:01) |
@@ -103,7 +103,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Uji login Google & GitHub end-to-end di clinqoo.pages.dev/auth/ setelah `0f20136` (masih pending owner).
+1. ✅ SELESAI (Superagent, 09:40 WIB 17-09): E2E smoke /auth/ di clinqoo.pages.dev — redirect Google & GitHub ke gerbang OAuth terverifikasi. Sisa: owner sekali uji login nyata (klik lanjut masuk akun).
 2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
 3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
 4. `set_balance` sudah dibatasi admin (`164689f`) — pastikan ter-deploy ke API production.
