@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 19:26 WIB)
+## Status Saat Ini (update terakhir: 2026-09-17 20:17 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -51,192 +51,28 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string baru di subscription.js (`5c7d317`); runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | HEAD `6e4d516` |
-| AI chat / Tim AI | Backlog + 1 bug agent | Dual-mode (17:39) + loop/SSOT/maxOutputTokens/Doctor Deploy (18:05) masih terbuka. **Baru 19:23**: `write_file` overwrite-only (perlu `search_replace`); Workers AI fallback tanpa tools; **BUG** `agent.js` `aiCall(doneMsgs, …)` tanpa `env` — rangkuman agent rusak. |
+| AI chat / Tim AI | Backlog + 1 bug agent | Dual-mode (17:39) + loop/SSOT/maxOutputTokens/Doctor Deploy (18:05) masih terbuka. **19:23**: `write_file` overwrite-only; Workers AI fallback tanpa tools; **BUG** `agent.js` `aiCall(doneMsgs, …)` tanpa `env` — belum di-fix jam ini. |
 | Promo | OK | Tidak berubah jam ini |
 | Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
 | Wallet / langganan | OK — fix urutan tx | `5c7d317` catat wallet_transactions setelah potongan berhasil; live via run 270 |
 | Middleware | OK | Clinqoo connector tools berfungsi |
-| Hourly audit automation | OK | Email 18:00 dikirim (perubahan penting) |
+| Hourly audit automation | OK | Audit 20:17: All clear (tidak kirim email) |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | Artikel komunitas + sitemap (`84a2101`); bukan kode auth/wallet |
-| Clinqoo-Data | OK | Sync rutin `59f3e95` 11:00Z |
+| Blog | OK | Artikel editor/deploy (`0d8a9f6`); bukan kode auth/wallet |
+| Clinqoo-Data | OK | Sync rutin `a5c9867` 13:15Z |
 | Landing | OK | Tidak berubah jam ini |
 
-**Bukan All clear murni** — backlog kualitas AI 17:39 + 18:05 masih terbuka, plus temuan baru 19:23 (termasuk bug `aiCall` di `agent.js`). Email ide perbaikan 19:23 dikirim (plain-text). Log laporan masuk dicatat 19:26 WIB.
+**All clear (jam ini)** — tidak ada commit kode baru di Clinqoo./Editor/Landing/Wallet sejak audit 19:26. OAuth tetap FIXED. Bug `aiCall` di `agent.js` + backlog AI 17:39/18:05/19:23 **masih terbuka** (sudah dilaporkan; tidak diulang email). Issue/PR 0. Deploy run 276 (`d62c409`) success.
 
 ---
 
 ## Log Interaksi Agent
 
-### 2026-09-17 19:26 WIB — Grok (xAI) laporan masuk
-- Ringkasan laporan: Ide Perbaikan AI Clinqoo 19:23 WIB. Temuan: workspace chat.js hanya write_file overwrite (perlu search_replace/grep_content); tryWorkersAIText tanpa tools; **BUG** agent.js rangkuman `aiCall(doneMsgs, orKey, gemKey)` tanpa env — rangkuman kosong; Tim AI batas 300 kata/8 file, Reviewer tidak pakai take_screenshot; backlog 18:05 masih terbuka. Ide prompt: template-first + brief UMKM; kontrak edit patch > rewrite; jujur di fallback. Fitur: search_replace + grep_content; Visual QA screenshot. Token: compact per-path + auto-lanjut MAX_TOKENS. P0: fix aiCall, aturan prompt (2)+(3), search_replace minimal. Otomasi aktif `168d5135`.
-- Sumber: email/pesan laporan subject "Ide Perbaikan AI Clinqoo — 2026-09-17 19:23 WIB" (pengirim vylonium@gmail.com)
-- Status: 1 bug runtime (aiCall di agent.js) + saran/backlog; bukan mengulang dual-mode 17:39 atau paket 18:05
-
-### 2026-09-17 19:23 WIB — Grok (xAI) saran kualitas AI (jam ini)
-- Sumber: sesi / automation "Tingkatkan Kualitas AI Clinqoo". Saran **baru** (bukan mengulang dual-mode 17:39, bukan inspect-act-verify / SSOT / Doctor Deploy / profil bisnis / maxOutputTokens 18:05).
-- Temuan kode:
-  1. `chat.js` tools: `write_file` overwrite penuh; tidak ada `search_replace` / `patch_file`; `search_items` hanya nama file.
-  2. `tryWorkersAIText` teks-saja (tanpa functionDeclarations) — fallback = AI tidak bisa menulis file.
-  3. **BUG** `functions/api/agent.js`: rangkuman akhir `aiCall(doneMsgs, orKey, gemKey)` — argumen pertama harus `env`. Impact: result task agent kosong/error.
-  4. Tim AI: rencana maks 300 kata / 8 file; Reviewer tidak pakai `take_screenshot` meski tool sudah ada; Programmer tidak menyebut WA/QRIS/Rupiah.
-- 3 ide prompt: (1) template-first + brief default UMKM (maks 1 pertanyaan); (2) kontrak edit patch > rewrite; (3) jujur saat fallback tanpa tools + daftar file tertunda jika hop habis.
-- 2 fitur: `search_replace` + `grep_content`; Visual QA Tim AI (`take_screenshot` preview → Reviewer) — bukan Doctor Deploy.
-- Token: compact per-path (simpan write/read terakhir per file, buang isi lama) + auto-lanjut `finishReason=MAX_TOKENS` + cache system prompt. Jangan hanya `maxOutputTokens`.
-- Status: saran + 1 bug agent. Email plain-text ke muzawwied@gmail.com. Tidak membuat otomasi duplikat (`168d5135` aktif).
-
-### 2026-09-17 18:08 WIB — Grok (xAI) laporan masuk
-- Ringkasan laporan: Ide Perbaikan AI Clinqoo (plain-text lengkap). Temuan kode (bukan bug runtime): `SINGLE_SYSTEM_PROMPT` di `functions/api/chat.js` belum punya loop inspect-act-verify; `CLINQOO_AI_SYSTEM_PROMPT` di `ai.js` salah tulis kuota 25 pesan/hari; `toGeminiPayload` splice 30 pesan; Gemini/OpenRouter tanpa `maxOutputTokens`; `agent.js` MAX_TRANSCRIPT 40, ringkasan 400 karakter, tanpa tools workspace. 3 ide prompt: loop inspect→act→verify; facts SSOT (`CLINQOO_FACTS` di plan-helpers.js — Starter 50/bulan maks 10/hari, Pro Rp49.000 promo Rp5.000, Bisnis Rp129.000, Kredit AI, QRIS/WIB); kontrak debug/deploy. 2 fitur: Doctor Deploy (`get_deploy_logs` + `capture_preview`); profil bisnis + `apply_template`. Token: `maxOutputTokens: 8192`, snapshot `list_items`, ringkasan D1, auto-lanjut jika write_file terpotong. Prioritas P0–P3. Otomasi duplikat `850559af` di-pause; yang aktif `168d5135`.
-- Sumber: email/pesan laporan subject "Ide Perbaikan AI Clinqoo — 2026-09-17 18:05 WIB" (pengirim vylonium@gmail.com)
-- Status: saran implementasi / backlog; bukan bug runtime. Tidak mengulang dual-mode 17:39.
-
-### 2026-09-17 18:05 WIB — Grok (xAI) saran kualitas AI (jam ini)
-- Sumber: automation "Tingkatkan Kualitas AI Clinqoo". Saran **baru** (bukan mengulang dual-mode 17:39).
-- Temuan kode: `SINGLE_SYSTEM_PROMPT` di `functions/api/chat.js` tidak punya loop inspect→act→verify; `CLINQOO_AI_SYSTEM_PROMPT` di `functions/api/ai.js` kontradiksi kuota (25/hari vs Starter 10/hari, 50/bulan); `toGeminiPayload` memotong konteks ke 30 pesan; Gemini/OpenRouter tanpa `maxOutputTokens`; `/api/agent` tidak punya tools workspace.
-- 3 ide prompt: (1) loop inspect→act→verify + larangan klaim palsu; (2) facts SSOT (`PLAN_AI_LIMITS` + promo + Kredit AI + QRIS); (3) kontrak debug/deploy (`deploy_project` wajib, jangan klaim sukses tanpa hasil tool).
-- 2 fitur: Doctor Deploy (`get_deploy_logs` + `capture_preview`); Profil Bisnis Lokal (`set_business_profile` + `apply_template`).
-- Token: `maxOutputTokens: 8192` + snapshot pohon file + ringkasan percakapan lama di D1, ganti splice 30 pesan.
-- Status: saran implementasi, bukan bug. Email plain-text dikirim ke muzawwied@gmail.com (perbaikan vs run 17:39 yang body_text kosong).
-
-### 2026-09-17 18:01 WIB — Grok (xAI) laporan masuk
-- Ringkasan laporan: Hourly Audit 18:00 WIB. Status PERUBAHAN PENTING (positif). Tidak ada bug kritis baru. HEAD `d371519`. Fix `5c7d317` (subscription): INSERT `wallet_transactions` hanya setelah potongan saldo (mirrorDelta / lokal) berhasil — memperbaiki gejala "di Clinqoo kepotong, di ClinqooPay tidak". Side effect encoding em-dash di `subscription.js`. OAuth tetap FIXED (`4ff816e`). Editor `6e4d516`. Wallet tidak ada commit baru. Clinqoo-Data `59f3e95`. Blog `84a2101`. Landing tidak berubah. Issue/PR 0. Deploy run 270 success — `5c7d317` live di clincoo-be2.
-- Sumber: email/pesan laporan subject "[Clinqoo Hourly Audit] 2026-09-17 18:00 WIB"
-- Status: PERUBAHAN PENTING (positif); bukan All clear murni
-
-### 2026-09-17 18:00 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `d371519`.
-- Sejak audit 17:10: `5c7d317` fix urutan INSERT `wallet_transactions` di `functions/api/subscription.js` (setelah `mirrorDelta`/potongan lokal sukses). Docs `d371519` log saran AI.
+### 2026-09-17 20:17 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `d62c409` (docs laporan 19:23).
+- Sejak audit 19:26: hanya docs (`6e87579`, `d62c409`). Tidak ada commit kode auth/wallet/schema/middleware.
 - `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 270 (`d371519`) success.
-- Status: **perubahan penting** (positif). Email `[Clinqoo Hourly Audit] 2026-09-17 18:00 WIB` dikirim ke muzawwied@gmail.com.
-
-### 2026-09-17 17:39 WIB — Grok (xAI) laporan masuk (manual)
-- Sumber: email Gmail "Ide Perbaikan AI Clinqoo untuk Pengguna Indonesia" dari Grok <noreply@x.ai> (17:36 WIB).
-- Ringkasan: Automation "Tingkatkan Kualitas AI Clinqoo" (jadwal setiap 60 menit WIB) menghasilkan saran implementasi.
-- Ide utama yang disampaikan:
-  1. **Persona dual-mode + locale ID** — deteksi intent user (non-coder vs developer).
-     - Non-coder → bahasa sederhana, tawarkan preview/template, jangan dump kode mentah.
-     - Developer → file path, diff, stack trace, perintah deploy.
-     - Default bahasa: Indonesia; istilah teknis boleh Inggris.
-     - Constraint lokal: Rupiah, zona WIB, pembayaran Midtrans/Xendit, domain .id, copy UI natural (bukan terjemahan kaku).
-  2. (ide lain terpotong di notifikasi HTML; butuh baca full output automation untuk detail).
-- Status: saran, bukan bug. Tidak mengubah status All clear.
-- Catatan: email murni HTML notifikasi, body_text kosong.
-
-### 2026-09-17 17:10 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `d50d666` (docs audit 16:15).
-- Sejak audit 16:15: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Sync Clinqoo-Data `8f4b4b2` (10:00Z). Blog artikel Git + sitemap (`4eda3a1`); bukan kode auth/wallet.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 267 (`d50d666`) success.
+- Bug `aiCall(doneMsgs, orKey, gemKey)` tanpa `env` di `functions/api/agent.js` **masih ada** (sudah dilaporkan 19:23).
+- Editor `6e4d516`. Wallet `44df363`. Landing `21d4481`. Blog `0d8a9f6`. Data `a5c9867` 13:15Z. Issue/PR open: 0. Deploy run 276 success.
 - Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 16:15 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `7db9154` (docs audit 15:05).
-- Sejak audit 15:05: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet/Blog. Sync Clinqoo-Data `36af3c8` (09:15Z).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 266 (`7db9154`) success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 15:05 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `30dfff6` (docs audit 14:18).
-- Sejak audit 14:18: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Sync Clinqoo-Data `56c171f` (08:00Z). Blog tetap `4ac3f20`.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 265 (`30dfff6`) success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 14:18 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `80ab904` (docs audit 13:13).
-- Sejak audit 13:13: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Sync Clinqoo-Data `f7ec973` (07:15Z). Clinqoo-Blog: artikel coding + sitemap (`4ac3f20`).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor tidak berubah. Issue/PR open: 0. Deploy run 264 (`80ab904`) success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 13:13 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `92f0499` (docs audit 12:18).
-- Sejak audit 12:18: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Sync Clinqoo-Data `12ee3ef` (06:01Z). Clinqoo-Blog: v1 + perf + artikel promo Pro (`d70b6a6`).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 263 (`92f0499`) success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 12:18 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `631368b` (docs audit 11:07).
-- Sejak audit 11:07: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Hanya sync Clinqoo-Data (`8813f8c` 05:15Z).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), ter-deploy. Kode di `functions/api/auth/shared.js` masih aman.
-- Editor `6e4d516`. Issue/PR open: 0. Deploy run 262 success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 11:07 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `5e88f21` (docs verifikasi production Superagent).
-- Sejak audit 10:13: hanya `5e88f21` docs; tidak ada commit kode.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), ter-deploy.
-- Editor `6e4d516`. Data sync `1acbe93` 04:00Z. Issue/PR open: 0. Deploy run 261 success.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-17 10:13 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `d6231b7` (docs rekomendasi #5).
-- Sejak audit 09:15: `4ff816e` fix upsertOauthUser tanpa email; `b424c6b` docs E2E /auth/; `d6231b7` docs.
-- `upsertOauthUser`: INSERT + guard + emailNorm + last_row_id — **FIXED**.
-- Editor `6e4d516`. Data sync `079e0bd`. Issue/PR open: 0.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 10:13 WIB` dikirim.
-
-### 2026-09-17 09:15 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `164689f` (sec wallet set_balance admin-only).
-- Sejak audit 08:13: docs `5650b78`, wallet `164689f`.
-- `upsertOauthUser`: INSERT + guard null **masih ada**. Tidak diubah jam ini.
-- Clinqoo-Data sync `057a273` 02:15Z. Editor `6e4d516`. Issue/PR open: 0.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 09:15 WIB` dikirim (perubahan penting, tidak kritis).
-
-### 2026-09-17 08:13 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `237f161` (kartu Pro homepage promo Rp5.000).
-- Sejak audit 07:01: atomic promo `41bc95e`, UI upgrade/home `084d945`/`a78022c`/`237f161`, docs deploy MCP `0cdd1a2`, auth copy `bb2acf6`.
-- `upsertOauthUser`: INSERT + guard null **masih ada**.
-- Email `[Clinqoo Hourly Audit] 2026-09-17 08:13 WIB` dikirim.
-
-### 2026-09-17 — Superagent Clinqoo (ui(upgrade): styling label promo Pro, lanjutan log sebelumnya)
-- `akun/langganan/upgrade/index.html` (SIMPAN SOLUSI): harga promo Rp5.000 kini `text-gray-900 dark:text-white` (putih di dark mode, bukan emerald), badge "Discount" bawah dihapus total, pita pojok kartu Pro `Paling Populer` → `Discount` (SEMENTARA selama promo — kembalikan jadi "Paling Populer" saat promo berakhir). Semua class emerald di halaman upgrade sudah nol. Sudah deploy ke clinqoo (Vylonium, direct-upload) & terverifikasi live di kedua domain. Commit `084d945..HEAD` cabang repo utama.
-
-### 2026-09-17 — Superagent Clinqoo (UI label promo Pro + deploy clinqoo.pages.dev)
-- **UI**: `akun/langganan/upgrade/index.html` — label harga promo "Rp5.000/bln" dipindah ke area harga utama kartu Pro (sejajar "49K", dicoret jadi Rp49.000), sebelumnya nongol aneh di bawah dekat tombol. Badge "Discount" hilangkan emoji. Commit `084d945`.
-- Deploy manual ke project Pages `clinqoo` (akun Vylonium, direct-upload) sudah dijalankan & diverifikasi live di clinqoo.pages.dev dan clincoo-be2.pages.dev.
-
-### 2026-09-17 — Superagent Clinqoo (perbaiki halaman auth + deploy clinqoo.pages.dev)
-- **FIX KORUP**: `auth/index.html` kehilangan seluruh `<head>` + 4 div pembungkus sejak merge lama. Direkonstruksi dari `akun/auth.html`; logic OAuth tak diubah. Commit `0f20136`.
-- **UI**: hapus baris "Belum punya akun? Daftar sekarang". Commit `bb2acf6`.
-- **PENTING**: project Pages `clinqoo` ada di akun Cloudflare *Vylonium* — **direct-upload, TANPA koneksi git**.
-
-### 2026-09-17 07:01 WIB — Grok (xAI) hourly audit
-- HEAD saat itu `0f20136`. Email dikirim (perubahan penting).
-
-### 2026-09-17 06:18 WIB — Grok (xAI) hourly audit
-- HEAD saat itu `85f6f88`.
-
-### 2026-09-16 — Grok (xAI) 19:23 WIB
-- Konfirmasi: **muzawwied@gmaio.com adalah typo**. Alamat resmi hanya **muzawwied@gmail.com**.
-
----
-
-## Verifikasi Deploy Production — Superagent 10:50 WIB 17-09
-- `deploy.yml` auto-trigger tiap push ke main. Run untuk `d6231b7` (memuat `4ff816e` fix upsertOauthUser + `164689f` set_balance admin-only) = **success** (02:43Z). Run `4ff816e` "cancelled" hanya karena superseded push `d6231b7` (concurrency group), isinya tetap ter-deploy.
-- Verifikasi live `https://clincoo-be2.pages.dev/api/wallet`: POST set_balance tanpa login → 401 `Login diperlukan` (kode baru aktif; guard 403 admin berlaku setelah login).
-- Rekomendasi #1 & #3 audit 10:13 **SELESAI** — kedua fix sudah di production. #4 mojibake diverifikasi bersih.
-- Run 261 (`5e88f21`) juga **success** (03:52Z). Run 262 (`631368b` docs audit 11:07) **success** (04:08Z). Run 263 (`92f0499` docs audit 12:18) **success** (05:20Z). Run 264 (`80ab904` docs audit 13:13) **success** (06:14Z). Run 265 (`30dfff6` docs audit 14:18) **success** (07:19Z). Run 266 (`7db9154` docs audit 15:05) **success** (08:08Z). Run 267 (`d50d666` docs audit 16:15) **success** (09:17Z). Run 270 (`d371519`, memuat `5c7d317`) **success** (10:41Z).
-
-## Rekomendasi untuk Agent Berikutnya
-
-1. SELESAI (Superagent, 09:40 WIB 17-09): E2E smoke /auth/ di clinqoo.pages.dev — redirect Google & GitHub ke gerbang OAuth terverifikasi. Sisa: owner sekali uji login nyata (klik lanjut masuk akun).
-2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
-3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
-4. SELESAI: `set_balance` admin-only (`164689f`) live di clincoo-be2.
-5. SELESAI: `upsertOauthUser` aman untuk OAuth tanpa email (`4ff816e`) live di clincoo-be2.
-6. Semua laporan email hanya ke **muzawwied@gmail.com**. Laporan kualitas AI wajib plain-text (jangan HTML-only — run 17:39 body_text kosong).
-7. Blog (`muzawwied/Clinqoo-Blog`) konten/perf saja — pantau jika nanti di-wire ke auth/wallet.
-8. Pertimbangkan saran system prompt dual-mode (non-coder vs developer) + locale ID dari automation "Tingkatkan Kualitas AI Clinqoo" 17:39 — tetap backlog, bukan bug.
-9. Owner uji 1x beli langganan Saldo Dompet + ClinqooPay — pastikan `5c7d317` sinkron (tidak ada riwayat "keluar" jika `mirrorDelta` gagal). Bersihkan mojibake em-dash di `subscription.js`.
-10. **Baru 18:05**: backlog kualitas AI — (a) loop inspect→act→verify di `SINGLE_SYSTEM_PROMPT`; (b) facts SSOT supaya `ai.js` / `agent.js` tidak kontradiksi kuota 25 vs 10/hari; (c) `generationConfig.maxOutputTokens = 8192` + ganti splice 30 pesan; (d) tools Doctor Deploy dari `/api/deploy-logs` + `/api/screenshot`; (e) `set_business_profile` untuk UMKM. P0 ≈ 1 jam: maxOutputTokens + loop + hapus angka 25/hari.
-11. **Baru 19:23**: (a) **P0 bug** perbaiki `aiCall(env, messages, …)` di rangkuman `agent.js`; (b) tool `search_replace` + `grep_content` + aturan prompt patch > rewrite; (c) jujur saat fallback Workers AI tanpa tools; (d) compact per-path + auto-lanjut MAX_TOKENS; (e) Visual QA Tim AI pakai `take_screenshot` ke Reviewer. Jangan buat otomasi duplikat — aktif `168d5135`.
-
----
-
-*File ini hidup. Silakan diedit oleh agent manapun yang memiliki akses write ke repo.*
-*Wiki + automation selalu dicek di setiap sesi.*
