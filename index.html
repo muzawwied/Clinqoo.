@@ -1364,10 +1364,11 @@ function tmShowCollabPlansModal(sub) {
           btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20">Mulai ' + p.name + '</a>';
         }
         return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
-          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
+          (p.hot ? '<div id="home-pro-ribbon" class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Discount</div>' : '') +
           '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
           '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
-          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
+          '<div id="home-pro-price-wrap" class="mb-4 flex items-baseline flex-wrap">' +
+          (p.hot ? '<span class="text-2xl font-extrabold tracking-tight text-gray-900">Rp5.000</span><span class="text-xs font-medium text-gray-500 ml-1">/bln</span><span class="text-sm text-gray-400 line-through ml-1.5">Rp49.000</span><span class="w-full text-[10px] text-gray-500 mt-0.5" id="home-pro-promo-note">Promo 100 user pertama — sisa <span id="home-promo-rem">…</span> slot</span>' : '<span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span>') + '</div>' +
           '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
       };
 
@@ -1528,6 +1529,25 @@ function tmShowCollabPlansModal(sub) {
         clinqooCheckQuotaBanner();
         setInterval(clinqooCheckQuotaBanner, 3 * 60 * 1000);
 
+        // PROMO: kartu harga homepage sinkron /api/promo (revert 49K + 'Paling Populer' kalau selesai)
+        (function () {
+            try {
+                var apiB = (['clincoo-be2.pages.dev', 'localhost', '127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
+                fetch(apiB + '/api/promo', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (p) {
+                    var ribbon = document.getElementById('home-pro-ribbon');
+                    var wrap = document.getElementById('home-pro-price-wrap');
+                    var note = document.getElementById('home-pro-promo-note');
+                    if (!p || p.active !== true || p.remaining <= 0) {
+                        if (ribbon) ribbon.textContent = 'Paling Populer';
+                        if (note) note.remove();
+                        if (wrap) wrap.innerHTML = '<span class="text-2xl font-extrabold tracking-tight text-gray-900">49K</span><span class="text-xs font-medium text-gray-500 ml-1">/bln</span>';
+                        return;
+                    }
+                    var rem = document.getElementById('home-promo-rem');
+                    if (rem) rem.textContent = String(p.remaining);
+                }).catch(function () {});
+            } catch (e) {}
+        })();
         // PROMO 100 USER PERTAMA — banner di bawah header; X menutup utk sesi ini.
         (function () {
             var banner = document.getElementById('promo-early-banner');
