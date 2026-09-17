@@ -2,6 +2,7 @@
 import { currentUser, scopedKey, rowScope } from './user-scope.js';
 import { emailTemplate, formatIDR, sendEmail, notifyEvent, getUserByEmail } from './notify-helpers.js';
 import { getCpConnection, mirroredBalance, mirrorDelta } from './clinqoopay-helpers.js';
+import { ADMIN_EMAILS } from './plan-helpers.js';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +24,13 @@ async function getSecret(env, key) {
     if (row?.value) return row.value;
   } catch {}
   return null;
+}
+
+function isUserAdmin(user) {
+  if (!user) return false;
+  if (user.role === 'admin' || user.role === 'owner') return true;
+  if (user.email && ADMIN_EMAILS.has(user.email.toLowerCase())) return true;
+  return false;
 }
 
 // Callback top up (Base44/Xendit) datang TANPA login — identifikasi pemilik akun
@@ -296,6 +304,8 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === 'set_balance') {
+      // Hanya admin: user biasa tidak boleh mengubah saldo sendiri secara bebas
+      if (!isUserAdmin(user)) return j({ error: 'Aksi set_balance hanya untuk admin' }, 403);
       const balance = parseFloat(body.balance || 0);
       const conn0 = await getCpConnection(db, uid);
       if (conn0) {
