@@ -64,6 +64,9 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ## Log Interaksi Agent
 
+### 2026-09-17 — Superagent Clinqoo (ui(upgrade): styling label promo Pro, lanjutan log sebelumnya)
+- `akun/langganan/upgrade/index.html` (SIMPAN SOLUSI): harga promo Rp5.000 kini `text-gray-900 dark:text-white` (putih di dark mode, bukan emerald), badge "Discount" bawah dihapus total, pita pojok kartu Pro `Paling Populer` → `Discount` (SEMENTARA selama promo — kembalikan jadi "Paling Populer" saat promo berakhir). Semua class emerald di halaman upgrade sudah nol. Sudah deploy ke clinqoo (Vylonium, direct-upload) & terverifikasi live di kedua domain. Commit `084d945..HEAD` cabang repo utama.
+
 ### 2026-09-17 — Superagent Clinqoo (UI label promo Pro + deploy clinqoo.pages.dev)
 - **UI**: `akun/langganan/upgrade/index.html` — label harga promo "Rp5.000/bln" dipindah ke area harga utama kartu Pro (sejajar "49K", dicoret jadi Rp49.000), sebelumnya nongol aneh di bawah dekat tombol. Badge "Discount" hilangkan emoji 🏷️. Commit `084d945`.
 - Deploy manual ke project Pages `clinqoo` (akun Vylonium, direct-upload — lihat catatan sebelumnya) sudah dijalankan & diverifikasi live di clinqoo.pages.dev dan clincoo-be2.pages.dev.
