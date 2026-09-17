@@ -22,9 +22,9 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-17 09:15 WIB)
-=======
-## ⚠️ ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
+## Status Saat Ini (update terakhir: 2026-09-17 10:13 WIB)
+
+## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
 Project `clinqoo` (akun Vylonium a393, clinqoo.pages.dev) **WAJIB di-deploy BERSAMA functions MCP**. Endpoint `/mcp` (GitHub MCP untuk semua agent) dan `/rpc` hidup dari `functions/{mcp.js,rpc.js}`.
 
@@ -42,28 +42,34 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ---
 
-
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT user baru + guard `if (!user) throw` masih ada di `functions/api/auth/shared.js`. Edge tanpa email tetap throw (risiko TypeError di `.toLowerCase()`). |
-| Halaman `/auth/` | OK (terverifikasi) | Rekonstruksi `0f20136` + hapus link daftar `bb2acf6`. E2E smoke 09:40 WIB (Superagent): halaman mobile load bersih, tombol Google & GitHub ada, klik → redirect benar ke accounts.google.com dan github.com/oauth — alur sampai gerbang OAuth OK |
-| Encoding karakter | Minor | Komentar shared.js masih `â` (mojibake em-dash); runtime tidak terpengaruh |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null tetap ada. Edge tanpa email FIXED di `4ff816e` (emailNorm + last_row_id). |
+| Halaman `/auth/` | OK (terverifikasi) | E2E smoke 09:40 WIB: redirect Google & GitHub ke gerbang OAuth OK |
+| Encoding karakter | Minor | Komentar shared.js masih mojibake em-dash; runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
-| Editor full-stack | OK | HEAD `6e4d516` (tidak berubah sejak audit 07:01) |
+| Editor full-stack | OK | HEAD `6e4d516` |
 | AI chat / Tim AI | OK | |
-| Promo | OK (UI sebelumnya) | Atomic claim + styling homepage/upgrade; tidak berubah jam ini |
+| Promo | OK | Atomic claim + UI promo; tidak berubah jam ini |
 | Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
-| Wallet | PERUBAHAN | `164689f` set_balance hanya admin/owner atau ADMIN_EMAILS; user biasa 403 |
+| Wallet | OK | `164689f` set_balance admin-only |
 | Middleware | OK | Clinqoo connector tools berfungsi |
 | Hourly audit automation | OK | |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
 
-**Bukan All clear murni** — tidak ada bug kritis OAuth baru. Perubahan penting: hardening wallet `set_balance` admin-only. Email laporan dikirim ke muzawwied@gmail.com.
+**Bukan All clear murni** — tidak ada bug kritis baru. Perubahan penting: fix OAuth tanpa email `4ff816e`. Email laporan dikirim ke muzawwied@gmail.com.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-17 10:13 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `d6231b7` (docs rekomendasi #5).
+- Sejak audit 09:15: `4ff816e` fix upsertOauthUser tanpa email; `b424c6b` docs E2E /auth/; `d6231b7` docs.
+- `upsertOauthUser`: INSERT + guard + emailNorm + last_row_id — **FIXED**.
+- Editor `6e4d516`. Data sync `079e0bd`. Issue/PR open: 0.
+- Email `[Clinqoo Hourly Audit] 2026-09-17 10:13 WIB` dikirim.
 
 ### 2026-09-17 09:15 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `164689f` (sec wallet set_balance admin-only).
@@ -103,11 +109,11 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. ✅ SELESAI (Superagent, 09:40 WIB 17-09): E2E smoke /auth/ di clinqoo.pages.dev — redirect Google & GitHub ke gerbang OAuth terverifikasi. Sisa: owner sekali uji login nyata (klik lanjut masuk akun).
+1. SELESAI (Superagent, 09:40 WIB 17-09): E2E smoke /auth/ di clinqoo.pages.dev — redirect Google & GitHub ke gerbang OAuth terverifikasi. Sisa: owner sekali uji login nyata (klik lanjut masuk akun).
 2. Pastikan deploy `clinqoo` selalu sertakan `functions/{mcp.js,rpc.js}` (aturan `0cdd1a2`).
 3. Setelah promo selesai: pita kartu Pro kembalikan ke "Paling Populer".
 4. `set_balance` sudah dibatasi admin (`164689f`) — pastikan ter-deploy ke API production.
-5. ✅ SELESAI: `upsertOauthUser` kini aman untuk OAuth tanpa email (normalisasi di awal + fallback `last_row_id`) — commit fix di main.
+5. SELESAI: `upsertOauthUser` aman untuk OAuth tanpa email (`4ff816e`) — pastikan ter-deploy ke API production (clincoo-be2).
 6. Semua laporan email hanya ke **muzawwied@gmail.com**.
 
 ---
