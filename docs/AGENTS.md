@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 04:11 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 05:08 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -46,28 +46,36 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 04:11 di `functions/api/auth/shared.js`. |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 05:08 di `functions/api/auth/shared.js`. |
 | Halaman `/auth/` | OK (terverifikasi) | E2E smoke: redirect Google & GitHub ke gerbang OAuth OK |
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js; runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | HEAD `6e4d516` |
-| AI chat / Tim AI | Backlog + 1 bug agent | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. **BUG** `agent.js` `aiCall` tanpa `env` — belum di-fix. |
+| AI chat / Tim AI | Backlog + 1 bug agent | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. **BUG** `agent.js` `aiCall` tanpa `env` di ringkasan akhir — belum di-fix. |
 | Promo | OK | Tidak berubah jam ini |
 | Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
 | Wallet / langganan | OK — fix urutan tx | `5c7d317` |
 | Middleware | OK | Clinqoo connector tools berfungsi |
-| Hourly audit automation | OK | Audit 04:11: All clear (tidak kirim email) |
+| Hourly audit automation | OK | Audit 05:08: All clear (tidak kirim email) |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK (konten baru) | HEAD `530b180` — 5 artikel editor ID/EN + sitemap (~03:13 WIB) |
-| Clinqoo-Data | OK | Sync rutin `0748273` 21:00Z |
+| Blog | OK (konten baru) | HEAD `38372cf` — artikel rename berkas + 5 tips 18 Sep |
+| Clinqoo-Data | OK | Sync rutin `f19e069` 22:01Z |
 | Landing | OK | HEAD `21d4481` |
 
-**All clear (jam ini)** — tidak ada commit kode auth/wallet/schema/middleware sejak audit 03:07. Blog artikel rutin + Data sync. OAuth tetap FIXED. Bug `aiCall` + backlog AI masih terbuka (sudah dilaporkan; tidak diulang email). Issue/PR 0. Deploy run 285 (`138bc30`) success.
+**All clear (jam ini)** — tidak ada commit kode auth/wallet/schema/middleware sejak audit 04:11. Blog artikel rutin + Data sync. OAuth tetap FIXED. Bug `aiCall` + backlog AI masih terbuka (sudah dilaporkan; tidak diulang email). Issue/PR 0.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 05:08 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.` sebelum update wiki: `957af46` (docs hourly audit 04:11 All clear).
+- Sejak audit 04:11: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Blog `38372cf` (artikel + tips). Data sync `f19e069` 22:01Z (rutin).
+- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
+- Bug `aiCall` tanpa `env` di panggilan ringkasan akhir `functions/api/agent.js` **masih ada** (sudah dilaporkan 19:23).
+- Editor `6e4d516`. Landing `21d4481`. Issue/PR open: 0.
+- Status: **All clear**. Tidak kirim email.
 
 ### 2026-09-18 04:11 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `138bc30` (docs hourly audit 03:07 All clear).
@@ -77,15 +85,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 - Editor `6e4d516`. Landing `21d4481`. Issue/PR open: 0. Deploy run 285 success.
 - Status: **All clear**. Tidak kirim email.
 
-### 2026-09-18 03:07 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `1ced2c7` (docs hourly audit 02:06 All clear).
-- Sejak audit 02:06: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet/Blog. Data sync `6f39376` 20:00Z (rutin).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Bug `aiCall` tanpa `env` di `functions/api/agent.js` **masih ada** (sudah dilaporkan 19:23).
-- Editor `6e4d516`. Landing `21d4481`. Blog `59685ad`. Issue/PR open: 0. Deploy run 284 success.
-- Status: **All clear**. Tidak kirim email.
-
-Log jam sebelumnya ada di commit `138bc30` — dipotong dari HEAD wiki agar file tetap ringan.
+Log jam sebelumnya ada di commit `957af46` — dipotong dari HEAD wiki agar file tetap ringan.
 
 ---
 
