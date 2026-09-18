@@ -108,8 +108,11 @@ export async function onRequestPost({ request, env }) {
     const escape = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     let attachment = null;
     if (thumbnail) {
-      const m = thumbnail.match(/^data:(image\/[a-z+]+);base64,(.+)$/i);
-      if (m) attachment = [{ name: 'thumbnail-' + (id || 'baru') + '.webp', content: m[2] }];
+      const m = thumbnail.match(/^data:(image\/([a-z+]+));base64,(.+)$/i);
+      const extByMime = { 'png': 'png', 'jpeg': 'jpg', 'jpg': 'jpg' };
+      const ext = m && extByMime[(m[2] || '').toLowerCase()];
+      // webp tidak didukung lampiran Brevo -> biarkan gagal lalu fallback kirim tanpa lampiran
+      if (m && ext) attachment = [{ name: 'thumbnail-' + (id || 'baru') + '.' + ext, content: m[3] }];
     }
     const html =
       '<div style="background:#f4f5f7;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">' +
