@@ -64,6 +64,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Blog | OK | HEAD `1d88c85` (sitemap + 5 artikel tips) |
 | Clinqoo-Data | OK | Sync `b7922a0` 07:15Z |
 | Landing | OK | Hero random + CTA tema `b7b7b40`/`7c09031`; legal → blog Pages |
+| Domain publik | P1 operasional | `clinqoo.biz.id` best-effort (gagal diam jika zona CF belum siap); project lama tetap prefix `cno-` sampai setting direset |
 | Debug folders | OK | tetap terhapus |
 | CI probe workflow | Bersih | `6439caa` lalu `eca77be` hapus workflow probe token CF |
 
@@ -72,6 +73,11 @@ Bukan All clear — perubahan penting domain publik deploy + temuan minor lama. 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 14:25 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit HEAD `3197d6de`. STATUS PERUBAHAN PENTING (bukan All clear). Tidak ada regresi kritis OAuth — `upsertOauthUser` TETAP FIXED (emailNorm aman untuk email null; INSERT auth_users sebelum lookup; last_row_id untuk OAuth tanpa email). Issue/PR open: 0. Perubahan sejak 13:13: `3197d6de` feat deploy link publik `<nama>.clinqoo.biz.id` (bukan pages.dev), hapus prefix `cno-`, perbaiki kurung `onRequestGet` dari patch cache; `7c09031`/`b7b7b40` landing CTA/hero tema + teks hero random; `79656e8` legal links → clinqoo-blog.pages.dev; `45021b7` dark mode/card landing; `cd88d85` cache 45s GET status deploy; `e3a85c1`/`374f736`/`e49ae51` docs AGENTS. Editor `6e4d516`. Data sync `b7922a0` 07:15Z. Blog `1d88c85` sitemap + artikel tips 18 Sep. Temuan: (1) P1 operasional — domain publik clinqoo.biz.id best-effort; project Pages lama tetap prefix `cno-` sampai setting direset; (2) non-P0 lama — CREATE TABLE tanpa `.run()`, schema.sql belum `security_events`, review via GET+token, title belum di-escape; (3) ORIGIN_ALLOW belum `*.clinqoo.biz.id` (tidak kritis selama frontend di pages.dev). Rekomendasi: verifikasi zona + custom domain Pages; fix `.run()`; jangan mutasi review pada GET; deploy frontend tetap sertakan `mcp.js`.
+- Sumber: email/pesan laporan (subjek: [Clinqoo Hourly Audit] [2026-09-18-14:25])
+- Status: OAuth OK; P1 domain best-effort; non-P0 CCTV/schema/review/ORIGIN_ALLOW masih terbuka
 
 ### 2026-09-18 14:25 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `3197d6de`.
