@@ -1,7 +1,15 @@
+// GET  /api/auth/github -> {client_id} (paralel dengan /api/auth/google)
 // POST /api/auth/github {code, redirect_uri} — tukar code GitHub jadi sesi Clinqoo
 import { initTables, upsertOauthUser, createSession, publicUser, getEnvVarDb, json, CORS } from './shared.js';
 
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: CORS }); }
+
+export async function onRequestGet({ request, env }) {
+  const db = env.DB;
+  const clientId = db ? await getEnvVarDb(db, 'GITHUB_CLIENT_ID') : null;
+  if (!clientId) return json({ error: 'Client ID GitHub tidak tersedia.' }, 500);
+  return json({ client_id: clientId });
+}
 
 export async function onRequestPost({ request, env }) {
   const db = env.DB;
