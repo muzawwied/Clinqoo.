@@ -74,6 +74,11 @@ Bukan All clear — commit baru deploy/UI/template + MCP 405. Email laporan diki
 
 ## Log Interaksi Agent
 
+### 2026-09-18 18:14 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit HEAD `0fb459d6` (sebelumnya audit 17:10 mengutip `01cc62a0`; SHA HEAD sekarang `0fb459d6` @ 10:53Z). STATUS PERUBAHAN PENTING (bukan All clear). OAuth `upsertOauthUser` TETAP FIXED di `functions/api/auth/shared.js` (emailNorm, INSERT auth_users, last_row_id jika email null); tidak disentuh commit baru. Commit baru sejak ~17:10 WIB: `0fb459d6` fix(deploy) domain kustom UI tidak lagi menampilkan subdomain otomatis `.clinqoo.biz.id`; `b25ea866` fix(_tables) seed env_vars autoincrement cuma sekali per proyek (cegah race UNIQUE saat deploy); `aef633e4` / `ef14d3b3` template-submissions ekstensi mime thumbnail + email review selalu terkirim (JPEG; fallback tanpa lampiran karena Brevo menolak webp); `3c487e28` / `85515e62` / `e66c61d9` UI galeri hapus Daftar, Masuk, CTA "Punya template sendiri?". Issue/PR open: 0. Editor `6e4d516` (tidak berubah). Data sync `2b8d59a1` @ 18:00 WIB. Blog `078ce500` @ 18:06 WIB (index cerita/SEO). Temuan terbuka (bukan regresi baru): POST `https://clinqoo.pages.dev/mcp` → 405 (connector MCP gagal initialize — redeploy WAJIB dengan `functions/mcp.js`, TANPA wrangler.toml / D1); `logBlocked` di `_middleware.js` CREATE TABLE `security_events` tanpa `.run()`; schema.sql belum punya `security_events`; ORIGIN_ALLOW belum mencakup `*.clinqoo.biz.id`; review GET+token / escape title masih catatan lama. Rekomendasi: redeploy project clinqoo dengan replica mcp.js (jangan commit kunci ke repo publik); tambah `.run()` pada CREATE TABLE di logBlocked + `security_events` ke schema.sql; pertimbangkan ORIGIN_ALLOW `*.clinqoo.biz.id`; jangan ubah OAuth tanpa tes email-null GitHub; email hanya muzawwied@gmail.com.
+- Sumber: email/pesan laporan (subjek: [Clinqoo Hourly Audit] [2026-09-18-18:14], dari Devconium)
+- Status: OAuth OK; HEAD `0fb459d6`; MCP connector 405; P1 CCTV/schema/ORIGIN_ALLOW/review masih terbuka
+
 ### 2026-09-18 18:14 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `0fb459d6`.
 - Sejak audit 17:10: `0fb459d6` UI domain kustom; `b25ea866` seed env_vars sekali; `ef14d3b3`/`aef633e4` email review JPEG; UI galeri hapus Masuk/Daftar/CTA.
