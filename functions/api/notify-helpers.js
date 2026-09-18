@@ -1,4 +1,4 @@
-// Helpers notifikasi in-app & email (Brevo) Clincoo — template profesional, per-akun.
+// Helpers notifikasi in-app & email (Resend) Clincoo — template profesional, per-akun.
 // JANGAN pakai prefix "_" pada nama file (wrangler mengecualikannya dari bundle).
 import { rowScope } from './user-scope.js';
 
@@ -68,28 +68,32 @@ export function emailTemplate(title, name, introText, details, ctaText, ctaLink,
   '</div>';
 }
 
-// Kirim email via Brevo. opts: { toEmail, toName, subject, html }. Hasil: { sent, via, reason }
+// Kirim email via Resend. opts: { toEmail, toName, subject, html, attachment }. Hasil: { sent, via, reason }
+// attachment format lama Resend [{name, content}] otomatis dinormalisasi ke [{filename, content}] Resend.
 export async function sendEmail(env, opts) {
-  const apiKey = await getSecret(env, 'BREVO_API_KEY');
+  const apiKey = await getSecret(env, 'RESEND_API_KEY');
   if (!apiKey || !opts || !opts.toEmail) return { sent: false, via: null, reason: 'no_api_key_or_recipient' };
-  const senderEmail = await getSecret(env, 'BREVO_SENDER_EMAIL');
+  const senderEmail = (await getSecret(env, 'RESEND_SENDER_EMAIL')) || (await getSecret(env, 'BREVO_SENDER_EMAIL'));
   if (!senderEmail) return { sent: false, via: null, reason: 'no_sender' };
-  const senderName = (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clincoo';
+  const senderName = (await getSecret(env, 'RESEND_SENDER_NAME')) || (await getSecret(env, 'BREVO_SENDER_NAME')) || 'Clincoo';
   try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const attachments = (Array.isArray(opts.attachment) ? opts.attachment : [])
+      .filter(function (a) { return a && a.content; })
+      .map(function (a) { return { filename: a.filename || a.name, content: a.content }; });
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { 'api-key': apiKey, 'Content-Type': 'application/json', accept: 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email: opts.toEmail, ...(opts.toName ? { name: opts.toName } : {}) }],
+        from: senderName + ' <' + senderEmail + '>',
+        to: [opts.toEmail],
         subject: opts.subject,
-        htmlContent: opts.html,
-        ...(Array.isArray(opts.attachment) && opts.attachment.length ? { attachment: opts.attachment } : {})
+        html: opts.html,
+        ...(attachments.length ? { attachments: attachments } : {})
       })
     });
-    return { sent: res.ok, via: 'brevo', reason: res.ok ? null : ('HTTP ' + res.status) };
+    return { sent: res.ok, via: 'resend', reason: res.ok ? null : ('HTTP ' + res.status + (res.status === 403 ? ' (pengirim belum terverifikasi di Resend)' : '')) };
   } catch (e) {
-    return { sent: false, via: 'brevo', reason: String(e && e.message || e) };
+    return { sent: false, via: 'resend', reason: String(e && e.message || e) };
   }
 }
 

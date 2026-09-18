@@ -144,7 +144,7 @@ export async function onRequestPost({ request, env }) {
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
         .bind(balKey, String(balance)).run();
 
-      // Notifikasi in-app + email konfirmasi (Brevo) — hanya utk transaksi hasil top up Xendit
+      // Notifikasi in-app + email konfirmasi (Resend) — hanya utk transaksi hasil top up Xendit
       if (/^top up xendit/i.test(String(title))) {
         const nres = { notif: false, email: null };
         try {

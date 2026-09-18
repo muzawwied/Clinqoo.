@@ -2,7 +2,7 @@
 //   GET  /api/template-submissions          -> daftar template komunitas yang DISETUJUI (publik)
 //   POST /api/template-submissions          -> ajukan template (wajib login Bearer):
 //        { title, desc, preview_url, project_name, thumbnail (data URL webp) }
-//        Data langsung dikirim real-time via email ke reviewer (Brevo) dengan CTA Setujui/Tolak.
+//        Data langsung dikirim real-time via email ke reviewer (Resend) dengan CTA Setujui/Tolak.
 //   Tabel: template_submissions (D1, dibuat otomatis).
 // Sub-route: /api/template-submissions/track   (pencatatan pemakaian/kunjungan, publik)
 //            /api/template-submissions/review (CTA Setujui/Tolak dari email, via token)
@@ -111,7 +111,7 @@ export async function onRequestPost({ request, env }) {
       const m = thumbnail.match(/^data:(image\/([a-z+]+));base64,(.+)$/i);
       const extByMime = { 'png': 'png', 'jpeg': 'jpg', 'jpg': 'jpg' };
       const ext = m && extByMime[(m[2] || '').toLowerCase()];
-      // webp tidak didukung lampiran Brevo -> biarkan gagal lalu fallback kirim tanpa lampiran
+      // webp tidak didukung lampiran Resend -> biarkan gagal lalu fallback kirim tanpa lampiran
       if (m && ext) attachment = [{ name: 'thumbnail-' + (id || 'baru') + '.' + ext, content: m[3] }];
     }
     const html =
@@ -147,7 +147,7 @@ export async function onRequestPost({ request, env }) {
     };
     let mail = await sendEmail(env, mailOpts);
 
-    // Fallback: kalau email dengan lampiran gagal (mis. format webp ditolak Brevo),
+    // Fallback: kalau email dengan lampiran gagal (mis. format webp ditolak Resend),
     // kirim ulang TANPA lampiran agar review email selalu sampai.
     if (!mail.sent && attachment) {
       mail = await sendEmail(env, { toEmail: mailOpts.toEmail, subject: mailOpts.subject, html });

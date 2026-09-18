@@ -211,7 +211,7 @@ export async function creditTopup(env, order) {
 
   await db.prepare("UPDATE topup_orders SET status = 'paid', paid_at = datetime('now') WHERE id = ?").bind(order.id).run();
 
-  // Notifikasi in-app + email konfirmasi (Brevo) ke pemilik akun
+  // Notifikasi in-app + email konfirmasi (Resend) ke pemilik akun
   if (owner) {
     const nres = { notif: false, email: null };
     try {

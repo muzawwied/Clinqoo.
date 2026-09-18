@@ -1,4 +1,4 @@
-// POST /api/auth/forgot-password — kirim link atur ulang kata sandi via email (Brevo)
+// POST /api/auth/forgot-password — kirim link atur ulang kata sandi via email (Resend)
 // Selalu balas success agar tidak membocorkan keberadaan akun.
 import { initTables, json, validEmail, randomHex } from './shared.js';
 import { emailTemplate, sendEmail } from '../notify-helpers.js';

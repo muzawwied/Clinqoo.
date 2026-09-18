@@ -221,7 +221,7 @@ function loadThumb(file) {
     reader.onload = function (ev) {
         var img = new Image();
         img.onload = function () {
-            // Rasio 16:9 (memanjang ke samping) + kompresi JPEG (ringan & didukung lampiran email Brevo)
+            // Rasio 16:9 (memanjang ke samping) + kompresi JPEG (ringan & didukung lampiran email Resend)
             var W = 1280, H = 720;
             var canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;

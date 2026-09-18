@@ -282,7 +282,7 @@
         .then(res => {
             if (res.success && res.email_sent) return done();
             if (res.success && res.invite_url) {
-                // Undangan tersimpan; server email D1 belum terpasang -> kirim via jalur cadangan (Base44/Brevo)
+                // Undangan tersimpan; server email D1 belum terpasang -> kirim via jalur cadangan (Base44/Resend)
                 return fetch('https://koda-da05205d.base44.app/functions/sendInviteEmail', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

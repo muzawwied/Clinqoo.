@@ -6,7 +6,7 @@
 // POST /api/scheduled-tasks {action:'mark_run'}  -> tandai tugas milik sendiri baru dijalankan
 //
 // Eksekusi tugas = panggil Gemini (gemini-3.6-flash, fallback gemini-3-flash-preview) dengan
-// prompt tugas -> hasil disimpan ke task_results -> notifikasi in-app -> email opsional (Brevo).
+// prompt tugas -> hasil disimpan ke task_results -> notifikasi in-app -> email opsional (Resend).
 
 import { currentUser } from './user-scope.js';
 import { getSecret, emailTemplate, sendEmail, notifyEvent } from './notify-helpers.js';
