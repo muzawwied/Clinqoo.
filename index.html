@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script>
+    // Domain publik clinqoo.biz.id: root diredirect ke landing page resmi
+    // (landing page tetap beralamat clinqoo-landing.pages.dev).
+    (function () {
+      var h = location.hostname;
+      var p = (location.pathname.replace(/\/+$/, '')) || '/';
+      if ((h === 'clinqoo.biz.id' || h === 'www.clinqoo.biz.id') && (p === '/' || p === '/index.html')) {
+        location.replace('https://clinqoo-landing.pages.dev/');
+      }
+    })();
+  </script>
   <script src="js/auth-client.js?v=2"></script>
   <script src="js/templates-data.js?v=20260916"></script>
     <meta charset="UTF-8">
