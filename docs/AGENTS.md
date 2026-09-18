@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 05:10 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 06:02 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -54,31 +54,40 @@ Deploy proyek UI lain (semua manual, `wrangler pages deploy`):
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id di `functions/api/auth/shared.js`. Diverifikasi 05:10. |
-| Deploy user sites | OK | HEAD kode app `0fb459d6` |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id di `functions/api/auth/shared.js`. Diverifikasi 06:02. |
+| Deploy user sites | OK | Kode app `0fb459d6` + rebrand UI `c44e6c71` |
 | Seed tabel proyek | OK | `b25ea866` |
 | Galeri template | OK | Email review JPEG + fallback |
 | CCTV `security_events` | Minor | `logBlocked` CREATE TABLE tanpa `.run()` (known) |
 | Encoding karakter | Minor | Mojibake em-dash |
 | Schema D1 vs runtime | Gap known | `security_events` belum di schema.sql |
-| Editor full-stack | OK | `6e4d516` |
+| Editor full-stack | OK | HEAD `29d5033` (rebrand UI) |
 | AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy |
 | Promo | OK | |
-| Deploy MCP | OK — FIXED | Re-deploy sesuai prosedur 2026-09-18; POST /mcp balas JSON-RPC initialize (200) |
-| Wallet / langganan | OK | |
+| Deploy MCP | OK — FIXED | Re-deploy sesuai prosedur; POST /mcp JSON-RPC initialize |
+| Wallet / langganan | OK | HEAD `95a42372` rebrand ClincooPay |
 | Middleware | OK + catatan | ORIGIN_ALLOW belum `*.clinqoo.biz.id` |
-| Hourly audit automation | OK | Audit 05:10: All clear — tidak kirim email |
+| Hourly audit automation | OK | Audit 06:02: All clear — tidak kirim email |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `263cb982` (batch artikel security ~04:25 WIB) |
-| Clinqoo-Data | OK | Sync rutin `d8943366` 22:01Z / 05:01 WIB |
-| Landing | OK | HEAD `280302d9` |
+| Blog | OK | HEAD `93d62bc3` rebrand + artikel template |
+| Clinqoo-Data | OK | Sync rutin `85a16670` 22:45Z / 05:45 WIB |
+| Landing | OK | Rebrand di repo utama `e8c31d64`; repo Landing tetap `280302d9` |
+| Legal | OK | `5ad44340` fix path root + `8446b521` rebrand |
 
-**All clear** — tidak ada commit kode app baru sejak `0fb459d6` / audit 04:08. Perubahan: data sync Clinqoo-Data + artikel blog security. OAuth tetap FIXED. Tidak kirim email.
+**All clear** — tidak ada bug kritis baru. Sejak audit 05:10: rebrand UI Clincoo di Clinqoo./Wallet/Editor/Blog/Legal (disengaja), cleanup email, sync Data, artikel blog. OAuth tetap FIXED. Tidak kirim email.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-19 06:02 WIB — Grok (xAI) hourly audit
+- HEAD sebelumnya `8c4af590` (audit 05:10 All clear); HEAD sekarang `89dc645e` (docs rebrand + prosedur deploy).
+- Sejak 05:10: rebrand UI `c44e6c71` + landing `e8c31d64` + cleanup email `f4ea447b` (Clinqoo.). Wallet `95a42372`. Editor `29d5033`. Blog `93d62bc3`. Legal `5ad44340`. Data `85a16670`.
+- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (dibaca ulang 06:02, file tidak diubah oleh rebrand).
+- Issue/PR open: 0.
+- Rebrand disengaja, bukan regresi OAuth/wallet/middleware. Minor CCTV/schema tetap terbuka.
+- Status: **All clear**. Tidak kirim email.
 
 ### 2026-09-19 05:10 WIB — Grok (xAI) hourly audit
 - HEAD wiki sebelumnya `a30c2067` (audit 04:08 All clear).
@@ -98,28 +107,20 @@ Deploy proyek UI lain (semua manual, `wrangler pages deploy`):
 - MCP 405 known. Minor CCTV/schema tetap terbuka, bukan kritis baru.
 - Status: **All clear**. Tidak kirim email.
 
-### 2026-09-19 03:10 WIB — Grok (xAI) hourly audit
-- HEAD wiki sebelumnya `93f99a08` (audit 02:15 All clear).
-- Kode produk terakhir tetap `0fb459d6` @ 10:53Z.
-- Sejak 02:15: Clinqoo-Data sync rutin (`e2f5decf` 03:00 WIB). Blog/Editor/Landing tidak berubah.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (dibaca ulang 03:10).
-- Issue/PR open: 0. Editor `6e4d516`. Landing `280302d9`. Blog `1562a0db`.
-- MCP 405 known. Minor CCTV/schema tetap terbuka, bukan kritis baru.
-- Status: **All clear**. Tidak kirim email.
-
 Log lebih lama dipotong agar wiki ringan.
 
 ---
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Redeploy project `clinqoo` DENGAN `functions/mcp.js` (jangan sertakan wrangler.toml / D1 binding) — POST `/mcp` saat ini 405.
+1. Redeploy project `clinqoo` DENGAN `functions/mcp.js` (jangan sertakan wrangler.toml / D1 binding) jika POST `/mcp` kembali 405.
 2. Fix `logBlocked` di `functions/api/_middleware.js`: panggil `.run()` pada CREATE TABLE.
 3. Tambah `security_events` ke schema.sql.
 4. Pertimbangkan ORIGIN_ALLOW untuk `*.clinqoo.biz.id`.
 5. Email hanya ke **muzawwied@gmail.com**.
 6. Backlog AI: dual-mode, SSOT kuota, maxOutputTokens 8192, Doctor Deploy.
 7. OAuth tetap jangan diubah tanpa tes email-null GitHub.
+8. Rebrand Clincoo: jangan rename domain/repo/identifier kode.
 
 ---
 
