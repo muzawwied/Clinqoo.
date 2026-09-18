@@ -1,0 +1,24 @@
+# Probe read-only: cek apakah CLOUDFLARE_API_TOKEN (secret repo) bisa melihat project Pages "clinqoo".
+# Tidak mengubah apa pun — hanya list project & deployment terakhir.
+name: Probe CF token (read-only)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Cek project Pages
+        run: |
+          echo "== account =="
+          curl -s https://api.cloudflare.com/client/v4/accounts \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | head -c 600
+          echo ""
+          echo "== pages project list =="
+          npx wrangler pages project list 2>&1 | head -40
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
