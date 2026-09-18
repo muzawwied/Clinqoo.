@@ -218,10 +218,55 @@ async function lookupProject(creds, name) {
 // layanan Cloudflare (upload-token dll. bisa balas "Project not found" sesaat
 // setelah create — race condition nyata yang pernah membuat deploy gagal).
 // Domain publik bawaan: tiap proyek yang dideploy otomatis dapat
-// <project>.clinqoo.biz.id selain <project>.pages.dev. Kalau zona
-// clinqoo.biz.id belum ada di akun Cloudflare, pemasangan gagal
-// diam-diam dan link publik tetap memakai pages.dev.
+// <project>.clinqoo.biz.id selain <project>.pages.dev.
+// CATATAN PENTING: zona clinqoo.biz.id bisa berada di akun Cloudflare yang
+// BERBEDA dari akun tempat project Pages berada. Kalau begitu, Cloudflare
+// TIDAK otomatis membuat record DNS saat domain dipasang, dan subdomain
+// tidak pernah aktif (status domain stuck "pending: CNAME record not set").
+// Karena itu di sini kita juga membuat/memperbaiki record CNAME
+// <project>.clinqoo.biz.id -> <project>.pages.dev lewat API DNS.
+// Token API Cloudflare di pengaturan deploy harus punya permission:
+//   Account (akun Pages): Cloudflare Pages -> Edit
+//   Zone (clinqoo.biz.id): DNS -> Edit  (+ Zone -> Read untuk lookup zona)
+// Kalau token tidak bisa mengelola zona, gagal diam-diam dan link publik
+// tetap memakai pages.dev (halaman Domain Kustom menampilkan status pending).
 const PUB_SUFFIX = '.clinqoo.biz.id';
+const PUB_ZONE = 'clinqoo.biz.id';
+
+// Pastikan record CNAME <project>.clinqoo.biz.id -> <project>.pages.dev ada.
+// Return true kalau record sudah benar / berhasil dibuat, false kalau tidak
+// bisa dikelola dari sini (tanpa akses zona, dsb).
+async function ensurePublicDomainDns(creds, domain, pagesName) {
+  try {
+    const zones = await cfFetch('/zones?name=' + PUB_ZONE, creds.apiKey);
+    const zoneId = zones && zones.length && zones[0].id;
+    if (!zoneId) return false;
+    const target = pagesName + '.pages.dev';
+    let existing = null;
+    try {
+      const recs = await cfFetch('/zones/' + zoneId + '/dns_records?type=CNAME&name=' + domain, creds.apiKey);
+      existing = (recs || []).find(r => r && r.type === 'CNAME') || null;
+    } catch (e) { existing = null; }
+    if (existing) {
+      if (existing.content === target && existing.proxied) return true; // sudah benar
+      await cfFetch('/zones/' + zoneId + '/dns_records/' + existing.id, creds.apiKey, {
+        method: 'PUT',
+        body: JSON.stringify({ type: 'CNAME', name: domain, content: target, proxied: true, ttl: 1 })
+      });
+      return true;
+    }
+    try {
+      await cfFetch('/zones/' + zoneId + '/dns_records', creds.apiKey, {
+        method: 'POST',
+        body: JSON.stringify({ type: 'CNAME', name: domain, content: target, proxied: true, ttl: 1 })
+      });
+      return true;
+    } catch (e) {
+      if (e && e.code === 81057) return true; // record sudah ada (race) -> sukses
+      return false;
+    }
+  } catch (e) { return false; }
+}
 
 async function ensurePublicDomain(creds, pagesName) {
   const domain = pagesName + PUB_SUFFIX;
@@ -229,11 +274,17 @@ async function ensurePublicDomain(creds, pagesName) {
     await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + pagesName + '/domains', creds.apiKey, {
       method: 'POST', body: JSON.stringify({ name: domain })
     });
-    return domain;
   } catch (e) {
-    if (e && e.code === 8000013) return domain; // sudah terpasang -> anggap sukses
-    return null;
+    if (e && e.code !== 8000013) return null; // 8000013 = sudah terpasang -> lanjut cek DNS
   }
+  if (await ensurePublicDomainDns(creds, domain, pagesName)) return domain;
+  // DNS tidak bisa dikelola dari sini: pakai domain cuma kalau sudah aktif
+  // (record pernah dibuat manual / zona di akun yang sama dan sudah validate).
+  try {
+    const info = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + pagesName + '/domains/' + domain, creds.apiKey);
+    if (info && info.status === 'active') return domain;
+  } catch (e) {}
+  return null;
 }
 
 async function ensurePagesProject(creds, name) {
