@@ -380,7 +380,8 @@
             if (!pv) return;
             const v = (document.getElementById('input-app-name').value || '').trim();
             if (!v) { pv.textContent = ''; return; }
-            pv.textContent = 'Deploy pertama: ' + ('cno-be2' + slugifyName(v)).slice(0, 60) + '.pages.dev';
+            var pvSlug = slugifyName(v).replace(/-/g, '').slice(0, 12);
+            pv.textContent = 'Deploy pertama: ' + (pvSlug || 'proyek') + '-xxxx.clinqoo.biz.id';
         }
 
         // ---- Perubahan input hanya menandai pending (simpan via tombol centang) ----

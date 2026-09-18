@@ -148,7 +148,7 @@ async function resolvePagesName(db, table, projectId) {
   const preferred = await getPreferredName(db, table, projectId);
   // slug dari nama proyek, tanpa tanda hubung, maks 12 karakter agar CNAME target tetap pendek
   const slug = slugify(String(preferred || '')).replace(/-/g, '').slice(0, 12);
-  const name = ('cno-' + (slug || projHash(projectId)) + '-' + projHash(projectId)).slice(0, 60);
+  const name = ((slug || projHash(projectId)) + '-' + projHash(projectId)).slice(0, 60);
   await setSetting(db, table, projectId, 'pages_project', name); // simpan -> stabil selamanya
   return name;
 }
@@ -217,6 +217,25 @@ async function lookupProject(creds, name) {
 // Pastikan project ada; jika baru dibuat, TUNGGU sampai terpropagasi di semua
 // layanan Cloudflare (upload-token dll. bisa balas "Project not found" sesaat
 // setelah create — race condition nyata yang pernah membuat deploy gagal).
+// Domain publik bawaan: tiap proyek yang dideploy otomatis dapat
+// <project>.clinqoo.biz.id selain <project>.pages.dev. Kalau zona
+// clinqoo.biz.id belum ada di akun Cloudflare, pemasangan gagal
+// diam-diam dan link publik tetap memakai pages.dev.
+const PUB_SUFFIX = '.clinqoo.biz.id';
+
+async function ensurePublicDomain(creds, pagesName) {
+  const domain = pagesName + PUB_SUFFIX;
+  try {
+    await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + pagesName + '/domains', creds.apiKey, {
+      method: 'POST', body: JSON.stringify({ name: domain })
+    });
+    return domain;
+  } catch (e) {
+    if (e && e.code === 8000013) return domain; // sudah terpasang -> anggap sukses
+    return null;
+  }
+}
+
 async function ensurePagesProject(creds, name) {
   let project = await lookupProject(creds, name);
   if (!project) {
@@ -268,7 +287,7 @@ function statusCacheSet(pid, body) {
 }
 function statusCacheDel(pid) { try { if (pid) statusCache.delete(pid); } catch (e) {} }
 
-export async function onRequestGet(({ request, env }) {
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const projectId = url.searchParams.get('project_id') || '';
   const deny = await guardProject(env, request, projectId);
@@ -320,6 +339,11 @@ export async function onRequestGet(({ request, env }) {
     if (project && Array.isArray(doms)) {
       domains = doms.map(x => ({ name: x.name, status: x.status || 'pending' }));
     }
+    let publicUrl = pagesUrl;
+    if (Array.isArray(doms)) {
+      const pd = doms.find(x => x && x.name === name + PUB_SUFFIX && (x.status === 'active' || x.status === 'initializing'));
+      if (pd) publicUrl = 'https://' + pd.name;
+    }
 
     let logs = [];
     try {
@@ -330,7 +354,7 @@ export async function onRequestGet(({ request, env }) {
     const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
     const deployPhase = await getSetting(db, T.projectSettings, projectId, 'deploy_phase');
     const deployed = Array.isArray(logs) && logs.some(l => l && l.status === 'success');
-    const _statusBody = { pages_project: name, pages_url: pagesUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' };
+    const _statusBody = { pages_project: name, pages_url: pagesUrl, public_url: publicUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' };
     statusCacheSet(projectId, _statusBody);
     return json(_statusBody);
   } catch (err) {
@@ -557,6 +581,7 @@ export async function onRequestPost({ request, env }) {
       return json({ error: 'Cloudflare menolak deployment: ' + msg }, 500);
     }
     const dep = depData.result || {};
+    const pubDomain = await ensurePublicDomain(creds, name);
 
     await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
       .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
@@ -571,6 +596,8 @@ export async function onRequestPost({ request, env }) {
       success: true,
       pages_project: name,
       pages_url: pagesUrl,
+      public_url: pubDomain ? ('https://' + pubDomain) : pagesUrl,
+      public_domain: pubDomain || '',
       deployment: {
         id: dep.id,
         url: (dep.aliases && dep.aliases[0]) || dep.url || pagesUrl,

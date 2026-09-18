@@ -279,7 +279,7 @@
         // Deploy engine: same-origin di Cloudflare Pages; clinqoo-be2 hanya untuk frontend GitHub Pages (tanpa Functions).
         const API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev/api' : '/api';
         const pid = () => localStorage.getItem('clinqoo_current_project_id') || '';
-        let deployState = { pages_url: '', pollTimer: null, domainTimer: null, deploying: false };
+        let deployState = { pages_url: '', public_url: '', pollTimer: null, domainTimer: null, deploying: false };
 
         // ===================== SESI DEPLOY (klik deploy cukup sekali) =====================
         // Sesi per proyek tersimpan di localStorage: halaman langsung membuka dashboard
@@ -343,15 +343,17 @@
             const visitBtn = document.getElementById('btn-visit-site');
 
             deployState.pages_url = ses.pages_url;
+            deployState.public_url = ses.public_url || '';
+            const sUrl = deployState.public_url || ses.pages_url;
             indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
             shimmer.style.display = 'none';
             link.style.display = 'inline-block';
-            link.textContent = ses.pages_url;
-            link.href = ses.pages_url;
+            link.textContent = sUrl;
+            link.href = sUrl;
             timeLabel.innerText = timeAgo(ses.done_at || ses.started_at || Date.now());
             visitBtn.disabled = false;
             visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            visitBtn.onclick = () => window.open(ses.pages_url, '_blank');
+            visitBtn.onclick = () => window.open(sUrl, '_blank');
             if (ses.deployed_by) setDeployedBy(ses.deployed_by);
             if (Array.isArray(ses.domains)) renderRealDomains(ses.domains);
 
@@ -361,8 +363,9 @@
                 const dep = st.last_deployment;
                 if (st.last_deploy_by) setDeployedBy(st.last_deploy_by);
                 if (dep && ['success', 'active'].includes(dep.status)) {
-                    const url = dep.url || ses.pages_url;
+                    const url = st.public_url || dep.url || ses.pages_url;
                     deployState.pages_url = url;
+                    deployState.public_url = st.public_url || '';
                     link.textContent = url;
                     link.href = url;
                     visitBtn.onclick = () => window.open(url, '_blank');
@@ -372,6 +375,7 @@
                 try {
                     writeDeploySession({
                         status: 'done',
+                        public_url: st.public_url || '',
                         pages_url: (dep && dep.url) || ses.pages_url,
                         done_at: Date.now(),
                         deployed_by: st.last_deploy_by || ses.deployed_by || '',
@@ -400,14 +404,16 @@
             shimmer.style.display = 'none';
             link.style.display = 'inline-block';
             deployState.pages_url = st.pages_url || (ok ? (dep.url || '') : '');
-            if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, done_at: Date.now(), deployed_by: st.last_deploy_by || '', domains: st.domains || [] });
-            link.textContent = deployState.pages_url || 'gagal dideploy';
-            link.href = deployState.pages_url || '#';
+            deployState.public_url = st.public_url || '';
+            const dispUrl = deployState.public_url || deployState.pages_url;
+            if (ok) writeDeploySession({ status: 'done', pages_url: deployState.pages_url, public_url: deployState.public_url, done_at: Date.now(), deployed_by: st.last_deploy_by || '', domains: st.domains || [] });
+            link.textContent = dispUrl || 'gagal dideploy';
+            link.href = dispUrl || '#';
             timeLabel.innerText = ok ? timeAgoIso(dep.created) : 'deploy gagal';
             visitBtn.disabled = !ok;
             if (ok) {
                 visitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                visitBtn.onclick = () => window.open(deployState.pages_url, '_blank');
+                visitBtn.onclick = () => window.open(dispUrl, '_blank');
             }
             setDeployedBy(st.last_deploy_by || (ok ? '' : null));
             renderRealDomains(st.domains || []);
@@ -540,7 +546,7 @@
             try {
                 const res = await apiFetch('/deploy', { method: 'POST', body: JSON.stringify({ project_id: pid() }) });
                 deployState.deploying = false;
-                writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', done_at: Date.now() });
+                writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', public_url: (res && res.public_url) || '', done_at: Date.now() });
             } catch (err) {
                 deployState.deploying = false;
                 writeDeploySession({ status: 'failed' });
