@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Bersihkan artefak repo (tidak ikut di-publish)
-        run: rm -rf .git .github tests node_modules .wrangler package.json package-lock.json .gitignore
+        run: rm -rf .git .github tests node_modules .wrangler package.json package-lock.json .gitignore debug debug-notif
 
       - name: Pasang wrangler
         run: npm install -g wrangler

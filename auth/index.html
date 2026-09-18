@@ -368,6 +368,16 @@
         // ==== KONFIG AUTH ====
         const API_BASE = 'https://clincoo-be2.pages.dev/api/auth';
         const TOKEN_KEY = 'clinqoo_auth_token';
+        // ?next= ditangkap sekali di awal (sebelum replaceState menghapus query).
+        // Hanya path same-origin diterima (mulai '/', bukan '//' dan tanpa '://').
+        const CLINQOO_NEXT = (function () {
+            try {
+                var n = new URLSearchParams(window.location.search).get('next');
+                if (n && n.charAt(0) === '/' && n.charAt(1) !== '/' && n.indexOf('://') === -1) return n;
+            } catch (e) {}
+            return '';
+        })();
+        function clinqooNextTarget(def) { return CLINQOO_NEXT || def || '../'; }
         const GITHUB_CLIENT_ID = 'Ov23ctIBGjQBolR5PS2C';
 
         function saveSession(data) {
@@ -449,7 +459,8 @@
                 const data = await res.json();
                 if (!res.ok || !data.token) throw new Error(data.error || 'Login ' + provider + ' gagal.');
                 saveSession(data);
-                setTimeout(() => { window.location.href = '../'; }, 400);
+
+                setTimeout(() => { window.location.href = clinqooNextTarget(); }, 400);
             } catch (err) {
                 document.getElementById('oauth-loading').classList.add('hidden');
                 showModal('Login ' + (provider === 'github' ? 'GitHub' : 'Google') + ' Gagal', err.message, 'error');
@@ -485,7 +496,7 @@
                     const res = await fetch(API_BASE + '/me', { headers: { 'Authorization': 'Bearer ' + token } });
                     if (res.ok) {
                         const d = await res.json();
-                        if (d.authenticated) window.location.replace('../');
+                        if (d.authenticated) window.location.replace(clinqooNextTarget());
                     } else {
                         localStorage.removeItem(TOKEN_KEY);
                     }

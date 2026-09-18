@@ -70,7 +70,21 @@ function originOk(request) {
 const SCANNER = /(\.env|wp-login|\.php|\.git|phpmyadmin|wp-admin)/i;
 
 export async function onRequest({ request, env, next }) {
-  if (request.method === 'OPTIONS') return next();
+  if (request.method === 'OPTIONS') {
+    // Preflight CORS: hanya echo origin yang lolos allowlist (bukan '*' — audit #3).
+    // Origin asing tetap bisa request tanpa-cors dari server, tapi browser diblok.
+    const origin = request.headers.get('origin');
+    if (origin && originOk(request)) {
+      return new Response(null, { status: 204, headers: {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': request.headers.get('access-control-request-headers') || 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+        'Vary': 'Origin'
+      } });
+    }
+    return new Response(null, { status: 204 });
+  }
   const url = new URL(request.url);
   const path = url.pathname;
 
@@ -145,6 +159,19 @@ export async function onRequest({ request, env, next }) {
   const res = await next();
   try {
     const h = new Headers(res.headers);
+    // CORS allowlist (audit #3): handler lama menulis '*'; ganti dengan origin
+    // request bila lolos allowlist, atau hapus sama sekali bila origin asing.
+    const reqOrigin = request.headers.get('origin');
+    if (reqOrigin && h.get('Access-Control-Allow-Origin')) {
+      if (originOk(request)) {
+        h.set('Access-Control-Allow-Origin', reqOrigin);
+        try { h.append('Vary', 'Origin'); } catch (e) {}
+      } else {
+        h.delete('Access-Control-Allow-Origin');
+        h.delete('Access-Control-Allow-Headers');
+        h.delete('Access-Control-Allow-Methods');
+      }
+    }
     h.set('X-Content-Type-Options', 'nosniff');
     h.set('X-Frame-Options', 'DENY');
     h.set('Referrer-Policy', 'strict-origin-when-cross-origin');

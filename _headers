@@ -3,3 +3,7 @@
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Jangan publish halaman debug ke produksi (audit #9) — folder tetap di repo untuk pengujian lokal
+/debug/* X-Robots-Tag: noindex
+/debug-notif/* X-Robots-Tag: noindex
