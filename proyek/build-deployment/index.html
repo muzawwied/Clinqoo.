@@ -243,7 +243,7 @@
             // 2) Tanpa sesi lokal: cek server (deploy dari device lain / cache hilang)
             try {
                 const st = await fetchStatus();
-                if (st && (st.last_deployment || (st.domains || []).length)) {
+                if (st && (st.last_deployment || st.deployed === true || (st.domains || []).length)) {
                     window.location.replace('../build-deployment/dashboard/'); return;
                 }
             } catch (e) {}

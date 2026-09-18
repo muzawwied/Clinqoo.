@@ -353,7 +353,15 @@ export async function onRequestGet({ request, env }) {
 
     const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
     const deployPhase = await getSetting(db, T.projectSettings, projectId, 'deploy_phase');
-    const deployed = Array.isArray(logs) && logs.some(l => l && l.status === 'success');
+    // last_deployment juga disintesis dari log D1 bila daftar deployment Cloudflare
+    // tidak terbaca/kosong, supaya halaman tidak salah bilang "belum pernah deploy".
+    if (!last && Array.isArray(logs)) {
+      const okLog = logs.find(l => l && l.status === 'success');
+      if (okLog) last = { id: 'd1-' + (okLog.created_at || ''), status: 'success', url: okLog.url || pagesUrl, created: okLog.created_at || '' };
+    }
+    const deployed = (Array.isArray(logs) && logs.some(l => l && l.status === 'success'))
+      || (last && ['success', 'active'].includes(last.status))
+      || (Array.isArray(deps) && deps.length > 0);
     const _statusBody = { pages_project: name, pages_url: pagesUrl, public_url: publicUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' };
     statusCacheSet(projectId, _statusBody);
     return json(_statusBody);
@@ -583,8 +591,13 @@ export async function onRequestPost({ request, env }) {
     const dep = depData.result || {};
     const pubDomain = await ensurePublicDomain(creds, name);
 
-    await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
-      .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
+    // Log sukses dibungkus try/catch: gagal mencatat log TIDAK boleh membuat
+    // deploy sukses dilaporkan gagal (pernah bikin user nyangkut di halaman
+    // "Mulai Konfigurasi" padahal situsnya sudah online).
+    try {
+      await db.prepare(`INSERT INTO ${T.deployLogs} (project_id, status, url, message, created_at) VALUES (?, 'success', ?, ?, datetime('now'))`)
+        .bind(projectId, pagesUrl, 'deploy ' + files.length + ' file ke ' + name).run();
+    } catch (e) {}
     await setPhase(db, T.projectSettings, projectId, '');
     await bumpMonthlyDeployCount(db, user && user.id);
     try { await setSetting(db, T.projectSettings, projectId, 'last_deploy_by', (user && (user.name || user.email)) || 'pengguna'); } catch (e) {}

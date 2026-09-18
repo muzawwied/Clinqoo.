@@ -337,7 +337,10 @@
                 writeDeploySession({ status: 'done', pages_url: (res && res.pages_url) || deployState.pages_url || '', public_url: (res && res.public_url) || '', done_at: Date.now() });
                 btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> <span class="inline-block">Berhasil Deploy!</span>`;
                 lucide.createIcons();
-                window.ClinqooBack('../dashboard/?id=' + encodeURIComponent(pid()));
+                // Setelah deploy sukses SELALU buka dashboard — jangan history.back(),
+                // karena halaman sebelumnya bisa jadi CTA "Mulai Konfigurasi" sehingga
+                // user seperti dibawa mundur setelah deploy selesai.
+                setTimeout(function () { location.replace('../dashboard/?id=' + encodeURIComponent(pid())); }, 600);
                 setTimeout(() => {
                     btn.innerHTML = `Jalankan Deploy`;
                     btn.className = "flex-[2] py-4 bg-transparent border border-gray-300 text-gray-900 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center gap-2";
