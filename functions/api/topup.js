@@ -61,8 +61,16 @@ export async function onRequestGet({ request, env }) {
       const orderId = url.searchParams.get('order_id');
       if (!orderId) return json({ error: 'order_id required' }, 400);
 
+      // Wajib login — status order hanya boleh dilihat pemiliknya (atau admin)
+      const stUser = await currentUser(env, request);
+      if (!stUser) return json({ error: 'Login diperlukan', need_login: true }, 401);
+      const stAdmin = String(stUser.email || '').toLowerCase() === 'muzawwied@gmail.com';
+
       let order = await env.DB.prepare('SELECT * FROM topup_orders WHERE id = ?').bind(orderId).first();
       if (!order) return json({ error: 'order not found' }, 404);
+      if (order.user_id != null && !stAdmin && String(order.user_id) !== String(stUser.id)) {
+        return json({ error: 'Bukan order Anda' }, 403);
+      }
 
       // Jika masih pending: cek live ke Xendit (real-time, tanpa bergantung webhook)
       if (order.status === 'pending' && order.xendit_id) {
