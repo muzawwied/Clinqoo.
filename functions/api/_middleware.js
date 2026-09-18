@@ -56,9 +56,9 @@ function tooMany(retryAfter) {
 }
 
 // ---- 2. VALIDASI ORIGIN (anti-phishing / anti-lintas-situs) ----
-// Frontend resmi Clincoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clinco.co, *.clinqoo.co.
+// Frontend resmi Clincoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clincoo.buzz (domain utama).
 // Browsers selalu mengirim Origin pada cross-site POST; absen Origin = klien non-browser (curl/webhook) → diizinkan (auth tetap dicek handler).
-const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clinco\.co$)|(^([\w-]+\.)*clinqoo\.co$)/;
+const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clincoo\.buzz$)/;
 function originOk(request) {
   const origin = request.headers.get('origin');
   if (!origin) return true; // curl / webhook server (BuatQris, e-wallet) — tanpa browser
