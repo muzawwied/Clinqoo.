@@ -72,6 +72,20 @@ function originOk(request) {
 // ---- 4. PATH SCANNER ----
 const SCANNER = /(\.env|wp-login|\.php|\.git|phpmyadmin|wp-admin)/i;
 
+
+// ---- CCTV: catat pemblokiran (scanner / rate-limit / origin jahat) ke security_events ----
+let _secTableOk = false;
+async function logBlocked(env, type, ip, detail) {
+  if (!env.DB) return;
+  try {
+    if (!_secTableOk) {
+      await env.DB.prepare("CREATE TABLE IF NOT EXISTS security_events (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, ip TEXT, email TEXT, detail TEXT, created_at TEXT DEFAULT (datetime('now')))");
+      _secTableOk = true;
+    }
+    await env.DB.prepare("INSERT INTO security_events (type, ip, detail) VALUES (?, ?, ?)").bind(type, ip || null, detail || null).run();
+  } catch (e) { /* jangan ganggu respons */ }
+}
+
 export async function onRequest({ request, env, next }) {
   if (request.method === 'OPTIONS') {
     // Preflight CORS: hanya echo origin yang lolos allowlist (bukan '*' — audit #3).
@@ -93,13 +107,14 @@ export async function onRequest({ request, env, next }) {
 
   // 4. Blokir path scanner umum dengan cepat (tanpa beban D1)
   if (SCANNER.test(path)) {
+    await logBlocked(env, 'scanner_blocked', ipOf(request), path);
     return new Response(JSON.stringify({ error: 'not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
   }
 
   // 1. Rate limit per IP — kelas berbeda untuk auth & admin
   const ip = ipOf(request);
-  if (!rateLimit('g:' + ip, RL.global)) return tooMany(60);
-  if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) return tooMany(60);
+  if (!rateLimit('g:' + ip, RL.global)) { await logBlocked(env, 'rate_limited', ip, 'global ' + path); return tooMany(60); }
+  if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) { await logBlocked(env, 'rate_limited', ip, 'admin ' + path); return tooMany(60); }
 
   // 1b. Rate limit DURABEL (D1) untuk request autentikasi yang mengubah data
   //     (login/register/forgot/reset) — anti brute-force yang tahan lintas-isolate.
@@ -128,6 +143,7 @@ export async function onRequest({ request, env, next }) {
   // 2. Anti-lintas-situs untuk request yang mengubah data di endpoint sensitif
   const mutates = request.method !== 'GET' && request.method !== 'HEAD';
   if (mutates && (/^\/api\/(auth|admin)(\/|$)/.test(path)) && !originOk(request)) {
+    await logBlocked(env, 'origin_blocked', ipOf(request), path + ' dari ' + (request.headers.get('origin') || '?'));
     return new Response(JSON.stringify({ error: 'Permintaan lintas situs ditolak.' }), {
       status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
