@@ -1,4 +1,4 @@
-// Sinkronisasi warna aksen dari preferensi pengguna (Profile) ke semua halaman Clinqoo
+// Sinkronisasi warna aksen dari preferensi pengguna (Profile) ke semua halaman Clincoo
 (function () {
   var map = {
     'Hitam (Default)': { m: '#000000', h: '#1f2937' },

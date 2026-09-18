@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — Backend Chat AI Clinqoo (SELF-CONTAINED)
+// Cloudflare Pages Function — Backend Chat AI Clincoo (SELF-CONTAINED)
 // Memanggil Gemini langsung dari project ini (TIDAK lagi mem-forward ke proxy lain —
 // self-forward adalah bug loop yang membakar kuota 25x per pesan).
 // Fitur:
@@ -85,12 +85,12 @@ const OPENROUTER_MODELS = [
   'openrouter/free'
 ];
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const QUOTA_MSG_DAILY = 'Kuota AI Clinqoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
-const QUOTA_MSG_MONTHLY = 'Kuota AI Clinqoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
+const QUOTA_MSG_DAILY = 'Kuota AI Clincoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
+const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
 
 // System prompt server untuk mode biasa (single) — jaring pengaman bila klien tidak
 // mengirim system prompt sendiri; klien punya versi lebih lengkap (tools super).
-const SINGLE_SYSTEM_PROMPT = 'Kamu adalah Clinqoo AI, asisten super cerdas platform web-builder Clinqoo. Bahasa: Indonesia, natural dan mudah dipahami. ATURAN: (1) Jika user meminta dibuatkan situs/halaman/aplikasi web atau mengubah file proyek, WAJIB memanggil tool write_file untuk setiap file (path + konten lengkap siap jalan) — DILARANG menulis kode sebagai teks obrolan tanpa menyimpannya. (2) Untuk pertanyaan & obrolan, jawab secara DETAIL, LENGKAP, MENDALAM dan TERSTRUKTUR: kalimat pertama langsung menjawab inti pertanyaan, lalu perdalam dengan penjelasan bertahap, alasan, contoh nyata, langkah praktis, dan tips. JANGAN jawab asal/sekadarnya. (3) JAWAB SESUAI DATA: gunakan data yang benar-benar tersedia — isi percakapan, hasil tool (list_items/read_file), lampiran, dan data real-time yang diberikan — sebagai sumber kebenaran. Jika data belum cukup atau kamu belum yakin, kumpulkan dulu dengan tool yang tersedia; jika tetap tidak ada, katakan jujur bagian mana yang tidak bisa dipastikan. DILARANG mengarang fakta, angka, nama file, isi file, atau hasil yang tidak pernah kamu lihat. (4) Jangan pernah menampilkan proses berpikir internal (mis. "Here\'s a thinking process") — mulai langsung dari inti jawaban.';
+const SINGLE_SYSTEM_PROMPT = 'Kamu adalah Clincoo AI, asisten super cerdas platform web-builder Clincoo. Bahasa: Indonesia, natural dan mudah dipahami. ATURAN: (1) Jika user meminta dibuatkan situs/halaman/aplikasi web atau mengubah file proyek, WAJIB memanggil tool write_file untuk setiap file (path + konten lengkap siap jalan) — DILARANG menulis kode sebagai teks obrolan tanpa menyimpannya. (2) Untuk pertanyaan & obrolan, jawab secara DETAIL, LENGKAP, MENDALAM dan TERSTRUKTUR: kalimat pertama langsung menjawab inti pertanyaan, lalu perdalam dengan penjelasan bertahap, alasan, contoh nyata, langkah praktis, dan tips. JANGAN jawab asal/sekadarnya. (3) JAWAB SESUAI DATA: gunakan data yang benar-benar tersedia — isi percakapan, hasil tool (list_items/read_file), lampiran, dan data real-time yang diberikan — sebagai sumber kebenaran. Jika data belum cukup atau kamu belum yakin, kumpulkan dulu dengan tool yang tersedia; jika tetap tidak ada, katakan jujur bagian mana yang tidak bisa dipastikan. DILARANG mengarang fakta, angka, nama file, isi file, atau hasil yang tidak pernah kamu lihat. (4) Jangan pernah menampilkan proses berpikir internal (mis. "Here\'s a thinking process") — mulai langsung dari inti jawaban.';
 
 const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
@@ -245,7 +245,7 @@ function toGeminiPayload(messages) {
 // ===== Deklarasi tools (dieksekusi LOKAL di browser klien) =====
 const WORKSPACE_FUNCTION_DECLARATIONS = [
   { name: 'list_items',
-    description: 'Lihat daftar file & folder di dalam sebuah folder workspace Clinqoo milik user. Gunakan ini untuk melihat isi workspace atau folder sebelum melakukan operasi lain.',
+    description: 'Lihat daftar file & folder di dalam sebuah folder workspace Clincoo milik user. Gunakan ini untuk melihat isi workspace atau folder sebelum melakukan operasi lain.',
     parameters: { type: 'OBJECT', properties: { path: { type: 'STRING', description: 'Path folder. Contoh: "root" (folder utama), "js", "root/css/style". Default: root.' } } } },
   { name: 'read_file',
     description: 'Baca isi lengkap sebuah file di workspace. WAJIB dipakai sebelum mengedit file agar konten terbaru dan akurat.',
@@ -276,7 +276,7 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
     description: 'Cari informasi terbaru di web (search engine). Gunakan untuk pertanyaan yang butuh data real-time atau terkini: harga, berita, dokumentasi versi baru, dll.',
     parameters: { type: 'OBJECT', properties: { query: { type: 'STRING', description: 'Kata kunci pencarian.' } }, required: ['query'] } },
   { name: 'rename_project',
-    description: 'Ganti nama (judul) proyek Clinqoo yang sedang aktif di percakapan ini.',
+    description: 'Ganti nama (judul) proyek Clincoo yang sedang aktif di percakapan ini.',
     parameters: { type: 'OBJECT', properties: { new_name: { type: 'STRING', description: 'Nama baru proyek.' } }, required: ['new_name'] } },
   { name: 'deploy_project',
     description: 'Publish / deploy proyek yang sedang aktif ke internet (Cloudflare Pages) sehingga situsnya live. Gunakan saat user minta deploy, publish, atau membuat situsnya online.',
@@ -415,7 +415,7 @@ function orBuildTools() {
 // push_to_github HANYA tersedia di mode Kolaborasi (Tim AI + hop lanjutannya:
 // klien mengirim team_followup=true selama mode kolaborasi aktif).
 const GITHUB_PUSH_DECLARATION = { name: 'push_to_github',
-  description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clinqoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
+  description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clincoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
   parameters: { type: 'OBJECT', properties: { repo: { type: 'STRING', description: 'Repo target format owner/name, contoh "muzawwied/situs-ku". Opsional — kosongkan untuk memakai repo yang sudah terhubung di pengaturan proyek.' }, commit_message: { type: 'STRING', description: 'Pesan commit singkat dan deskriptif, contoh "Update halaman utama".' } }, required: ['commit_message'] }
 };
 function workspaceDecls(body) {
@@ -429,7 +429,7 @@ function orTools(list) {
     function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
   }));
 }
-// messages klien (format blok Clinqoo) -> pesan OpenAI-compatible
+// messages klien (format blok Clincoo) -> pesan OpenAI-compatible
 function orMessages(messages) {
   const out = [];
   const pushText = (role, text) => { if (text) out.push({ role, content: text }); };
@@ -687,7 +687,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
 
   // Tahap 1: Arsitek menyusun rencana situs
   const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB paling senior di Tim AI Clinqoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JIKA workspace di konteks sudah berisi file, rencanakan EDIT/menimpa file itu (programmer bisa membacanya dengan tool read_file) alih-alih memaksakan semua file baru. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
+    'Kamu adalah ARSITEK WEB paling senior di Tim AI Clincoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JIKA workspace di konteks sudah berisi file, rencanakan EDIT/menimpa file itu (programmer bisa membacanya dengan tool read_file) alih-alih memaksakan semua file baru. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
     ctxBlock + 'PERMINTAAN USER:\n' + userPrompt, null);
   if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek', dbgStatuses: r1.dbgStatuses || null };
   transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
@@ -695,7 +695,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
   const startedAt = Date.now();
   const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
-    'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. DILARANG KERAS menulis TODO, FIXME, "lorem ipsum", "coming soon", atau teks pengganti lain — QA otomatis server akan menolaknya dan hasilmu dikembalikan untuk diperbaiki. Konten nyata dan lengkap di setiap file. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat. Tool list_items dan read_file tersedia untuk MEMBACA isi workspace yang sudah ada — WAJIB dipakai sebelum mengubah file lama supaya konten aslinya tidak hilang.',
+    'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. DILARANG KERAS menulis TODO, FIXME, "lorem ipsum", "coming soon", atau teks pengganti lain — QA otomatis server akan menolaknya dan hasilmu dikembalikan untuk diperbaiki. Konten nyata dan lengkap di setiap file. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat. Tool list_items dan read_file tersedia untuk MEMBACA isi workspace yang sudah ada — WAJIB dipakai sebelum mengubah file lama supaya konten aslinya tidak hilang.',
     ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS, projectId);
   if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer', dbgStatuses: r2.dbgStatuses || null };
   const draftCalls = sanitizeTeamCalls((r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content), 25);
@@ -719,7 +719,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
     return { transcript, tool_calls: draftCalls, text: '', fixModel: null };
   }
   const r3 = await teamBuildLoop(env, orKey, apiKey, 'reviewer',
-    'Kamu adalah REVIEWER KODE paling ketat di Tim AI Clinqoo — audit berbasis bukti, bukan opini. Bandingkan file web berikut terhadap rencana arsitek, POTONGAN ISI FILE yang diberikan, hasil QA OTOMATIS, dan data permintaan user. Periksa sistematis: (1) apakah semua file di rencana sudah dibuat, (2) link & navigasi antar file valid, (3) HTML tidak rusak (tag tidak tertutup, struktur rusak), (4) JS tidak ada error sintaks/logika yang jelas, (5) fitur inti rencana benar-benar ada, bukan cuma teks pengganti, (6) konten sesuai data/asumsi rencana — tidak ada konten yang jelas-jelas dikarang atau bertentangan, (7) verifikasi klaim QA otomatis di bawah. Jika workspace sudah punya file lama, WAJIB baca file yang diedit memakai tool read_file sebelum menilai konsistensinya. Laporkan HANYA masalah fatal/penting dengan menyebut bukti persisnya (nama file + kutipan singkat) — maks 180 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
+    'Kamu adalah REVIEWER KODE paling ketat di Tim AI Clincoo — audit berbasis bukti, bukan opini. Bandingkan file web berikut terhadap rencana arsitek, POTONGAN ISI FILE yang diberikan, hasil QA OTOMATIS, dan data permintaan user. Periksa sistematis: (1) apakah semua file di rencana sudah dibuat, (2) link & navigasi antar file valid, (3) HTML tidak rusak (tag tidak tertutup, struktur rusak), (4) JS tidak ada error sintaks/logika yang jelas, (5) fitur inti rencana benar-benar ada, bukan cuma teks pengganti, (6) konten sesuai data/asumsi rencana — tidak ada konten yang jelas-jelas dikarang atau bertentangan, (7) verifikasi klaim QA otomatis di bawah. Jika workspace sudah punya file lama, WAJIB baca file yang diedit memakai tool read_file sebelum menilai konsistensinya. Laporkan HANYA masalah fatal/penting dengan menyebut bukti persisnya (nama file + kutipan singkat) — maks 180 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
     ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest + '\n\nHASIL QA OTOMATIS (verifikasi bila relevan):\n' + (qaFindings.length ? qaFindings.join('\n') : '(tidak menemukan masalah mekanis)'), 3, startedAt + TEAM_DEADLINE_MS, projectId, true);
   const reviewText = (r3.text || '').trim();
   transcript.push({ stage: 'reviewer', model: r3.model, text: (reviewText.slice(0, 1000) || '(reviewer tidak menghasilkan laporan — QA otomatis dipakai)') });
@@ -730,7 +730,7 @@ async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
   let fixModel = null;
   if (needsFix) {
     const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
-      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clinqoo — presisi tinggi. Setiap temuan reviewer di bawah harus dibereskan SESUAI BUKTI yang ia sebutkan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki, tetap menjaga bagian file yang sudah benar). Jangan mengulang file yang sudah benar dan tidak disebut reviewer, jangan mengubah gaya/struktur yang tidak dikeluhkan. Baca ulang temuan reviewer satu per satu dan pastikan semuanya tertangani.',
+      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo — presisi tinggi. Setiap temuan reviewer di bawah harus dibereskan SESUAI BUKTI yang ia sebutkan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki, tetap menjaga bagian file yang sudah benar). Jangan mengulang file yang sudah benar dan tidak disebut reviewer, jangan mengubah gaya/struktur yang tidak dikeluhkan. Baca ulang temuan reviewer satu per satu dan pastikan semuanya tertangani.',
       ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + (reviewText || '(tidak ada laporan reviewer)') + '\n\nTEMUAN QA OTOMATIS (WAJIB dibereskan semuanya):\n' + (qaFindings.length ? qaFindings.join('\n') : '(tidak ada)'), 4, startedAt + TEAM_DEADLINE_MS, projectId);
     const fixCalls = sanitizeTeamCalls((r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content), 25);
     if (!r4.error && fixCalls.length) {
@@ -757,7 +757,7 @@ function teamTranscriptText(transcript) {
   }).join('\n\n');
 }
 
-// GET /api/chat — status kredit AI akun ini (dipakai UI: ClinqooPay top-up + banner kredit habis)
+// GET /api/chat — status kredit AI akun ini (dipakai UI: ClincooPay top-up + banner kredit habis)
 // read-only, TIDAK memakai/mengurangi kuota atau kredit paket (beda dari quotaCheck yg dipanggil saat kirim pesan).
 export async function onRequestGet({ request, env }) {
   try {

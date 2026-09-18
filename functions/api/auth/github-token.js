@@ -1,4 +1,4 @@
-// GET /api/auth/github-token — token GitHub milik user dari sesi login Clinqoo
+// GET /api/auth/github-token — token GitHub milik user dari sesi login Clincoo
 // Dipakai workspace agar import repo tidak perlu auth GitHub lagi
 import { initTables, getUserByToken, getToken, json, CORS } from './shared.js';
 

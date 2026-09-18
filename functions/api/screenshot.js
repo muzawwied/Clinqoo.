@@ -1,5 +1,5 @@
 // Cloudflare Pages Function — /api/screenshot (SELF-CONTAINED)
-// Tool screenshot halaman web untuk AI Clinqoo: buat gambar pratinjau URL
+// Tool screenshot halaman web untuk AI Clincoo: buat gambar pratinjau URL
 // dan kembalikan LINK gambar (hosted) yang bisa langsung dibagikan ke user.
 // Sumber gambar: thum.io (utama, kualitas bagus) + fallback mshots WordPress.
 // Endpoint: GET /api/screenshot?url=...&width=...  → { ok, url, fallback_url }

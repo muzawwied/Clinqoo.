@@ -1,7 +1,7 @@
 {
   "name": "clinqoo-mcp-server",
   "version": "1.0.0",
-  "description": "MCP Server for Clinqoo — akses projects, agent tasks, wallet, dan notifikasi",
+  "description": "MCP Server for Clincoo — akses projects, agent tasks, wallet, dan notifikasi",
   "type": "module",
   "bin": {
     "clinqoo-mcp": "./build/index.js"

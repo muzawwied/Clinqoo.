@@ -1,4 +1,4 @@
-// Clinqoo i18n — penerjemah UI otomatis berbasis kamus.
+// Clincoo i18n — penerjemah UI otomatis berbasis kamus.
 // Bahasa tersimpan di localStorage 'clinqoo_language' ('id' default, 'en', 'es').
 // Saat bahasa != id, semua node teks DOM diterjemahkan lewat kamus
 // (window.ClinqooI18nDict), atribut placeholder/title/aria-label juga, lalu

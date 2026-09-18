@@ -1,4 +1,4 @@
-// API ClinqooPay — hubungkan / putuskan dompet web Wallet milik akun Clinqoo
+// API ClincooPay — hubungkan / putuskan dompet web Wallet milik akun Clincoo
 // GET  /api/clinqoopay            -> status koneksi
 // POST /api/clinqoopay {action:'link', wallet_address, pin}  -> verifikasi PIN di server wallet, simpan token koneksi
 // POST /api/clinqoopay {action:'unlink'}                    -> putuskan

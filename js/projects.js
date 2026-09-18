@@ -16,12 +16,12 @@ function stripMd(text) {
         .trim();
 }
 /**
- * Clinqoo Project Management
+ * Clincoo Project Management
  */
 
 // Detect GitHub Pages subpath
-const _isGHPages = window.location.pathname.includes('/Clinqoo');
-const _BASE = _isGHPages ? '/Clinqoo.' : '';
+const _isGHPages = window.location.pathname.includes('/Clincoo');
+const _BASE = _isGHPages ? '/Clincoo.' : '';
 
 // === Sinkronisasi D1 per akun (Cloudflare) ===
 // Token Bearer diinjeksi otomatis oleh js/auth-client.js pada semua call /api/.
@@ -34,7 +34,7 @@ function showPlanLimitModal(d) {
     if (document.getElementById('plan-limit-modal')) return;
     var m = document.createElement('div');
     m.id = 'plan-limit-modal';
-    var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
+    var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
     m.innerHTML =
         '<div class="fixed inset-0 z-[90] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.45)">' +
         '<div class="bg-white rounded-2xl w-full max-w-xs px-5 pt-5 pb-4 text-center">' +

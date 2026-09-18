@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="Clinqoo Code — editor kode full-stack yang lengkap, rapi & modern. Bekerja langsung di browser.">
-<title>Clinqoo Code — Editor Kode Full-Stack</title>
-  <script>/* Produksi: editor hanya untuk proyek Clinqoo yang valid — tanpa id proyek, arahkan ke halaman workspace */
+<meta name="description" content="Clincoo Code — editor kode full-stack yang lengkap, rapi & modern. Bekerja langsung di browser.">
+<title>Clincoo Code — Editor Kode Full-Stack</title>
+  <script>/* Produksi: editor hanya untuk proyek Clincoo yang valid — tanpa id proyek, arahkan ke halaman workspace */
   (function(){
     try{
       var q=new URLSearchParams(location.search);
@@ -112,7 +112,7 @@ svg{flex-shrink:0}
 .panel-body{flex:1;overflow:auto;padding:6px 8px 14px;min-height:0}
 .panel{display:none}
 .panel.show{display:block}
-/* Menu Clinqoo (Workspace / Agent) di bawah sidebar — gaya seperti menu di halaman workspace Clinqoo */
+/* Menu Clincoo (Workspace / Agent) di bawah sidebar — gaya seperti menu di halaman workspace Clincoo */
 .sb-clinqoo{border-top:1px solid var(--line);padding:8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
 .sb-clinqoo .lbl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);padding:2px 8px 4px}
 .sb-clinqoo a{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;font-size:12.8px;color:var(--text2);text-decoration:none;transition:.15s}
@@ -163,7 +163,7 @@ svg{flex-shrink:0}
 .cloud-dot.ok{background:#2fbf71}
 .cloud-meta{font-size:11px;color:var(--text3);margin:8px 2px}
 .cloud-note{font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.5}
-/* AI panel — gaya chat Clinqoo */
+/* AI panel — gaya chat Clincoo */
 #p-ai.show{display:flex;flex-direction:column;min-height:0;height:100%}
 .ai-chat{flex:1;overflow-y:auto;padding:8px 4px 10px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .ai-empty{margin:auto;text-align:center;padding:24px 14px;display:flex;flex-direction:column;gap:14px;align-items:center}
@@ -532,7 +532,7 @@ body.light #statusbar{background:#131316}
   #titlebar>.spacer{min-width:4px}
 }
 
-/* ===== Background bawaan Clinqoo (dari repo utama) ===== */
+/* ===== Background bawaan Clincoo (dari repo utama) ===== */
 body{background:linear-gradient(180deg,rgba(16,16,19,.84) 0%,rgba(16,16,19,.9) 55%,rgba(16,16,19,.95) 100%),url('assets/backgrounds/bg-dark-night2.webp');background-size:cover;background-attachment:fixed}
 body.light{background:linear-gradient(180deg,rgba(250,250,251,.88) 0%,rgba(253,253,254,.94) 55%,rgba(255,255,255,.98) 100%),url('assets/backgrounds/bg-light-morning.webp');background-size:cover;background-attachment:fixed}
 #titlebar,#sidebar{background:rgba(26,26,29,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -547,7 +547,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <button class="tb-btn" id="hamb" onclick="toggleSidebar()" title="Berkas / Panel samping">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
   </button>
-  <div id="logo"><span class="logo-code"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></span><span>Clinqoo<b style="color:var(--text)"> Code</b></span></div>
+  <div id="logo"><span class="logo-code"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></span><span>Clincoo<b style="color:var(--text)"> Code</b></span></div>
   <nav id="menubar">
     <button class="menu-btn" data-menu="m-file">Berkas</button>
     <button class="menu-btn" data-menu="m-edit">Edit</button>
@@ -626,7 +626,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
 <div class="dropdown" id="m-help">
   <div class="dd-item" onclick="showWelcome()">Halaman Selamat Datang</div>
   <div class="dd-item" onclick="termRun('help')">Panduan Terminal</div>
-  <div class="dd-item" onclick="toast('Clinqoo Code v1.0 — dibuat dengan ❤️')">Tentang Clinqoo Code</div>
+  <div class="dd-item" onclick="toast('Clincoo Code v1.0 — dibuat dengan ❤️')">Tentang Clincoo Code</div>
 </div>
 
 <!-- ===== MAIN ===== -->
@@ -698,13 +698,13 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
 
     </div>
       <div class="sb-clinqoo">
-        <div class="lbl">Clinqoo</div>
-        <a id="sb-link-workspace" href="/proyek/workspace/" target="_blank" rel="noopener" title="Buka halaman Workspace Clinqoo (tab baru)">
+        <div class="lbl">Clincoo</div>
+        <a id="sb-link-workspace" href="/proyek/workspace/" target="_blank" rel="noopener" title="Buka halaman Workspace Clincoo (tab baru)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
           Workspace
           <svg class="ext" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a>
-        <a id="sb-link-agent" href="/proyek/chat/" target="_blank" rel="noopener" title="Buka halaman Agent Clinqoo (tab baru)">
+        <a id="sb-link-agent" href="/proyek/chat/" target="_blank" rel="noopener" title="Buka halaman Agent Clincoo (tab baru)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="8" rx="2"/><path d="M12 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 5v3"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M10 18h4"/></svg>
           Agent
           <svg class="ext" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
@@ -729,7 +729,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
       <div id="welcome" class="show">
         <div class="home-wrap">
           <div class="home-logo"><svg class="logo-home-code" viewBox="0 0 32 32" fill="none" stroke="#16161a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></div>
-          <div class="big">Clinqoo <b>Code</b></div>
+          <div class="big">Clincoo <b>Code</b></div>
           <div class="sub">Editor kode full-stack — ringan, rapi, langsung jalan di browser.</div>
           <div class="home-cta">
             <button class="home-btn primary" onclick="startCoding()">Mulai Coding</button>
@@ -815,7 +815,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <div class="sb" id="sb-cursor" onclick="toast('Gunakan Ctrl+G untuk pergi ke baris')">Ln 1, Col 1</div>
   <div class="sb" id="sb-indent" onclick="cycleIndent()">Spasi: 2</div>
   <div class="sb" id="sb-lang" onclick="openSettings()">Plain Text</div>
-  <div class="sb" onclick="openSettings()"><svg style="height:13px;display:inline-block;vertical-align:-2px" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg> Clinqoo Code</div>
+  <div class="sb" onclick="openSettings()"><svg style="height:13px;display:inline-block;vertical-align:-2px" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg> Clincoo Code</div>
 </div>
 
 <!-- overlays -->
@@ -887,7 +887,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
 <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.min.js"></script>
 <script>
 /* ============================================================
-   Clinqoo Code — editor logic
+   Clincoo Code — editor logic
    ============================================================ */
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -995,13 +995,13 @@ const FILES={
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Halo dari Clinqoo Code</title>
+  <title>Halo dari Clincoo Code</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="card">
     <h1>Halo, Dunia! 👋</h1>
-    <p>Halaman ini dibuat & dijalankan dari <b>Clinqoo Code</b>.</p>
+    <p>Halaman ini dibuat & dijalankan dari <b>Clincoo Code</b>.</p>
     <button id="btn">Klik aku</button>
     <p id="count">0 klik</p>
   </main>
@@ -1056,9 +1056,9 @@ btn.addEventListener('click', () => {
   console.log('Terklik', n, 'kali');
 });
 
-console.log('Clinqoo Code siap! 🚀');
+console.log('Clincoo Code siap! 🚀');
 `,
-'README.md':`# Proyek Clinqoo Code
+'README.md':`# Proyek Clincoo Code
 
 Editor kode full-stack yang jalan langsung di browser.
 
@@ -1076,7 +1076,7 @@ Tekan **Ctrl+P** untuk membuka berkas, atau **F5** untuk menjalankan pratinjau.
 'package.json':`{
   "name": "proyek-clinqoo",
   "version": "1.0.0",
-  "description": "Proyek contoh di Clinqoo Code",
+  "description": "Proyek contoh di Clincoo Code",
   "scripts": {
     "dev": "clinqoo serve",
     "build": "clinqoo build"
@@ -1086,12 +1086,12 @@ Tekan **Ctrl+P** untuk membuka berkas, atau **F5** untuk menjalankan pratinjau.
 };
 
 let project, savedSnap;
-/* ===== Mode tersambung: sinkronisasi dua arah dengan proyek Clinqoo ===== */
-/* Editor (clinqoo.pages.dev) berbagi localStorage dengan Clinqoo (clinqoo.pages.dev) —  */
-/* struktur berkas Clinqoo (folder->[item]) dikonversi ke berkas rata.   */
+/* ===== Mode tersambung: sinkronisasi dua arah dengan proyek Clincoo ===== */
+/* Editor (clinqoo.pages.dev) berbagi localStorage dengan Clincoo (clinqoo.pages.dev) —  */
+/* struktur berkas Clincoo (folder->[item]) dikonversi ke berkas rata.   */
 const _QP=new URLSearchParams(location.search);
 const LINK_PID=_QP.get('id')||_QP.get('pid')||'';
-/* Menu Clinqoo di sidebar: bawa id proyek aktif ke halaman Workspace / Agent Clinqoo */
+/* Menu Clincoo di sidebar: bawa id proyek aktif ke halaman Workspace / Agent Clincoo */
 (function(){
   var b='/';
   var q=LINK_PID?('?id='+encodeURIComponent(LINK_PID)):'';
@@ -1147,10 +1147,10 @@ function flatToWs(){
   return data;
 }
 function loadProject(){
-  if(LINK_PID){ // proyek Clinqoo: berkas apa adanya (kosong ya kosong)
+  if(LINK_PID){ // proyek Clincoo: berkas apa adanya (kosong ya kosong)
     try{
       let raw=localStorage.getItem(wsFilesKey());
-      // migrasi: data lama tersimpan di kunci global Clinqoo
+      // migrasi: data lama tersimpan di kunci global Clincoo
       if(!raw){raw=localStorage.getItem('clinqoo_workspace_files');}
       if(raw){const d=JSON.parse(raw);const r=wsToFlat(d);linkedEmptyFolders=r.emptyFolders;
         try{localStorage.setItem(wsFilesKey(),raw);}catch(e){}
@@ -1207,8 +1207,8 @@ function linkedCloudPull(){
       toast('Berkas proyek ditarik dari cloud ✦ '+files.length+' berkas');
     }).catch(()=>{});
 }
-/* Handshake lintas domain: halaman proyek Clinqoo (opener) mengirim berkas + token.
-   Menutup kasus editor dibuka dari domain Clinqoo yang berbeda asal (origin). */
+/* Handshake lintas domain: halaman proyek Clincoo (opener) mengirim berkas + token.
+   Menutup kasus editor dibuka dari domain Clincoo yang berbeda asal (origin). */
 window.addEventListener('message',function(e){
   const d=e&&e.data;
   if(!d||d.type!=='clinqoo-editor-init')return;
@@ -1248,9 +1248,9 @@ function setCloudDot(ok){
   if(!LINK_PID){el.style.display='none';return;}
   el.style.display='inline-flex';
   el.innerHTML=ok?'<b style=\"color:#2fbf71\">☁</b> '+LINK_NAME:'<b style=\"color:#e5604f\">☁</b> '+LINK_NAME+' (offline)';
-  el.title=ok?'Tersinkron cloud Clinqoo — klik untuk sinkron sekarang':'Belum tersinkron — klik untuk coba lagi';
+  el.title=ok?'Tersinkron cloud Clincoo — klik untuk sinkron sekarang':'Belum tersinkron — klik untuk coba lagi';
 }
-// Sinkronisasi dua arah real-time: perubahan dari Clinqoo di tab lain masuk ke editor
+// Sinkronisasi dua arah real-time: perubahan dari Clincoo di tab lain masuk ke editor
 window.addEventListener('storage',e=>{
   if(!LINK_PID||e.key!==wsFilesKey()||!e.newValue)return;
   try{
@@ -1319,7 +1319,7 @@ require(['vs/editor/editor.main'],function(){
   openDefaultTabs();
   renderAll();
   // start
-  termPrint(['Clinqoo Code — Terminal','Ketik "help" untuk daftar perintah.','',''].join('\n'),'dim');
+  termPrint(['Clincoo Code — Terminal','Ketik "help" untuk daftar perintah.','',''].join('\n'),'dim');
   termPrint('','ok');
 });
 
@@ -1364,7 +1364,7 @@ function createStarterFiles(){
   if(!('style.css' in project))project['style.css']='*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:Inter,system-ui,sans-serif;padding:24px;color:#1a1a1a}\nh1{font-size:28px;font-weight:700}';
   if(!('app.js' in project))project['app.js']="console.log('siap');";
   persist();renderAll();openDefaultTabs();
-  toast('Kerangka standar dibuat — tersinkron ke Clinqoo');
+  toast('Kerangka standar dibuat — tersinkron ke Clincoo');
 }
 function openDefaultTabs(){
   const keys=Object.keys(project);
@@ -1602,7 +1602,7 @@ function newFolderModal(){
     <h3>＋ Folder Baru</h3>
     <label>Nama folder (boleh bersarang, mis. src/components)</label>
     <input type="text" id="nfd-name" placeholder="contoh: assets">
-    <div class="hint">Folder tetap tersimpan walau kosong & tersinkron ke Clinqoo.</div>
+    <div class="hint">Folder tetap tersimpan walau kosong & tersinkron ke Clincoo.</div>
     <div class="row"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn primary" onclick="createFolder()">Buat</button></div>
   </div>`);
   const inp=$('#nfd-name');inp.focus();
@@ -1685,7 +1685,7 @@ function doCommitFromModal(){
   $('#git-msg').value=v;
   doCommit();
 }
-/* ---------- AI Koding (sidebar chat ala Clinqoo, dengan tools) ---------- */
+/* ---------- AI Koding (sidebar chat ala Clincoo, dengan tools) ---------- */
 const AI_API='https://clincoo-be2.pages.dev/api/chat';
 const TOOL_API_BASE='https://clincoo-be2.pages.dev';
 let aiHistory=[],aiBusy=false,aiBooted=false;
@@ -1906,7 +1906,7 @@ async function aiExecTool(name,args){
           const kr=await fetch(TOOL_API_BASE+'/api/e2b');
           if(kr.ok){const kj=await kr.json();key=kj.apiKey||'';}
         }catch(e){}
-        if(!key)return{success:false,error:'Sandbox belum dikonfigurasi di backend Clinqoo.'};
+        if(!key)return{success:false,error:'Sandbox belum dikonfigurasi di backend Clincoo.'};
         const sbx=await CI.create({apiKey:key});
         try{
           const exe=await sbx.commands.run(cmd);
@@ -1931,7 +1931,7 @@ async function aiExecTool(name,args){
         return {success:true,query:q,results:results};
       }
       default:
-        return {success:false,error:'Tool "'+name+'" hanya tersedia di halaman Chat Clinqoo, bukan di editor.'};
+        return {success:false,error:'Tool "'+name+'" hanya tersedia di halaman Chat Clincoo, bukan di editor.'};
     }
   }catch(e){
     return {success:false,error:'Gagal menjalankan tool: '+(e&&e.message?e.message:String(e))};
@@ -1943,7 +1943,7 @@ async function aiSend(){
   if(!text||aiBusy)return;
   if(!ccAuthHeaders().Authorization){
     aiAddUser(text);inp.value='';inp.style.height='auto';
-    aiErr('AI aktif setelah kamu login di Clinqoo. Buka editor ini dari halaman proyek Clinqoo agar sesi tersambung.');
+    aiErr('AI aktif setelah kamu login di Clincoo. Buka editor ini dari halaman proyek Clincoo agar sesi tersambung.');
     return;
   }
   aiBusy=true;$('#ai-send').disabled=true;
@@ -1952,7 +1952,7 @@ async function aiSend(){
   const body=aiAddRow();
   aiDots(body);
   aiHistory.push({role:'user',content:text});
-  const apiMessages=[{role:'system',content:'Kamu Clinqoo AI, asisten koding di editor Clinqoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: kalimat pertama langsung ke inti jawaban, lalu kembangkan pembahasan secara mendalam. Susun jawaban dengan Markdown rapi — judul bagian (###), daftar bertingkat, blok kode dengan penjelasan per bagian, contoh konkret, langkah-langkah pengerjaan, best practices, catatan penting, dan saran langkah lanjutan. Pikirkan kritis sebelum menjawab: pertimbangkan beberapa pendekatan, pilih yang terbaik, jelaskan alasannya. Kamu punya TOOLS: list_items, read_file, write_file (menulis kode langsung ke berkas editor — user melihat prosesnya), create_folder, rename_item, delete_item, search_items, run_command (sandbox bash/python), read_web_page, web_search. Gunakan tools untuk menjalankan perintah, membenahkan error (baca berkas, perbaiki, tulis balik), atau mengatur proyek — sebut singkat aksi yang kamu lakukan. ATURAN IDENTITAS: kamu hanya bernama Clinqoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
+  const apiMessages=[{role:'system',content:'Kamu Clincoo AI, asisten koding di editor Clincoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: kalimat pertama langsung ke inti jawaban, lalu kembangkan pembahasan secara mendalam. Susun jawaban dengan Markdown rapi — judul bagian (###), daftar bertingkat, blok kode dengan penjelasan per bagian, contoh konkret, langkah-langkah pengerjaan, best practices, catatan penting, dan saran langkah lanjutan. Pikirkan kritis sebelum menjawab: pertimbangkan beberapa pendekatan, pilih yang terbaik, jelaskan alasannya. Kamu punya TOOLS: list_items, read_file, write_file (menulis kode langsung ke berkas editor — user melihat prosesnya), create_folder, rename_item, delete_item, search_items, run_command (sandbox bash/python), read_web_page, web_search. Gunakan tools untuk menjalankan perintah, membenahkan error (baca berkas, perbaiki, tulis balik), atau mengatur proyek — sebut singkat aksi yang kamu lakukan. ATURAN IDENTITAS: kamu hanya bernama Clincoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
   aiHistory.slice(-12).forEach(m=>apiMessages.push({role:m.role,content:m.content}));
   const last=apiMessages[apiMessages.length-1];
   last.content+=aiContext();
@@ -1962,7 +1962,7 @@ async function aiSend(){
       const res=await fetch(AI_API,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},ccAuthHeaders()),body:JSON.stringify({messages:apiMessages,workspace_tools:true,session_id:'clinqoo-editor',save_user_message:hop===0})});
       if(!res.ok){
         let msg='AI sedang tidak bisa dihubungi ('+res.status+').';
-        try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clinqoo berakhir — buka kembali editor dari halaman proyek Clinqoo.';}catch(e){}
+        try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clincoo berakhir — buka kembali editor dari halaman proyek Clincoo.';}catch(e){}
         aiErr(msg);
         if(hop===0)aiHistory.pop();
         return;
@@ -2021,7 +2021,7 @@ function chatSave(){try{localStorage.setItem(chatKey(),JSON.stringify(chatHist.s
 function chatRender(){
   const c=$('#chat-msgs');
   if(!chatHist.length){
-    c.innerHTML='<div class="chat-empty"><div class="t">Chat AI Clinqoo</div><div class="d">Asisten AI untuk membantumu ngoding. Tanya cara pakai editor, minta contoh kode, atau diskusikan proyekmu — AI ini asisten, bukan pembuat web otomatis.</div><div class="chat-chips"><button class="chat-chip" onclick="chatQuick(\'Bagaimana cara membuat halaman yang responsif?\')">Tips desain responsif</button><button class="chat-chip" onclick="chatQuick(\'Beri contoh kode HTML+CSS untuk kartu profil modern\')">Contoh kode</button><button class="chat-chip" onclick="chatQuick(\'Jelaskan fitur Clinqoo Code satu per satu\')">Tur fitur editor</button></div></div>';
+    c.innerHTML='<div class="chat-empty"><div class="t">Chat AI Clincoo</div><div class="d">Asisten AI untuk membantumu ngoding. Tanya cara pakai editor, minta contoh kode, atau diskusikan proyekmu — AI ini asisten, bukan pembuat web otomatis.</div><div class="chat-chips"><button class="chat-chip" onclick="chatQuick(\'Bagaimana cara membuat halaman yang responsif?\')">Tips desain responsif</button><button class="chat-chip" onclick="chatQuick(\'Beri contoh kode HTML+CSS untuk kartu profil modern\')">Contoh kode</button><button class="chat-chip" onclick="chatQuick(\'Jelaskan fitur Clincoo Code satu per satu\')">Tur fitur editor</button></div></div>';
     return;
   }
   c.innerHTML=chatHist.map(m=>'<div class="cmsg '+m.role+'"><div class="cbub">'+(m.role==='ai'?aiMd(m.content):esc(m.content).replace(/\n/g,'<br>'))+'</div></div>').join('');
@@ -2036,7 +2036,7 @@ async function chatSend(){
   if(!text||chatBusy)return;
   if(!ccAuthHeaders().Authorization){
     chatBubble('user',esc(text).replace(/\n/g,'<br>'));inp.value='';
-    chatErr('AI aktif setelah kamu login di Clinqoo. Buka editor ini dari halaman proyek Clinqoo agar sesi tersambung.');
+    chatErr('AI aktif setelah kamu login di Clincoo. Buka editor ini dari halaman proyek Clincoo agar sesi tersambung.');
     return;
   }
   chatBusy=true;const sb=$('#chat-send');sb.disabled=true;
@@ -2051,7 +2051,7 @@ async function chatSend(){
   const steps=['membaca konteks proyek…','menganalisis pertanyaan…','menyusun jawaban…','menyempurnakan hasil…'];
   let si=0;
   const stTimer=setInterval(()=>{const el=st.querySelector('.chat-prog');if(el){si=(si+1)%steps.length;el.textContent=steps[si];}},900);
-  const apiMessages=[{role:'system',content:'Kamu Clinqoo AI, asisten chat di editor Clinqoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: mulai dari inti jawaban, lalu kembangkan mendalam. Gunakan Markdown rapi — judul bagian (###), daftar, blok kode dengan penjelasan, contoh konkret, dan saran langkah lanjutan. Kamu MEMBANTU user membangun webnya sendiri di editor Clinqoo (editor, terminal, templates, deploy) — kamu BUKAN pembuat web otomatis, jangan pernah menawarkan membuatkan web sekaligus. ATURAN IDENTITAS: kamu hanya bernama Clinqoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
+  const apiMessages=[{role:'system',content:'Kamu Clincoo AI, asisten chat di editor Clincoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: mulai dari inti jawaban, lalu kembangkan mendalam. Gunakan Markdown rapi — judul bagian (###), daftar, blok kode dengan penjelasan, contoh konkret, dan saran langkah lanjutan. Kamu MEMBANTU user membangun webnya sendiri di editor Clincoo (editor, terminal, templates, deploy) — kamu BUKAN pembuat web otomatis, jangan pernah menawarkan membuatkan web sekaligus. ATURAN IDENTITAS: kamu hanya bernama Clincoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
   chatHist.slice(-14).forEach(m=>apiMessages.push({role:m.role==='ai'?'assistant':'user',content:m.content}));
   apiMessages[apiMessages.length-1].content+=aiContext();
   try{
@@ -2059,7 +2059,7 @@ async function chatSend(){
     clearInterval(stTimer);st.remove();
     if(!res.ok){
       let msg='AI sedang tidak bisa dihubungi ('+res.status+').';
-      try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clinqoo berakhir — buka kembali editor dari halaman proyek Clinqoo.';}catch(e){}
+      try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clincoo berakhir — buka kembali editor dari halaman proyek Clincoo.';}catch(e){}
       chatErr(msg);return;
     }
     const d=await res.json();
@@ -2096,7 +2096,7 @@ function chatDoClear(){closeModal();chatHist=[];chatSave();chatRender();toast('P
 const TEMPLATES=[
  {name:'Landing Modern',grad:'radial-gradient(120% 120% at 20% 0%,#2b2350 0%,#12121e 55%,#07070c 100%)',
   wire:'<div style="position:absolute;left:22px;top:22px;width:46px;height:5px;border-radius:4px;background:rgba(255,255,255,.25)"></div><div style="position:absolute;left:22px;top:38px;width:110px;height:9px;border-radius:4px;background:rgba(255,255,255,.5)"></div><div style="position:absolute;left:22px;top:54px;width:80px;height:9px;border-radius:4px;background:rgba(255,255,255,.2)"></div><div style="position:absolute;right:22px;bottom:22px;width:64px;height:20px;border-radius:6px;background:#7c5cff"></div>',
-  desc:'Halaman arahan gelap bertabur bintang ala Clinqoo: hero besar, tiga fitur, dan tombol CTA.',
+  desc:'Halaman arahan gelap bertabur bintang ala Clincoo: hero besar, tiga fitur, dan tombol CTA.',
   files:{
 'index.html':`<!DOCTYPE html>
 <html lang="id">
@@ -2124,7 +2124,7 @@ const TEMPLATES=[
   <h2>Siap memulai?</h2>
   <a class="cta big" href="#">Coba Sekarang</a>
 </section>
-<footer>Dibuat dengan Clinqoo Code</footer>
+<footer>Dibuat dengan Clincoo Code</footer>
 </body>
 </html>`,
 'style.css':`*{margin:0;box-sizing:border-box}
@@ -2184,7 +2184,7 @@ footer{text-align:center;color:#556;padding:26px;font-size:13px}`
   <h2>Hubungi</h2>
   <p class="bio">Email: halo@contoh.id</p>
 </section>
-<footer>Dibuat dengan Clinqoo Code</footer>
+<footer>Dibuat dengan Clincoo Code</footer>
 </body>
 </html>`,
 'style.css':`*{margin:0;box-sizing:border-box}
@@ -2235,7 +2235,7 @@ footer{text-align:center;color:#5c748c;padding:30px;font-size:13px}
     <p>Istirahat cukup, commit rajin, dan jangan lupa berjalan-jalan.</p>
   </article>
 </main>
-<footer>Dibuat dengan Clinqoo Code</footer>
+<footer>Dibuat dengan Clincoo Code</footer>
 </body>
 </html>`,
 'style.css':`*{margin:0;box-sizing:border-box}
@@ -2275,7 +2275,7 @@ footer{text-align:center;color:#9b8a68;padding:28px;font-size:13px}`
     <div class="bars" id="bars"></div>
   </section>
 </main>
-<footer>Dibuat dengan Clinqoo Code</footer>
+<footer>Dibuat dengan Clincoo Code</footer>
 <script src="app.js"><\/script>
 </body>
 </html>`,
@@ -2380,7 +2380,7 @@ function termPrint(text,cls){
   out.scrollTop=out.scrollHeight;
 }
 const CMDS={
-  help(){return ['Perintah tersedia:','  help            — panduan ini','  ls / tree       — daftar / struktur berkas','  cd / pwd        — pindah & lihat folder kerja','  cat <berkas>    — tampilkan isi berkas','  open <berkas>   — buka di editor','  touch <nama>    — buat berkas baru','  mkdir <nama>    — buat folder','  rm <berkas>     — hapus berkas','  mv <a> <b>      — pindah/ganti nama','  cp <a> <b>      — salin berkas','  echo teks > f   — tulis teks ke berkas','  find <kata>     — cari berkas & isi','  stat <berkas>   — ukuran & tanggal','  save            — simpan semua berkas','  clear           — bersihkan terminal','  date            — tanggal & waktu','  git status      — status perubahan','  git log         — riwayat versi','  git commit -m <pesan> — simpan versi','  git checkout <id> — pulihkan versi','  git pull        — tarik berkas terbaru dari cloud','  git push        — kirim ke cloud Clinqoo','  npm run dev     — jalankan pratinjau','  npm run build   — unduh proyek jadi satu berkas HTML','  zip             — unduh proyek sebagai arsip .zip','  grep <f> <kata> — cari dalam berkas','  wc <berkas>     — hitung baris/kata/karakter','  ↑ / ↓           — riwayat perintah'].join('\n');},
+  help(){return ['Perintah tersedia:','  help            — panduan ini','  ls / tree       — daftar / struktur berkas','  cd / pwd        — pindah & lihat folder kerja','  cat <berkas>    — tampilkan isi berkas','  open <berkas>   — buka di editor','  touch <nama>    — buat berkas baru','  mkdir <nama>    — buat folder','  rm <berkas>     — hapus berkas','  mv <a> <b>      — pindah/ganti nama','  cp <a> <b>      — salin berkas','  echo teks > f   — tulis teks ke berkas','  find <kata>     — cari berkas & isi','  stat <berkas>   — ukuran & tanggal','  save            — simpan semua berkas','  clear           — bersihkan terminal','  date            — tanggal & waktu','  git status      — status perubahan','  git log         — riwayat versi','  git commit -m <pesan> — simpan versi','  git checkout <id> — pulihkan versi','  git pull        — tarik berkas terbaru dari cloud','  git push        — kirim ke cloud Clincoo','  npm run dev     — jalankan pratinjau','  npm run build   — unduh proyek jadi satu berkas HTML','  zip             — unduh proyek sebagai arsip .zip','  grep <f> <kata> — cari dalam berkas','  wc <berkas>     — hitung baris/kata/karakter','  ↑ / ↓           — riwayat perintah'].join('\n');},
   tree(){const t=treeData();let out=LINK_PID?LINK_NAME:'proyek-clinqoo';const walk=(node,pre)=>{const ds=Object.keys(node.dirs).sort(),fs=node.files.sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));ds.forEach((d,i)=>{const last=i===ds.length-1&&!fs.length;out+='\n'+pre+(last?'└─ ':'├─ ')+d+'/';walk(node.dirs[d],pre+(last?'   ':'│  '));});fs.forEach((f,i)=>{out+='\n'+pre+(i===fs.length-1?'└─ ':'├─ ')+nameOf(f);});};walk(t,'');return out;},
   cd(a){const target=(a[0]||'').replace(/\/$/,'');if(!target||target==='/'){termCwd='';return 'OK — root';}const ok=Object.keys(project).some(p=>p===target||p.startsWith(target+'/')||linkedEmptyFolders.some(f=>f===target||f.startsWith(target+'/')));if(!ok)return 'cd: '+target+': folder tidak ada';termCwd=target;return 'OK — '+target;},
   pwd(){return '/'+termCwd;},
@@ -2395,7 +2395,7 @@ const CMDS={
   echo(a,line){const m=line.match(/^echo\s+(.*?)\s*>\s*(\S+)$/);if(m){project[m[2]]=m[1]+'\n';persist();renderTree();return 'Ditulis ke '+m[2];}return line.replace(/^echo\s+/,'');},
   find(a){const q=a.join(' ').toLowerCase();if(!q)return 'Penggunaan: find <kata>';const hits=[];Object.keys(project).forEach(p=>{if(p.toLowerCase().includes(q))hits.push(p);else{const i=project[p].toLowerCase().indexOf(q);if(i!==-1)hits.push(p+': …'+project[p].slice(Math.max(0,i-20),i+30).replace(/\n/g,'␤')+'…');}});return hits.length?hits.slice(0,30).join('\n'):'Tidak ada hasil untuk "'+q+'"';},
   stat(a){const f=a[0];if(project[f]===undefined)return 'stat: '+f+': tidak ada';const c=project[f];return ['Berkas : '+f,'Ukuran: '+c.length+' byte ('+ccSizeLabel(c)+')','Baris : '+c.split('\n').length,'Karakter: '+c.length].join('\n');},
-  save(){saveAll();return 'Semua berkas tersimpan'+(LINK_PID?' & tersinkron ke Clinqoo':'')+'.';},
+  save(){saveAll();return 'Semua berkas tersimpan'+(LINK_PID?' & tersinkron ke Clincoo':'')+'.';},
   clear(){$('#term-out').innerHTML='';return '';},
   date(){return new Date().toString();},
   git(a,line){const s=a[0];
@@ -2403,8 +2403,8 @@ const CMDS={
     if(s==='commit'){const m=line.match(/-m\s+["\']?(.+?)["\']?$/);if(!m)return 'Penggunaan: git commit -m "pesan"';$('#git-msg').value=m[1];doCommit();return '';}
     if(s==='log'){const h=getCommits();if(!h.length)return 'Belum ada versi tersimpan.\nKetik: git commit -m "pesan"';return h.map(c=>'['+new Date(c.date).toLocaleString('id-ID')+'] [main '+c.id+'] '+c.msg+' ('+c.n+' berkas)').join('\n');}
     if(s==='checkout'){const id=a[1];if(!id)return 'Penggunaan: git checkout <id> — lihat id di git log';if(!getCommits().some(c=>c.id===id))return 'checkout: '+id+': versi tidak ada';checkoutCommit(id);return 'Dipulihkan ke versi '+id;}
-    if(s==='push'){if(!LINK_PID)return 'git push: hanya berlaku untuk proyek Clinqoo.';linkedCloudPush();return 'Mengirim '+Object.keys(project).length+' berkas ke cloud Clinqoo…';}
-    if(s==='pull'){if(!LINK_PID)return 'git pull: hanya berlaku untuk proyek Clinqoo.';linkedCloudPullForce();return 'Menarik berkas terbaru dari cloud Clinqoo…';}
+    if(s==='push'){if(!LINK_PID)return 'git push: hanya berlaku untuk proyek Clincoo.';linkedCloudPush();return 'Mengirim '+Object.keys(project).length+' berkas ke cloud Clincoo…';}
+    if(s==='pull'){if(!LINK_PID)return 'git pull: hanya berlaku untuk proyek Clincoo.';linkedCloudPullForce();return 'Menarik berkas terbaru dari cloud Clincoo…';}
     return 'git: perintah tidak dikenali. Coba: status / log / commit -m / checkout / pull / push';},
   npm(a){if((a[0]==='run')&&(a[1]==='dev')){setTimeout(()=>{runPreview();termPrint('  ➜ Pratinjau live berjalan — berkas proyek nyata, bukan simulasi ✨','ok');},250);return '> proyek-clinqoo@1.0.0 dev\n> clinqoo serve';}
     if((a[0]==='run')&&(a[1]==='build')){setTimeout(()=>{const out=buildBundle();if(out){downloadFile(LINK_PID?LINK_NAME:'proyek-clinqoo',out);termPrint('  ➜ Build selesai — HTML gabungan diunduh ('+out.length+' byte) ✨','ok');}},250);return '> proyek-clinqoo@1.0.0 build\n> clinqoo build (menggabungkan HTML/CSS/JS menjadi satu berkas)';}
@@ -2872,7 +2872,7 @@ function openDrawerMenu(){
   body.innerHTML=
     '<div class="sd-sec">Menu</div>'+
     '<div class="sd-menu">'+
-    mi('chat','Chat AI','Halaman chat bersama asisten AI Clinqoo','closeSettingsDrawer();openChatPage()')+
+    mi('chat','Chat AI','Halaman chat bersama asisten AI Clincoo','closeSettingsDrawer();openChatPage()')+
     mi('tpl','Templates','Halaman template siap pakai untuk proyek baru','closeSettingsDrawer();openTemplatesPage()')+
     mi('hist','Riwayat Versi','Simpan & pulihkan versi proyek','closeSettingsDrawer();showPanel(\'git\')')+
     mi('home','Halaman Utama','Kembali ke layar sambutan','showWelcome();closeSettingsDrawer()')+
@@ -3116,7 +3116,7 @@ else if(localStorage.getItem('cc_sb_open')==='0'){
 }
 project=loadProject();
 if(LINK_PID){
-  document.title=LINK_NAME+' — Clinqoo Code';
+  document.title=LINK_NAME+' — Clincoo Code';
   setCloudDot(false);
   linkedCloudPull();
   askOpenerForProject();
@@ -3124,7 +3124,7 @@ if(LINK_PID){
 }
 if(localStorage.getItem('cc_theme')==='light')document.body.classList.add('light');
 $('#sb-indent').textContent='Spasi: '+(localStorage.getItem('cc_tab')||'2');
-outPrint('<b>Clinqoo Code</b> siap digunakan.');
+outPrint('<b>Clincoo Code</b> siap digunakan.');
 outPrint('Monaco engine dimuat. Semua perubahan tersimpan otomatis di browser.');
 </script>
 <script src="fullstack.js?v=20260917" defer></script>

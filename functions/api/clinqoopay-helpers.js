@@ -1,5 +1,5 @@
-// ClinqooPay — jembatan saldo Clinqoo ↔ web Wallet (backend wallet-muz, D1 wallet-db)
-// Saldo terhubung 2 arah: wallet-muz jadi sumber kebenaran saldo; Clinqoo baca live & tulis delta.
+// ClincooPay — jembatan saldo Clincoo ↔ web Wallet (backend wallet-muz, D1 wallet-db)
+// Saldo terhubung 2 arah: wallet-muz jadi sumber kebenaran saldo; Clincoo baca live & tulis delta.
 const WALLET_API = 'https://wallet-muz.pages.dev/api/wallet';
 export { WALLET_API };
 
@@ -12,7 +12,7 @@ export async function ensureCpTable(db) {
   )`).run();
 }
 
-// Koneksi ClinqooPay milik user (null = belum terhubung)
+// Koneksi ClincooPay milik user (null = belum terhubung)
 export async function getCpConnection(db, uid) {
   if (!uid) return null;
   try {
@@ -53,8 +53,8 @@ export async function mirrorDelta(conn, delta, note, txid) {
     });
     const d = await r.json().catch(() => ({}));
     if (d && d.success) return { ok: true, balance: Number(d.balance) || 0 };
-    return { ok: false, error: (d && d.error) || 'Gagal sinkron ke ClinqooPay' };
+    return { ok: false, error: (d && d.error) || 'Gagal sinkron ke ClincooPay' };
   } catch (e) {
-    return { ok: false, error: 'Tidak dapat terhubung ke server ClinqooPay' };
+    return { ok: false, error: 'Tidak dapat terhubung ke server ClincooPay' };
   }
 }

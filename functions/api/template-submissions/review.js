@@ -7,7 +7,7 @@ const CORS = { 'Access-Control-Allow-Origin': '*' };
 function htmlPage(title, msg, color) {
   return new Response(
     '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<title>' + title + ' — Clinqoo</title>' +
+    '<title>' + title + ' — Clincoo</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">' +
     '<style>body{font-family:Inter,Arial,sans-serif;background:#fafafa;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#111}' +
     '.box{max-width:420px;text-align:center;padding:40px 28px}h1{font-size:20px;margin:18px 0 8px}p{font-size:14px;color:#6b7280;line-height:1.6;margin:0}' +
@@ -36,9 +36,9 @@ export async function onRequestGet({ request, env }) {
     await db.prepare("UPDATE template_submissions SET status = ?, reviewed_at = datetime('now') WHERE id = ? AND review_token = ?")
       .bind(status, row.id, token).run();
     if (action === 'approve') {
-      return htmlPage('Template disetujui', 'Template "' + row.title + '" kini tampil di galeri template Clinqoo beserta hitungan pemakaian dan kunjungan real-time.', '#059669');
+      return htmlPage('Template disetujui', 'Template "' + row.title + '" kini tampil di galeri template Clincoo beserta hitungan pemakaian dan kunjungan real-time.', '#059669');
     }
-    return htmlPage('Template ditolak', 'Pengajuan template "' + row.title + '" ditolak dan tidak akan tampil di galeri Clinqoo.', '#dc2626');
+    return htmlPage('Template ditolak', 'Pengajuan template "' + row.title + '" ditolak dan tidak akan tampil di galeri Clincoo.', '#dc2626');
   } catch (e) {
     return htmlPage('Kesalahan', 'Terjadi kesalahan saat memproses: ' + e.message, '#dc2626');
   }

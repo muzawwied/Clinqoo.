@@ -84,7 +84,7 @@ export async function onRequestGet({ request, env }) {
 
     const exportData = {
       export_date: new Date().toISOString(),
-      app_name: 'Clinqoo',
+      app_name: 'Clincoo',
       app_version: '2.4.0',
       account: { id: user.id, email: user.email, name: user.name },
       preferences,

@@ -194,7 +194,7 @@ export async function onRequestPost({ request, env }) {
           const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
           const balRow = await db.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(balKey).first();
           let balance = parseFloat(balRow?.value || '0');
-          // ClinqooPay: dompet terhubung â saldo live web Wallet
+          // ClincooPay: dompet terhubung â saldo live web Wallet
           const subConn = await getCpConnection(db, user.id);
           if (subConn) {
             const wb = await mirroredBalance(subConn);
@@ -210,24 +210,24 @@ export async function onRequestPost({ request, env }) {
             }), { status: 402, headers: { 'Content-Type': 'application/json', ...CORS } });
           }
 
-          // PERBAIKAN: potong saldo NYATA dulu (ClinqooPay atau lokal), baru catat riwayat
-          // transaksi di Clinqoo. Sebelumnya urutan terbalik â baris wallet_transactions
-          // "keluar" sudah tercatat di Clinqoo SEBELUM tahu hasil mirrorDelta() ke ClinqooPay.
+          // PERBAIKAN: potong saldo NYATA dulu (ClincooPay atau lokal), baru catat riwayat
+          // transaksi di Clincoo. Sebelumnya urutan terbalik â baris wallet_transactions
+          // "keluar" sudah tercatat di Clincoo SEBELUM tahu hasil mirrorDelta() ke ClincooPay.
           // Akibatnya kalau mirrorDelta gagal (token invalid/expired, race, server Wallet
-          // lambat), Clinqoo sudah menampilkan seolah saldo terpotong padahal saldo asli
-          // di ClinqooPay tidak pernah berkurang â persis gejala "di Clinqoo kepotong,
-          // di ClinqooPay tidak" yang dilaporkan. Sekarang riwayat baru dicatat setelah
+          // lambat), Clincoo sudah menampilkan seolah saldo terpotong padahal saldo asli
+          // di ClincooPay tidak pernah berkurang â persis gejala "di Clincoo kepotong,
+          // di ClincooPay tidak" yang dilaporkan. Sekarang riwayat baru dicatat setelah
           // potongan beneran berhasil di salah satu sisi.
           const subUid = await rowScope(db, 'wallet_transactions', user);
           const subTxId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
           let newBalance = balance - totalPrice;
-          // ClinqooPay: dompet terhubung â potong saldo di web Wallet (mirroring 2 arah)
+          // ClincooPay: dompet terhubung â potong saldo di web Wallet (mirroring 2 arah)
           if (subConn) {
-            const mr = await mirrorDelta(subConn, -totalPrice, 'Clinqoo: Langganan ' + validPlan + ' (' + billing + ')', subTxId);
+            const mr = await mirrorDelta(subConn, -totalPrice, 'Clincoo: Langganan ' + validPlan + ' (' + billing + ')', subTxId);
             if (!mr.ok) {
               const kurang = String(mr.error).indexOf('tidak cukup') >= 0;
               await releasePromoSlot();
-              return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClinqooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
+              return new Response(JSON.stringify({ success: false, error: kurang ? 'Saldo ClincooPay tidak cukup.' : mr.error }), { status: kurang ? 402 : 502, headers: { 'Content-Type': 'application/json' } });
             }
             newBalance = mr.balance;
           } else {
@@ -255,7 +255,7 @@ export async function onRequestPost({ request, env }) {
             try {
               await sendEmail(env, {
                 toEmail: user.email, toName: user.name || '',
-                subject: 'Langganan Clinqoo Aktif â ' + validPlan,
+                subject: 'Langganan Clincoo Aktif â ' + validPlan,
                 html: emailTemplate(
                   'Langganan Aktif',
                   user.name || '',
@@ -269,7 +269,7 @@ export async function onRequestPost({ request, env }) {
                   ],
                   'Lihat Detail Langganan',
                   'https://clinqoo.pages.dev/akun/langganan/',
-                  'Rincian langganan dapat dilihat di halaman Langganan pada akun Clinqoo Anda.'
+                  'Rincian langganan dapat dilihat di halaman Langganan pada akun Clincoo Anda.'
                 )
               });
             } catch (e3) {}

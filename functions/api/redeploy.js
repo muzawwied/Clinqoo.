@@ -60,7 +60,7 @@ export async function onRequestPost({ env }) {
       // Return helpful message instead of error
       return new Response(JSON.stringify({ 
         success: false, 
-        message: 'Auto-redeploy requires Git integration. Use the Clinqoo Auto Deploy workflow or run wrangler pages deploy manually.',
+        message: 'Auto-redeploy requires Git integration. Use the Clincoo Auto Deploy workflow or run wrangler pages deploy manually.',
         errors: data.errors 
       }), { status: 200, headers: { 'Content-Type': 'application/json', ...CORS } });
     }

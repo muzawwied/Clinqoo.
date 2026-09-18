@@ -1,4 +1,4 @@
-// Clinqoo Agent Worker — Cloudflare Workflows untuk Agent Mode Clinqoo
+// Clincoo Agent Worker — Cloudflare Workflows untuk Agent Mode Clincoo
 // Tugas agent beneran jalan DURABLE di latar belakang (bukan tergantung request
 // HTTP yang bisa putus), dengan progres mid-task:
 //   • tiap langkah ditulis ke D1 (agent_tasks + agent_events) → dibaca /api/agent
@@ -6,7 +6,7 @@
 //   • kena error pun otomatis RETRY (bawaan Workflows) dan RESUME dari langkah terakhir
 //
 // Cara kerja:
-//   1. App Clinqoo (atau gateway WA) membuat task status='queued' di D1
+//   1. App Clincoo (atau gateway WA) membuat task status='queued' di D1
 //   2. Cron tiap menit menjemput task 'queued' → create instance Workflow
 //   3. Workflow: susun rencana → jalankan langkah satu per satu (idempotent,
 //      bisa dijalankan ulang dari posisi mana pun) → rangkuman akhir
@@ -28,13 +28,13 @@ const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-f
 const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
-const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clinqoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
+const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clincoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
 Tugasmu: pecah TUJUAN user menjadi langkah-langkah eksekusi yang terurut dan konkret.
 Balas HANYA JSON valid tanpa teks lain, format:
 {"steps":[{"title":"judul langkah singkat (bahasa Indonesia)","detail":"1-2 kalimat penjelasan apa yang dikerjakan di langkah ini"}]}
 Aturan: maksimal 12 langkah, tiap langkah bisa diselesaikan lewat penalaran/penulisan (bukan aksi sistem eksternal), bahasa Indonesia yang jelas.`;
 
-const AGENT_SYSTEM = `Kamu adalah "Clinqoo AI Agent" — agen pelaksana mandiri di platform Clinqoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
+const AGENT_SYSTEM = `Kamu adalah "Clincoo AI Agent" — agen pelaksana mandiri di platform Clincoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
 Kamu sedang menjalankan SATU langkah dari rencana yang sudah disusun. Kerjakan langkah itu sampai tuntas, konkret, dan langsung pakai — kode diberikan dalam blok kode siap salin, konten diberikan final, keputusan diambil tanpa bertanya balik.
 Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, dan SANGAT DETAIL. Jawaban harus PANJANG, LENGKAP, dan MENDALAM — jangan pernah menjawab terlalu singkat atau sederhana. Beri penjelasan menyeluruh dengan konteks, langkah, contoh, dan tips.`;
 

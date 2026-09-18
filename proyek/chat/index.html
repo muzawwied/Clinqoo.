@@ -9,22 +9,22 @@
     <link rel="icon" type="image/png" sizes="64x64" href="../../assets/favicon.png">
     <link rel="manifest" href="../../manifest.json">
     <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
-    <title>Chat AI — Clinqoo</title>
-    <meta name="description" content="Chat AI — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <title>Chat AI — Clincoo</title>
+    <meta name="description" content="Chat AI — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Clinqoo">
-    <meta property="og:title" content="Chat AI — Clinqoo">
-    <meta property="og:description" content="Chat AI — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="apple-mobile-web-app-title" content="Clincoo">
+    <meta property="og:title" content="Chat AI — Clincoo">
+    <meta property="og:description" content="Chat AI — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Clinqoo">
+    <meta property="og:site_name" content="Clincoo">
     <meta property="og:url" content="https://clinqoo.pages.dev/">
     <meta property="og:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Chat AI — Clinqoo">
-    <meta name="twitter:description" content="Chat AI — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="twitter:title" content="Chat AI — Clincoo">
+    <meta name="twitter:description" content="Chat AI — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="twitter:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -378,7 +378,7 @@
         body.dark-mode header { background-color: #000000 !important; }
     </style>
     
-<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clinqoo) -->
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
 <script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 
     <script>/* clinqoo-seo-auto: canonical & og mengikuti domain aktif */
@@ -407,7 +407,7 @@
                 <div class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
                     <img src="../../assets/logo-clinqoo.png" alt="Logo" class="w-full h-full object-cover">
                 </div>
-                <span class="font-bold font-montserrat text-lg text-gray-800">Clinqoo</span>
+                <span class="font-bold font-montserrat text-lg text-gray-800">Clincoo</span>
             </div>
         </div>
         
@@ -614,7 +614,7 @@
         let currentProjectId = null;
 
         const welcomeGreetings = [
-            "Ada rencana apa hari ini, Clinqoo?",
+            "Ada rencana apa hari ini, Clincoo?",
             "Halo! Ada yang bisa saya bantu hari ini?",
             "Siap mewujudkan ide hebatmu hari ini?",
             "Apa proyek seru kita selanjutnya?",
@@ -1651,7 +1651,7 @@
             const msg = messages.find(m => m.id === id || m.id.toString() === id);
             if (msg) {
                 if (navigator.share) {
-                    navigator.share({ title: 'Bagikan Pesan Clinqoo', text: msg.text }).catch(err => {});
+                    navigator.share({ title: 'Bagikan Pesan Clincoo', text: msg.text }).catch(err => {});
                 } else {
                     copyText(id);
                 }
@@ -1692,7 +1692,7 @@
         const quotaBannerText = document.getElementById('quota-banner-text');
         const quotaRetryBtn = document.getElementById('quota-retry-btn');
         function upgradeUrl() {
-            var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
             return base + '/akun/langganan/';
         }
         let quotaLocked = false;
@@ -1854,7 +1854,7 @@
             if (c) c.classList.toggle('hidden', isPlanPro());
         }
         function upgradeUrlPro() {
-            var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
+            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
             return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
         }
         function showProLockPopup() {
@@ -1890,7 +1890,7 @@ function showCollabPlansModal(sub) {
       if (document.getElementById('upgrade-plans-modal')) return;
       var m = document.createElement('div');
       m.id = 'upgrade-plans-modal';
-      var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
+      var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
       var current = (sub && sub.plan) ? sub.plan : 'Starter';
       var billing = (sub && sub.billingCycle) ? sub.billingCycle : 'Bulanan';
       var checkoutUrl = function (name, cyc) {
@@ -2074,7 +2074,7 @@ function showCollabPlansModal(sub) {
         }
 
         const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
-        const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clinqoo (kuota 25/hari user gratis, 500/hari admin)
+        const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
 
         // ===== STREAMING PROGRES TIM AI (SSE) =====
         // Progres BUKAN teks hardcode: backend mengirim output ASLI tiap tahap
@@ -2638,7 +2638,7 @@ function showCollabPlansModal(sub) {
             const a = args || {};
             if (!teamModeOn) return { success: false, error: 'push_to_github hanya tersedia di mode Kolaborasi (Tim AI).' };
             if (!currentProjectId) return { success: false, error: 'Tidak ada proyek aktif. Buka proyek dulu dari daftar proyek.' };
-            const payload = { project_id: currentProjectId, commit_message: a.commit_message || 'Update proyek via Clinqoo AI' };
+            const payload = { project_id: currentProjectId, commit_message: a.commit_message || 'Update proyek via Clincoo AI' };
             if (a.repo) payload.repo = a.repo;
             const res = await fetch(TOOL_API_BASE + '/api/github-push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             const d = await res.json().catch(function () { return {}; });
@@ -2921,7 +2921,7 @@ function showCollabPlansModal(sub) {
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clinqoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clinqoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nTOOLS SUPER (WAJIB dipakai aktif, bukan sekadar teori): run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown), web_search (cari info terbaru/real-time di web), rename_project (ganti nama proyek aktif), deploy_project (publish situs proyek aktif ke internet), push_to_github (HANYA tersedia di mode Kolaborasi: kirim semua file proyek ke repo GitHub yang terintegrasi + picu deploy — di mode biasa tool ini TIDAK ada, jangan menyebut/memakainya), add_env_var (tambah/ubah env var proyek), list_env_vars (lihat env var proyek). Gunakan run_command untuk verifikasi perhitungan/kode sebelum menjawab final, web_search/read_web_page untuk pertanyaan yang butuh data terkini, dan deploy_project saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clinqoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clinqoo, AI asisten Clinqoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clinqoo.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.';
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nTOOLS SUPER (WAJIB dipakai aktif, bukan sekadar teori): run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown), web_search (cari info terbaru/real-time di web), rename_project (ganti nama proyek aktif), deploy_project (publish situs proyek aktif ke internet), push_to_github (HANYA tersedia di mode Kolaborasi: kirim semua file proyek ke repo GitHub yang terintegrasi + picu deploy — di mode biasa tool ini TIDAK ada, jangan menyebut/memakainya), add_env_var (tambah/ubah env var proyek), list_env_vars (lihat env var proyek). Gunakan run_command untuk verifikasi perhitungan/kode sebelum menjawab final, web_search/read_web_page untuk pertanyaan yang butuh data terkini, dan deploy_project saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.';
                 
                 try {
                     const apiMessages = [
@@ -3058,7 +3058,7 @@ function showCollabPlansModal(sub) {
                             setQuotaLock(true, qMsg + ' Pesanmu aman di kolom ketik.');
                         } else {
                         // FALLBACK: /api/chat gagal karena provider (bukan kuota) -> coba /api/ai
-                        // (Clinqoo AI: Workers AI di backend, tanpa API key). Kuota habis TIDAK
+                        // (Clincoo AI: Workers AI di backend, tanpa API key). Kuota habis TIDAK
                         // difallback — UX kuota tetap seperti sebelumnya.
                         let fbOk = false;
                         try {
@@ -3071,7 +3071,7 @@ function showCollabPlansModal(sub) {
                             if (fbRes.ok) {
                                 const fbJson = await fbRes.json();
                                 if (fbJson && fbJson.text) {
-                                    console.log('Clinqoo AI fallback aktif:', fbJson.model || 'workers-ai');
+                                    console.log('Clincoo AI fallback aktif:', fbJson.model || 'workers-ai');
                                     streamingBuffer = fbJson.text;
                                     hasReceivedData = true;
                                     if (quotaLocked) setQuotaLock(false);
@@ -3584,7 +3584,7 @@ function clinqooLaunchEditor(pid) {
     if (document.getElementById('upgrade-plans-modal')) return;
     var m = document.createElement('div');
     m.id = 'upgrade-plans-modal';
-    var base = (location.pathname.indexOf('/Clinqoo') !== -1) ? '/Clinqoo.' : '';
+    var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
     var checkoutUrl = function (name, cyc) {
       return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
     };
@@ -3649,7 +3649,7 @@ function clinqooLaunchEditor(pid) {
       '<div class="min-h-full flex items-center justify-center">' +
       '<div class="bg-white rounded-2xl w-full max-w-sm relative px-4 sm:px-5 pt-9 pb-4 my-2">' +
       '<button id="upgrade-plans-x" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition-colors z-10" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18M6 6l12 12"></path></svg></button>' +
-      '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Paket Clinqoo</h3>' +
+      '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Paket Clincoo</h3>' +
       '<p class="text-[13px] sm:text-sm text-gray-500 mt-1 text-center leading-snug px-1">Fitur Editor & impor GitHub tersedia mulai paket Pro. Paket kamu saat ini: <b>' + current + '</b>.</p>' +
       '<div class="relative mt-4">' +
         '<div id="upc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +

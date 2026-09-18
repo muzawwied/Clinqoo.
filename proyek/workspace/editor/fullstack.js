@@ -1,4 +1,4 @@
-/* Clinqoo Editor Full-stack extensions (Database + API Tester)
+/* Clincoo Editor Full-stack extensions (Database + API Tester)
  * Loaded separately so main index.html style stays untouched.
  */
 (function () {

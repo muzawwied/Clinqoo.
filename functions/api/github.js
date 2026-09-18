@@ -5,7 +5,7 @@ const CORS = {
 };
 
 // Cloudflare Pages Functions - GitHub API proxy
-// Allows Clinqoo to import/read repo code files securely
+// Allows Clincoo to import/read repo code files securely
 // Impor repository GitHub = fitur paket Pro & Bisnis (Starter diarahkan upgrade)
 import { currentUser } from './user-scope.js';
 import { getEffectivePlan, ADMIN_EMAILS } from './plan-helpers.js';
@@ -59,7 +59,7 @@ export async function onRequestGet({ request, env }) {
         headers: {
           'Authorization': 'Bearer ' + GITHUB_TOKEN,
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Clinqoo'
+          'User-Agent': 'Clincoo'
         }
       });
       const data = await res.json();
@@ -92,7 +92,7 @@ export async function onRequestGet({ request, env }) {
         headers: {
           'Authorization': 'Bearer ' + GITHUB_TOKEN,
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Clinqoo'
+          'User-Agent': 'Clincoo'
         }
       });
       const data = await res.json();
@@ -120,7 +120,7 @@ export async function onRequestGet({ request, env }) {
         headers: {
           'Authorization': 'Bearer ' + GITHUB_TOKEN,
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Clinqoo'
+          'User-Agent': 'Clincoo'
         }
       });
       const data = await res.json();
@@ -152,7 +152,7 @@ export async function onRequestGet({ request, env }) {
         headers: {
           'Authorization': 'Bearer ' + GITHUB_TOKEN,
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Clinqoo'
+          'User-Agent': 'Clincoo'
         }
       });
       const data = await res.json();

@@ -1,11 +1,11 @@
 /**
- * Clinqoo URL Path Router
+ * Clincoo URL Path Router
  * Parses nested URLs like /workspace/{projectId}/pengaturan/{submenu}
- * Supports both Cloudflare Pages (root) and GitHub Pages (subpath /Clinqoo/)
+ * Supports both Cloudflare Pages (root) and GitHub Pages (subpath /Clincoo/)
  */
 
 // Detect if we're on GitHub Pages (subpath) vs Cloudflare Pages (root)
-const _BASE = (window.location.pathname.match(/^(\/Clinqoo[.]?)/) || [''])[0] || '';
+const _BASE = (window.location.pathname.match(/^(\/Clincoo[.]?)/) || [''])[0] || '';
 const _isGitHubPages = _BASE.length > 0;
 
 const PathRouter = {

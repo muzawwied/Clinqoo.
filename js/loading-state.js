@@ -1,4 +1,4 @@
-// Clinqoo Loading State — indikator loading bergaya halaman Deployment:
+// Clincoo Loading State — indikator loading bergaya halaman Deployment:
 // header halaman tetap terlihat, area konten memutih dengan icon loader-2 di tengah (tanpa teks).
 // Muncul HANYA bila data awal lambat (fetch masih berjalan >500ms) — halaman yang cepat
 // langsung tampil, pindah antar halaman tidak terhalang. Hilang segera saat fetch selesai

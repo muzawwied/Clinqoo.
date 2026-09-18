@@ -1,7 +1,7 @@
-// Cloudflare Pages Function — /api/wa "Gateway WhatsApp untuk Clinqoo AI" (SELF-CONTAINED)
-// Chat Clinqoo AI lewat WhatsApp (Cloud API Meta), ala superagent:
+// Cloudflare Pages Function — /api/wa "Gateway WhatsApp untuk Clincoo AI" (SELF-CONTAINED)
+// Chat Clincoo AI lewat WhatsApp (Cloud API Meta), ala superagent:
 //   GET  /api/wa?hub.mode=subscribe&hub.verify_token=...&hub.challenge=...  → verifikasi webhook Meta
-//   POST /api/wa  → event masuk dari Meta: pesan user dibalas Clinqoo AI OTOMATIS (wajib X-Hub-Signature-256 bila WHATSAPP_APP_SECRET di-set)
+//   POST /api/wa  → event masuk dari Meta: pesan user dibalas Clincoo AI OTOMATIS (wajib X-Hub-Signature-256 bila WHATSAPP_APP_SECRET di-set)
 //   POST /api/wa  body { action: 'send', to, text } (Bearer admin) → kirim manual
 // Konfigurasi (env_vars / env): WHATSAPP_TOKEN (access token Cloud API),
 // WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN (string bebas untuk verifikasi webhook).
@@ -20,9 +20,9 @@ const MAX_CHARS = 3800;          // batas aman satu pesan WA sebelum dipecah
 const SESSION_MSGS = 10;         // konteks yang diingat per nomor
 const DAILY_LIMIT = 30;          // balasan AI per nomor per hari
 
-const WA_SYSTEM = `Kamu adalah "Clinqoo AI" — asisten resmi Clinqoo, platform pembuatan website dengan AI Indonesia (template, editor kode, deploy Cloudflare Pages, domain kustom, SSL otomatis; paket Starter gratis, Pro Rp49.000/bln, Bisnis Rp129.000/bln).
+const WA_SYSTEM = `Kamu adalah "Clincoo AI" — asisten resmi Clincoo, platform pembuatan website dengan AI Indonesia (template, editor kode, deploy Cloudflare Pages, domain kustom, SSL otomatis; paket Starter gratis, Pro Rp49.000/bln, Bisnis Rp129.000/bln).
 Sekarang kamu mengobrol lewat WhatsApp. Jawab dalam Bahasa Indonesia yang hangat, profesional, dan SINGKAT (ideal 2-6 kalimat — ini chat WA, bukan dokumen). Tanpa markdown; teks polos + emoji secukupnya.
-Kalau user minta hal yang butuh akun Clinqoo (deploy, workspace, dll), arahkan membuka clinqoo.pages.dev dan login. Kalau pertanyaan di luar produk Clinqoo, tetap bantu secukupnya secara umum.`;
+Kalau user minta hal yang butuh akun Clincoo (deploy, workspace, dll), arahkan membuka clinqoo.pages.dev dan login. Kalau pertanyaan di luar produk Clincoo, tetap bantu secukupnya secara umum.`;
 
 // ===== env vars (DB env_vars / env asli) =====
 async function getEnvKey(env, name) {
@@ -118,7 +118,7 @@ async function waAgentStatus(env, phone) {
   const ev = await env.DB.prepare('SELECT kind, text FROM agent_events WHERE task_id = ? ORDER BY id DESC LIMIT 1').bind(t.id).first();
   return { goal: t.goal, status: t.status, step: t.current_step, planLen, lastEvent: ev?.text || '', error: t.error };
 }
-const WA_TUGAS_HELP = 'Kirim "tugas: <tujuan>" — contoh: tugas: buatkan rencana konten IG 30 hari untuk brand kopi.\nAku kerjakan di latar belakang dan kirim progresnya ke chat ini tiap langkah. Cek progres dengan "status". (Clinqoo AI)';
+const WA_TUGAS_HELP = 'Kirim "tugas: <tujuan>" — contoh: tugas: buatkan rencana konten IG 30 hari untuk brand kopi.\nAku kerjakan di latar belakang dan kirim progresnya ke chat ini tiap langkah. Cek progres dengan "status". (Clincoo AI)';
 
 // ===== D1: sesi + kuota =====
 async function ensureTables(DB) {
@@ -172,7 +172,7 @@ async function handleIncoming(env, msg) {
   else if (msg.type === 'interactive' && msg.interactive?.list_reply?.title) userText = String(msg.interactive.list_reply.title).slice(0, 1000);
 
   if (!userText) {
-    await waSend(env, phoneId, token, from, 'Maaf, untuk saat ini aku baru bisa membaca pesan teks ya 🙂 — kirim pertanyaanmu dalam bentuk teks. (Clinqoo AI)');
+    await waSend(env, phoneId, token, from, 'Maaf, untuk saat ini aku baru bisa membaca pesan teks ya 🙂 — kirim pertanyaanmu dalam bentuk teks. (Clincoo AI)');
     return;
   }
   // ==== Perintah "tugas ..." — lempar ke Agent Mode background (Workflows) ====
@@ -181,9 +181,9 @@ async function handleIncoming(env, msg) {
     const goal = mTugas[1].trim();
     try {
       await waAgentStart(env, from, goal);
-      await waSend(env, phoneId, token, from, '✅ Tugas dicatat: "' + goal.slice(0, 120) + '"\n\nAku susun rencana dan kerjakan di latar belakang — progres kutulis ke chat ini tiap langkah. Ketik "status" kapan pun untuk cek. (Clinqoo AI)');
+      await waSend(env, phoneId, token, from, '✅ Tugas dicatat: "' + goal.slice(0, 120) + '"\n\nAku susun rencana dan kerjakan di latar belakang — progres kutulis ke chat ini tiap langkah. Ketik "status" kapan pun untuk cek. (Clincoo AI)');
     } catch (e) {
-      await waSend(env, phoneId, token, from, 'Maaf, gagal mencatat tugas — coba kirim ulang ya. (Clinqoo AI)');
+      await waSend(env, phoneId, token, from, 'Maaf, gagal mencatat tugas — coba kirim ulang ya. (Clincoo AI)');
     }
     return;
   }
@@ -199,7 +199,7 @@ async function handleIncoming(env, msg) {
   }
 
   if (!(await quotaOk(env.DB, from))) {
-    await waSend(env, phoneId, token, from, 'Kamu sudah mencapai batas chat 30 pesan hari ini lewat WhatsApp. Lanjut lagi besok ya! (Clinqoo AI)');
+    await waSend(env, phoneId, token, from, 'Kamu sudah mencapai batas chat 30 pesan hari ini lewat WhatsApp. Lanjut lagi besok ya! (Clincoo AI)');
     return;
   }
 
@@ -207,7 +207,7 @@ async function handleIncoming(env, msg) {
   const messages = [{ role: 'system', content: WA_SYSTEM }, ...history, { role: 'user', content: userText }];
   const r = await aiCall(env, messages);
   if (r.error) {
-    await waSend(env, phoneId, token, from, 'Maaf, server AI sedang sibuk — coba kirim ulang sebentar lagi ya. (Clinqoo AI)');
+    await waSend(env, phoneId, token, from, 'Maaf, server AI sedang sibuk — coba kirim ulang sebentar lagi ya. (Clincoo AI)');
     return;
   }
   history.push({ role: 'user', content: userText });
@@ -230,12 +230,12 @@ export async function onRequestGet({ request, env }) {
     }
     return new Response('Forbidden', { status: 403 });
   }
-  return json({ ok: true, service: 'Clinqoo AI WhatsApp Gateway', webhook: 'https://clincoo-be2.pages.dev/api/wa' });
+  return json({ ok: true, service: 'Clincoo AI WhatsApp Gateway', webhook: 'https://clincoo-be2.pages.dev/api/wa' });
 }
 
 // ===== POST: event Meta (masuk otomatis) / kirim manual (admin) =====
 export async function onRequestPost({ request, env }) {
-  // jalur 1: kirim manual dari dashboard Clinqoo (wajib Bearer admin)
+  // jalur 1: kirim manual dari dashboard Clincoo (wajib Bearer admin)
   const auth = request.headers.get('Authorization') || '';
   const raw = await request.text();
   let body = null; try { body = JSON.parse(raw); } catch (e) { body = null; }

@@ -1,4 +1,4 @@
-// Cloudflare Pages Functions — Pengajuan Template Komunitas Clinqoo
+// Cloudflare Pages Functions — Pengajuan Template Komunitas Clincoo
 //   GET  /api/template-submissions          -> daftar template komunitas yang DISETUJUI (publik)
 //   POST /api/template-submissions          -> ajukan template (wajib login Bearer):
 //        { title, desc, preview_url, project_name, thumbnail (data URL webp) }
@@ -57,7 +57,7 @@ export async function onRequestGet({ request, env }) {
     const templates = (rows.results || []).map(r => ({
       id: r.id,
       key: 'community:' + r.id,
-      creator: r.creator_name || 'Pengguna Clinqoo',
+      creator: r.creator_name || 'Pengguna Clincoo',
       name: r.title,
       desc: r.description,
       url: r.preview_url,
@@ -96,7 +96,7 @@ export async function onRequestPost({ request, env }) {
       `INSERT INTO template_submissions
         (user_id, creator_name, creator_email, project_name, title, description, preview_url, thumbnail, status, review_token)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`
-    ).bind(user.id, user.name || user.email || 'Pengguna Clinqoo', user.email || '', projectName, title, desc, previewUrl, thumbnail, token).run();
+    ).bind(user.id, user.name || user.email || 'Pengguna Clincoo', user.email || '', projectName, title, desc, previewUrl, thumbnail, token).run();
 
     const id = res.meta ? res.meta.last_row_id : null;
 
@@ -118,7 +118,7 @@ export async function onRequestPost({ request, env }) {
       '<div style="background:#f4f5f7;padding:32px 16px;font-family:Arial,Helvetica,sans-serif">' +
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;border-collapse:separate;overflow:hidden">' +
           '<tr><td style="background:#0a0a0a;padding:22px 32px">' +
-            '<span style="color:#ffffff;font-size:19px;font-weight:bold;letter-spacing:2px">Clinqoo — Template Baru untuk Ditinjau</span>' +
+            '<span style="color:#ffffff;font-size:19px;font-weight:bold;letter-spacing:2px">Clincoo — Template Baru untuk Ditinjau</span>' +
           '</td></tr>' +
           '<tr><td style="padding:32px">' +
             '<p style="margin:0 0 4px;color:#9ca3af;font-size:12px">' + tgl + '</p>' +
@@ -126,16 +126,16 @@ export async function onRequestPost({ request, env }) {
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">' +
               '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Pencipta</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;color:#111827;font-size:13px;font-weight:bold;text-align:right">' + escape(user.name || '-') + '</td></tr>' +
               '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Email</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;color:#111827;font-size:13px;font-weight:bold;text-align:right">' + escape(user.email || '-') + '</td></tr>' +
-              '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Proyek Clinqoo</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;color:#111827;font-size:13px;font-weight:bold;text-align:right">' + escape(projectName || '-') + '</td></tr>' +
+              '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Proyek Clincoo</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;color:#111827;font-size:13px;font-weight:bold;text-align:right">' + escape(projectName || '-') + '</td></tr>' +
               '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Tautan Preview</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;text-align:right"><a href="' + escape(previewUrl) + '" style="color:#2563eb;font-size:13px;font-weight:bold;text-decoration:none">' + escape(previewUrl.replace(/^https?:\/\//, '').slice(0, 48)) + '</a></td></tr>' +
               '<tr><td style="padding:10px 0;border-bottom:1px solid #eceef1;color:#6b7280;font-size:13px">Deskripsi</td><td style="padding:10px 0 10px 16px;border-bottom:1px solid #eceef1;color:#111827;font-size:13px;text-align:right">' + escape(desc) + '</td></tr>' +
             '</table>' +
-            '<p style="margin:24px 0 8px;color:#374151;font-size:13px;line-height:1.6">Template ini dikirim secara real-time dari halaman pendaftaran template Clinqoo. Tinjau datanya, lalu pilih tindakan:</p>' +
+            '<p style="margin:24px 0 8px;color:#374151;font-size:13px;line-height:1.6">Template ini dikirim secara real-time dari halaman pendaftaran template Clincoo. Tinjau datanya, lalu pilih tindakan:</p>' +
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>' +
               '<td style="padding-right:8px"><a href="' + approveUrl + '" style="display:inline-block;background:#059669;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold">&#10003; Setujui</a></td>' +
               '<td><a href="' + rejectUrl + '" style="display:inline-block;background:#dc2626;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:bold">&#10007; Tolak</a></td>' +
             '</tr></table>' +
-            '<p style="margin:20px 0 0;color:#9ca3af;font-size:11px;line-height:1.6">Setujui = template langsung tampil di galeri template publik Clinqoo beserta hitungan pemakaian dan kunjungan real-time.</p>' +
+            '<p style="margin:20px 0 0;color:#9ca3af;font-size:11px;line-height:1.6">Setujui = template langsung tampil di galeri template publik Clincoo beserta hitungan pemakaian dan kunjungan real-time.</p>' +
           '</td></tr>' +
         '</table>' +
       '</div>';

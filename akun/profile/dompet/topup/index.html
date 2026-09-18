@@ -10,22 +10,22 @@
     <link rel="icon" type="image/png" sizes="64x64" href="../../../../assets/favicon.png">
     <link rel="manifest" href="../../../../manifest.json">
     <link rel="apple-touch-icon" href="../../../../assets/icons/apple-touch-icon.png">
-    <title>Top Up Saldo — Clinqoo</title>
-    <meta name="description" content="Top Up Saldo — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <title>Top Up Saldo — Clincoo</title>
+    <meta name="description" content="Top Up Saldo — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Clinqoo">
-    <meta property="og:title" content="Top Up Saldo — Clinqoo">
-    <meta property="og:description" content="Top Up Saldo — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="apple-mobile-web-app-title" content="Clincoo">
+    <meta property="og:title" content="Top Up Saldo — Clincoo">
+    <meta property="og:description" content="Top Up Saldo — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Clinqoo">
+    <meta property="og:site_name" content="Clincoo">
     <meta property="og:url" content="https://clinqoo.pages.dev/">
     <meta property="og:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Top Up Saldo — Clinqoo">
-    <meta name="twitter:description" content="Top Up Saldo — kelola langsung di Clinqoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="twitter:title" content="Top Up Saldo — Clincoo">
+    <meta name="twitter:description" content="Top Up Saldo — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
     <meta name="twitter:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -183,7 +183,7 @@
     body.dark-mode .skel-dot { background-color: #141414 !important; border-color: #222222 !important; }
     </style>
     <script src="/js/path-router.js"></script>
-<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clinqoo) -->
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clincoo) -->
 <script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 
     <script>/* clinqoo-seo-auto: canonical & og mengikuti domain aktif */
@@ -225,19 +225,19 @@
                     <!-- Instant Payment -->
                     <div class="space-y-3">
                         <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 px-1">Pembayaran Instan</h4>
-                        <!-- ClinqooPay (metode aktif satu-satunya) — kartu tunggal: metode + status koneksi menyatu -->
+                        <!-- ClincooPay (metode aktif satu-satunya) — kartu tunggal: metode + status koneksi menyatu -->
                         <div class="pay-method-card selected border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-gray-50 dark:bg-[#1a1a1a]">
                             <div class="flex items-center space-x-3 p-3.5">
                                 <div class="relative w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden payment-logo-badge bg-white shadow-sm border border-gray-200 dark:border-gray-700">
-                                    <img src="/assets/logo-clinqoo.png" alt="ClinqooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
+                                    <img src="/assets/logo-clinqoo.png" alt="ClincooPay" class="absolute inset-0 w-full h-full object-cover scale-[1.42]">
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClinqooPay</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">ClincooPay</p>
                                     <p id="clinqoopay-desc" class="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">Memuat…</p>
                                 </div>
                                 <div id="clinqoopay-cta" class="shrink-0"></div>
                             </div>
-                            <input type="hidden" name="payment-method" value="ClinqooPay">
+                            <input type="hidden" name="payment-method" value="ClincooPay">
                         </div>
                         <!-- QRIS via BuatQris — aktif: buat transaksi, QR ditampilkan di step khusus -->
                         <div onclick="selectPaymentMethod(this)" class="pay-method-card border border-gray-200 dark:border-gray-800 rounded-2xl w-full bg-white dark:bg-[#0a0a0a]">
@@ -596,12 +596,12 @@
         }
 
         function goToStep2() {
-            // ClinqooPay = hubungkan dompet: pindah ke halaman auth ClinqooPay (bukan input nominal).
+            // ClincooPay = hubungkan dompet: pindah ke halaman auth ClincooPay (bukan input nominal).
             // Kalau sudah terhubung, saldo sudah tersinkron — tidak perlu isi saldo.
             var el = document.querySelector('input[name="payment-method"]:checked');
-            if (el && el.value === 'ClinqooPay') {
+            if (el && el.value === 'ClincooPay') {
                 if (cpConnected) {
-                    showModal('Saldo Sudah Terhubung', 'Saldo ClinqooPay dan saldo Clinqoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
+                    showModal('Saldo Sudah Terhubung', 'Saldo ClincooPay dan saldo Clincoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
                 } else {
                     window.location.href = 'clinqoopay/';
                 }
@@ -664,18 +664,18 @@
             labelEl.classList.remove('bg-white', 'dark:bg-[#0a0a0a]');
             var radio = labelEl.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
-            // CTA Lanjutkan hanya untuk QRIS & metode lain — ClinqooPay informatif saja
+            // CTA Lanjutkan hanya untuk QRIS & metode lain — ClincooPay informatif saja
             var inp = labelEl.querySelector('input[name="payment-method"]');
             var wrap = document.getElementById('method-cta-wrap');
             if (wrap && inp) {
-                if (inp.value === 'ClinqooPay') wrap.classList.add('cta-hidden');
+                if (inp.value === 'ClincooPay') wrap.classList.add('cta-hidden');
                 else wrap.classList.remove('cta-hidden');
             }
         }
 
         async function processClinqooPay() {
             if (cpConnected) {
-                showModal('Saldo Sudah Terhubung', 'Saldo ClinqooPay dan saldo Clinqoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
+                showModal('Saldo Sudah Terhubung', 'Saldo ClincooPay dan saldo Clincoo kamu sudah tersinkron otomatis. Tidak perlu isi saldo — cukup isi dari aplikasi Wallet.');
                 return;
             }
             var token = '';
@@ -684,21 +684,21 @@
                 var res = await fetch(API_BASE + '/api/wallet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify({ action: 'add_transaction', title: 'Top Up ClinqooPay', amount: selectedNominalAmount, type: 'in', method: 'ClinqooPay' })
+                    body: JSON.stringify({ action: 'add_transaction', title: 'Top Up ClincooPay', amount: selectedNominalAmount, type: 'in', method: 'ClincooPay' })
                 }).then(function(r) { return r.json(); });
                 if (!res.success) {
                     if (res.need_login) { showModal('Sesi Berakhir', 'Silakan masuk ulang, lalu coba isi saldo kembali.'); return; }
-                    showModal('Top Up Gagal', res.error || 'Gagal memproses ClinqooPay.');
+                    showModal('Top Up Gagal', res.error || 'Gagal memproses ClincooPay.');
                     return;
                 }
-                showModal('Top Up Berhasil', 'Saldo ' + Number(selectedNominalAmount).toLocaleString('id-ID') + ' berhasil masuk lewat ClinqooPay.');
+                showModal('Top Up Berhasil', 'Saldo ' + Number(selectedNominalAmount).toLocaleString('id-ID') + ' berhasil masuk lewat ClincooPay.');
                 setTimeout(function() { closeTopUpPage(); }, 1200);
             } catch (e) {
-                showModal('Gagal', 'Tidak dapat terhubung ke server ClinqooPay.');
+                showModal('Gagal', 'Tidak dapat terhubung ke server ClincooPay.');
             }
         }
 
-        // ===== ClinqooPay: hubungkan/putuskan dompet web Wallet (mirroring saldo 2 arah) =====
+        // ===== ClincooPay: hubungkan/putuskan dompet web Wallet (mirroring saldo 2 arah) =====
         var cpConnected = false;
         function cpAuthHeaders() {
             var token = '';
@@ -720,12 +720,12 @@
                     var bal = (st.wallet_balance == null) ? '…' : Number(st.wallet_balance).toLocaleString('id-ID');
                     desc.innerHTML = 'Saldo · <span class="font-bold text-gray-900 dark:text-white">' + bal + '</span>';
                 } else {
-                    desc.textContent = 'Clinqoo wallet';
+                    desc.textContent = 'Clincoo wallet';
                     if (cta) cta.innerHTML =
                         '<button type="button" onclick="location.href=\'clinqoopay/\'" class="px-3.5 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black text-[11px] font-bold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all">Hubungkan</button>';
                 }
             } catch (e) {
-                desc.textContent = 'Gagal memuat status ClinqooPay.';
+                desc.textContent = 'Gagal memuat status ClincooPay.';
             }
         }
 
@@ -890,7 +890,7 @@
                 if (data.status === 'paid') {
                     stopQrisTimers();
                     qrisForgetSession();
-                    showModal('Top Up Berhasil', 'Pembayaran QRIS diterima. Saldo sudah masuk ke Dompet Clinqoo.');
+                    showModal('Top Up Berhasil', 'Pembayaran QRIS diterima. Saldo sudah masuk ke Dompet Clincoo.');
                     setTimeout(function () { closeTopUpPage(); }, 1500);
                     return;
                 }
@@ -956,8 +956,8 @@
                 return;
             }
             var methodEl = document.querySelector('input[name="payment-method"]:checked');
-            var method = methodEl ? methodEl.value : 'ClinqooPay';
-            if (method === 'ClinqooPay') { return processClinqooPay(); }
+            var method = methodEl ? methodEl.value : 'ClincooPay';
+            if (method === 'ClincooPay') { return processClinqooPay(); }
             if (method === 'QRIS') { return showQrisConfirm(); }
             var channel = XENDIT_METHOD_MAP[method] || 'qris';
             try {

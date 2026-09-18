@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — /api/agent "Agent Mode Clinqoo" (SELF-CONTAINED)
+// Cloudflare Pages Function — /api/agent "Agent Mode Clincoo" (SELF-CONTAINED)
 // Agent AI mandiri: satu tujuan besar dieksekusi jadi langkah-langkah kecil
 // SECARA OTOMATIS tanpa konfirmasi per langkah — seperti agen di platform builder:
 //   1. AI menyusun rencana terstruktur (JSON langkah-langkah)
@@ -43,7 +43,7 @@ function clientIp(request) {
 const ADMIN_EMAILS = new Set(['muzawwied@gmail.com', 'muzawwied@gmail.com']);
 const DAILY_LIMIT = 25;
 const ADMIN_DAILY_LIMIT = 500;
-const QUOTA_MSG = 'Kuota AI Clinqoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
+const QUOTA_MSG = 'Kuota AI Clincoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
 
 const MAX_PLAN_STEPS = 12;
 const MAX_TRANSCRIPT = 40;
@@ -55,13 +55,13 @@ const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-f
 const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
-const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clinqoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
+const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clincoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
 Tugasmu: pecah TUJUAN user menjadi langkah-langkah eksekusi yang terurut dan konkret.
 Balas HANYA JSON valid tanpa teks lain, format:
 {"steps":[{"title":"judul langkah singkat (bahasa Indonesia)","detail":"1-2 kalimat penjelasan apa yang dikerjakan di langkah ini"}]}
 Aturan: maksimal 12 langkah, tiap langkah bisa diselesaikan lewat penalaran/penulisan (bukan aksi sistem eksternal), bahasa Indonesia yang jelas.`;
 
-const AGENT_SYSTEM = `Kamu adalah "Clinqoo AI Agent" — agen pelaksana mandiri di platform Clinqoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
+const AGENT_SYSTEM = `Kamu adalah "Clincoo AI Agent" — agen pelaksana mandiri di platform Clincoo (pembuatan website dengan AI: template, editor kode, deploy Cloudflare Pages, domain kustom CNAME @, SSL otomatis, paket Starter gratis/Pro Rp49.000/Bisnis Rp129.000).
 Kamu sedang menjalankan SATU langkah dari rencana yang sudah disusun. Kerjakan langkah itu sampai tuntas, konkret, dan langsung pakai — kode diberikan dalam blok kode siap salin, konten diberikan final, keputusan diambil tanpa bertanya balik.
 Jangan menawarkan "sebaiknya hubungi" — kamu sendiri yang mengeksekusi. Bahasa Indonesia yang hangat, profesional, dan SANGAT DETAIL. Jawaban harus PANJANG, LENGKAP, dan MENDALAM — jangan pernah menjawab terlalu singkat atau sederhana. Beri penjelasan menyeluruh dengan konteks, langkah, contoh, dan tips.`;
 
@@ -312,7 +312,7 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true, task: taskJson(done) });
     }
 
-    // action === 'start_bg' — tugas masuk antrean, dijalankan Clinqoo Agent Worker
+    // action === 'start_bg' — tugas masuk antrean, dijalankan Clincoo Agent Worker
     // (Cloudflare Workflows) di latar belakang. Request balik LANGSUNG; progres
     // dipantau lewat GET /api/agent?task_id=... (events) atau dikirim ke WhatsApp
     // bila wa_number diisi.
@@ -334,7 +334,7 @@ export async function onRequestPost({ request, env }) {
       };
       await env.DB.prepare('INSERT INTO agent_tasks (id, user_key, project_id, goal, status, plan, transcript, current_step, result, error, wa_number, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
         .bind(t.id, t.user_key, t.project_id, t.goal, t.status, t.plan, t.transcript, t.current_step, t.result, t.error, t.wa_number, t.created_at, t.updated_at).run();
-      addEvent(env.DB, t.id, t.user_key, 'queued', 'Tugas masuk antrean — Clinqoo Agent Worker menjalankannya di latar belakang.');
+      addEvent(env.DB, t.id, t.user_key, 'queued', 'Tugas masuk antrean — Clincoo Agent Worker menjalankannya di latar belakang.');
       return json({ ok: true, task: taskJson(t), background: true, message: 'Tugas masuk antrean. Pantau progres via GET /api/agent?task_id=' + t.id });
     }
 

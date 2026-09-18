@@ -1,4 +1,4 @@
-// ===== Clinqoo Templates — data & aksi fitur template (dipakai index.html & akun/favorit.html) =====
+// ===== Clincoo Templates — data & aksi fitur template (dipakai index.html & akun/favorit.html) =====
 // Dibuat otomatis dari preview-shots/, jangan diedit manual.
 var ClinqooTemplates = (function () {
   'use strict';

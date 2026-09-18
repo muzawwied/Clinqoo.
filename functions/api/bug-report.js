@@ -104,18 +104,18 @@ export async function onRequestPost({ request, env }) {
     ];
     const emailResult = await sendEmail(env, {
       toEmail: ownerEmail,
-      toName: 'Admin Clinqoo',
-      subject: '[Laporan Bug] ' + categoryLabel + (reportId ? ' #' + reportId : '') + ' — Clinqoo',
+      toName: 'Admin Clincoo',
+      subject: '[Laporan Bug] ' + categoryLabel + (reportId ? ' #' + reportId : '') + ' — Clincoo',
       html: emailTemplate(
         'Laporan Bug Baru',
         'Admin',
-        'Ada laporan bug baru yang masuk melalui halaman Laporkan Bug Clinqoo. Rincian laporan:' +
+        'Ada laporan bug baru yang masuk melalui halaman Laporkan Bug Clincoo. Rincian laporan:' +
           '<div style="margin:16px 0;padding:14px 16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;color:#374151;font-size:14px;line-height:1.7">' + esc(description) + '</div>' +
           (attachments.length ? '<p style="margin:0 0 4px;color:#6b7280;font-size:12px">' + attachments.length + ' tangkapan layar dilampirkan di email ini.</p>' : ''),
         details,
         null,
         null,
-        'Laporan ini juga tersimpan otomatis di database Clinqoo. Email ini dikirim otomatis — mohon jangan dibalas.'
+        'Laporan ini juga tersimpan otomatis di database Clincoo. Email ini dikirim otomatis — mohon jangan dibalas.'
       ),
       attachment: attachments.map(function (dataUrl, i) {
         return { name: 'laporan-' + (reportId || 'x') + '-' + (i + 1) + '.jpg', content: dataUrl.split(',')[1] };

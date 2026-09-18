@@ -7,7 +7,7 @@
 //   BUATQRIS_WEBHOOK_SECRET (opsional) — kunci tanda tangan webhook; jika kosong pakai secret_token
 //   BUATQRIS_METHOD         (opsional) — metode qris: qris_one..qris_four, default 'qris_two'
 // Callback URL (di dashboard BuatQris): https://<domain>/api/topup-qris
-// Referensi order ditanam di `description` QRIS ("Clinqoo TOPUPQ-xxx") sehingga
+// Referensi order ditanam di `description` QRIS ("Clincoo TOPUPQ-xxx") sehingga
 // webhook apa pun formatnya tetap bisa dicocokkan ke order — plus verifikasi HMAC.
 
 import { currentUser } from './user-scope.js';
@@ -211,7 +211,7 @@ export async function onRequestPost({ request, env }) {
     account_id: accountId,
     secret_token: secretToken,
     amount: String(amount),
-    description: 'Top up saldo Clinqoo ' + orderId,
+    description: 'Top up saldo Clincoo ' + orderId,
     qris_method: method
   });
   // Respons BuatQris: { qr_url, payment_url, status, ... } (tahan terhadap bungkus data)

@@ -1,5 +1,5 @@
 // GET  /api/auth/github -> {client_id} (paralel dengan /api/auth/google)
-// POST /api/auth/github {code, redirect_uri} — tukar code GitHub jadi sesi Clinqoo
+// POST /api/auth/github {code, redirect_uri} — tukar code GitHub jadi sesi Clincoo
 import { initTables, upsertOauthUser, createSession, publicUser, getEnvVarDb, json, CORS } from './shared.js';
 
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: CORS }); }

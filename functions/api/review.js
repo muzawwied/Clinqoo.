@@ -13,7 +13,7 @@ export async function onRequestOptions() { return new Response(null, { status: 2
 
 const MAX_FILES = 25;
 const MAX_TOTAL = 80 * 1024;
-const REVIEW_SYSTEM = `Kamu adalah "Clinqoo Code Reviewer" — engineer senior yang memeriksa kode website (HTML/CSS/JS vanilla, situs statis yang di-deploy ke Cloudflare Pages).
+const REVIEW_SYSTEM = `Kamu adalah "Clincoo Code Reviewer" — engineer senior yang memeriksa kode website (HTML/CSS/JS vanilla, situs statis yang di-deploy ke Cloudflare Pages).
 Tugas: temukan ERROR, BUG, kelemahan keamanan, dan masalah logika di file-file berikut, lalu susun laporan terurut berdasarkan prioritas.
 Format laporan (Bahasa Indonesia, markdown ringan, langsung isi tanpa basa-basi):
 1. **[KRITIS/SEDANG/RINGAN] nama-file** — masalahnya apa (spesifik: baris/fungsi/selector) dan cara memperbaikinya (tunjukkan potongan kode perbaikan bila perlu).

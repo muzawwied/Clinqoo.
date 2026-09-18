@@ -1,7 +1,7 @@
 // Escape HTML — wajib untuk semua data user/server sebelum masuk innerHTML (anti-XSS)
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 /**
- * Clinqoo Notifications System
+ * Clincoo Notifications System
  * Real-time D1-backed notifications with page links
  */
 const NOTIF_API = 'https://clincoo-be2.pages.dev/api/notifications';

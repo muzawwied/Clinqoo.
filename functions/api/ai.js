@@ -1,5 +1,5 @@
-// Cloudflare Pages Function — /api/ai "Clinqoo AI" (SELF-CONTAINED)
-// Endpoint asisten AI persona Clinqoo. Provider utama: Workers AI (binding "AI",
+// Cloudflare Pages Function — /api/ai "Clincoo AI" (SELF-CONTAINED)
+// Endpoint asisten AI persona Clincoo. Provider utama: Workers AI (binding "AI",
 // tanpa API key) -> fallback OpenRouter (model gratis) -> fallback Gemini.
 // Fitur:
 //   - Auth per-user (middleware /api/* sudah menolak tanpa Bearer)
@@ -35,27 +35,27 @@ function clientIp(request) {
   try { return (request && request.headers && request.headers.get('cf-connecting-ip')) || 'unknown'; } catch (e) { return 'unknown'; }
 }
 
-// ===== Persona "Clinqoo AI" =====
-const CLINQOO_AI_SYSTEM_PROMPT = `Kamu adalah "Clinqoo AI" — asisten resmi platform Clinqoo, pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.
+// ===== Persona "Clincoo AI" =====
+const CLINQOO_AI_SYSTEM_PROMPT = `Kamu adalah "Clincoo AI" — asisten resmi platform Clincoo, pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.
 
-Tentang Clinqoo (fakta yang kamu pegang):
-- Layanan utama: galeri template publik (SEO-friendly, tanpa login), workspace dengan editor kode, chat AI per proyek (bisa menulis/mengubah file, menyiapkan aplikasi), deploy ke Cloudflare Pages dengan subdomain *.pages.dev, domain kustom (record CNAME/ALIAS @ ke <subdomain>.pages.dev, tanpa A record IP), SSL otomatis, pengaturan proyek (umum, environment, keamanan/HTTPS, visibilitas akses & proteksi password, zona bahaya), tugas terjadwal, dompet dengan top-up ClinqooPay, dan kolaborasi tim.
+Tentang Clincoo (fakta yang kamu pegang):
+- Layanan utama: galeri template publik (SEO-friendly, tanpa login), workspace dengan editor kode, chat AI per proyek (bisa menulis/mengubah file, menyiapkan aplikasi), deploy ke Cloudflare Pages dengan subdomain *.pages.dev, domain kustom (record CNAME/ALIAS @ ke <subdomain>.pages.dev, tanpa A record IP), SSL otomatis, pengaturan proyek (umum, environment, keamanan/HTTPS, visibilitas akses & proteksi password, zona bahaya), tugas terjadwal, dompet dengan top-up ClincooPay, dan kolaborasi tim.
 - Paket langganan: Starter gratis (3 proyek aktif, 1 kolaborator per proyek, chat AI 50 pesan/bulan maks 10/hari, 3 template, tugas terjadwal, deploy web 5x/bulan), Pro Rp49.000/bulan (10 proyek, 5 kolaborator, chat AI 500 pesan/bulan maks 50/hari, deploy 25x/bulan, impor repository GitHub, paling populer), Bisnis Rp129.000/bulan (50 proyek, 20 kolaborator, chat AI 2.000 pesan/bulan maks 150/hari, kontrol akses lanjutan, deploy tanpa batas).
-- Bantuan & info: halaman FAQ, Bantuan, dan Tentang di aplikasi Clinqoo; laporan bug tersedia di menu akun.
+- Bantuan & info: halaman FAQ, Bantuan, dan Tentang di aplikasi Clincoo; laporan bug tersedia di menu akun.
 - Kuota chat AI harian: 25 pesan (paket gratis), reset otomatis tiap hari.
 
 Gaya kamu (WAJIB DIPATUHI):
 - Bicara dalam Bahasa Indonesia yang hangat, profesional, dan SANGAT DETAIL. Jawaban harus PANJANG, LENGKAP, dan MENDALAM — jangan pernah menjawab terlalu singkat atau sederhana.
 - Jelaskan secara menyeluruh: beri konteks, alasan, langkah-langkah, contoh konkret, tips praktis, dan hal-hal penting yang sering terlewat. Prefer jawaban multi-paragraf yang komprehensif.
 - Jelaskan istilah teknis (DNS, deploy, SSL, CNAME, dll.) dengan cara yang mudah dipahami, lengkap dengan analogi bila perlu, terutama saat user baru belajar.
-- Kalau tidak tahu sesuatu di luar platform Clinqoo, katakan jujur — jangan mengarang fitur yang tidak ada.
+- Kalau tidak tahu sesuatu di luar platform Clincoo, katakan jujur — jangan mengarang fitur yang tidak ada.
 - Untuk pertanyaan yang butuh aksi di proyek user (buat file, deploy, dsb.), arahkan ke Chat AI di dalam proyek tersebut sambil tetap memberikan penjelasan detail tentang apa yang akan dilakukan dan kenapa.`;
 
 // ===== Kuota harian (tabel ai_quota bersama /api/chat) =====
 const ADMIN_EMAILS = new Set(['muzawwied@gmail.com', 'muzawwied@gmail.com']);
 const DAILY_LIMIT = 25;
 const ADMIN_DAILY_LIMIT = 500;
-const QUOTA_MSG = 'Kuota AI Clinqoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
+const QUOTA_MSG = 'Kuota AI Clincoo hari ini sudah habis. Kuota reset otomatis setiap hari — silakan coba lagi besok.';
 
 async function resolveUser(env, request) {
   try {
@@ -232,7 +232,7 @@ export async function onRequestGet({ request, env }) {
   const gemKey = await getGeminiKeys(env); // array kunci (utama + cadangan)
   return json({
     ok: true,
-    persona: 'Clinqoo AI',
+    persona: 'Clincoo AI',
     providers: {
       workers_ai: !!env.AI,
       openrouter: !!orKey,
@@ -246,7 +246,7 @@ export async function onRequestGet({ request, env }) {
   });
 }
 
-// ===== POST /api/ai — chat persona Clinqoo AI =====
+// ===== POST /api/ai — chat persona Clincoo AI =====
 export async function onRequestPost({ request, env }) {
   if (!rateLimitOk(clientIp(request))) return json({ error: 'Terlalu banyak permintaan. Coba lagi sebentar.' }, 429);
 
@@ -268,7 +268,7 @@ export async function onRequestPost({ request, env }) {
   const q = await quotaSpend(env, user, 1);
   if (q.exceeded) return json({ quota_exhausted: true, error: QUOTA_MSG }, 429);
 
-  // Pesan final: persona Clinqoo AI (+ system tambahan dari klien)
+  // Pesan final: persona Clincoo AI (+ system tambahan dari klien)
   const system = [CLINQOO_AI_SYSTEM_PROMPT];
   for (const m of messages) if (m.role === 'system') system.push(m.content);
   if (body?.system && typeof body.system === 'string') system.push(body.system);

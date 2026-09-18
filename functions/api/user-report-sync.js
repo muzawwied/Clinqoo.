@@ -1,18 +1,18 @@
 // Cloudflare Pages Functions — Sinkronisasi Laporan User ke GitHub (real-time)
 // POST /api/user-report-sync  {action:'sync'}  — wajib header x-cron-secret (CRON_SECRET)
 //
-// File tujuan: muzawwied/Clinqoo-Data/users-live.md (repo PRIVAT) — daftar user
+// File tujuan: muzawwied/Clincoo-Data/users-live.md (repo PRIVAT) — daftar user
 // yang SELALU ter-update otomatis:
 //   1. Real-time: hook di pendaftaran akun baru (register email + OAuth Google/GitHub)
 //   2. Cron: functions/scheduled.js tiap 15 menit (menangkap perubahan lain:
 //      upgrade paket, topup saldo, dsb.)
 //   3. Manual: panggil endpoint ini dengan x-cron-secret
 //
-// Sengiku disimpan di env_vars D1: GITHUB_DATA_TOKEN (akses push repo Clinqoo-Data).
+// Sengiku disimpan di env_vars D1: GITHUB_DATA_TOKEN (akses push repo Clincoo-Data).
 
 import { getSecret } from './notify-helpers.js';
 
-const GH_REPO = 'muzawwied/Clinqoo-Data';
+const GH_REPO = 'muzawwied/Clincoo-Data';
 const GH_PATH = 'users-live.md';
 const GH_BRANCH = 'main';
 
@@ -79,7 +79,7 @@ export async function syncUserReport(env, opts) {
 
   const now = new Date();
   const tglNow = now.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'full', timeStyle: 'long' });
-  let md = '# Data User Clinqoo (Live)\n\n';
+  let md = '# Data User Clincoo (Live)\n\n';
   md += `> Tersinkron otomatis dari database: langsung saat ada pendaftaran baru, plus tiap 15 menit (paket, saldo, dsb.).\n`;
   md += `> Terakhir diperbarui: ${tglNow}\n\n`;
   md += `**Total user: ${users.length}** | Login Google/GitHub: ${oauthCount} | Paket berbayar: ${paidCount} | Total saldo dompet: ${rp(totalBal)}\n\n`;

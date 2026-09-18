@@ -163,7 +163,7 @@ export async function onRequestPost({ request, env }) {
     external_id: orderId,
     amount: amount,
     currency: 'IDR',
-    description: 'Top Up Saldo Clinqoo',
+    description: 'Top Up Saldo Clincoo',
     invoice_duration: 3600,
     payment_methods: channel.methods
   });
@@ -225,11 +225,11 @@ export async function creditTopup(env, order) {
       try {
         nres.email = await sendEmail(env, {
           toEmail: owner.email, toName: owner.name || '',
-          subject: 'Konfirmasi Top Up Clinqoo — ' + formatIDR(order.amount),
+          subject: 'Konfirmasi Top Up Clincoo — ' + formatIDR(order.amount),
           html: emailTemplate(
             'Top Up Berhasil',
             owner.name || '',
-            'Top up saldo Clinqoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
+            'Top up saldo Clincoo Anda telah berhasil diproses dan saldo telah masuk ke Dompet Anda. Berikut rincian transaksinya:',
             [
               ['Jumlah Top Up', formatIDR(order.amount) + ' (' + (order.method || 'Xendit') + ')'],
               ['Saldo Saat Ini', formatIDR(balance)],
@@ -237,7 +237,7 @@ export async function creditTopup(env, order) {
             ],
             'Lihat Riwayat Dompet',
             'https://clinqoo.pages.dev/akun/dompet/',
-            'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clinqoo Anda.'
+            'Rincian lengkap transaksi dapat dilihat di halaman Dompet pada akun Clincoo Anda.'
           )
         });
       } catch (e) {}
