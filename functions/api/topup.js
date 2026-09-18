@@ -89,7 +89,6 @@ export async function onRequestGet({ request, env }) {
         }
       }
 
-      const stUser = await currentUser(env, request);
       const stBalKey = await scopedKey(env.DB, 'wallet_balance', stUser, 'balance');
       const balRow = await env.DB.prepare('SELECT value FROM wallet_balance WHERE key = ?').bind(stBalKey).first();
       return json({
