@@ -122,3 +122,30 @@ CREATE TABLE IF NOT EXISTS admin_reports (
 
 CREATE INDEX IF NOT EXISTS idx_admin_reports_status ON admin_reports(status);
 CREATE INDEX IF NOT EXISTS idx_admin_reports_created ON admin_reports(created_at);
+
+-- ============================================================================
+-- template_submissions — pengajuan template komunitas dari halaman galeri.
+--   - status: pending | approved | rejected
+--   - review_token: token unik untuk CTA Setujui/Tolak di email reviewer
+--   - uses / views: hitungan real-time pemakaian & kunjungan template
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS template_submissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  creator_name TEXT DEFAULT '',
+  creator_email TEXT DEFAULT '',
+  project_name TEXT DEFAULT '',
+  title TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  preview_url TEXT DEFAULT '',
+  thumbnail TEXT DEFAULT '',
+  status TEXT DEFAULT 'pending',
+  review_token TEXT,
+  uses INTEGER DEFAULT 0,
+  views INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now')),
+  reviewed_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_template_submissions_status ON template_submissions(status);

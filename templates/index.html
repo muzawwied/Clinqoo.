@@ -32,6 +32,23 @@
         .img-skeleton { background: linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
         body.dark-mode .img-skeleton { background: linear-gradient(90deg,#111 25%,#1c1c1c 50%,#111 75%); background-size: 200% 100%; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Capsule CTA "+ daftarkan template" (header, hanya untuk yang sudah masuk) */
+        #reg-capsule { display: inline-flex; align-items: center; gap: 7px; background: transparent;
+            border: 1px solid #e5e7eb; border-radius: 9999px; padding: 8px 16px;
+            font-size: 13px; font-weight: 600; color: inherit;
+            transition: padding .45s cubic-bezier(.4,0,.2,1), border-color .3s, gap .45s; }
+        #reg-capsule:hover { border-color: #9ca3af; }
+        body.dark-mode #reg-capsule { border-color: #2a2a2a; }
+        body.dark-mode #reg-capsule:hover { border-color: #4b5563; }
+        #reg-capsule .cap-plus { display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; line-height: 1; font-size: 15px; flex-shrink: 0; }
+        #reg-capsule .cap-label { display: inline-flex; overflow: hidden; white-space: nowrap;
+            max-width: 200px; opacity: 1; transition: max-width .5s cubic-bezier(.4,0,.2,1), opacity .35s ease; }
+        #reg-capsule .cap-label .ch { transition: opacity .38s ease; }
+        #reg-capsule.cap-collapsed { padding: 8px 9px; gap: 0; }
+        #reg-capsule.cap-collapsed .cap-label { max-width: 0; opacity: 0; }
+        #reg-capsule.cap-collapsed .cap-plus { width: 16px; height: 16px; font-size: 16px; }
     </style>
     <script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
 <script src="../js/i18n-dict.js" defer></script>
@@ -47,7 +64,13 @@
                 <img src="../assets/logo-clinqoo.png" alt="Clinqoo" class="w-7 h-7 rounded-full">
                 <span class="font-bold text-[15px]">Clinqoo</span>
             </a>
-            <a href="../" class="text-sm font-semibold text-white bg-black dark:bg-white dark:text-black px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">Masuk</a>
+            <div id="hdr-auth" class="flex items-center gap-2">
+                <a href="../auth/" class="text-sm font-semibold text-gray-600 dark:text-gray-300 px-3 py-2 rounded-lg hover:text-black dark:hover:text-white transition-colors">Daftar</a>
+                <a href="../auth/" class="text-sm font-semibold text-white bg-black dark:bg-white dark:text-black px-4 py-2 rounded-lg hover:opacity-90 transition-opacity">Masuk</a>
+            </div>
+            <a id="reg-capsule" href="daftarkan.html" class="hidden" aria-label="Daftarkan template" title="Daftarkan template">
+                <span class="cap-plus">+</span><span class="cap-label">daftarkan template</span>
+            </a>
         </div>
     </header>
 
@@ -108,6 +131,10 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p class="text-xs text-gray-400 dark:text-gray-500">© 2026 Clinqoo — Ruang kerja untuk membangun, mendeploy, dan berkolaborasi.</p>
             <div class="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
+                <span id="ftr-auth" class="flex items-center gap-4">
+                    <a href="../auth/" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Masuk</a>
+                    <a href="../auth/" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Daftar</a>
+                </span>
                 <a href="../akun/tentang/" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Tentang</a>
                 <a href="../" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Beranda</a>
             </div>
@@ -124,20 +151,32 @@
         { key: "properti", name: "Web Properti", cat: "Properti", desc: "Template web properti profesional — katalog listing dengan filter tipe, lokasi, dan budget; valuasi properti; layanan agen; serta halaman properti, layanan, tentang, dan kontak.", url: "https://clinqoo.pages.dev/demo/properti/" }
     ];
     var IMG_BASE = '../assets/templates/';
+    var API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api');
+    var COMMUNITY = []; // template komunitas (pengajuan yang disetujui) — dimuat real-time
 
     var state = { q: "", cat: "Semua", sort: "new" };
 
     // ===== Filter kategori =====
-    var cats = ["Semua"].concat(Array.from(new Set(TEMPLATES.map(function (t) { return t.cat; }))));
+    function allCats() {
+        var base = TEMPLATES.map(function (t) { return t.cat; });
+        if (COMMUNITY.length) base.push('Komunitas');
+        return base;
+    }
     var filterWrap = document.getElementById('tpl-filters');
-    cats.forEach(function (c) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.cat = c;
-        b.textContent = c;
-        b.className = 'tpl-chip shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-lg border transition-colors';
-        filterWrap.appendChild(b);
-    });
+    function buildChips() {
+        var cats = ["Semua"].concat(Array.from(new Set(allCats())));
+        filterWrap.innerHTML = '';
+        cats.forEach(function (c) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.dataset.cat = c;
+            b.textContent = c;
+            b.className = 'tpl-chip shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-lg border transition-colors';
+            filterWrap.appendChild(b);
+        });
+        paintChips();
+    }
+    buildChips();
     function paintChips() {
         filterWrap.querySelectorAll('.tpl-chip').forEach(function (b) {
             var on = b.dataset.cat === state.cat;
@@ -187,7 +226,8 @@
 
     // ===== Render grid =====
     function render() {
-        var items = TEMPLATES.filter(function (t) {
+        var all = TEMPLATES.concat(COMMUNITY);
+        var items = all.filter(function (t) {
             var okCat = state.cat === 'Semua' || t.cat === state.cat;
             var okQ = !state.q || t.name.toLowerCase().indexOf(state.q) !== -1 || t.desc.toLowerCase().indexOf(state.q) !== -1 || t.cat.toLowerCase().indexOf(state.q) !== -1;
             return okCat && okQ;
@@ -212,7 +252,7 @@
             imgWrap.className = 'block relative aspect-video overflow-hidden bg-gray-100 dark:bg-[#111]';
             imgWrap.setAttribute('aria-label', 'Pratinjau ' + t.name);
             var img = document.createElement('img');
-            img.src = IMG_BASE + t.key + '.webp';
+            img.src = t.thumbnail ? t.thumbnail : (IMG_BASE + t.key + '.webp');
             img.alt = 'Pratinjau template ' + t.name;
             img.loading = 'lazy';
             img.className = 'img-skeleton w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300';
@@ -231,6 +271,32 @@
             desc.className = 'text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4';
             desc.textContent = t.desc;
 
+            // Meta komunitas: icon user = pencipta, icon gunakan = jumlah dipakai, icon mata = kunjungan
+            if (t.community) {
+                var meta = document.createElement('div');
+                meta.className = 'flex items-center flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-400 dark:text-gray-500 mb-4';
+                function metaItem(svgPath, label) {
+                    var sp = document.createElement('span');
+                    sp.className = 'inline-flex items-center gap-1';
+                    var sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    sv.setAttribute('class', 'w-3.5 h-3.5');
+                    sv.setAttribute('fill', 'none'); sv.setAttribute('stroke', 'currentColor');
+                    sv.setAttribute('stroke-width', '2'); sv.setAttribute('viewBox', '0 0 24 24');
+                    var pth = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    pth.setAttribute('stroke-linecap', 'round'); pth.setAttribute('stroke-linejoin', 'round');
+                    pth.setAttribute('d', svgPath);
+                    sv.appendChild(pth);
+                    var tx = document.createElement('span');
+                    tx.textContent = label;
+                    sp.appendChild(sv); sp.appendChild(tx);
+                    return sp;
+                }
+                meta.appendChild(metaItem('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 8c0-3 3.5-5 8-5s8 2 8 5', 'by ' + t.creator));
+                meta.appendChild(metaItem('M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M12 4v12m0 0l-4-4m4 4l4-4', String(t.uses) + ' dipakai'));
+                meta.appendChild(metaItem('M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', String(t.views) + ' dilihat'));
+                body.appendChild(meta);
+            }
+
             var actions = document.createElement('div');
             actions.className = 'flex items-center gap-2';
             var previewBtn = document.createElement('a');
@@ -239,11 +305,15 @@
             previewBtn.rel = 'noopener';
             previewBtn.className = 'flex-1 text-center text-sm font-medium py-2.5 rounded-lg border border-gray-200 dark:border-[#2a2a2a] text-gray-700 dark:text-gray-200 hover:border-gray-400 dark:hover:border-[#444] transition-colors';
             previewBtn.textContent = 'Preview';
+            if (t.community) previewBtn.addEventListener('click', function () { trackCommunity(t.id, 'view'); });
             var useBtn = document.createElement('button');
             useBtn.type = 'button';
             useBtn.className = 'flex-1 text-sm font-semibold py-2.5 rounded-lg bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity';
             useBtn.textContent = 'Gunakan';
-            useBtn.addEventListener('click', function () { useTemplate(t.key); });
+            useBtn.addEventListener('click', function () {
+                if (t.community) trackCommunity(t.id, 'use');
+                useTemplate(t.key);
+            });
             actions.appendChild(previewBtn);
             actions.appendChild(useBtn);
 
@@ -255,6 +325,96 @@
             card.appendChild(body);
             grid.appendChild(card);
         });
+    }
+
+    // ===== Template komunitas: pencatatan real-time (uses/views) =====
+    function trackCommunity(id, action) {
+        try {
+            fetch(API_BASE + '/template-submissions/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ id: id, action: action === 'view' ? 'view' : 'use' }),
+                keepalive: true
+            }).catch(function () {});
+        } catch (e) {}
+    }
+
+    // ===== Muat template komunitas (disetujui) dari API, real-time =====
+    fetch(API_BASE + '/template-submissions')
+        .then(function (r) { return r.ok ? r.json() : { templates: [] }; })
+        .then(function (d) {
+            if (d && d.templates) {
+                COMMUNITY = d.templates.map(function (t) {
+                    t.community = true;
+                    t.cat = 'Komunitas';
+                    return t;
+                });
+                buildChips();
+                render();
+            }
+        })
+        .catch(function () {});
+
+    // ===== Auth ringan: cek status login tanpa redirect (galeri tetap publik) =====
+    var TOKEN = '';
+    try { TOKEN = localStorage.getItem('clinqoo_auth_token') || ''; } catch (e) {}
+    if (TOKEN) {
+        fetch(API_BASE + '/auth/me', { headers: { 'Authorization': 'Bearer ' + TOKEN } })
+            .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+            .then(function (d) {
+                if (d && d.authenticated) onAuthed(d.user);
+                else localStorage.removeItem('clinqoo_auth_token');
+            })
+            .catch(function () {});
+    }
+
+    // ===== Sudah masuk: sembunyikan CTA masuk/daftar, tampilkan capsule "+ daftarkan template" =====
+    function onAuthed(user) {
+        var hdrAuth = document.getElementById('hdr-auth');
+        var ftrAuth = document.getElementById('ftr-auth');
+        if (hdrAuth) hdrAuth.style.display = 'none';
+        if (ftrAuth) ftrAuth.style.display = 'none';
+        var cap = document.getElementById('reg-capsule');
+        if (!cap) return;
+        cap.classList.remove('hidden');
+
+        // Pecah teks jadi huruf: hilang berurutan & halus, sisakan icon +, capsule jadi bulat
+        var label = cap.querySelector('.cap-label');
+        var chars = [];
+        try {
+            var text = label.textContent;
+            label.innerHTML = text.split('').map(function (c) {
+                return '<span class="ch">' + (c === ' ' ? '&nbsp;' : c) + '</span>';
+            }).join('');
+            chars = Array.prototype.slice.call(label.querySelectorAll('.ch'));
+        } catch (e) {}
+
+        var timers = [];
+        function collapse() {
+            chars.forEach(function (ch, i) {
+                timers.push(setTimeout(function () { ch.style.opacity = '0'; }, i * 45));
+            });
+            timers.push(setTimeout(function () { cap.classList.add('cap-collapsed'); }, chars.length * 45 + 380));
+        }
+        function expand() {
+            cap.classList.remove('cap-collapsed');
+            chars.forEach(function (ch) { ch.style.opacity = '1'; });
+        }
+        function restart(delay) {
+            timers.forEach(clearTimeout); timers = [];
+            timers.push(setTimeout(collapse, delay));
+        }
+        restart(2800);
+        cap.addEventListener('mouseenter', function () {
+            timers.forEach(clearTimeout); timers = [];
+            expand();
+        });
+        cap.addEventListener('mouseleave', function () { restart(1200); });
+        cap.addEventListener('focus', function () {
+            timers.forEach(clearTimeout); timers = [];
+            expand();
+        });
+        cap.addEventListener('blur', function () { restart(600); });
     }
 
     // ===== Aksi "Gunakan": simpan pilihan, arahkan ke login/app =====
