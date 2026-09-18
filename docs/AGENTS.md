@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 09:05 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 09:45 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -35,9 +35,9 @@ Project `clinqoo` (akun Vylonium a393, clinqoo.pages.dev) **WAJIB di-deploy BERS
 Prosedur benar (Superagent, terverifikasi 2026-09-17):
 1. Build dari `origin/main`: `git archive origin/main | tar -x -C build-dir`
 2. Hapus dari build-dir: `functions/api/`, `functions/scheduled.js`, `wrangler.toml`, `wrangler-proxy.toml`, `.github/`, `agent-worker/`, `docs/`, `landing/`, `legal/`, `mcp-server/`, `schema.sql`, `.gitignore`
-3. Tempel `functions/{mcp.js,rpc.js}` (sumber: snapshot deploy terakhir — JANGAN overwrite tanpa koordinasi)
+3. Tempel `functions/mcp.js` (sumber: backup privat Superagent `mp/private/6aa8dfd1266e6380d43f3f8e/a7bd875d4_mcpjs.backup` — file berisi KUNCI, JANGAN pernah commit ke repo publik; `rpc` tidak diperlukan: /rpc di produksi hanyalah 404 statis, bukan function)
 4. Deploy: `wrangler pages deploy . --project-name clinqoo` (butuh Node 22; token akun Vylonium)
-5. Jika error `D1 binding 'DB' ... not found`: binding basi muncul lagi — hapus via `PATCH /accounts/<acc>/pages/projects/clinqoo` body `{"deployment_configs":{"production":{"d1_databases":{"DB":null}}}}`, lalu deploy ulang. JANGAN pernah menambahkan binding D1 ke project ini (database 49b6fed3 bukan milik akun ini).
+5. Jika error `D1 binding 'DB' ... not found`: AKAR MASALAH = `wrangler.toml` (binding D1 basi 49b6fed3) ikut ter-copy ke folder deploy dan menimpa konfigurasi project — pastikan wrangler.toml TERHAPUS dari folder deploy SEBELUM deploy. Jika binding basi sudah nempel di project: hapus via `PATCH /accounts/<acc>/pages/projects/clinqoo` body `{"deployment_configs":{"production":{"d1_databases":{"DB":null}},"preview":{"d1_databases":{"DB":null}}}}`, lalu deploy ulang. JANGAN pernah menambahkan binding D1 ke project ini (database 49b6fed3 bukan milik akun ini; akun tidak punya D1 sama sekali).
 6. Verifikasi pasca-deploy: `POST https://clinqoo.pages.dev/mcp` (Bearer key) harus balas JSON-RPC `initialize`, bukan 405/404.
 
 Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; backend API (clincoo-be2) hanya lewat GitHub Actions deploy.yml — jangan pernah deploy statis ke sana.
@@ -51,9 +51,10 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js; runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
 | Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App: `9a0d087` route `/editor/` + cache paket fail-open |
-| AI chat / Tim AI | Backlog + 1 bug agent | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. **BUG** `agent.js` `aiCall` tanpa `env` di ringkasan akhir — belum di-fix. |
+| AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. Bug `agent.js` `aiCall` tanpa `env` di ringkasan akhir SUDAH di-fix (`b537ca9`). |
 | Promo | OK | Tidak berubah jam ini |
-| Deploy MCP | OK (docs) | Aturan functions/{mcp.js,rpc.js} |
+| Deploy MCP | OK — live & terverifikasi | `mcp.js` di-rebuild dari nol 2026-09-18 (14 tools identik + fix UTF-8 TextDecoder), kunci baru, deployed `9f82c01d` produksi. GET/POST/auth/tools/call semua OK. Backup sumber: file privat Superagent (lihat prosedur deploy). |
+| Audit keamanan 10 temuan (P0-P2) | OK — semua selesai & ter-push | Signature WA `b03ebad`, status topup wajib login `833e256` + fix deklarasi ganda `67fc2f9`, GET github `edf304c`, CORS allowlist middleware + next= + debug tidak dipublish `8967e4f`, logo absolut `f61a92e`. QRIS BuatQris terverifikasi `configured:true`. |
 | Wallet / langganan | OK — fix urutan tx | `5c7d317` |
 | Middleware | OK | Clinqoo connector tools berfungsi |
 | Hourly audit automation | OK | Audit 09:05: All clear (tidak kirim email) |
