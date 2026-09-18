@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 15:11 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 17:10 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -46,33 +46,38 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | Diverifikasi ulang 15:11 di `functions/api/auth/shared.js`. Bukan regresi. |
-| Deploy user sites | Fix UX | HEAD `cd6a46c2` — tidak nyangkut di Mulai Konfigurasi; last_deployment dari log D1 |
-| Landing standalone | Fix | `c894575a` — link absolut ke clinqoo.pages.dev |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | Diverifikasi ulang 17:10. Tidak disentuh commit baru. Bukan regresi. |
+| Deploy user sites | Fix UX | HEAD `01cc62a0` — redirect/CNAME domain publik + suffix `.clinqoo.biz.id` |
+| Landing standalone | Update | Root/www clinqoo.biz.id → redirect client-side ke clinqoo-landing.pages.dev (`01cc62a0`) |
 | Galeri template komunitas | Baru | `7611945` — `/api/template-submissions` + review token email |
 | CCTV `security_events` | Minor bug | `logBlocked` CREATE TABLE tanpa `.run()` (belum ditutup) |
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js |
 | Schema D1 vs runtime | Gap | `template_submissions` ada; `security_events` belum di schema.sql |
-| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `cd6a46c2` |
+| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `01cc62a0` |
 | AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka |
 | Promo | OK | Tidak berubah jam ini |
-| Deploy MCP | OK | `mcp.js` live `9f82c01d` |
+| Deploy MCP | REGRESI 405 | POST `/mcp` → 405 Method Not Allowed (deploy statis tanpa `functions/mcp.js`) |
 | Wallet / langganan | OK | Tidak ada regresi kritis |
 | Middleware | OK + catatan | PUBLIC include template-submissions; CCTV lemah; ORIGIN_ALLOW belum `*.clinqoo.biz.id` |
-| Hourly audit automation | OK | Audit 15:11: email perubahan penting ke gmail |
+| Hourly audit automation | OK | Audit 17:10: email perubahan penting ke gmail |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `1d88c85` |
-| Clinqoo-Data | OK | Sync `875d2d5` 08:00Z |
-| Domain publik | P1 operasional | `clinqoo.biz.id` best-effort |
+| Blog | OK | HEAD `fc95d5d` 09:20Z |
+| Clinqoo-Data | OK | Sync `294ee57` 10:08Z |
+| Domain publik | P1 operasional | CNAME otomatis Zone DNS API (`96c1801d`); target proj.subdomain Pages (`278ee30c`); gagal silent → pages.dev |
 | Debug folders | OK | tetap terhapus |
 | CI probe workflow | Bersih | workflow probe token CF sudah dihapus |
 
-Bukan All clear — perubahan penting UX deploy + landing URL. Email laporan dikirim.
+Bukan All clear — perubahan penting domain/DNS + redirect root/www; MCP connector 405. Email laporan dikirim.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 17:10 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit HEAD `01cc62a0` (sebelumnya `cd6a46c2` @ 15:11). STATUS PERUBAHAN PENTING (bukan All clear). Tidak ada regresi kritis OAuth — `upsertOauthUser` TETAP FIXED (emailNorm, INSERT auth_users, last_row_id jika email null); tidak disentuh commit baru. Perubahan: `01cc62a0` root/www clinqoo.biz.id redirect client-side ke clinqoo-landing.pages.dev (path selain `/` tetap); `5fce691f`/`c1a61094` UI suffix subdomain publik `.clinqoo.biz.id`; `278ee30c` CNAME target pakai proj.subdomain Pages; `96c1801d` ensurePublicDomainDns CNAME otomatis via Zone DNS API (zona beda akun); docs AGENTS `756e1dce`/`5ce0f9e5` dari audit 15:11. Issue/PR open: 0. Editor `6e4d516`. Data sync `294ee57` 10:08Z. Blog `fc95d5d` 09:20Z. Temuan: POST `/mcp` → 405 (deploy statis tanpa `functions/mcp.js`); logBlocked tanpa `.run()`; schema.sql belum `security_events`; review GET+token / escape title; ORIGIN_ALLOW belum `*.clinqoo.biz.id`; script redirect di index.html sebelum meta charset (minor); CNAME proxied=true butuh token Zone DNS Edit, gagal silent → pages.dev. Rekomendasi: redeploy clinqoo DENGAN `functions/mcp.js` (jangan wrangler.toml / D1); verifikasi zona + CNAME vs redirect JS; fix `.run()` CCTV; jangan ubah OAuth tanpa tes email-null; email hanya muzawwied@gmail.com.
+- Sumber: email/pesan laporan (subjek: [Clinqoo Hourly Audit] [2026-09-18-17:10], dari Devconium)
+- Status: OAuth OK; domain/DNS + redirect diperbarui; MCP connector 405; P1 CCTV/schema/review/ORIGIN_ALLOW masih terbuka
 
 ### 2026-09-18 15:11 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit HEAD `cd6a46c2`. STATUS PERUBAHAN PENTING (bukan All clear). Tidak ada regresi kritis OAuth — `upsertOauthUser` TETAP FIXED (emailNorm, INSERT auth_users, last_row_id untuk email null). Issue/PR open: 0. Perubahan sejak 14:25: `cd6a46c2` fix user nyangkut di "Mulai Konfigurasi" setelah deploy sukses (redirect config → dashboard via `location.replace`; log sukses D1 di try/catch; GET status mensintesis `last_deployment` dari log D1; `deployed=true` juga jika last success/active atau ada daftar deployment CF); `c894575a` fix link internal landing jadi absolute ke clinqoo.pages.dev; `c1d2639`/`0fcc4e1` docs AGENTS dari audit 14:25. Editor `6e4d516`. Data sync `875d2d5` 08:00Z. Blog `1d88c85`. Temuan lama belum ditutup: `logBlocked` tanpa `.run()`; schema.sql belum `security_events`; review GET+token & title belum escape; ORIGIN_ALLOW belum `*.clinqoo.biz.id`; domain publik clinqoo.biz.id masih best-effort. Catatan baru non-P0: `deployed=true` jika `deps.length>0` bisa menandai sukses meski CF gagal (sengaja untuk UX). Rekomendasi: deploy frontend tetap sertakan `functions/mcp.js`; verifikasi zona clinqoo.biz.id; fix `.run()` CCTV; jangan ubah OAuth tanpa tes email-null.
@@ -95,11 +100,11 @@ Log lebih lama dipotong agar wiki ringan.
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Fix `logBlocked` di `functions/api/_middleware.js`: panggil `.run()` pada CREATE TABLE.
-2. Tambah `security_events` ke schema.sql.
-3. Review template: jangan mutasi status pada GET murni; escape HTML title di `review.js`.
-4. Verifikasi zona `clinqoo.biz.id` + custom domain Pages; pertimbangkan ORIGIN_ALLOW untuk `*.clinqoo.biz.id`.
-5. Deploy `clinqoo` selalu sertakan `functions/{mcp.js}`.
+1. Redeploy project `clinqoo` DENGAN `functions/mcp.js` (jangan sertakan wrangler.toml / D1 binding) — POST `/mcp` saat ini 405.
+2. Fix `logBlocked` di `functions/api/_middleware.js`: panggil `.run()` pada CREATE TABLE.
+3. Tambah `security_events` ke schema.sql.
+4. Review template: jangan mutasi status pada GET murni; escape HTML title di `review.js`.
+5. Verifikasi zona `clinqoo.biz.id` + CNAME root/www vs redirect JS; pertimbangkan ORIGIN_ALLOW untuk `*.clinqoo.biz.id`.
 6. Email hanya ke **muzawwied@gmail.com**.
 7. Folder `debug/` jangan dihidupkan lagi.
 8. Backlog AI: dual-mode, SSOT kuota, maxOutputTokens 8192, Doctor Deploy.
