@@ -252,7 +252,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     { role: 'system', content: AGENT_SYSTEM },
     { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Detail, lengkap, dan konkret — multi-paragraf jika perlu, bahasa Indonesia.' }
   ];
-  const rf = await aiCall(doneMsgs, orKey, gemKey);
+  const rf = await aiCall(env, doneMsgs, orKey, gemKey);
   t.result = rf.text || rf.error || '(rangkuman dilewati)';
   t.status = 'done'; t.error = null;
   await saveTask(env.DB, t);
