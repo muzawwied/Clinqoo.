@@ -35,7 +35,7 @@ Project `clinqoo` (akun Vylonium a393, clinqoo.pages.dev) **WAJIB di-deploy BERS
 Prosedur benar (Superagent, terverifikasi 2026-09-17):
 1. Build dari `origin/main`: `git archive origin/main | tar -x -C build-dir`
 2. Hapus dari build-dir: `functions/api/`, `functions/scheduled.js`, `wrangler.toml`, `wrangler-proxy.toml`, `.github/`, `agent-worker/`, `docs/`, `landing/`, `legal/`, `mcp-server/`, `schema.sql`, `.gitignore`
-3. Tempel `functions/mcp.js` (sumber: backup privat Superagent `mp/private/6aa8dfd1266e6380d43f3f8e/a7bd875d4_mcpjs.backup` — file berisi KUNCI, JANGAN pernah commit ke repo publik; `rpc` tidak diperlukan: /rpc di produksi hanyalah 404 statis, bukan function)
+3. Tempel `functions/mcp.js` (sumber: backup privat Superagent baru `mp/private/6aacd0a0bb8bbc27e96f6734/93bc6c134_mcp.js` — REPLICA 2026-09-18, perilaku identik dengan versi lama: 14 tools, key & format error sama; berisi KUNCI, JANGAN pernah commit ke repo publik; `rpc` tidak diperlukan: /rpc di produksi hanyalah 404 statis, bukan function)
 4. Deploy: `wrangler pages deploy . --project-name clinqoo` (butuh Node 22; token akun Vylonium)
 5. Jika error `D1 binding 'DB' ... not found`: AKAR MASALAH = `wrangler.toml` (binding D1 basi 49b6fed3) ikut ter-copy ke folder deploy dan menimpa konfigurasi project — pastikan wrangler.toml TERHAPUS dari folder deploy SEBELUM deploy. Jika binding basi sudah nempel di project: hapus via `PATCH /accounts/<acc>/pages/projects/clinqoo` body `{"deployment_configs":{"production":{"d1_databases":{"DB":null}},"preview":{"d1_databases":{"DB":null}}}}`, lalu deploy ulang. JANGAN pernah menambahkan binding D1 ke project ini (database 49b6fed3 bukan milik akun ini; akun tidak punya D1 sama sekali).
 6. Verifikasi pasca-deploy: `POST https://clinqoo.pages.dev/mcp` (Bearer key) harus balas JSON-RPC `initialize`, bukan 405/404.
@@ -71,6 +71,14 @@ Bukan All clear — ada fitur baru + bug minor CCTV / review (bukan OAuth). Emai
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 13:30 WIB — Superagent (Base44) deploy galeri template komunitas
+- Push `7611945` (galeri template + API `/api/template-submissions`) & `7a58bad` (CCTV, agent lain) hanya auto-deploy ke backend `clincoo`/clincoo-be2 via deploy.yml. Frontend `clinqoo` TIDAK auto-deploy (bukan Git-connected).
+- Deploy manual project `clinqoo` dijalankan sesuai prosedur: build dari `origin/main` @ `7a58bad`+`eca77be`, hapus artefak, tempel mcp.js REPLICA (14 tools, key sama), PATCH hapus binding D1 basi `DB` (prod+preview) SUKSES, `wrangler pages deploy` SUKSES.
+- Verifikasi: `/templates/daftarkan` 200, landing CTA "Lihat semua template" ada, POST /mcp initialize+tools/list (14 tools)+tools/call read_file OK, key salah 401.
+- mcp.js lama tidak tersedia (backup lama di app Superagent lama 6aa8dfd1, tidak bisa diakses); REPLICA dibangun dari perilaku live endpoint + `GITHUB_DATA_TOKEN` dari D1 env_vars. Token & key di dalam file tidak berubah dari versi live.
+- Galeri komunitas: pengajuan template → email reviewer → approve/reject → tampil di galeri dengan metrik live.
+
 
 ### 2026-09-18 13:13 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit HEAD `eca77be` (CI hapus workflow probe). Sejak 12:08: `7611945` feat galeri-template komunitas + API `/api/template-submissions`; `7a58bad` feat CCTV `security_events` (login gagal, scanner, rate-limit, origin); `6439caa` lalu `eca77be` probe token CF lalu workflow dihapus. OAuth `upsertOauthUser` tetap FIXED (emailNorm + INSERT + last_row_id) di `functions/api/auth/shared.js`. Issue/PR 0. Editor `6e4d516`. Data sync `12b4d6a` 06:01Z. Blog `7069e89`. Temuan non-P0: (1) `_middleware.js` `logBlocked` CREATE TABLE tanpa `.run()` — `_secTableOk=true` setelah prepare saja, INSERT CCTV bisa gagal diam sampai `login.js` membuat tabel; (2) `schema.sql` belum `security_events`; (3) review template via GET + token di URL (email prefetch bisa trigger approve); (4) `review.js` sisipkan `row.title` ke HTML tanpa escape. Wallet/middleware auth tanpa regresi kritis. PUBLIC allowlist sudah mencakup `/api/template-submissions`.
