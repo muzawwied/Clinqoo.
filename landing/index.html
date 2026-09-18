@@ -11,14 +11,16 @@
 <meta property="og:image" content="https://clinqoo.pages.dev/assets/og-image.png">
 <meta name="robots" content="index, follow">
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/favicon.png">
-<script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
+
 <script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: "class" };</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"Clinqoo","url":"https://clinqoo.pages.dev/landing/","description":"Publikasikan situsmu dengan mudah — bangun dengan AI, kelola, dan deploy dari satu ruang kerja.","inLanguage":"id"}
 </script>
+
 <style>
   body { font-family: 'Inter', sans-serif; }
   ::-webkit-scrollbar { display: none; width: 0; height: 0; background: transparent; }
@@ -34,10 +36,24 @@
   details.faq summary .chev { transition: transform .2s ease; }
   details.faq[open] summary .chev { transform: rotate(180deg); }
 </style>
-<script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+
+<script>
+  (function() {
+    try {
+      var t = localStorage.getItem('clinqoo_theme') || 'Sistem (Default)';
+      var isDark = (t === 'Gelap') || ((t === 'Sistem (Default)' || !t) && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    } catch(e) {}
+  })();
+</script>
 </head>
 <body class="bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white min-h-screen antialiased">
-<script>try{var t=localStorage.getItem("clinqoo_theme")||"Sistem (Default)";var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}}catch(e){}</script>
 
 <!-- NAVBAR -->
 <header class="sticky top-0 z-40 border-b border-gray-100 dark:border-[#222] bg-white/90 dark:bg-[#0a0a0a]/90 backdrop-blur-md">
@@ -53,8 +69,9 @@
       <a href="#faq" class="hover:text-black dark:hover:text-white transition-colors">FAQ</a>
     </nav>
     <div class="flex items-center gap-2">
-      <a href="/auth/" class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#161616] rounded-lg transition-colors">Masuk</a>
-      <a href="/auth/" class="px-4 py-2 text-sm font-semibold bg-black text-white dark:bg-white dark:text-black rounded-lg hover:opacity-85 transition-opacity">Mulai Gratis</a>
+      <a href="/auth/" class="px-5 py-2 text-sm font-semibold bg-black text-white dark:bg-white dark:text-black rounded-full hover:opacity-85 transition-opacity shadow-sm">
+        Daftar / Masuk
+      </a>
     </div>
   </div>
 </header>
@@ -112,42 +129,42 @@
     <p class="text-gray-600 dark:text-gray-400 mt-3 max-w-xl mx-auto">Satu ruang kerja lengkap — dari ide sampai situsmu hidup di internet.</p>
   </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 15-2-2-2 2"/><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5Z"/><path d="M7 15h.01"/><path d="M11 15h2"/></svg>
       </div>
       <h3 class="font-semibold text-base mt-4">Asisten AI</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">Butuh bantuan? AI Clinqoo siap membantu — memberi saran, menjelaskan, mencari referensi, sampai mengatur file workspace-mu. Kamu yang pegang kendali penuh atas situsmu.</p>
     </div>
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       </div>
       <h3 class="font-semibold text-base mt-4">Editor Kode Full-Stack</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">Editor modern berbasis Monaco dengan terminal, version control, dan live preview — bekerja langsung di browser, di mana saja.</p>
     </div>
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 12a9 9 0 1 1-2.64-6.35"/><polyline points="21.5 3 21.5 9 15.5 9"/></svg>
       </div>
       <h3 class="font-semibold text-base mt-4">Deploy Sekali Klik</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">Publish situsmu ke internet dalam sekali klik — atau suruh AI yang menekan tombol deploy-nya. Build cepat, HTTPS otomatis.</p>
     </div>
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       </div>
       <h3 class="font-semibold text-base mt-4">Template Siap Pakai</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">Portfolio, landing page SaaS, toko online top-up game, sampai aplikasi manajemen tugas — pilih, personalisasi, langsung jalan.</p>
     </div>
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
       <h3 class="font-semibold text-base mt-4">Kolaborasi &amp; Workspace</h3>
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">Workspace per-proyek dengan file &amp; folder, tim AI multi-ahli, dan sinkronisasi antar perangkat lewat akun Clinqoo-mu.</p>
     </div>
-    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6">
+    <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-gray-50/60 dark:bg-[#111] p-6 shadow-sm hover:shadow-md transition-shadow">
       <div class="w-11 h-11 rounded-xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
       </div>
@@ -158,8 +175,9 @@
 </section>
 
 <!-- SOROTAN AI -->
-<section class="bg-gray-50/80 dark:bg-[#0d0d0d] border-y border-gray-100 dark:border-[#1a1a1a] py-20">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+<section class="bg-gray-50/80 dark:bg-[#0d0d0d] border-y border-gray-100 dark:border-[#1a1a1a] py-20 relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-transparent to-gray-100/50 dark:to-white/5 pointer-events-none"></div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-10 md:gap-16 items-center relative z-10">
     <div>
       <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight">Asisten AI yang siap membantu, kamu yang pegang kendali</h2>
       <p class="text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
@@ -167,7 +185,7 @@
         mencari info terbaru, dan mengurus hal-hal kecil — sementara kamu fokus membangun dan mengelola situsmu.
         Untuk pekerjaan yang lebih besar, aktifkan <span class="font-semibold text-black dark:text-white">Mode Kolaborasi</span> dan bekerja searah dengan tim AI multi-ahli.
       </p>
-      <a href="/auth/" class="inline-block mt-6 px-5 py-3 rounded-xl bg-black text-white dark:bg-white dark:text-black font-semibold text-sm hover:opacity-85 transition-opacity">Coba Asisten AI &rarr;</a>
+      <a href="/auth/" class="inline-block mt-6 px-5 py-3 rounded-xl bg-black text-white dark:bg-white dark:text-black font-semibold text-sm hover:opacity-85 transition-opacity shadow-sm hover:shadow-md">Coba Asisten AI &rarr;</a>
     </div>
     <ul class="space-y-4">
       <li class="flex items-start gap-3">
@@ -216,7 +234,7 @@
       Mau turun tangan sendiri? Editor Clinqoo memberi kamu pengalaman coding yang familiar dan lengkap —
       tanpa install apa pun, buka dari perangkat mana saja.
     </p>
-    <a href="/auth/" class="inline-block mt-6 px-5 py-3 rounded-xl border border-gray-300 dark:border-[#2f2f2f] font-semibold text-sm hover:bg-gray-50 dark:hover:bg-[#141414] transition-colors">Buka Editor &rarr;</a>
+    <a href="/auth/" class="inline-block mt-6 px-5 py-3 rounded-xl border border-gray-300 dark:border-[#2f2f2f] font-semibold text-sm hover:bg-gray-50 dark:hover:bg-[#141414] transition-colors shadow-sm hover:shadow-md">Buka Editor &rarr;</a>
   </div>
 </section>
 
@@ -228,27 +246,27 @@
       <p class="text-gray-600 dark:text-gray-400 mt-3">Klik untuk melihat demo langsung — semuanya bisa langsung kamu pakai dan ubah.</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      <a href="/demo/portfolio/" class="card-hover group rounded-2xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
+      <a href="/demo/portfolio/" class="card-hover group rounded-xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
         <div class="aspect-[16/10] overflow-hidden"><img src="/assets/templates/portfolio.webp" alt="Pratinjau Portfolio Profesional" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"></div>
         <div class="p-5"><h3 class="font-semibold">Portfolio Profesional</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Portfolio developer dengan bagian karya, layanan, blog, dan kontak.</p></div>
       </a>
-      <a href="/demo/saas/" class="card-hover group rounded-2xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
+      <a href="/demo/saas/" class="card-hover group rounded-xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
         <div class="aspect-[16/10] overflow-hidden"><img src="/assets/templates/saas.webp" alt="Pratinjau Landing Page SaaS" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"></div>
         <div class="p-5"><h3 class="font-semibold">Landing Page SaaS</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Hero, fitur, showcase, testimoni, pricing, dan FAQ siap konversi.</p></div>
       </a>
-      <a href="/demo/topup/" class="card-hover group rounded-2xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
+      <a href="/demo/topup/" class="card-hover group rounded-xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
         <div class="aspect-[16/10] overflow-hidden"><img src="/assets/templates/topup.webp" alt="Pratinjau Top Up Game" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"></div>
         <div class="p-5"><h3 class="font-semibold">Top Up Game</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Toko top up instan dengan katalog game dan metode pembayaran lengkap.</p></div>
       </a>
-      <a href="/demo/tasks/" class="card-hover group rounded-2xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
+      <a href="/demo/tasks/" class="card-hover group rounded-xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
         <div class="aspect-[16/10] overflow-hidden"><img src="/assets/templates/tasks.webp" alt="Pratinjau Manajemen Tugas" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"></div>
         <div class="p-5"><h3 class="font-semibold">Manajemen Tugas</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dashboard statistik, papan kanban, kalender, dan laporan.</p></div>
       </a>
-      <a href="/demo/properti/" class="card-hover group rounded-2xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
+      <a href="/demo/properti/" class="card-hover group rounded-xl overflow-hidden border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] block">
         <div class="aspect-[16/10] overflow-hidden"><img src="/assets/templates/properti.webp" alt="Pratinjau Web Properti" class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"></div>
         <div class="p-5"><h3 class="font-semibold">Web Properti</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Katalog listing dengan filter, valuasi properti, dan layanan agen.</p></div>
       </a>
-      <a href="/templates/" class="card-hover rounded-2xl overflow-hidden border border-dashed border-gray-300 dark:border-[#2f2f2f] bg-white dark:bg-[#111] flex items-center justify-center p-5 text-center">
+      <a href="/templates/" class="card-hover rounded-xl overflow-hidden border border-dashed border-gray-300 dark:border-[#2f2f2f] bg-white dark:bg-[#111] flex items-center justify-center p-5 text-center">
         <div>
           <p class="font-semibold">Lihat semua template di galeri &rarr;</p>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Termasuk template AI siap pakai untuk berbagai kebutuhan.</p>
@@ -283,28 +301,29 @@
 </section>
 
 <!-- UNTUK SIAPA -->
-<section class="bg-gray-50/80 dark:bg-[#0d0d0d] border-y border-gray-100 dark:border-[#1a1a1a] py-20">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+<section class="bg-gray-50/80 dark:bg-[#0d0d0d] border-y border-gray-100 dark:border-[#1a1a1a] py-20 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-tr from-transparent to-gray-100/50 dark:to-white/5 pointer-events-none"></div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
     <div class="text-center mb-12">
       <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight">Dibuat untuk siapa saja yang ingin online</h2>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center">
+      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center shadow-sm">
         <p class="text-3xl">🎨</p>
         <h3 class="font-semibold mt-3 text-sm">Portfolio &amp; Personal Brand</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">Tunjukkan karya dan jasa-mu dengan situs yang terlihat profesional dalam sehari.</p>
       </div>
-      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center">
+      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center shadow-sm">
         <p class="text-3xl">🛒</p>
         <h3 class="font-semibold mt-3 text-sm">UMKM &amp; Toko Online</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">Jualan online tanpa ribet — katalog produk, top up, sampai pembayaran.</p>
       </div>
-      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center">
+      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center shadow-sm">
         <p class="text-3xl">🏢</p>
         <h3 class="font-semibold mt-3 text-sm">Bisnis &amp; Properti</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">Halaman bisnis dan katalog listing yang mudah diperbarui kapan saja.</p>
       </div>
-      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center">
+      <div class="card-hover rounded-2xl border border-gray-100 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-6 text-center shadow-sm">
         <p class="text-3xl">💻</p>
         <h3 class="font-semibold mt-3 text-sm">Developer &amp; Agensi</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">Editor kode penuh dengan terminal dan git — plus asisten AI saat butuh bantuan.</p>
