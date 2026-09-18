@@ -159,7 +159,7 @@ if(form){
     if(!d.nama||!d.email||!d.pesan){toast('Lengkapi nama, email, dan pesan dulu ya.');return}
     const body=encodeURIComponent('Nama: '+d.nama+'\nEmail: '+d.email+(d.telepon?'\nTelepon: '+d.telepon:'')+'\n\n'+d.pesan);
     const a=document.createElement('a');
-    a.href='mailto:muzawwied@gmail.com?subject='+encodeURIComponent('Tanya Properti — '+d.nama)+'&body='+body;
+    a.href='mailto:email@contoh.com?subject='+encodeURIComponent('Tanya Properti — '+d.nama)+'&body='+body;
     a.click();
     toast('Terima kasih! Aplikasi email akan terbuka untuk mengirim pesanmu.');
     form.reset();
