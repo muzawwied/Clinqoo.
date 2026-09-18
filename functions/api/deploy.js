@@ -241,7 +241,13 @@ async function ensurePublicDomainDns(creds, domain, pagesName) {
     const zones = await cfFetch('/zones?name=' + PUB_ZONE, creds.apiKey);
     const zoneId = zones && zones.length && zones[0].id;
     if (!zoneId) return false;
-    const target = pagesName + '.pages.dev';
+    // Target CNAME = subdomain pages.dev ASLI project (bisa berbeda dari nama
+    // project, mis. project "clincoo" punya clincoo-be2.pages.dev).
+    let target = pagesName + '.pages.dev';
+    try {
+      const proj = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + pagesName, creds.apiKey);
+      if (proj && proj.subdomain) target = proj.subdomain;
+    } catch (e) {}
     let existing = null;
     try {
       const recs = await cfFetch('/zones/' + zoneId + '/dns_records?type=CNAME&name=' + domain, creds.apiKey);
