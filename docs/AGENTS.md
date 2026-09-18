@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 10:55 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 11:03 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -46,30 +46,38 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 10:03 di `functions/api/auth/shared.js`. |
-| Email transaksional (reset password) | Info — email terkirim | Email “Atur Ulang Kata Sandi Clinqoo” ke muzawwied@gmail.com via Brevo, 18 Sep 2026 10.55 WIB; tautan berlaku 1 jam. Bukan laporan bug. |
-| Halaman `/auth/` | OK (terverifikasi) | E2E smoke: redirect Google & GitHub ke gerbang OAuth OK |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 11:03 di `functions/api/auth/shared.js`. |
+| Email transaksional (reset password) | Info | Email reset 10.55 WIB (Brevo). Bukan laporan bug. |
+| Halaman `/auth/` | OK | Landing CTA kini menunjuk `/auth/` (`275e6fc`) |
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js; runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
-| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `4f079b1` — logo editor ikon kode `</>` |
-| AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. Bug `agent.js` `aiCall` tanpa `env` di ringkasan akhir SUDAH di-fix (`b537ca9`). |
+| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `275e6fc` |
+| AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. Bug `aiCall` tanpa `env` SUDAH di-fix (`b537ca9`). |
 | Promo | OK | Tidak berubah jam ini |
-| Deploy MCP | OK — live & terverifikasi | `mcp.js` di-rebuild dari nol 2026-09-18 (14 tools identik + fix UTF-8 TextDecoder), kunci baru, deployed `9f82c01d` produksi. |
-| Audit keamanan 10 temuan (P0-P2) | OK — semua selesai & ter-push | |
-| Wallet / langganan | OK — fix urutan tx | `5c7d317` |
+| Deploy MCP | OK | `mcp.js` live `9f82c01d` |
+| Audit keamanan 10 temuan (P0-P2) | OK | semua selesai |
+| Wallet / langganan | OK | `5c7d317` |
 | Middleware | OK | Clinqoo connector tools berfungsi |
-| Hourly audit automation | OK | Audit 10:03: All clear (tidak kirim email) |
+| Hourly audit automation | OK | Audit 11:03: All clear (tidak kirim email) |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `116a8ab` — 5 artikel coding 18 Sep |
-| Clinqoo-Data | OK | Sync rutin `159f2d2` 03:01Z |
-| Landing | OK | HEAD `21d4481` |
+| Blog | OK | HEAD `2c93785` |
+| Clinqoo-Data | OK | Sync rutin `32c8322` 04:01Z |
+| Landing | OK | CTA daftar → `/auth/` (`275e6fc`) |
 
-**All clear (jam ini)** — OAuth tetap FIXED. Email masuk adalah transactional reset password (Brevo), bukan laporan insiden. Issue/PR 0.
+**All clear (jam ini)** — OAuth tetap FIXED. Sejak audit 10:03: docs wiki + tautan registrasi landing ke `/auth/` saja. Issue/PR 0.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 11:03 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `275e6fc` (landing CTA `/akun/daftar.html` → `/auth/`, 6 tautan).
+- Sejak audit 10:03 / wiki 10:55: `fb8cef` (docs email reset) + `275e6fc` (landing links). Bukan OAuth/wallet/middleware.
+- Data sync `32c8322` 04:01Z (rutin). Blog `2c93785`. Editor repo tetap `6e4d516`.
+- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
+- Issue/PR open: 0.
+- Status: **All clear**. Tidak kirim email.
 
 ### 2026-09-18 10:55 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Email otomatis Clinqoo “Atur Ulang Kata Sandi” untuk akun muzawwied@gmail.com. Permintaan reset password; tautan berlaku 1 jam sejak kirim (18 September 2026 pukul 10.55 WIB). Pengirim via Brevo (`devconium@12054872.brevosend.com`). Bukan bug/update produk. Jika tidak diminta owner, abaikan — kata sandi tetap aman.
@@ -84,21 +92,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 - Issue/PR open: 0.
 - Status: **All clear**. Tidak kirim email.
 
-### 2026-09-18 09:05 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.` sebelum update wiki: `9a0d087` (fix editor `/editor/` 301 + cache paket fail-open + fallback popup).
-- Sejak audit 08:09: 1 commit kode UX editor (`9a0d087`, Superagent Base44). Bukan OAuth/wallet/middleware. Blog `86e47e5`. Data sync `0d9ea90` 02:01Z (rutin).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Bug `aiCall` tanpa `env` di panggilan ringkasan akhir `functions/api/agent.js` **masih ada** (sudah dilaporkan 19:23).
-- Editor repo `6e4d516`. Landing `21d4481`. Issue/PR open: 0.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-18 08:09 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.` sebelum update wiki: `25b2c89` (docs hourly audit 07:19 All clear).
-- Sejak audit 07:19: tidak ada commit kode di Clinqoo./Editor/Landing/Wallet. Data sync `d7261c6` / `2be0ee6` / `dd112ea` (rutin 00:31–01:01Z).
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`).
-- Status: **All clear**. Tidak kirim email.
-
-Log jam sebelumnya ada di commit `644adc8` — dipotong dari HEAD wiki agar file tetap ringan.
+Log jam sebelumnya ada di commit `644adc8` / `7b8bae2` — dipotong dari HEAD wiki agar file tetap ringan.
 
 ---
 
@@ -114,7 +108,7 @@ Log jam sebelumnya ada di commit `644adc8` — dipotong dari HEAD wiki agar file
 8. Backlog dual-mode + locale ID (17:39).
 9. Owner uji beli langganan + ClinqooPay (`5c7d317`). Bersihkan mojibake em-dash di `subscription.js`.
 10. Backlog 18:05: loop inspect-act-verify; facts SSOT kuota; maxOutputTokens 8192; Doctor Deploy; profil bisnis.
-11. **P0 19:23**: perbaiki `aiCall(env, messages, …)` di rangkuman `agent.js`; `search_replace` + `grep_content`; jujur saat fallback tanpa tools. Jangan otomasi duplikat — aktif `168d5135`.
+11. SELESAI: `aiCall(env, …)` rangkuman `agent.js` (`b537ca9`). Jangan otomasi duplikat — aktif `168d5135`.
 12. Setelah deploy Pages: pastikan `_redirects` `/editor` → `/proyek/workspace/editor/` ikut live (`9a0d087` / `75e34b2`).
 13. Email reset password 10:55 WIB: konfirmasi ke owner apakah permintaan itu disengaja; jangan klik tautan reset dari log agent.
 
