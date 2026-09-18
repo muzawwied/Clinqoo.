@@ -136,12 +136,19 @@ export async function onRequestPost({ request, env }) {
           '</td></tr>' +
         '</table>' +
       '</div>';
-    const mail = await sendEmail(env, {
+    const mailOpts = {
       toEmail: REVIEWER_EMAIL,
       subject: 'Template baru untuk ditinjau: ' + title,
       html,
       ...(attachment ? { attachment } : {})
-    });
+    };
+    let mail = await sendEmail(env, mailOpts);
+
+    // Fallback: kalau email dengan lampiran gagal (mis. format webp ditolak Brevo),
+    // kirim ulang TANPA lampiran agar review email selalu sampai.
+    if (!mail.sent && attachment) {
+      mail = await sendEmail(env, { toEmail: mailOpts.toEmail, subject: mailOpts.subject, html });
+    }
 
     return json({ ok: true, id, email_sent: mail.sent, email_reason: mail.sent ? null : mail.reason });
   } catch (e) {

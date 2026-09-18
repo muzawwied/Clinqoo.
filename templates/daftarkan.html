@@ -221,7 +221,7 @@ function loadThumb(file) {
     reader.onload = function (ev) {
         var img = new Image();
         img.onload = function () {
-            // Rasio 16:9 (memanjang ke samping) + kompresi webp agar ringan
+            // Rasio 16:9 (memanjang ke samping) + kompresi JPEG (ringan & didukung lampiran email Brevo)
             var W = 1280, H = 720;
             var canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;
@@ -231,10 +231,10 @@ function loadThumb(file) {
             ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
             ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
             var dataUrl;
-            try { dataUrl = canvas.toDataURL('image/webp', 0.68); } catch (e) { dataUrl = ev.target.result; }
-            if (dataUrl.indexOf('data:image/webp') === -1) { showError('Browser tidak mendukung kompresi WebP.'); return; }
+            try { dataUrl = canvas.toDataURL('image/jpeg', 0.82); } catch (e) { dataUrl = ev.target.result; }
+            if (dataUrl.indexOf('data:image/jpeg') === -1) { showError('Browser tidak mendukung kompresi gambar.'); return; }
             if (dataUrl.length > 300000) {
-                try { dataUrl = canvas.toDataURL('image/webp', 0.45); } catch (e) {}
+                try { dataUrl = canvas.toDataURL('image/jpeg', 0.6); } catch (e) {}
             }
             sel.thumbnail = dataUrl;
             thumbPreview.src = dataUrl;
