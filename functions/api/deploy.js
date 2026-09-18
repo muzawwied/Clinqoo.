@@ -394,7 +394,9 @@ export async function onRequestGet({ request, env }) {
       }
     }
     if (project && Array.isArray(doms)) {
-      domains = doms.map(x => ({ name: x.name, status: x.status || 'pending' }));
+      // Kecualikan subdomain publik otomatis (<project>.clinqoo.biz.id) dari daftar
+      // "domain kustom" — itu domain gratis bawaan, bukan domain kustom milik user.
+      domains = doms.filter(x => x && x.name !== name + PUB_SUFFIX).map(x => ({ name: x.name, status: x.status || 'pending' }));
     }
     let publicUrl = pagesUrl;
     if (Array.isArray(doms)) {
