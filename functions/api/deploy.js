@@ -247,7 +247,28 @@ export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS });
 }
 
-export async function onRequestGet({ request, env }) {
+// Cache status deploy (GET non-fast) per proyek: halaman domain kustom melakukan
+// polling tiap 20 detik; tanpa cache setiap polling menunggu 3x round-trip API
+// Cloudflare. Cache 45 detik membuat polling ringan; POST (deploy/unpublish/
+// add_domain/remove_domain) otomatis menghapus cache supaya tidak ada data basi.
+const STATUS_TTL_MS = 45 * 1000;
+const statusCache = new Map();
+
+function statusCacheGet(pid) {
+  const e = statusCache.get(pid);
+  if (!e) return null;
+  if (Date.now() - e.at > STATUS_TTL_MS) { statusCache.delete(pid); return null; }
+  return e.body;
+}
+function statusCacheSet(pid, body) {
+  try {
+    statusCache.set(pid, { at: Date.now(), body });
+    if (statusCache.size > 400) statusCache.delete(statusCache.keys().next().value);
+  } catch (e) {}
+}
+function statusCacheDel(pid) { try { if (pid) statusCache.delete(pid); } catch (e) {} }
+
+export async function onRequestGet(({ request, env }) {
   const url = new URL(request.url);
   const projectId = url.searchParams.get('project_id') || '';
   const deny = await guardProject(env, request, projectId);
@@ -259,6 +280,9 @@ export async function onRequestGet({ request, env }) {
     const T = await getProjectTables(db, projectId);
     const name = await resolvePagesName(db, T.projectSettings, projectId);
     const pagesUrl = 'https://' + name + '.pages.dev';
+
+    const _cached = statusCacheGet(projectId);
+    if (_cached) return json(_cached);
 
     // Mode cepat: hanya nama Pages + URL (murni D1, tanpa round-trip API Cloudflare).
     // Dipakai halaman domain kustom supaya nilai record DNS terisi < 200 ms,
@@ -306,7 +330,9 @@ export async function onRequestGet({ request, env }) {
     const lastDeployBy = await getSetting(db, T.projectSettings, projectId, 'last_deploy_by');
     const deployPhase = await getSetting(db, T.projectSettings, projectId, 'deploy_phase');
     const deployed = Array.isArray(logs) && logs.some(l => l && l.status === 'success');
-    return json({ pages_project: name, pages_url: pagesUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' });
+    const _statusBody = { pages_project: name, pages_url: pagesUrl, deployed, last_deployment: last, last_deploy_by: lastDeployBy || '', domains, logs, deploy_phase: deployPhase || '', api_rev: 'uniq4' };
+    statusCacheSet(projectId, _statusBody);
+    return json(_statusBody);
   } catch (err) {
     try {
       const db = env.DB;
@@ -323,6 +349,7 @@ export async function onRequestPost({ request, env }) {
   const projectId = body.project_id || '';
   const deny = await guardProject(env, request, projectId);
   if (deny) return deny;
+  statusCacheDel(projectId);
   try {
     const db = env.DB;
     const creds = await getCreds(db);
