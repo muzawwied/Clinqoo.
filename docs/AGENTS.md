@@ -42,6 +42,14 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; backend API (clincoo-be2) hanya lewat GitHub Actions deploy.yml — jangan pernah deploy statis ke sana.
 
+**Rebrand UI (2026-09-18/19):** seluruh teks UI pengguna sekarang `Clincoo` / `ClincooPay` — LANDING (clinqoo-landing), situs utama (clinqoo), Wallet (clinqoo-wallet), Editor (clinqoo-editor, "Clincoo Code"), Blog (clinqoo-blog), Legal (clinqoo-legal). Yang TIDAK boleh ikut di-rename: domain/URL `clinqoo*`, nama repo & path GitHub (mis. `muzawwied.github.io/Clinqoo./`), identifier kode (ClinqooAPI, ClinqooAuth, dsb), dan kunci API. Gunakan rename kata utuh (`\bClinqooPay\b` dulu, baru `\bClinqoo\b`), JANGAN regex tanpa word-boundary.
+
+Deploy proyek UI lain (semua manual, `wrangler pages deploy`):
+- `clinqoo-wallet` (akun Vylonium a393): dari repo `Wallet`. Frontend saja — API dipanggil ke `wallet-muz.pages.dev`, `functions/api/wallet.js` lokal tidak terpakai. HAPUS `wrangler.toml` dari folder deploy (binding D1 `wallet-db` tidak berlaku untuk project ini).
+- `clinqoo-editor` (akun Vylonium a393): dari repo `Clinqoo-Editor`, deploy seluruh isi repo.
+- `clinqoo-blog` (akun 59db6147 "Clinqoo"): dari repo `Clinqoo-Blog`, deploy seluruh isi repo, gunakan token akun tersebut.
+- `clinqoo-legal` (akun Vylonium a393): dari repo `Clinqoo-Legal`, deploy tanpa `build.py`/`README.md`. Halaman dilayani di root; pretty URL `/syarat-ketentuan`, `/kebijakan-privasi`, dst. Link internal harus ke root (`/xxx.html`), bukan `/legal/*` (fallback SPA menampilkan index).
+
 ---
 
 | Area | Status | Catatan |
@@ -56,7 +64,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 | Editor full-stack | OK | `6e4d516` |
 | AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy |
 | Promo | OK | |
-| Deploy MCP | REGRESI 405 (known) | Bukan temuan baru |
+| Deploy MCP | OK — FIXED | Re-deploy sesuai prosedur 2026-09-18; POST /mcp balas JSON-RPC initialize (200) |
 | Wallet / langganan | OK | |
 | Middleware | OK + catatan | ORIGIN_ALLOW belum `*.clinqoo.biz.id` |
 | Hourly audit automation | OK | Audit 05:10: All clear — tidak kirim email |
