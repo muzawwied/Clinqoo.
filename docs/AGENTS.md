@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 14:25 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 15:11 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -46,59 +46,45 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | Diverifikasi ulang 14:25 di `functions/api/auth/shared.js`. Bukan regresi. |
-| Deploy user sites | Baru | `3197d6de` — public_url `*.clinqoo.biz.id`, prefix `cno-` dihapus, fix kurung `onRequestGet` |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | Diverifikasi ulang 15:11 di `functions/api/auth/shared.js`. Bukan regresi. |
+| Deploy user sites | Fix UX | HEAD `cd6a46c2` — tidak nyangkut di Mulai Konfigurasi; last_deployment dari log D1 |
+| Landing standalone | Fix | `c894575a` — link absolut ke clinqoo.pages.dev |
 | Galeri template komunitas | Baru | `7611945` — `/api/template-submissions` + review token email |
 | CCTV `security_events` | Minor bug | `logBlocked` CREATE TABLE tanpa `.run()` (belum ditutup) |
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js |
 | Schema D1 vs runtime | Gap | `template_submissions` ada; `security_events` belum di schema.sql |
-| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `3197d6de` |
+| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `cd6a46c2` |
 | AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka |
 | Promo | OK | Tidak berubah jam ini |
 | Deploy MCP | OK | `mcp.js` live `9f82c01d` |
 | Wallet / langganan | OK | Tidak ada regresi kritis |
 | Middleware | OK + catatan | PUBLIC include template-submissions; CCTV lemah; ORIGIN_ALLOW belum `*.clinqoo.biz.id` |
-| Hourly audit automation | OK | Audit 14:25: email perubahan penting ke gmail |
+| Hourly audit automation | OK | Audit 15:11: email perubahan penting ke gmail |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `1d88c85` (sitemap + 5 artikel tips) |
-| Clinqoo-Data | OK | Sync `b7922a0` 07:15Z |
-| Landing | OK | Hero random + CTA tema `b7b7b40`/`7c09031`; legal → blog Pages |
-| Domain publik | P1 operasional | `clinqoo.biz.id` best-effort (gagal diam jika zona CF belum siap); project lama tetap prefix `cno-` sampai setting direset |
+| Blog | OK | HEAD `1d88c85` |
+| Clinqoo-Data | OK | Sync `875d2d5` 08:00Z |
+| Domain publik | P1 operasional | `clinqoo.biz.id` best-effort |
 | Debug folders | OK | tetap terhapus |
-| CI probe workflow | Bersih | `6439caa` lalu `eca77be` hapus workflow probe token CF |
+| CI probe workflow | Bersih | workflow probe token CF sudah dihapus |
 
-Bukan All clear — perubahan penting domain publik deploy + temuan minor lama. Email laporan dikirim.
+Bukan All clear — perubahan penting UX deploy + landing URL. Email laporan dikirim.
 
 ---
 
 ## Log Interaksi Agent
 
-### 2026-09-18 14:25 WIB — Grok (xAI) laporan masuk
-- Ringkasan laporan: Hourly audit HEAD `3197d6de`. STATUS PERUBAHAN PENTING (bukan All clear). Tidak ada regresi kritis OAuth — `upsertOauthUser` TETAP FIXED (emailNorm aman untuk email null; INSERT auth_users sebelum lookup; last_row_id untuk OAuth tanpa email). Issue/PR open: 0. Perubahan sejak 13:13: `3197d6de` feat deploy link publik `<nama>.clinqoo.biz.id` (bukan pages.dev), hapus prefix `cno-`, perbaiki kurung `onRequestGet` dari patch cache; `7c09031`/`b7b7b40` landing CTA/hero tema + teks hero random; `79656e8` legal links → clinqoo-blog.pages.dev; `45021b7` dark mode/card landing; `cd88d85` cache 45s GET status deploy; `e3a85c1`/`374f736`/`e49ae51` docs AGENTS. Editor `6e4d516`. Data sync `b7922a0` 07:15Z. Blog `1d88c85` sitemap + artikel tips 18 Sep. Temuan: (1) P1 operasional — domain publik clinqoo.biz.id best-effort; project Pages lama tetap prefix `cno-` sampai setting direset; (2) non-P0 lama — CREATE TABLE tanpa `.run()`, schema.sql belum `security_events`, review via GET+token, title belum di-escape; (3) ORIGIN_ALLOW belum `*.clinqoo.biz.id` (tidak kritis selama frontend di pages.dev). Rekomendasi: verifikasi zona + custom domain Pages; fix `.run()`; jangan mutasi review pada GET; deploy frontend tetap sertakan `mcp.js`.
-- Sumber: email/pesan laporan (subjek: [Clinqoo Hourly Audit] [2026-09-18-14:25])
-- Status: OAuth OK; P1 domain best-effort; non-P0 CCTV/schema/review/ORIGIN_ALLOW masih terbuka
+### 2026-09-18 15:11 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `cd6a46c2`.
+- Sejak audit 14:25: `cd6a46c2` fix stuck Mulai Konfigurasi (redirect dashboard, log D1 try/catch, sintesis last_deployment); `c894575a` landing URL absolut ke clinqoo.pages.dev.
+- `upsertOauthUser`: tetap FIXED (emailNorm + INSERT + last_row_id).
+- Issue/PR open: 0. Editor `6e4d516`. Data `875d2d5`. Blog `1d88c85`.
+- Email `[Clinqoo Hourly Audit] [2026-09-18-15:11]` ke muzawwied@gmail.com.
 
 ### 2026-09-18 14:25 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `3197d6de`.
-- Sejak audit 13:13: `3197d6de` domain publik `*.clinqoo.biz.id` + hapus prefix `cno-` + fix syntax `onRequestGet`; landing hero/CTA; legal ke `clinqoo-blog.pages.dev`; cache 45s GET deploy.
-- `upsertOauthUser`: tetap FIXED (emailNorm + INSERT + last_row_id).
-- Issue/PR open: 0. Editor `6e4d516`. Data `b7922a0`. Blog `1d88c85`.
-- Temuan baru: pemasangan domain CF best-effort (gagal diam); project lama tetap `cno-*` jika setting sudah tersimpan; ORIGIN_ALLOW belum `clinqoo.biz.id`.
-- Temuan lama: `logBlocked` tanpa `.run()`; review GET+token; title tidak di-escape.
-- Status: perubahan penting. Email `[Clinqoo Hourly Audit] [2026-09-18-14:25]` ke muzawwied@gmail.com.
+- HEAD `3197d6de`. Domain publik `*.clinqoo.biz.id`. OAuth FIXED. Email `[Clinqoo Hourly Audit] [2026-09-18-14:25]`.
 
-### 2026-09-18 13:30 WIB — Superagent (Base44) deploy galeri template komunitas
-- Push `7611945` (galeri template + API `/api/template-submissions`) & `7a58bad` (CCTV, agent lain) hanya auto-deploy ke backend `clincoo`/clincoo-be2 via deploy.yml. Frontend `clinqoo` TIDAK auto-deploy (bukan Git-connected).
-- Deploy manual project `clinqoo` sesuai prosedur + mcp.js REPLICA. Verifikasi POST /mcp OK.
-
-### 2026-09-18 13:13 WIB — Grok (xAI) hourly audit
-- HEAD `eca77be`. Galeri + CCTV. OAuth FIXED. Email `[Clinqoo Hourly Audit] [2026-09-18-13:13]`.
-
-### 2026-09-18 12:08 WIB — Grok (xAI) hourly audit
-- HEAD `e215d49`. Status saat itu: All clear. Tidak kirim email.
-
-Log lebih lama dipotong agar wiki ringan (`883695b` / `c4892ef`).
+Log lebih lama dipotong agar wiki ringan.
 
 ---
 
