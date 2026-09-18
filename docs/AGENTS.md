@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-18 11:03 WIB)
+## Status Saat Ini (update terakhir: 2026-09-18 12:08 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -46,30 +46,39 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 11:03 di `functions/api/auth/shared.js`. |
+| Auth OAuth (`upsertOauthUser`) | OK — sudah diperbaiki | INSERT + guard null + emailNorm + last_row_id (`4ff816e`). Diverifikasi ulang 12:08 di `functions/api/auth/shared.js`. |
 | Email transaksional (reset password) | Info | Email reset 10.55 WIB (Brevo). Bukan laporan bug. |
-| Halaman `/auth/` | OK | Landing CTA kini menunjuk `/auth/` (`275e6fc`) |
+| Halaman `/auth/` | OK | Landing CTA menunjuk `/auth/` (`275e6fc`) |
 | Encoding karakter | Minor | Mojibake em-dash di komentar shared.js + string di subscription.js; runtime tidak terpengaruh |
 | Schema D1 vs runtime | OK | |
-| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `275e6fc` |
+| Editor full-stack | OK | Repo Editor HEAD `6e4d516`. App HEAD `e215d49` |
 | AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy masih terbuka. Bug `aiCall` tanpa `env` SUDAH di-fix (`b537ca9`). |
 | Promo | OK | Tidak berubah jam ini |
 | Deploy MCP | OK | `mcp.js` live `9f82c01d` |
 | Audit keamanan 10 temuan (P0-P2) | OK | semua selesai |
-| Wallet / langganan | OK | `5c7d317` |
+| Wallet / langganan | OK | `5c7d317`; tautan TikTok tanpa email (`9a65c4d`) |
 | Middleware | OK | Clinqoo connector tools berfungsi |
-| Hourly audit automation | OK | Audit 11:03: All clear (tidak kirim email) |
+| Hourly audit automation | OK | Audit 12:08: All clear (tidak kirim email) |
 | Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
 | Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `2c93785` |
-| Clinqoo-Data | OK | Sync rutin `32c8322` 04:01Z |
+| Blog | OK | HEAD `fffba64` (artikel coding) |
+| Clinqoo-Data | OK | Sync rutin `38fef1c` 05:01Z |
 | Landing | OK | CTA daftar → `/auth/` (`275e6fc`) |
+| Debug folders | OK | `debug/` + `debug-notif/` dihapus (`e215d49`) |
 
-**All clear (jam ini)** — OAuth tetap FIXED. Sejak audit 10:03: docs wiki + tautan registrasi landing ke `/auth/` saja. Issue/PR 0.
+**All clear (jam ini)** — OAuth tetap FIXED. Sejak audit 11:03: hapus folder debug + ganti link TikTok (bukan OAuth/wallet/middleware). Issue/PR 0.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-18 12:08 WIB — Grok (xAI) hourly audit
+- HEAD `muzawwied/Clinqoo.`: `e215d49` (hapus `debug/` + `debug-notif/`).
+- Sejak audit 11:03: `9a65c4d` (TikTok @muzawwied, bukan email) + `e215d49` (bersih folder debug). Bukan OAuth/wallet/middleware.
+- Data sync `38fef1c` 05:01Z (rutin). Blog `fffba64`. Editor repo tetap `6e4d516`.
+- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
+- Issue/PR open: 0.
+- Status: **All clear**. Tidak kirim email.
 
 ### 2026-09-18 11:03 WIB — Grok (xAI) hourly audit
 - HEAD `muzawwied/Clinqoo.`: `275e6fc` (landing CTA `/akun/daftar.html` → `/auth/`, 6 tautan).
@@ -84,15 +93,7 @@ Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; back
 - Sumber: email/pesan laporan (subjek: Atur Ulang Kata Sandi Clinqoo)
 - Status: info / transactional email terkirim; tidak ada perubahan kode
 
-### 2026-09-18 10:03 WIB — Grok (xAI) hourly audit
-- HEAD `muzawwied/Clinqoo.`: `4f079b1` (brand editor logo `</>`).
-- Sejak audit 09:45: commit editor UX/brand (`92165de` param ?id=, `75e34b2` Clinqoo Code utama, `42c9b08` hapus arrow-left, `4f079b1` logo kode). Bukan OAuth/wallet/middleware.
-- Data sync `159f2d2` 03:01Z (rutin). Blog `116a8ab`. Editor repo tetap `6e4d516`. Landing `21d4481`.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (`4ff816e`), kode di `functions/api/auth/shared.js` masih aman.
-- Issue/PR open: 0.
-- Status: **All clear**. Tidak kirim email.
-
-Log jam sebelumnya ada di commit `644adc8` / `7b8bae2` — dipotong dari HEAD wiki agar file tetap ringan.
+Log jam sebelumnya ada di commit `c4892ef` / `032eb8c` — dipotong dari HEAD wiki agar file tetap ringan.
 
 ---
 
@@ -111,6 +112,7 @@ Log jam sebelumnya ada di commit `644adc8` / `7b8bae2` — dipotong dari HEAD wi
 11. SELESAI: `aiCall(env, …)` rangkuman `agent.js` (`b537ca9`). Jangan otomasi duplikat — aktif `168d5135`.
 12. Setelah deploy Pages: pastikan `_redirects` `/editor` → `/proyek/workspace/editor/` ikut live (`9a0d087` / `75e34b2`).
 13. Email reset password 10:55 WIB: konfirmasi ke owner apakah permintaan itu disengaja; jangan klik tautan reset dari log agent.
+14. Folder `debug/` sudah dihapus (`e215d49`) — jangan dihidupkan lagi di domain produksi.
 
 ---
 
