@@ -42,13 +42,13 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; backend API (clincoo-be2) hanya lewat GitHub Actions deploy.yml — jangan pernah deploy statis ke sana.
 
-**Rebrand UI (2026-09-18/19):** seluruh teks UI pengguna sekarang `Clincoo` / `ClincooPay` — LANDING (clinqoo-landing), situs utama (clinqoo), Wallet (clinqoo-wallet), Editor (clinqoo-editor, "Clincoo Code"), Blog (clinqoo-blog), Legal (clinqoo-legal). Yang TIDAK boleh ikut di-rename: domain/URL `clinqoo*`, nama repo & path GitHub (mis. `muzawwied.github.io/Clinqoo./`), identifier kode (ClinqooAPI, ClinqooAuth, dsb), dan kunci API. Gunakan rename kata utuh (`\bClinqooPay\b` dulu, baru `\bClinqoo\b`), JANGAN regex tanpa word-boundary.
+**Rebrand UI (2026-09-18/19):** seluruh teks UI pengguna sekarang `Clincoo` / `ClincooPay` — LANDING (clinqoo-landing), situs utama (clinqoo), Wallet (clinqoo-wallet), Editor (clinqoo-editor, "Clincoo Code"), Blog (clinqoo-blog; dokumen legal = artikel di /legal/). Yang TIDAK boleh ikut di-rename: domain/URL `clinqoo*`, nama repo & path GitHub (mis. `muzawwied.github.io/Clinqoo./`), identifier kode (ClinqooAPI, ClinqooAuth, dsb), dan kunci API. Gunakan rename kata utuh (`\bClinqooPay\b` dulu, baru `\bClinqoo\b`), JANGAN regex tanpa word-boundary.
 
 Deploy proyek UI lain (semua manual, `wrangler pages deploy`):
 - `clinqoo-wallet` (akun Vylonium a393): dari repo `Wallet`. Frontend saja — API dipanggil ke `wallet-muz.pages.dev`, `functions/api/wallet.js` lokal tidak terpakai. HAPUS `wrangler.toml` dari folder deploy (binding D1 `wallet-db` tidak berlaku untuk project ini).
 - `clinqoo-editor` (akun Vylonium a393): dari repo `Clinqoo-Editor`, deploy seluruh isi repo.
 - `clinqoo-blog` (akun 59db6147 "Clinqoo"): dari repo `Clinqoo-Blog`, deploy seluruh isi repo, gunakan token akun tersebut.
-- `clinqoo-legal` (akun Vylonium a393): dari repo `Clinqoo-Legal`, deploy tanpa `build.py`/`README.md`. Halaman dilayani di root; pretty URL `/syarat-ketentuan`, `/kebijakan-privasi`, dst. Link internal harus ke root (`/xxx.html`), bukan `/legal/*` (fallback SPA menampilkan index).
+- ~~`clinqoo-legal`~~ — PROJECT DIHAPUS 2026-09-19 atas permintaan owner. Seluruh dokumen legalitas (syarat-ketentuan, privasi, cookie, pembayaran, dst.) kini HIDUP SEBAGAI ARTIKEL BLOG di `clinqoo-blog.pages.dev/legal/` (folder `legal/` repo Clinqoo-Blog, sudah rebrand Clincoo). Repo `Clinqoo-Legal` di GitHub disimpan sebagai arsip sumber; jangan deploy ulang project ini.
 
 ---
 
