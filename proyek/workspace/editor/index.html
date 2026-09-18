@@ -58,6 +58,9 @@ svg{flex-shrink:0}
 #titlebar{height:48px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;gap:14px;flex-shrink:0;user-select:none}
 #logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;letter-spacing:-.01em;min-width:0}
 #logo .logo-img{width:24px;height:24px;display:block;background:#fff;border-radius:7px;padding:3px;box-sizing:border-box}
+#logo .logo-code{display:flex;align-items:center;color:var(--accent)}
+#logo .logo-code svg{width:22px;height:22px}
+.home-logo .logo-home-code{width:66%;height:66%}
 #logo b{color:var(--text)}#logo span{color:var(--accent)}
 #menubar{display:flex;gap:2px}
 .menu-btn{padding:5px 9px;border-radius:6px;color:var(--text2);font-size:12.5px;font-weight:500}
@@ -544,7 +547,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <button class="tb-btn" id="hamb" onclick="toggleSidebar()" title="Berkas / Panel samping">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
   </button>
-  <div id="logo"><img src="/assets/logo-clinqoo.png" alt="Clinqoo" class="logo-img"><span>Clinqoo<b style="color:var(--text)"> Code</b></span></div>
+  <div id="logo"><span class="logo-code"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></span><span>Clinqoo<b style="color:var(--text)"> Code</b></span></div>
   <nav id="menubar">
     <button class="menu-btn" data-menu="m-file">Berkas</button>
     <button class="menu-btn" data-menu="m-edit">Edit</button>
@@ -725,7 +728,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
       <div id="monaco"></div>
       <div id="welcome" class="show">
         <div class="home-wrap">
-          <div class="home-logo"><img src="/assets/logo-clinqoo.png" alt="Clinqoo" class="logo-img"></div>
+          <div class="home-logo"><svg class="logo-home-code" viewBox="0 0 32 32" fill="none" stroke="#16161a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></div>
           <div class="big">Clinqoo <b>Code</b></div>
           <div class="sub">Editor kode full-stack — ringan, rapi, langsung jalan di browser.</div>
           <div class="home-cta">
@@ -812,7 +815,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <div class="sb" id="sb-cursor" onclick="toast('Gunakan Ctrl+G untuk pergi ke baris')">Ln 1, Col 1</div>
   <div class="sb" id="sb-indent" onclick="cycleIndent()">Spasi: 2</div>
   <div class="sb" id="sb-lang" onclick="openSettings()">Plain Text</div>
-  <div class="sb" onclick="openSettings()"><img src="/assets/logo-clinqoo.png" style="height:13px"> Clinqoo Code</div>
+  <div class="sb" onclick="openSettings()"><svg style="height:13px;display:inline-block;vertical-align:-2px" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg> Clinqoo Code</div>
 </div>
 
 <!-- overlays -->
@@ -837,7 +840,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
 <div class="page" id="page-chat">
   <div class="page-head">
     <button class="ph-btn" onclick="closePages()" title="Kembali ke editor"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <span class="ph-title"><img src="/assets/logo-clinqoo.png" style="height:16px">Chat AI</span>
+    <span class="ph-title"><svg style="height:16px;display:inline-block;vertical-align:-3px" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg>Chat AI</span>
     <div style="flex:1"></div>
     <button class="ph-btn" onclick="chatClear()" title="Hapus percakapan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
   </div>
