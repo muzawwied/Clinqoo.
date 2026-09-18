@@ -78,16 +78,11 @@
 
 <!-- HERO -->
 <section class="relative overflow-hidden">
-  <div class="absolute inset-0 bg-cover bg-center" style="background-image:linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.92) 55%, #ffffff 100%), url('/assets/backgrounds/bg-light-morning.webp');"></div>
-  <div class="absolute inset-0 hidden dark:block" style="background-image:linear-gradient(180deg, rgba(10,10,10,0.72) 0%, rgba(10,10,10,0.85) 55%, #0a0a0a 100%), url('/assets/backgrounds/bg-dark-night2.webp');"></div>
+  <div id="hero-bg-light" class="absolute inset-0 bg-cover bg-center transition-opacity duration-700"></div>
+  <div id="hero-bg-dark" class="absolute inset-0 hidden dark:block bg-cover bg-center transition-opacity duration-700"></div>
   <div class="relative max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-24 text-center">
-    <h1 class="rise font-display font-bold text-4xl sm:text-5xl md:text-6xl tracking-tight max-w-3xl mx-auto leading-[1.08]">
-      Publikasikan situsmu dengan mudah — dari ide sampai online
-    </h1>
-    <p class="rise rise-d1 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-5 leading-relaxed">
-      Clinqoo memadukan <strong>editor kode full-stack</strong>, <strong>template siap pakai</strong>, dan <strong>deploy sekali klik</strong> dalam satu ruang kerja — lengkap dengan <strong>asisten AI</strong> yang siap membantu di setiap langkah.
-      Rancang situsmu, sempurnakan kodenya, dan publikasikan ke internet — semuanya dari browser, tanpa setup apa pun.
-    </p>
+    <h1 id="hero-title" class="rise font-display font-bold text-4xl sm:text-5xl md:text-6xl tracking-tight max-w-3xl mx-auto leading-[1.08]"></h1>
+    <p id="hero-subtitle" class="rise rise-d1 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-5 leading-relaxed"></p>
     <div class="rise rise-d2 flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
       <a href="/auth/" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-semibold text-base hover:opacity-85 transition-opacity shadow-lg shadow-black/10">
         Mulai Gratis Sekarang
@@ -99,6 +94,40 @@
     <p class="rise rise-d3 text-xs text-gray-500 dark:text-gray-500 mt-4">Gratis untuk memulai — tanpa kartu kredit.</p>
   </div>
 </section>
+<script>
+(function () {
+  // Background diambil langsung dari aset halaman utama clinqoo.pages.dev (bg-light-morning / bg-dark-night2)
+  var lightUrl = '/assets/backgrounds/bg-light-morning.webp';
+  var darkUrl = '/assets/backgrounds/bg-dark-night2.webp';
+  var texts = [
+    { t: 'Dari ide ke online, dalam satu ruang kerja', s: 'Clinqoo memadukan <strong>editor kode full-stack</strong>, <strong>template siap pakai</strong>, dan <strong>deploy sekali klik</strong> — dibantu <strong>asisten AI</strong> di setiap langkah. Semuanya dari browser, tanpa setup.' },
+    { t: 'Ngoding, desain, deploy. Selesai hari ini.', s: '<strong>Asisten AI</strong> siap bantu dari nol sampai online. Pakai <strong>template siap pakai</strong> atau tulis kode sendiri di editor full-stack, lalu <strong>deploy sekali klik</strong>.' },
+    { t: 'Situsmu online, secepat kamu mengetik', s: 'Rancang dengan <strong>AI</strong>, sempurnakan di <strong>editor kode full-stack</strong>, publikasikan dengan <strong>satu klik</strong>. Tanpa install, tanpa ribet.' },
+    { t: 'Bangun situs impianmu, tanpa drama teknis', s: '<strong>Template siap pakai</strong>, <strong>editor full-stack</strong>, dan <strong>asisten AI</strong> yang siap membantu — semua dalam satu ruang kerja. Publikasikan cuma sekali klik.' },
+    { t: 'Ide di kepala, situs di internet — hari ini', s: 'Clinqoo gabungkan <strong>editor kode</strong>, <strong>template</strong>, dan <strong>asisten AI</strong> dalam satu tempat. Rancang, sempurnakan, dan <strong>deploy sekali klik</strong>.' }
+  ];
+  // Variasi posisi & tint tipis agar background yang sama tetap terasa berbeda tiap refresh
+  var positions = ['center', 'top', 'bottom', '30% 20%', '70% 30%', 'center 80%'];
+  var tints = [
+    { l: 'rgba(255,255,255,0.82)', d: 'rgba(10,10,10,0.72)' },
+    { l: 'rgba(238,242,255,0.82)', d: 'rgba(9,12,20,0.74)' },
+    { l: 'rgba(255,247,237,0.82)', d: 'rgba(18,10,6,0.74)' },
+    { l: 'rgba(236,253,245,0.82)', d: 'rgba(6,16,12,0.74)' }
+  ];
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  var pos = pick(positions);
+  var tint = pick(tints);
+  var copy = pick(texts);
+  var bgLight = document.getElementById('hero-bg-light');
+  var bgDark = document.getElementById('hero-bg-dark');
+  bgLight.style.backgroundPosition = pos;
+  bgDark.style.backgroundPosition = pos;
+  bgLight.style.backgroundImage = "linear-gradient(180deg, " + tint.l + " 0%, rgba(255,255,255,0.92) 55%, #ffffff 100%), url('" + lightUrl + "')";
+  bgDark.style.backgroundImage = "linear-gradient(180deg, " + tint.d + " 0%, rgba(10,10,10,0.85) 55%, #0a0a0a 100%), url('" + darkUrl + "')";
+  document.getElementById('hero-title').textContent = copy.t;
+  document.getElementById('hero-subtitle').innerHTML = copy.s;
+})();
+</script>
 
 <!-- STRIP STATISTIK -->
 <section class="border-y border-gray-100 dark:border-[#1a1a1a] bg-gray-50/80 dark:bg-[#0d0d0d]">
