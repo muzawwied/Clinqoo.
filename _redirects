@@ -20,6 +20,10 @@
 /profil/tentang    /akun/tentang.html    301
 /notifikasi    /akun/notifikasi.html    301
 
+# Editor — sidebar link /editor/ langsung ke halaman editor asli (query ?pid= otomatis terjaga)
+/editor    /proyek/workspace/editor/    301
+/editor/   /proyek/workspace/editor/    301
+
 # Halaman proyek — id proyek dipertahankan lewat ?id= (rute spesifik dulu, catch-all terakhir)
 /workspace/*/pengaturan/umum    /proyek/pengaturan/umum/?id=:splat    301
 /workspace/*/pengaturan/build-deployment    /proyek/build-deployment.html?id=:splat    301

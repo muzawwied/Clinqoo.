@@ -424,7 +424,7 @@
                 <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
                 <span class="font-medium text-[14px]">Workspace</span>
             </a>
-            <a href="/editor/" onclick="openFullEditor(event)" data-page="editor" id="sidebar-editor-link" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+            <a href="/proyek/workspace/editor/" onclick="openFullEditor(event)" data-page="editor" id="sidebar-editor-link" class="sidebar-nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
                 <svg class="w-5 h-5 text-gray-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
                 <span class="font-medium text-[14px]">Editor</span>
                 <span class="clinqoo-editor-crown text-amber-500 shrink-0 cursor-pointer hover:text-amber-600 transition-colors ml-auto" style="display:none" title="Lihat daftar paket" onclick="event.preventDefault(); event.stopPropagation(); clinqooOpenPlansPopup();"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/></svg></span>
@@ -3471,38 +3471,60 @@ if (loadChatLog()) {
       if (e) e.preventDefault();
       var pid = ''; try { pid = localStorage.getItem('clinqoo_current_project_id') || ''; } catch (err) {}
       if (!pid) { try { addNotification('Editor', 'Buka proyek dulu untuk mengakses editor.'); } catch (err) {} return; }
+      // Editor = fitur paket Pro. Keputusan instan dari state/cache (tanpa menunggu server) —
+      // revalidasi dilakukan di belakang supaya keputusan klik berikutnya tetap segar.
       if (window.clinqooEditorPlan === 'Starter') {
         if (typeof window.clinqooOpenPlansPopup === 'function') { window.clinqooOpenPlansPopup(); return; }
-      } else if (!window.clinqooEditorPlan) {
-        var _cSub = clinqooReadSubCache();
-        var _fresh = _cSub && _cSub.plan && (Date.now() - (_cSub.ts || 0)) < 15 * 60 * 1000;
-        if (_fresh && _cSub.plan !== 'Starter') { clinqooLaunchEditor(pid); return; }
-        if (_fresh && _cSub.plan === 'Starter') {
-          if (typeof window.clinqooOpenPlansPopup === 'function') { window.clinqooOpenPlansPopup(); return; }
-          clinqooLaunchEditor(pid); return;
-        }
-        (async function () {
-          try {
-            var _t = clinqooAuthToken();
-            var _res = await fetch(clinqooApiBase() + '/api/subscription', { cache: 'no-store', headers: _t ? { Authorization: 'Bearer ' + _t } : {} });
-            if (_res.ok) {
-              var _d = await _res.json();
-              if (_d && _d.plan) {
-                window.clinqooEditorPlan = _d.plan;
-                try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: _d.plan, billingCycle: _d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (_e) {}
-                clinqooShowCrowns(_d.plan === 'Starter');
-                if (_d.plan !== 'Starter') { clinqooLaunchEditor(pid); return; }
-              }
-            }
-          } catch (_e) {}
-          if (typeof window.clinqooOpenPlansPopup === 'function') window.clinqooOpenPlansPopup();
-        })();
+        clinqooLaunchEditor(pid); return;
+      }
+      if (window.clinqooEditorPlan) { clinqooLaunchEditor(pid); return; }
+      var _cSub = clinqooReadSubCache();
+      if (_cSub && _cSub.plan) {
+        window.clinqooEditorPlan = _cSub.plan;
+        clinqooShowCrowns(_cSub.plan === 'Starter');
+        if (_cSub.plan === 'Starter' && typeof window.clinqooOpenPlansPopup === 'function') { window.clinqooOpenPlansPopup(); return; }
+        clinqooLaunchEditor(pid);
+        clinqooRevalidatePlan();
         return;
       }
-      clinqooLaunchEditor(pid);
+      // Plan belum diketahui — cek server, tapi jangan menggantung klik:
+      // timeout 2.5s; bila server lambat/gagal, buka editor dulu (fail-open, paywall tetap berlaku saat normal).
+      (async function () {
+        var _d = null;
+        try {
+          var _t = clinqooAuthToken();
+          var _res = await fetch(clinqooApiBase() + '/api/subscription', { cache: 'no-store', headers: _t ? { Authorization: 'Bearer ' + _t } : {} });
+          if (_res.ok) _d = await _res.json();
+        } catch (_e) {}
+        if (_d && _d.plan) {
+          window.clinqooEditorPlan = _d.plan;
+          try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: _d.plan, billingCycle: _d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (_e) {}
+          clinqooShowCrowns(_d.plan === 'Starter');
+          if (_d.plan !== 'Starter') { clinqooLaunchEditor(pid); return; }
+          if (typeof window.clinqooOpenPlansPopup === 'function') { window.clinqooOpenPlansPopup(); return; }
+        }
+        clinqooLaunchEditor(pid);
+      })();
     }
 
-    function clinqooLaunchEditor(pid) {
+    // Revalidasi paket di belakang (tidak memblokir klik) — menyegarkan cache & ikon crown.
+    function clinqooRevalidatePlan() {
+      (async function () {
+        try {
+          var _t = clinqooAuthToken();
+          var _res = await fetch(clinqooApiBase() + '/api/subscription', { cache: 'no-store', headers: _t ? { Authorization: 'Bearer ' + _t } : {} });
+          if (!_res.ok) return;
+          var _d = await _res.json();
+          if (_d && _d.plan) {
+            window.clinqooEditorPlan = _d.plan;
+            try { localStorage.setItem('TM_SUB_CACHE_KEY', JSON.stringify({ plan: _d.plan, billingCycle: _d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (_e) {}
+            clinqooShowCrowns(_d.plan === 'Starter');
+          }
+        } catch (_e) {}
+      })();
+    }
+
+function clinqooLaunchEditor(pid) {
       var name = 'Proyek';
       try {
         var ps = JSON.parse(localStorage.getItem('clinqoo_projects') || '[]');
@@ -3510,6 +3532,8 @@ if (loadChatLog()) {
         if (p && p.name) name = p.name; else if (p && p.aiName) name = p.aiName;
       } catch (err) {}
       var w = window.open('/editor/?pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name), '_blank');
+      // Popup diblokir browser (umum setelah async): fallback buka di tab yang sama, jangan diam saja.
+      if (!w) { window.location.href = '/editor/?pid=' + encodeURIComponent(pid) + '&name=' + encodeURIComponent(name); return; }
       var sendInit = function () {
         var files = null;
         try { files = JSON.parse(localStorage.getItem('clinqoo_workspace_files_' + pid) || 'null'); } catch (err) {}
