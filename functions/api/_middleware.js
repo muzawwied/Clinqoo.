@@ -117,7 +117,7 @@ export async function onRequest({ request, env, next }) {
   if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) { await logBlocked(env, 'rate_limited', ip, 'admin ' + path); return tooMany(60); }
 
   // 1b. Rate limit DURABEL (D1) untuk request autentikasi yang mengubah data
-  //     (login/register/forgot/reset) — anti brute-force yang tahan lintas-isolate.
+  //     (login/register/sesi) — anti brute-force yang tahan lintas-isolate.
   //     In-memory di atas tetap jadi lapisan pertama yang murah.
   const mutatesNow = request.method !== 'GET' && request.method !== 'HEAD';
   if (mutatesNow && /^\/api\/auth(\/|$)/.test(path) && env.DB) {

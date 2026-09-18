@@ -423,49 +423,6 @@
             } catch (e) {}
         }
 
-        // Handle aksi login & register (nyambung ke backend Clincoo)
-        async function handleAuth(event, action) {
-            event.preventDefault();
-
-            // Validasi khusus register
-            if (action === 'register') {
-                const pass = document.getElementById('reg-pass').value;
-                const passConfirm = document.getElementById('reg-pass-confirm').value;
-
-                if (pass !== passConfirm) {
-                    showModal('Pendaftaran Gagal', 'Kata sandi dan konfirmasi kata sandi tidak cocok.', 'error');
-                    return;
-                }
-            }
-
-            const btn = action === 'login' ? document.getElementById('btn-login') : document.getElementById('btn-register');
-            const btnText = btn.querySelector('.btn-text');
-            const originalText = btnText.innerText;
-
-            btn.disabled = true;
-            btnText.innerHTML = '<span class="loader"></span>';
-
-            try {
-                const body = action === 'login'
-                    ? { email: document.getElementById('login-email').value, password: document.getElementById('login-pass').value }
-                    : { name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-pass').value };
-
-                const res = await fetch(API_BASE + (action === 'login' ? '/login' : '/register'), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                const data = await res.json();
-                if (!res.ok || !data.token) throw new Error(data.error || 'Terjadi kesalahan, coba lagi.');
-
-                saveSession(data);
-                setTimeout(() => { window.location.href = '../'; }, 400);
-            } catch (err) {
-                showModal(action === 'login' ? 'Login Gagal' : 'Pendaftaran Gagal', err.message, 'error');
-                btn.disabled = false;
-                btnText.innerText = originalText;
-            }
-        }
 
         // Helper cookie untuk state OAuth (lebih tahan redirect lintas-domain daripada
         // localStorage/sessionStorage di beberapa browser dengan anti bounce-tracking).
