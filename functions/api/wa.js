@@ -1,7 +1,7 @@
 // Cloudflare Pages Function — /api/wa "Gateway WhatsApp untuk Clinqoo AI" (SELF-CONTAINED)
 // Chat Clinqoo AI lewat WhatsApp (Cloud API Meta), ala superagent:
 //   GET  /api/wa?hub.mode=subscribe&hub.verify_token=...&hub.challenge=...  → verifikasi webhook Meta
-//   POST /api/wa  → event masuk dari Meta: pesan user dibalas Clinqoo AI OTOMATIS
+//   POST /api/wa  → event masuk dari Meta: pesan user dibalas Clinqoo AI OTOMATIS (wajib X-Hub-Signature-256 bila WHATSAPP_APP_SECRET di-set)
 //   POST /api/wa  body { action: 'send', to, text } (Bearer admin) → kirim manual
 // Konfigurasi (env_vars / env): WHATSAPP_TOKEN (access token Cloud API),
 // WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN (string bebas untuk verifikasi webhook).
@@ -29,6 +29,15 @@ async function getEnvKey(env, name) {
   if (env[name]) return env[name];
   if (!env.DB) return null;
   try { const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind(name).first(); return row?.value || null; } catch { return null; }
+}
+
+
+// ===== verifikasi signature webhook Meta (X-Hub-Signature-256, HMAC SHA-256) =====
+async function hmacSha256(secret, message) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ===== AI provider chain (Workers AI -> OpenRouter -> Gemini) =====
@@ -228,7 +237,8 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   // jalur 1: kirim manual dari dashboard Clinqoo (wajib Bearer admin)
   const auth = request.headers.get('Authorization') || '';
-  const body = await request.json().catch(() => null);
+  const raw = await request.text();
+  let body = null; try { body = JSON.parse(raw); } catch (e) { body = null; }
   if (body && body.action === 'send') {
     if (!auth.startsWith('Bearer ')) return json({ error: 'Login diperlukan', need_login: true }, 401);
     try {
@@ -246,7 +256,13 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: true, sent: true });
   }
 
-  // jalur 2: event webhook Meta (tanpa Bearer — dibuktikan lewat struktur payload)
+  // jalur 2: event webhook Meta — wajib signature valid bila App Secret dikonfigurasi
+  const appSecret = await getEnvKey(env, 'WHATSAPP_APP_SECRET') || await getEnvKey(env, 'META_APP_SECRET');
+  if (appSecret) {
+    const sig = request.headers.get('x-hub-signature-256') || '';
+    const expected = 'sha256=' + await hmacSha256(appSecret, raw);
+    if (sig !== expected) return json({ error: 'invalid signature' }, 403);
+  }
   try {
     const entries = body?.entry || [];
     let handled = 0;
