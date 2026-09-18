@@ -4,7 +4,7 @@
   <script src="../../../js/auth-client.js?v=2"></script>
   <script src="../../../js/ws-github-sync.js"></script>
   <script src="../../../js/accent-init.js"></script>
-  <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clinqoo_current_project_id',__p);}}catch(e){}})();</script>
+  <script>(function(){try{var __sp=new URLSearchParams(location.search);var __p=__sp.get('id')||__sp.get('pid');if(__p){localStorage.setItem('clinqoo_current_project_id',__p);}}catch(e){}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" sizes="64x64" href="../../../assets/favicon.png">
@@ -729,9 +729,18 @@
     document.addEventListener('DOMContentLoaded', function() {
       const params = new URLSearchParams(window.location.search);
       currentFolderPath = params.get('folder') || 'root';
-      const fileParam = params.get('file') || '';
       loadWorkspaceFiles();
-      openFileInEditor(fileParam);
+      let fileParam = params.get('file') || '';
+      if (!fileParam) {
+        // Tidak ada ?file= di URL (mis. dari tombol "Editor" di sidebar tanpa target
+        // spesifik): jangan tinggalkan panel kosong — buka index.html bila ada,
+        // atau file pertama yang tersedia di folder aktif.
+        const items = projectFilesData[currentFolderPath] || [];
+        const files = items.filter(function (i) { return i.type === 'file'; });
+        const idx = files.find(function (i) { return i.name === 'index.html'; });
+        fileParam = (idx || files[0] || {}).name || '';
+      }
+      if (fileParam) openFileInEditor(fileParam);
     });
   </script>
 
