@@ -110,7 +110,7 @@ export async function syncUserReport(env, opts) {
     md += '|---------|------|-------|------|-------|-----------|\n';
     md += wRows.join('\n') + '\n';
   } catch (e) {
-    md += `> Wallet DB tidak tersedia: ${e.message} | env: ${Object.keys(env).join(',')}\n`;
+    md += `> Wallet DB tidak tersedia: ${e.message}\n`;
   }
 
   // ---- push ke GitHub ----
