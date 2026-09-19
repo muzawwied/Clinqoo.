@@ -479,9 +479,6 @@
                     <input type="file" id="real-file-input" class="hidden" multiple>
                 </div>
                 
-                <button id="ws-auto-btn" type="button" class="p-2 text-gray-400 hover:text-black rounded-full transition-all cursor-pointer" title="Kode otomatis dipush ke workspace (nonaktif)" aria-pressed="false">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6M9 13h6"></path></svg>
-                </button>
                 <div class="flex items-center gap-1.5 shrink-0">
                 <button id="submit-prompt-btn" class="w-10 h-10 bg-black text-white rounded-full hover:bg-gray-800 transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1782,36 +1779,10 @@
         let agentModeOn = false;
         try { agentModeOn = localStorage.getItem('clinqoo_agent_mode') === '1'; } catch (e) {}
 
-        // ===== Setting: push otomatis file/kode ke workspace (tanpa tampilkan kode di chat) =====
-        const WS_AUTO_KEY = 'clinqoo_ws_auto_push';
-        function wsAutoPushOn() { try { return localStorage.getItem(WS_AUTO_KEY) === '1'; } catch (e) { return false; } }
+        // ===== Perilaku default: kode hasil AI langsung dipush ke workspace (tanpa blok kode di chat) =====
         function wsAutoRuleText() {
-            return wsAutoPushOn() ? '\n\nMODE WORKSPACE LANGSUNG (SEDANG AKTIF — WAJIB DIPATUHI): Setiap kali user menyuruh membuat, mengubah, atau menghasilkan file/kode (HTML, CSS, JS, JSON, dll), JANGAN tampilkan isi kode sebagai blok kode di chat. LANGSUNG panggil tool write_file dengan path + isi file lengkap untuk menyimpannya ke workspace proyek (buat folder dulu dengan create_folder bila perlu; jika file sudah ada dan user minta perubahan, tulis ulang versi lengkapnya dengan write_file). Setelah tersimpan, jawab ringkas dan natural: file apa yang dibuat/diubah, path-nya, dan poin penting isinya. Blok kode HANYA boleh ditampilkan di chat jika user secara eksplisit meminta menampilkan kodenya di chat.' : '';
+            return '\n\nMODE WORKSPACE LANGSUNG (WAJIB DIPATUHI): Setiap kali user menyuruh membuat, mengubah, atau menghasilkan file/kode (HTML, CSS, JS, JSON, dll), JANGAN tampilkan isi kode sebagai blok kode di chat. LANGSUNG panggil tool write_file dengan path + isi file lengkap untuk menyimpannya ke workspace proyek (buat folder dulu dengan create_folder bila perlu; jika file sudah ada dan user minta perubahan, tulis ulang versi lengkapnya dengan write_file). Setelah tersimpan, jawab ringkas dan natural: file apa yang dibuat/diubah, path-nya, dan poin penting isinya. Blok kode HANYA boleh ditampilkan di chat jika user secara eksplisit meminta menampilkan kodenya di chat.';
         }
-        (function wireWsAutoBtn() {
-            const b = document.getElementById('ws-auto-btn');
-            if (!b) return;
-            function applyWsAutoStyle() {
-                const on = wsAutoPushOn();
-                const dark = document.body.classList.contains('dark-mode');
-                b.setAttribute('aria-pressed', on ? 'true' : 'false');
-                b.title = 'Kode otomatis dipush ke workspace (' + (on ? 'aktif' : 'nonaktif') + ')';
-                b.classList.remove('bg-gray-900', 'text-white', 'bg-white', 'text-black', 'text-gray-400');
-                if (on) {
-                    if (dark) b.classList.add('bg-white', 'text-black');
-                    else b.classList.add('bg-gray-900', 'text-white');
-                } else {
-                    b.classList.add('text-gray-400');
-                }
-            }
-            b.addEventListener('click', function () {
-                try { localStorage.setItem(WS_AUTO_KEY, wsAutoPushOn() ? '0' : '1'); } catch (e) {}
-                applyWsAutoStyle();
-            });
-            applyWsAutoStyle();
-            document.addEventListener('click', function () {});
-            try { new MutationObserver(applyWsAutoStyle).observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
-        })();
 
         const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
