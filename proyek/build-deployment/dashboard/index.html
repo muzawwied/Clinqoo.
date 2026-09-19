@@ -722,7 +722,10 @@
                 localStorage.removeItem('clinqoo_deploy_time');
                 clearDeploySession();
                 window.ClinqooBack('../build-deployment/');
-            } catch (err) { console.warn('Gagal: ' + err.message); }
+            } catch (err) {
+                console.warn('Gagal: ' + err.message);
+                alert('Gagal membatalkan publikasi: ' + ((err && err.message) ? err.message : 'coba lagi beberapa saat.'));
+            }
         }
 
         document.addEventListener("DOMContentLoaded", async () => {

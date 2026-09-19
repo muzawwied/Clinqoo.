@@ -795,10 +795,17 @@
       return data;
     }
 
+    // Status sinkronisasi awal: selama true, daftar berkas menampilkan skeleton
+    // pemuatan (bukan "tidak ada berkas") supaya tidak terasa data kosong/lama dulu.
+    let wsInitialSync = true;
+
     // Ambil data workspace dari D1; kalau D1 kosong tapi lokal ada, unggah (migrasi sekali)
     function wsCloudPull() {
       const pid = wsProjectId();
-      if (!pid || wsCloudTimer) return; // jangan menimpa saat ada push tertunda
+      if (!pid || wsCloudTimer) { // jangan menimpa saat ada push tertunda
+        if (!pid) { wsInitialSync = false; renderFileList(); }
+        return;
+      }
       fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { headers: wsAuthHeaders() })
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) {
@@ -821,7 +828,11 @@
             }
           }
         })
-        .catch(function() {});
+        .catch(function() {})
+        // Sinkronisasi awal selesai (sukses/gagal): pastikan skeleton diganti tampilan asli.
+        .then(function () {
+          if (wsInitialSync) { wsInitialSync = false; renderFileList(); }
+        });
     }
 
     // Simpan ke D1 (debounce) — penggantian penuh supaya hapus/rename ikut tersimpan
@@ -1098,6 +1109,18 @@
       }
 
       if (items.length === 0) {
+        if (wsInitialSync && !searchTerm) {
+          // Sedang menarik data dari server: tampilkan skeleton, jangan kesan kosong.
+          let skel = '';
+          for (let i = 0; i < 4; i++) {
+            skel += `<div class="flex items-center gap-4 py-3 border-b border-gray-200 px-1 animate-pulse">
+              <div class="w-6 h-6 bg-gray-200 rounded flex-shrink-0"></div>
+              <div class="flex-1 space-y-1.5"><div class="h-3 bg-gray-200 rounded w-2/5"></div><div class="h-2 bg-gray-100 rounded w-1/4"></div></div>
+            </div>`;
+          }
+          container.innerHTML += skel + `<div class="py-3 text-center text-gray-400 text-xs animate-pulse">Memuat berkas…</div>`;
+          return;
+        }
         container.innerHTML += `<div class="py-12 text-center text-gray-400 text-sm">Tidak ada berkas atau folder di sini.</div>`;
         return;
       }

@@ -274,6 +274,23 @@ async function ensurePublicDomainDns(creds, domain, pagesName) {
   } catch (e) { return false; }
 }
 
+// Hapus record CNAME <domain> dari zona publik clinqoo.biz.id (dipakai saat unpublish
+// supaya subdomain gratis tidak menggantung menunjuk project yang sudah dihapus).
+async function removePublicDomainDns(creds, domain) {
+  try {
+    const zones = await cfFetch('/zones?name=' + PUB_ZONE, creds.apiKey);
+    const zoneId = zones && zones.length && zones[0].id;
+    if (!zoneId) return;
+    let recs = [];
+    try { recs = await cfFetch('/zones/' + zoneId + '/dns_records?type=CNAME&name=' + domain, creds.apiKey) || []; } catch (e) { recs = []; }
+    for (const r of (recs || [])) {
+      if (r && r.type === 'CNAME') {
+        try { await cfFetch('/zones/' + zoneId + '/dns_records/' + r.id, creds.apiKey, { method: 'DELETE' }); } catch (e) {}
+      }
+    }
+  } catch (e) {}
+}
+
 async function ensurePublicDomain(creds, pagesName) {
   const domain = pagesName + PUB_SUFFIX;
   try {
@@ -468,18 +485,16 @@ export async function onRequestPost({ request, env }) {
         return json({ success: true, unpublished: name, note: 'Situs belum pernah dideploy — tidak ada yang perlu ditarik.' });
       }
       try {
-        // WAJIB: lepas semua custom domain dulu — Pages menolak delete project
-        // selama masih ada domain custom terpasang (error "you must first delete
-        // all custom domains associated with your project").
-        try {
-          const dl = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains', creds.apiKey);
-          const doms = (dl && dl.result) || [];
-          for (const d of doms) {
-            try {
-              await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains/' + encodeURIComponent(d.name), creds.apiKey, { method: 'DELETE' });
-            } catch (e2) {}
-          }
-        } catch (eD) {}
+        // Cloudflare menolak menghapus project Pages yang masih punya custom domain
+        // terpasang (termasuk subdomain gratis <project>.clinqoo.biz.id) —
+        // lepaskan semua domain dulu, lalu hapus project.
+        let doms = [];
+        try { doms = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains', creds.apiKey) || []; } catch (e) { doms = []; }
+        for (const d of (doms || [])) {
+          if (!d || !d.name) continue;
+          try { await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains/' + d.name, creds.apiKey, { method: 'DELETE' }); } catch (e) {}
+          if (d.name.endsWith(PUB_SUFFIX)) await removePublicDomainDns(creds, d.name);
+        }
         await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name, creds.apiKey, { method: 'DELETE' });
       } catch (e) {
         if (e.code !== 8000007) {
