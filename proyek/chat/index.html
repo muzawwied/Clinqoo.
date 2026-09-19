@@ -291,20 +291,20 @@
            (bukan sekadar pencarian info — lihat isInfoOnlyToolCalls di JS). */
         .toolcalls-card { border: none; border-radius: 0; background: transparent; overflow: visible; box-shadow: none; }
         body.dark-mode .toolcalls-card { border: none; background: transparent; box-shadow: none; }
-        .toolcalls-summary { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 0; margin: 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 13px; font-weight: 600; color: #1f2937; transition: opacity 0.15s ease; }
+        /* Monokrom abu2, bersih — terinspirasi pill "Thought for Xs" tapi beda: pakai
+           badge lingkaran outline (bukan icon polos) + teks tetap menyertakan jumlah langkah. */
+        .toolcalls-summary { display: flex; align-items: center; gap: 8px; width: 100%; padding: 6px 0; margin: 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 13px; font-weight: 500; color: #6b7280; transition: opacity 0.15s ease; }
         .toolcalls-summary:hover { opacity: 0.75; }
-        body.dark-mode .toolcalls-summary { color: #e5e7eb; }
+        body.dark-mode .toolcalls-summary { color: #9ca3af; }
         body.dark-mode .toolcalls-summary:hover { opacity: 0.8; }
-        .toolcalls-badge { width: 26px; height: 26px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #eef2f7; color: #475569; }
-        body.dark-mode .toolcalls-badge { background: #222228; color: #cbd5e1; }
-        .toolcalls-badge.ok { background: #e8f7ef; color: #16a34a; }
-        .toolcalls-badge.err { background: #fdecec; color: #dc2626; }
-        body.dark-mode .toolcalls-badge.ok { background: rgba(22,163,74,0.15); color: #4ade80; }
-        body.dark-mode .toolcalls-badge.err { background: rgba(220,38,38,0.15); color: #f87171; }
+        .toolcalls-badge { width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: none; border: 1.5px solid #b8bec7; color: #6b7280; }
+        body.dark-mode .toolcalls-badge { border-color: #46464e; color: #9ca3af; }
+        .toolcalls-badge.ok { border-color: #b8bec7; color: #6b7280; }
+        .toolcalls-badge.err { border-color: #d9a3a3; color: #a35555; }
+        body.dark-mode .toolcalls-badge.ok { border-color: #46464e; color: #9ca3af; }
+        body.dark-mode .toolcalls-badge.err { border-color: #6b4040; color: #c98080; }
         .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.18s ease; color: #9ca3af; }
         .toolcalls-summary.open .tc-chevron { transform: rotate(180deg); }
-        .toolcalls-count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(99,102,241,0.09); color: #6366f1; white-space: nowrap; }
-        body.dark-mode .toolcalls-count { background: rgba(99,102,241,0.16); color: #a5b4fc; }
         .toolcalls-livebar { height: 2px; width: 100%; background: linear-gradient(90deg, transparent 0%, #6366f1 30%, #8b5cf6 50%, #6366f1 70%, transparent 100%); background-size: 220% 100%; animation: tc-sweep 1.6s ease-in-out infinite; }
         @keyframes tc-sweep { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
         .toolcalls-list { display: flex; flex-direction: column; border-top: none; border-left: 2px solid #eef0f3; margin-left: 12px; padding-left: 6px; animation: tc-fadein 0.2s ease; }
@@ -1421,19 +1421,13 @@
                     : `Selesai — ${msg.toolCalls.length} langkah`);
             const badgeClass = running ? '' : (errCount > 0 ? ' err' : ' ok');
             const summaryIcon = running
-                ? '<i class="ph-bold ph-circle-notch tc-spin text-[14px]"></i>'
-                : (errCount > 0 ? '<i class="ph-bold ph-warning text-[14px]"></i>' : '<i class="ph-bold ph-check text-[14px]"></i>');
-            const countChip = running
-                ? `<span class="toolcalls-count">${msg.toolCalls.length} langkah</span>`
-                : (errCount > 0
-                    ? `<span class="toolcalls-count">${(msg.toolCalls.length - errCount)}/${msg.toolCalls.length}</span>`
-                    : `<span class="toolcalls-count">${msg.toolCalls.length} langkah</span>`);
+                ? '<i class="ph-bold ph-circle-notch tc-spin text-[12px]"></i>'
+                : (errCount > 0 ? '<i class="ph-bold ph-x text-[10px]"></i>' : '<i class="ph-bold ph-check text-[11px]"></i>');
             return `
                 <div class="mb-1.5 toolcalls-card fade-in">
                     <button type="button" class="toolcalls-summary${groupOpen ? ' open' : ''}" onclick="toggleToolCallsGroup('${msg.id}')">
                         <span class="toolcalls-badge${badgeClass}">${summaryIcon}</span>
                         <span>${escText(summaryText)}</span>
-                        ${countChip}
                         <i class="ph-bold ph-caret-down tc-chevron text-[12px]"></i>
                     </button>
                     ${running ? '<div class="toolcalls-livebar"></div>' : ''}
@@ -1519,9 +1513,9 @@
                         } else if (msg.processType === 'read') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Reading URL...'}</span></div>`;
                         } else if (msg.processType === 'file') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Menganalisis...'}</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Analyzing...'}</span></div>`;
                         } else if (msg.processType === 'image') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Membuat...'}</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Generating...'}</span></div>`;
                         } else {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Thinking...'}</span></div>`;
                         }
@@ -2290,25 +2284,25 @@
             return { text: finalObj.text || '', model: finalObj.model, session_id: finalObj.session_id, tool_calls: finalObj.tool_calls };
         }
 
-        // Label progres dari aksi tool AI di sisi klien (workspace browser)
+        // Client-side tool progress label (English — professional & consistent)
         function clientToolProgressLabel(tc) {
             const a = tc.args || {};
             const p = String(a.path || '').trim();
             const q = String(a.query || '').trim();
             switch (tc.name) {
-                case 'list_items': return 'Melihat isi workspace' + (p ? ': ' + p : '…');
-                case 'read_file': return 'Membaca file' + (p ? ': ' + p : '…');
-                case 'write_file': return 'Menulis file' + (p ? ': ' + p : '…');
-                case 'create_folder': return 'Membuat folder' + (p ? ': ' + p : '…');
-                case 'rename_item': return 'Mengganti nama: ' + (p || 'item') + '…';
-                case 'delete_item': return 'Menghapus: ' + (p || 'item') + '…';
-                case 'search_items': return 'Mencari di workspace' + (q ? ': ' + q : '…');
-                case 'web_search': return 'Menelusuri web' + (q ? ': ' + q : '…');
-                case 'read_web_page': return 'Membaca halaman: ' + String(a.url || '') + '…';
-                case 'run_command': return 'Menjalankan perintah di sandbox…';
-                case 'search_clinqoo_kb': return 'Menelusuri basis pengetahuan Clincoo' + (q ? ': ' + q : '…');
-                case 'deploy_project': return 'Publish situs proyek ke internet…';
-                default: return 'Memproses: ' + tc.name + '…';
+                case 'list_items': return 'Viewing workspace' + (p ? ': ' + p : '…');
+                case 'read_file': return 'Reading file' + (p ? ': ' + p : '…');
+                case 'write_file': return 'Writing file' + (p ? ': ' + p : '…');
+                case 'create_folder': return 'Creating folder' + (p ? ': ' + p : '…');
+                case 'rename_item': return 'Renaming: ' + (p || 'item') + '…';
+                case 'delete_item': return 'Deleting: ' + (p || 'item') + '…';
+                case 'search_items': return 'Searching workspace' + (q ? ': ' + q : '…');
+                case 'web_search': return 'Searching the web' + (q ? ': ' + q : '…');
+                case 'read_web_page': return 'Reading page: ' + String(a.url || '') + '…';
+                case 'run_command': return 'Running command in sandbox…';
+                case 'search_clinqoo_kb': return 'Searching Clincoo knowledge base' + (q ? ': ' + q : '…');
+                case 'deploy_project': return 'Publishing project to the internet…';
+                default: return 'Processing: ' + tc.name + '…';
             }
         }
 
