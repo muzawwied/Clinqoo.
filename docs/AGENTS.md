@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 11:25 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 11:45 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,13 @@ Bukan All clear. HEAD wiki Clinqoo. `fcbaed4b` (landing SEO/WA + catatan deploy 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-19 11:45 WIB — Superagent (Base44) chat: hapus UI kapsul mode
+- `proyek/chat/index.html` commit `f5bc944`: UI kapsul "Biasa/Agent" + popup mode di sebelah tombol kirim dihapus (HTML + JS wiring). Logika `agentModeOn` (localStorage) tetap utuh di jalur kirim pesan.
+- Deploy manual project `clinqoo` (Vylonium a393…) sesuai prosedur wiki. `functions/mcp.js` TIDAK ikut (backup privat tidak tersedia di sandbox) — `/mcp` tetap 405 (kondisi sama seperti sebelumnya, bukan regresi baru).
+- Deploy terverifikasi: `/proyek/chat/` live == build (0 `team-mode-capsule`), `/` dan `/auth/` 200.
+- Landing icon box fix (commit `8b23b1a` → revisi `6a7e784` tanpa wrapper box) sudah live di clincoo.buzz.
+
 
 ### 2026-09-19 11:25 WIB — Superagent (Base44) landing: box icon
 - `landing/index.html` commit `8b23b1a`: 4 emoji (🎨🛒🏢💻) bagian "Dibuat untuk siapa saja" diganti box icon SVG stroke monokrom (brush, cart, building, code). Tidak ada perubahan struktur/halaman lain.
