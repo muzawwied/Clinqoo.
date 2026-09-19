@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 11:55 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 12:10 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,11 @@ Bukan All clear. HEAD wiki Clinqoo. `fcbaed4b` (landing SEO/WA + catatan deploy 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 12:10 WIB — Superagent (Base44): editor.clincoo.buzz dipecah + halaman depan dihapus
+- Project Cloudflare Pages `clinqoo-editor` (akun a393…, domain editor.clincoo.buzz) tadinya SATU file index.html 194KB (HTML+CSS+JS inline) + fullstack.js + layout-sidebar.js, dengan redirect JS "tanpa pid → /landing/" yang jadi reload loop tak berujung di editor.clincoo.buzz tanpa pid.
+- Pemecahan: `index.html` (shell markup, 26KB) + `style.css` (39KB, ?v=20260919) + `app.js` (logika utama, 128KB, defer ?v=20260919). Blok redirect pid DIHAPUS — editor.clincoo.buzz sekarang langsung masuk editor (welcome screen) tanpa halaman depan; ?pid=... tetap berfungsi (linking proyek + sinkron D1). `fullstack.js` & `layout-sidebar.js` tidak berubah. `_redirects`: `/* /index.html 200` (SPA fallback, samakan perilaku lama).
+- Source hasil pemecahan tersimpan lokal di workspace Superagent: `build-editor/`. Deploy manual via wrangler ke `clinqoo-editor` (token a393…). Verifikasi live browser: tanpa pid → welcome editor (tidak loop lagi); dengan pid → welcome proyek; "Mulai Coding" → starter files + Monaco jalan.
+
 ### 2026-09-19 11:55 WIB — Superagent (Base44): mode push workspace jadi permanen
 - `proyek/chat/index.html` commit `712c7bc`: tombol toggle `#ws-auto-btn` DIHAPUS (permintaan owner: tanpa CTA, otomatis). Aturan "MODE WORKSPACE LANGSUNG" kini selalu aktif di system prompt tanpa kondisi — AI selalu simpan file/kode via `write_file` ke workspace, tidak menampilkan blok kode di chat (kecuali diminta eksplisit).
 - Deploy manual project `clinqoo` (a393…, tanpa `functions/mcp.js` — `/mcp` tetap 405, kondisi sama). Live == build terverifikasi.
