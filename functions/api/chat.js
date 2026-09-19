@@ -12,6 +12,7 @@
 // akar bug "AI pura-pura membuat file". Mode tools = functionDeclarations saja.
 
 import { PLAN_AI_LIMITS, ADMIN_EMAILS, getEffectivePlanByUserKey } from './plan-helpers.js';
+import { searchClincooBlog } from './blogsearch.js';
 import { consumePackCredit, getActivePacks } from './ai-packs.js';
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
@@ -276,6 +277,9 @@ const WORKSPACE_FUNCTION_DECLARATIONS = [
   { name: 'list_env_vars',
     description: 'Lihat daftar environment variable milik proyek aktif (nilai secret ditampilkan tersembunyi).',
     parameters: { type: 'OBJECT', properties: {} } },
+  { name: 'search_clinqoo_kb',
+    description: 'Cari informasi RESMI tentang Clincoo (platformnya sendiri) di basis pengetahuan internal yang diindeks dari blog resmi blog.clincoo.buzz — founder, visi, fitur produk, editor, AI, template, deploy, saldo, kebijakan/privasi, tips, dll. WAJIB dipanggil untuk pertanyaan tentang Clincoo sebagai produk/perusahaan (siapa pembuatnya, bagaimana cara pakai fitur X, kebijakan apa saja) — hasilnya adalah sumber kebenaran resmi, jangan mengarang. TIDAK untuk mencari info di web umum (pakai web_search) atau membaca file workspace.',
+    parameters: { type: 'OBJECT', properties: { query: { type: 'STRING', description: 'Pertanyaan atau kata kunci tentang Clincoo, contoh: "siapa pendiri clincoo", "cara deploy situs", "kebijakan privasi data".' } }, required: ['query'] } },
   // ===== TOOLS BACKEND FUNCTION (dieksekusi otomatis di server) =====
   { name: 'create_backend_function',
     description: 'Buat backend function baru milik user (ala platform builder): tulis kode -> terpasang -> bisa dipanggil via URL /api/fn/<nama>. Kode adalah badan fungsi async dengan parameter `args` (objek), boleh pakai `fetch` dan `JSON`, WAJIB return nilai. Contoh kode: "const r = await fetch(args.url); return { ok: r.status === 200, status: r.status };". Gunakan saat user minta API endpoint, webhook, integrasi data, atau logika backend.',
@@ -361,10 +365,13 @@ async function tryModels(apiKeys, systemInstruction, contents, tools) {
 // ===== TOOLS SERVER-SIDE (backend function & screenshot) =====
 // Tool ini dieksekusi DI SERVER (bukan di browser user): hasil langsung
 // ditempel ke percakapan dan provider dipanggil lagi — user/frontend tidak berubah.
-const SERVER_TOOLS = new Set(['create_backend_function', 'list_backend_functions', 'delete_backend_function', 'call_backend_function', 'take_screenshot']);
+const SERVER_TOOLS = new Set(['create_backend_function', 'list_backend_functions', 'delete_backend_function', 'call_backend_function', 'take_screenshot', 'search_clinqoo_kb']);
 async function executeServerTool(env, user, tc) {
   const a = tc.args || {};
   try {
+    if (tc.name === 'search_clinqoo_kb') {
+      return await searchClincooBlog(env, a.query || '');
+    }
     if (tc.name === 'take_screenshot') {
       const m = await import('./screenshot.js');
       return await m.takeScreenshot(a.url, a.width);
