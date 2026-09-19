@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 11:45 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 12:05 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,11 @@ Bukan All clear. HEAD wiki Clinqoo. `fcbaed4b` (landing SEO/WA + catatan deploy 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 12:05 WIB — Superagent (Base44): tes akses AI + judul kartu dari Pengaturan Umum
+- Tes akses eksternal: `editor.clincoo.buzz` 200, `clinqoo-blog.pages.dev` 200 (termasuk /legal/syarat-ketentuan), semua endpoint be2 (`/api/chat`, `/api/ai`, `/api/jina`, `/api/project-files`, `/api/deploy`, `/api/projects`, `/api/project-settings`) hidup dan auth gate 401 bekerja normal (bukan 404/500) — redeploy be2 pasca-push sehat. Tes end-to-end AI+tools butuh login user (tidak bisa dari luar).
+- `index.html` commit `b581959`: judul & deskripsi kartu proyek di halaman utama kini pakai `app_name`/`app_desc` dari Pengaturan Umum (`/api/project-settings` + cache `clinqoo_umum_<pid>`), fallback ke `title`/`prompt` asli. `aiName`/`aiDesc` (chat AI) TIDAK dipakai lagi di kartu.
+- Deploy manual project `clinqoo` (a393…, tanpa `functions/mcp.js` — `/mcp` tetap 405, kondisi sama spt sebelumnya). Live == build terverifikasi.
+
 
 ### 2026-09-19 11:45 WIB — Superagent (Base44) chat: hapus UI kapsul mode
 - `proyek/chat/index.html` commit `f5bc944`: UI kapsul "Biasa/Agent" + popup mode di sebelah tombol kirim dihapus (HTML + JS wiring). Logika `agentModeOn` (localStorage) tetap utuh di jalur kirim pesan.
