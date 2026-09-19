@@ -793,7 +793,7 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
             <div id="term-out"></div>
             <div id="term-in">
               <span id="term-prompt">clinqoo@code:~/project$</span>
-              <input id="term-input" autocomplete="off" spellcheck="false">
+              <input id="term-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
             </div>
           </div>
         </div>
@@ -2509,10 +2509,11 @@ function termRun(raw){
   const line=raw.trim();
   if(!line)return;
   termPrint('clinqoo@code:~/'+(termCwd||'project')+'$ '+line,'cmd');
-  const [c,...args]=line.split(/\s+/);
+  const [cRaw,...args]=line.split(/\s+/);
+  const c=(cRaw||'').toLowerCase();
   let out='';
   if(CMDS[c])out=CMDS[c](args,line);
-  else out='csh: perintah tidak ditemukan: '+c+'\nKetik "help" untuk daftar perintah.';
+  else out='csh: perintah tidak ditemukan: '+cRaw+'\nKetik "help" untuk daftar perintah.';
   if(out)termPrint(out);
 }
 function toggleBottomIfClosed(){if(!bottomOpen){bottomOpen=true;$('#bottom').classList.remove('hidden');}}
