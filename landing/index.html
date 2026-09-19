@@ -50,9 +50,13 @@
   .rise { animation: floatUp .6s ease both; }
   .rise-d1 { animation-delay: .08s; } .rise-d2 { animation-delay: .16s; } .rise-d3 { animation-delay: .24s; }
   .card-hover { transition: transform .25s ease, box-shadow .25s ease; }
-  #untuk-siapa .card-hover, #untuk-siapa .card-hover:hover { box-shadow: none !important; }
-  #untuk-siapa .card-hover, #untuk-siapa .card-hover:hover { box-shadow: none !important; }
   .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.10); }
+  /* Card "Untuk Siapa" bukan CTA: no lift, no shadow, no animasi sama sekali */
+  #untuk-siapa .card-hover, #untuk-siapa .card-hover:hover,
+  #untuk-siapa .card-hover:active, #untuk-siapa .card-hover:focus,
+  #untuk-siapa .card-hover:focus-visible {
+    transform: none !important; box-shadow: none !important; transition: none !important;
+  }
   details.faq summary::-webkit-details-marker { display: none; }
   details.faq summary { cursor: pointer; list-style: none; }
   details.faq summary .chev { transition: transform .2s ease; }
