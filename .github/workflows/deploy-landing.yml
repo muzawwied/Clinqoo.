@@ -1,0 +1,27 @@
+name: Deploy Landing (proxy www.clincoo.buzz)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['landing/**']
+
+concurrency:
+  group: pages-deploy-landing
+  cancel-in-progress: true
+
+jobs:
+  deploy-landing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+      - name: Pasang wrangler
+        run: npm install -g wrangler
+      - name: Deploy landing ke project clincoo (proxy)
+        run: npx wrangler pages deploy landing --project-name=clincoo --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
