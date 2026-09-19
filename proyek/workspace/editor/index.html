@@ -841,14 +841,6 @@ let project, savedSnap;
 /* struktur berkas Clincoo (folder->[item]) dikonversi ke berkas rata.   */
 const _QP=new URLSearchParams(location.search);
 const LINK_PID=_QP.get('id')||_QP.get('pid')||'';
-/* Menu Clincoo di sidebar: bawa id proyek aktif ke halaman Workspace / Agent Clincoo */
-(function(){
-  var b='/';
-  var q=LINK_PID?('?id='+encodeURIComponent(LINK_PID)):'';
-  var w=document.getElementById('sb-link-workspace'),a=document.getElementById('sb-link-agent');
-  if(w)w.href=b+'proyek/workspace/'+q;
-  if(a)a.href=b+'proyek/chat/'+q;
-})();
 const LINK_NAME=_QP.get('name')||'Proyek';
 const WS_API='https://clincoo-be2.pages.dev/api/project-files';
 let linkedEmptyFolders=[],cloudTimer=null,cloudOk=null;
