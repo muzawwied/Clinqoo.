@@ -416,7 +416,9 @@
                 return window.location.origin + window.location.pathname;
             if (location.hostname === 'muzawwied.github.io')
                 return 'https://muzawwied.github.io/Clincoo./akun/auth.html';
-            return 'https://clinqoo.pages.dev/auth/';
+            // Dinamis ikut domain aktif (app.clincoo.buzz, clinqoo.pages.dev, dst) —
+            // WAJIB semua domain yang dipakai didaftarkan di Google Console & GitHub OAuth App.
+            return location.origin + '/auth/';
         }
         function startOAuth(provider) {
             const redirectUri = oauthRedirectUri();
