@@ -297,12 +297,11 @@
         .toolcalls-summary:hover { opacity: 0.75; }
         body.dark-mode .toolcalls-summary { color: #9ca3af; }
         body.dark-mode .toolcalls-summary:hover { opacity: 0.8; }
-        .toolcalls-badge { width: 18px; height: 18px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: none; border: 1.5px solid #b8bec7; color: #6b7280; }
-        body.dark-mode .toolcalls-badge { border-color: #46464e; color: #9ca3af; }
-        .toolcalls-badge.ok { border-color: #b8bec7; color: #6b7280; }
-        .toolcalls-badge.err { border-color: #d9a3a3; color: #a35555; }
-        body.dark-mode .toolcalls-badge.ok { border-color: #46464e; color: #9ca3af; }
-        body.dark-mode .toolcalls-badge.err { border-color: #6b4040; color: #c98080; }
+        /* Bare icon tanpa lingkaran/box — persis gaya pill "Thought for Xs": ikon polos + teks + chevron, monokrom abu2 bawaan Clincoo (tanpa ungu). */
+        .toolcalls-badge { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: #6b7280; }
+        body.dark-mode .toolcalls-badge { color: #9ca3af; }
+        .toolcalls-badge.err { color: #a35555; }
+        body.dark-mode .toolcalls-badge.err { color: #c98080; }
         .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.18s ease; color: #9ca3af; }
         .toolcalls-summary.open .tc-chevron { transform: rotate(180deg); }
         .toolcalls-livebar { height: 2px; width: 100%; background: linear-gradient(90deg, transparent 0%, #6366f1 30%, #8b5cf6 50%, #6366f1 70%, transparent 100%); background-size: 220% 100%; animation: tc-sweep 1.6s ease-in-out infinite; }
@@ -1421,8 +1420,8 @@
                     : `Selesai — ${msg.toolCalls.length} langkah`);
             const badgeClass = running ? '' : (errCount > 0 ? ' err' : ' ok');
             const summaryIcon = running
-                ? '<i class="ph-bold ph-circle-notch tc-spin text-[12px]"></i>'
-                : (errCount > 0 ? '<i class="ph-bold ph-x text-[10px]"></i>' : '<i class="ph-bold ph-check text-[11px]"></i>');
+                ? '<i class="ph-bold ph-circle-notch tc-spin text-[15px]"></i>'
+                : (errCount > 0 ? '<i class="ph-bold ph-x text-[15px]"></i>' : '<i class="ph-bold ph-check text-[15px]"></i>');
             return `
                 <div class="mb-1.5 toolcalls-card fade-in">
                     <button type="button" class="toolcalls-summary${groupOpen ? ' open' : ''}" onclick="toggleToolCallsGroup('${msg.id}')">
