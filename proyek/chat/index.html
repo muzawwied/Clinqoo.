@@ -135,7 +135,7 @@
             100% { background-position: 200% center; }
         }
 
-        /* ===== Baris "thinking" Tim AI — satu baris, transparan, ikon titik + teks shimmer ===== */
+        /* ===== Baris "thinking" — satu baris, transparan, ikon titik + teks shimmer ===== */
         .ai-think-line {
             display: flex;
             align-items: center;
@@ -487,16 +487,6 @@
                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="team-mode-menu" class="absolute bottom-full right-0 mb-2 w-60 bg-white text-gray-800 border border-gray-100 rounded2-xl shadow-xl p-1.5 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50 origin-bottom-right">
-                        <button type="button" data-team-mode="kolaborasi" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
-                            <span class="text-sm font-semibold flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                Kolaborasi
-                                <span id="collab-crown-label" class="text-amber-500 shrink-0 cursor-pointer hover:text-amber-600 transition-colors" title="Lihat daftar paket" onclick="event.stopPropagation(); openCollabPlansPopup();"><svg class="w-4 h-4 " fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.019a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"></path></svg></span>
-                                
-                            </span>
-                            <span class="text-xs text-gray-500 mt-0.5">Tim AI berdiskusi</span>
-                        </button>
-                       
                         <button type="button" data-team-mode="biasa" class="team-mode-option w-full flex flex-col items-start px-3 py-2 hover:bg-gray-50 rounded-xl transition-colors text-left cursor-pointer">
                             <span class="text-sm font-semibold flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0zM7 21v-2.13A8.966 8.966 0 0112 21a8.966 8.966 0 004.494-1.13A8.966 8.966 0 0012 21a8.966 8.966 0 01-5-1.13V21z"></path></svg>
@@ -1443,11 +1433,7 @@
                     
                     let processIndicator = '';
                     if (msg.isProcessing) {
-                        if (msg.processType === 'team') {
-                            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            const label = msg.stepActive ? esc(msg.stepActive) : 'Thinking\u2026';
-                            processIndicator = `<div class="ai-think-line"><span class="ai-think-dots"><span></span><span></span><span></span></span><span class="ai-think-text" id="status-text-${msg.id}">${label}</span></div>`;
-                        } else if (msg.processType === 'search') {
+                        if (msg.processType === 'search') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
                         } else if (msg.processType === 'read') {
                             processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Reading URL...</span></div>`;
@@ -1807,17 +1793,15 @@
 
         // ===== MODE TIM AI: beberapa model AI berdiskusi lalu membangun web (kuota 5x) =====
         // Pilihan mode lewat capsul dropdown di samping kiri tombol kirim.
-        let teamModeOn = false;
-        try { teamModeOn = localStorage.getItem('clinqoo_team_mode') === '1'; } catch (e) {}
         let agentModeOn = false;
-        try { agentModeOn = localStorage.getItem('clinqoo_agent_mode') === '1' && !teamModeOn; } catch (e) {}
+        try { agentModeOn = localStorage.getItem('clinqoo_agent_mode') === '1'; } catch (e) {}
         const teamCapsule = document.getElementById('team-mode-capsule');
         const teamMenu = document.getElementById('team-mode-menu');
         const teamLabel = document.getElementById('team-mode-label');
         function applyTeamModeStyle() {
             if (!teamCapsule || !teamLabel) return;
-            teamLabel.textContent = agentModeOn ? 'Agent' : (teamModeOn ? 'Kolaborasi' : 'Biasa');
-            const modeActive = teamModeOn || agentModeOn;
+            teamLabel.textContent = agentModeOn ? 'Agent' : 'Biasa';
+            const modeActive = agentModeOn;
             if (modeActive) {
                 teamCapsule.classList.add('bg-gray-900', 'border-gray-900', 'text-white');
                 teamCapsule.classList.remove('border-gray-200', 'text-gray-600');
@@ -1827,7 +1811,7 @@
             }
             document.querySelectorAll('.team-mode-option').forEach(function (btn) {
                 const m = btn.getAttribute('data-team-mode');
-                const active = (m === 'kolaborasi' && teamModeOn) || (m === 'agent' && agentModeOn) || (m === 'biasa' && !teamModeOn && !agentModeOn);
+                const active = (m === 'agent' && agentModeOn) || (m === 'biasa' && !agentModeOn);
                 btn.classList.toggle('bg-gray-100', active);
             });
         }
@@ -1842,211 +1826,9 @@
                 teamMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
             }
         }
-        // ===== Kolaborasi = fitur Paket Pro =====
-        // Cepat: cache langganan (diisi halaman Langganan). Revalidasi server di bawah.
-        var SUB_CACHE_KEY2 = 'clinqoo_subscription_cache';
-        function readSubCache2() { try { return JSON.parse(localStorage.getItem(SUB_CACHE_KEY2) || 'null') || null; } catch (e) { return null; } }
-        function isPlanPro() { var c = readSubCache2(); return !!(c && c.plan && c.plan !== 'Starter'); }
-        function refreshCollabBadge() {
-            var b = document.getElementById('collab-pro-badge');
-            if (b) b.classList.toggle('hidden', isPlanPro());
-            // Label mahkota premium hanya tampil di akun yang belum berlangganan.
-            var c = document.getElementById('collab-crown-label');
-            if (c) c.classList.toggle('hidden', isPlanPro());
-        }
-        function upgradeUrlPro() {
-            var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
-            return base + '/akun/langganan/upgrade/konfirmasi/?plan=Pro&billing=Bulanan';
-        }
-        function showProLockPopup() {
-            // Kolaborasi khusus Paket Pro -> carousel daftar paket (bukan kartu ringkas).
-            var cached = readSubCache2();
-            showCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
-        }
-    // Mahkota diklik -> popup daftar paket (sama seperti fitur Sync GitHub di workspace).
-    async function openCollabPlansPopup() {
-      var cached = readSubCache2();
-      var fresh = cached && cached.plan && ((Date.now() - (cached.ts || 0)) < 15 * 60 * 1000);
-      if (fresh && cached.plan !== 'Starter') return; // sudah Pro: mahkota tidak relevan
-      showCollabPlansModal({ plan: cached ? cached.plan : null, billingCycle: cached ? cached.billingCycle : null });
-      // Revalidasi di background: popup ditutup bila ternyata paket sudah Pro.
-      try {
-        var tok = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || '';
-        var res = await fetch(TOOL_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
-        if (res.ok) {
-          var d = await res.json();
-          if (d && d.plan) {
-            try { localStorage.setItem(SUB_CACHE_KEY2, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
-            refreshCollabBadge();
-            if (d.plan !== 'Starter') {
-              var mp = document.getElementById('upgrade-plans-modal');
-              if (mp) { mp.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); }
-            }
-          }
-        }
-      } catch (e) {}
-    }
-
-function showCollabPlansModal(sub) {
-      if (document.getElementById('upgrade-plans-modal')) return;
-      var m = document.createElement('div');
-      m.id = 'upgrade-plans-modal';
-      var base = (location.pathname.indexOf('/Clincoo') !== -1) ? '/Clincoo.' : '';
-      var current = (sub && sub.plan) ? sub.plan : 'Starter';
-      var billing = (sub && sub.billingCycle) ? sub.billingCycle : 'Bulanan';
-      var checkoutUrl = function (name, cyc) {
-        return base + '/akun/langganan/upgrade/konfirmasi/?plan=' + encodeURIComponent(name) + '&billing=' + encodeURIComponent(cyc || billing);
-      };
-
-      var plans = [
-        { name: 'Starter', tagline: 'Untuk individu yang baru memulai.', price: 'Gratis', per: '', hot: false,
-          items: [
-            ['Hingga 3 proyek aktif', true],
-            ['1 kolaborator per proyek', true],
-            ['Chat AI di setiap proyek (50 pesan/bulan)', true],
-            ['3 template proyek siap pakai', true],
-            ['Tugas terjadwal & notifikasi', true],
-            ['Deploy web 5x per bulan', true],
-            ['Kolaborasi tim lebih besar', false],
-            ['Impor repository GitHub', false]
-          ] },
-        { name: 'Pro', tagline: 'Untuk profesional dan kreator aktif.', price: '49K', per: '/bln', hot: true,
-          items: [
-            ['Hingga 10 proyek aktif', true],
-            ['Hingga 5 kolaborator per proyek', true],
-            ['Semua fitur Starter: chat AI, template & tugas terjadwal', true],
-            ['Deploy web hingga 25x per bulan', true],
-            ['Impor repository GitHub ke workspace', true]
-          ] },
-        { name: 'Bisnis', tagline: 'Untuk tim dan operasi skala besar.', price: '129K', per: '/bln', hot: false,
-          items: [
-            ['Semua fitur Pro', true],
-            ['Hingga 50 proyek aktif', true],
-            ['Hingga 20 kolaborator per proyek', true],
-            ['Kontrol akses & keamanan proyek lanjutan', true],
-            ['Deploy web tanpa batas', true]
-          ] }
-      ];
-
-      var card = function (p) {
-        var isCurrent = (p.name === current);
-        var list = p.items.map(function (it) {
-          return '<li class="flex items-start gap-2.5 text-[13px] ' + (p.hot ? 'text-gray-900 font-medium' : (it[1] ? 'text-gray-700' : 'text-gray-400 opacity-70')) + '">' +
-            (it[1]
-              ? '<svg class="w-4 h-4 shrink-0 ' + (p.hot ? 'text-accent' : 'text-gray-900') + '" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"></path></svg>'
-              : '<svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path></svg>') +
-            '<span>' + it[0] + '</span></li>';
-        }).join('');
-        var btn;
-        if (isCurrent) {
-          btn = '<div class="w-full py-3 bg-gray-50 text-gray-500 border border-gray-200 rounded-xl font-semibold text-sm text-center cursor-not-allowed">Paket Saat Ini</div>';
-        } else if (p.hot) {
-          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-accent rounded-xl font-semibold text-sm text-center transition-all shadow-md active:scale-95">Upgrade ke ' + p.name + '</a>';
-        } else {
-          btn = '<a href="' + checkoutUrl(p.name, billing) + '" class="block w-full py-3 bg-white text-gray-900 border-2 border-gray-200 hover:border-gray-900 hover:bg-gray-50 rounded-xl font-semibold text-sm text-center transition-all">Mulai ' + p.name + '</a>';
-        }
-        return '<div class="w-full shrink-0 px-0.5"><div class="bg-white border ' + (p.hot ? 'border-2 border-accent shadow-xl' : 'border-gray-200') + ' rounded-3xl p-4 sm:p-5 flex flex-col relative text-left">' +
-          (p.hot ? '<div class="absolute top-0 right-0 bg-accent text-[10px] font-bold px-3.5 py-1 rounded-bl-xl rounded-tr-2xl uppercase tracking-wider">Paling Populer</div>' : '') +
-          '<div class="mb-4 ' + (p.hot ? 'mt-2' : '') + '"><h3 class="text-lg font-bold text-gray-900 ' + (p.hot ? 'text-accent' : '') + '">' + p.name + '</h3>' +
-          '<p class="text-xs text-gray-500 mt-0.5">' + p.tagline + '</p></div>' +
-          '<div class="mb-4 flex items-baseline"><span class="text-2xl font-extrabold tracking-tight text-gray-900">' + p.price + '</span><span class="text-xs font-medium text-gray-500 ml-1">' + p.per + '</span></div>' +
-          '<ul class="flex flex-col gap-2.5 mb-4 flex-1">' + list + '</ul>' + btn + '</div></div>';
-      };
-
-      var slides = plans.map(card).join('');
-      var dots = plans.map(function (p, i) {
-        return '<button class="upc-dot rounded-full transition-all duration-200" data-i="' + i + '" style="width:6px;height:6px;background:#d1d5db;"></button>';
-      }).join('');
-
-      var css = document.createElement('style');
-      css.id = 'upgrade-plans-css';
-      css.textContent =
-        '#upgrade-plans-modal .text-accent{color:var(--accent-color,#000000);} ' +
-        '#upgrade-plans-modal .bg-accent{background-color:var(--accent-color,#000000);color:#ffffff;} ' +
-        '#upgrade-plans-modal .border-accent{border-color:var(--accent-color,#000000);} ' +
-        'body.dark-mode #upgrade-plans-modal .text-accent{color:#ffffff !important;} ' +
-        'body.dark-mode #upgrade-plans-modal .bg-accent{background-color:#ffffff !important;color:#000000 !important;} ' +
-        'body.dark-mode #upgrade-plans-modal .border-accent{border-color:#ffffff !important;}';
-
-      m.innerHTML =
-        '<div class="fixed inset-0 z-[95] overflow-y-auto p-3 sm:p-4" style="background:rgba(0,0,0,0.45)">' +
-        '<div class="min-h-full flex items-center justify-center">' +
-        '<div class="bg-white rounded-2xl w-full max-w-sm relative px-4 sm:px-5 pt-9 pb-4 my-2">' +
-        '<button id="upgrade-plans-x" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black flex items-center justify-center transition-colors z-10" aria-label="Tutup"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6 6 18M6 6l12 12"></path></svg></button>' +
-        '<h3 class="text-base font-semibold text-gray-900 text-center pr-6">Mode Kolaborasi</h3>' +
-        '<p class="text-[13px] sm:text-sm text-gray-500 mt-1 text-center leading-snug px-1">Mode kolaborasi tim AI tersedia mulai paket Pro. Paket kamu saat ini: <b>' + current + '</b>.</p>' +
-        '<div class="relative mt-4">' +
-          '<div id="upc-viewport" class="overflow-hidden rounded-2xl" style="touch-action:pan-y;">' +
-            '<div id="upc-track" class="flex transition-transform duration-300 ease-out">' + slides + '</div>' +
-          '</div>' +
-          '<button id="upc-prev" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"></path></svg></button>' +
-          '<button id="upc-next" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-2 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center text-gray-600 hover:text-black transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"></path></svg></button>' +
-        '</div>' +
-        '<div class="flex items-center justify-center gap-2 mt-4">' + dots + '</div>' +
-        '</div></div>';
-      document.body.appendChild(css);
-      document.body.appendChild(m);
-
-      var track = m.querySelector('#upc-track');
-      var dotsEls = m.querySelectorAll('.upc-dot');
-      var idx = 1;
-      function render() {
-        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
-        dotsEls.forEach(function (d, i) {
-          var on = (i === idx);
-          d.style.width = on ? '18px' : '6px';
-          d.style.background = on ? '' : '#d1d5db';
-          d.classList.toggle('bg-accent', on);
-        });
-      }
-      function go(i) { idx = (i + plans.length) % plans.length; render(); }
-      m.querySelector('#upc-prev').addEventListener('click', function () { go(idx - 1); });
-      m.querySelector('#upc-next').addEventListener('click', function () { go(idx + 1); });
-      dotsEls.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.dataset.i, 10)); }); });
-
-      var vp = m.querySelector('#upc-viewport'), sx = null, dx = 0;
-      vp.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; dx = 0; track.style.transition = 'none'; }, { passive: true });
-      vp.addEventListener('touchmove', function (e) {
-        if (sx === null) return;
-        dx = e.touches[0].clientX - sx;
-        var w = vp.offsetWidth;
-        var lo = -(w * (plans.length - 1)) - 30;
-        var trackX = Math.min(Math.max(-(idx * w) + dx, lo), 30);
-        track.style.transform = 'translateX(' + trackX + 'px)';
-      }, { passive: true });
-      vp.addEventListener('touchend', function () {
-        track.style.transition = '';
-        if (Math.abs(dx) > 40) go(dx < 0 ? idx + 1 : idx - 1); else render();
-        sx = null;
-      });
-
-      m.querySelector('#upgrade-plans-x').addEventListener('click', function () { m.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); });
-      m.firstElementChild.addEventListener('click', function (e) { if (e.target === m.firstElementChild) m.remove(); });
-      render();
-    }
-        // Revalidasi plan di background — cache bisa basi setelah upgrade di halaman lain.
-        async function revalidatePlan2() {
-            try {
-                var tok = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || '';
-                var res = await fetch(TOOL_API_BASE + '/api/subscription', { cache: 'no-store', headers: tok ? { Authorization: 'Bearer ' + tok } : {} });
-                if (!res.ok) return;
-                var d = await res.json();
-                if (d && d.plan) {
-                    try { localStorage.setItem(SUB_CACHE_KEY2, JSON.stringify({ plan: d.plan, billingCycle: d.billingCycle || 'Bulanan', ts: Date.now() })); } catch (e) {}
-                    refreshCollabBadge();
-                    if (isPlanPro()) {
-                        var lk = document.getElementById('collab-pro-lock');
-                        if (lk) lk.remove();
-                        var mp = document.getElementById('upgrade-plans-modal');
-                        if (mp) { mp.remove(); var cs = document.getElementById('upgrade-plans-css'); if (cs) cs.remove(); }
-                    }
-                }
-            } catch (e) {}
-        }
+        // ===== Kapsul mode chat: Biasa / Agent (fitur Mode Kolaborasi dihapus) =====
         if (teamCapsule) {
             applyTeamModeStyle();
-            refreshCollabBadge();
-            revalidatePlan2();
             teamCapsule.addEventListener('click', function (e) {
                 e.stopPropagation();
                 toggleTeamMenu(teamMenu.classList.contains('invisible'));
@@ -2055,16 +1837,8 @@ function showCollabPlansModal(sub) {
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     var m = btn.getAttribute('data-team-mode');
-                    if (m === 'kolaborasi' && !isPlanPro()) {
-                        toggleTeamMenu(false);
-                        showProLockPopup();
-                        revalidatePlan2();
-                        return;
-                    }
-                    teamModeOn = (m === 'kolaborasi');
                     agentModeOn = (m === 'agent');
                     try {
-                        localStorage.setItem('clinqoo_team_mode', teamModeOn ? '1' : '0');
                         localStorage.setItem('clinqoo_agent_mode', agentModeOn ? '1' : '0');
                     } catch (err) {}
                     applyTeamModeStyle();
@@ -2076,88 +1850,6 @@ function showCollabPlansModal(sub) {
 
         const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
-
-        // ===== STREAMING PROGRES TIM AI (SSE) =====
-        // Progres BUKAN teks hardcode: backend mengirim output ASLI tiap tahap
-        // (Arsitek/Programmer/Reviewer/Perbaikan) secara real-time; halaman ini
-        // hanya menampilkannya begitu sampai.
-        function handleTeamEvent(d, aiMsgObj) {
-            try {
-                aiMsgObj.stepFeed = aiMsgObj.stepFeed || [];
-                if (d.type === 'stage') {
-                    // Menunggu keluaran ASLI model: status netral "Thinking..." untuk semua
-                    // tahap — tanpa nama peran, tanpa label rekaan. Begitu teks model
-                    // mengalir (event 'think'/'progress'), baris ini otomatis diganti
-                    // kalimat asli yang sedang ditulis model saat itu.
-                    aiMsgObj.stepActive = 'Thinking\u2026'; // netral; otomatis diganti teks asli model begitu 'think'/'progress' mengalir
-                    aiMsgObj._sentDoneLen = 0;
-                    renderMessages();
-                } else if (d.type === 'think') {
-                    // teks pikiran ASLI model: tiap kalimat selesai jadi langkah \u2713,
-                    // kalimat yang sedang ditulis jadi langkah aktif yang shimmer.
-                    let text = String(d.text || '');
-                    // Tahap Arsitek bisa mulai jawaban dengan tag internal [CHAT] saat
-                    // pertanyaan ternyata biasa (bukan build) — jangan tampilkan tag itu,
-                    // biar progres yang muncul murni jawaban asli, bukan jargon internal.
-                    if (d.stage === 'arsitek') text = text.replace(/^\s*\[?chat\]?\s*/i, '');
-                    let prev = aiMsgObj._sentDoneLen || 0;
-                    if (text.length < prev) { prev = 0; aiMsgObj._sentDoneLen = 0; }
-                    const fresh = text.slice(prev);
-                    const m = fresh.match(/^[\s\S]*[.!?\n]/);
-                    if (m) {
-                        const donePart = m[0];
-                        aiMsgObj._sentDoneLen = prev + donePart.length;
-                        donePart.split(/[\n]+/).forEach(function (seg) {
-                            seg.trim().split(/(?<=[.!?])\s+/).forEach(function (s) {
-                                s = s.trim();
-                                if (s) aiMsgObj.stepFeed.push(s.slice(0, 200));
-                            });
-                        });
-                    }
-                    aiMsgObj.stepActive = text.slice(aiMsgObj._sentDoneLen || 0).replace(/\s+/g, ' ').trim().slice(0, 120);
-                    renderMessages();
-                } else if (d.type === 'stage_done') {
-                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 150);
-                    if (short) aiMsgObj.stepFeed.push((d.label ? d.label + ' \u2014 ' : '') + short);
-                    aiMsgObj.stepActive = '';
-                    aiMsgObj._sentDoneLen = 0;
-                    renderMessages();
-                } else if (d.type === 'progress') {
-                    const short = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 150);
-                    if (short) aiMsgObj.stepFeed.push('\u2705 menulis: ' + short);
-                    renderMessages();
-                }
-            } catch (e) {}
-        }
-
-        async function streamTeamResponse(response, aiMsgObj) {
-            const ctype = (response.headers && response.headers.get('content-type')) || '';
-            if (ctype.indexOf('application/json') !== -1) return await response.json(); // backend lama: fallback JSON utuh
-            const reader = response.body.getReader();
-            const dec = new TextDecoder();
-            let buf = '';
-            let finalData = null;
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buf += dec.decode(value, { stream: true });
-                let idx;
-                while ((idx = buf.indexOf('\n\n')) !== -1) {
-                    const block = buf.slice(0, idx);
-                    buf = buf.slice(idx + 2);
-                    for (const line of block.split('\n')) {
-                        if (line.indexOf('data:') !== 0) continue;
-                        let d = null;
-                        try { d = JSON.parse(line.slice(5).trim()); } catch (e) {}
-                        if (!d) continue;
-                        if (d.type === 'done') finalData = d;
-                        else if (d.type === 'error') finalData = { error: d.error || 'Tim AI gagal memproses tugas.', quota_exhausted: !!d.quota_exhausted };
-                        else handleTeamEvent(d, aiMsgObj);
-                    }
-                }
-            }
-            return finalData || { error: 'Sambungan terputus saat Tim AI bekerja. Coba kirim ulang pesanmu.' };
-        }
 
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with ../workspace/) =====
         // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
@@ -2510,7 +2202,7 @@ function showCollabPlansModal(sub) {
             return { success: true, query: query, total: matches.length, items: matches.slice(0, 100) };
         }
 
-        // ===== Konteks workspace untuk AI (mode kolaborasi) =====
+        // ===== Konteks workspace untuk AI =====
         function buildWorkspaceContext() {
             try {
                 const data = wsLoad();
@@ -2547,7 +2239,6 @@ function showCollabPlansModal(sub) {
                     case 'web_search': return await toolWebSearch(args);
                     case 'rename_project': return await toolRenameProject(args);
                     case 'deploy_project': return await toolDeployProject(args);
-                    case 'push_to_github': return await toolPushToGitHub(args);
                     case 'add_env_var': return await toolAddEnvVar(args);
                     case 'list_env_vars': return await toolListEnvVars(args);
                     case 'review_code': return await toolReviewCode(args);
@@ -2635,18 +2326,6 @@ function showCollabPlansModal(sub) {
             return { success: true, url: url, pages_project: d.pages_project || '', file_count: d.fileCount || 0, message: 'Situs berhasil di-deploy' + (url ? ' ke ' + url : '') + '.' };
         }
 
-        async function toolPushToGitHub(args) {
-            const a = args || {};
-            if (!teamModeOn) return { success: false, error: 'push_to_github hanya tersedia di mode Kolaborasi (Tim AI).' };
-            if (!currentProjectId) return { success: false, error: 'Tidak ada proyek aktif. Buka proyek dulu dari daftar proyek.' };
-            const payload = { project_id: currentProjectId, commit_message: a.commit_message || 'Update proyek via Clincoo AI' };
-            if (a.repo) payload.repo = a.repo;
-            const res = await fetch(TOOL_API_BASE + '/api/github-push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const d = await res.json().catch(function () { return {}; });
-            if (!res.ok || d.success === false) return { success: false, error: d.error || ('Push ke GitHub gagal (HTTP ' + res.status + '). Pastikan repo GitHub sudah dihubungkan di pengaturan proyek.') };
-            return { success: true, repo: d.repo || a.repo || '', branch: d.branch || 'main', pushed: d.pushed, total: d.total, message: 'Berhasil mengirim ' + d.pushed + '/' + d.total + ' file ke GitHub (' + (d.repo || a.repo) + '@' + (d.branch || 'main') + ') & deploy dipicu.' };
-        }
-
         async function toolAddEnvVar(args) {
             const key = args && args.key ? String(args.key).trim().toUpperCase() : '';
             const value = args && args.value !== undefined ? String(args.value) : '';
@@ -2731,7 +2410,6 @@ function showCollabPlansModal(sub) {
             else if (requiresImage) processType = 'image';
             else if (requiresSearch) processType = 'search';
             else if (hasAttachment) processType = 'file';
-            if (teamModeOn) processType = 'team';
 
             const aiMsgObj = { 
                 id: generateId(), 
@@ -2801,7 +2479,7 @@ function showCollabPlansModal(sub) {
                         stopGeneration();
                     }
                 }
-            }, teamModeOn ? 300000 : 120000); 
+            }, 120000); 
 
             if (requiresImage) {
                 try {
@@ -2922,7 +2600,7 @@ function showCollabPlansModal(sub) {
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nTOOLS SUPER (WAJIB dipakai aktif, bukan sekadar teori): run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown), web_search (cari info terbaru/real-time di web), rename_project (ganti nama proyek aktif), deploy_project (publish situs proyek aktif ke internet), push_to_github (HANYA tersedia di mode Kolaborasi: kirim semua file proyek ke repo GitHub yang terintegrasi + picu deploy — di mode biasa tool ini TIDAK ada, jangan menyebut/memakainya), add_env_var (tambah/ubah env var proyek), list_env_vars (lihat env var proyek). Gunakan run_command untuk verifikasi perhitungan/kode sebelum menjawab final, web_search/read_web_page untuk pertanyaan yang butuh data terkini, dan deploy_project saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.';
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nHEMAT TOOL (WAJIB): tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa — ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan — jawab LANGSUNG tanpa memanggil tool apa pun. JANGAN memeriksa workspace (list_items/read_file), menjalankan run_command, atau memakai web_search/read_web_page kecuali user meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. Sebelum memanggil tool, tanyakan pada dirimu: apakah jawaban ini TIDAK MUNGKIN tanpa tool tersebut? Kalau masih mungkin dijawab tanpa tool, jangan panggil.\n\nTOOLS (dipakai sesuai kebutuhan, bukan otomatis): run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode yang kompleks — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown, saat user memberi link atau jawaban butuh isi halaman itu), web_search (cari info terbaru/real-time di web, saat pertanyaan butuh data terkini), rename_project (ganti nama proyek aktif saat diminta), deploy_project (publish situs proyek aktif ke internet saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri), add_env_var (tambah/ubah env var proyek saat diminta), list_env_vars (lihat env var proyek saat diminta).\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nOUTPUT BERSIH (WAJIB): jawaban final hanya berisi teks jawaban untuk user. JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], proses/logika berpikirmu, log atau hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai ke dalam jawaban. Jika jawaban berbasis hasil tool, tulis kesimpulannya secara natural — bukan tempelan mentahnya.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup dan pertanyaan memang butuh data itu, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.';
                 
                 try {
                     const apiMessages = [
@@ -2955,7 +2633,7 @@ function showCollabPlansModal(sub) {
                     let resultJson = null;
                     let hopError = null;
                     const apiMessagesWithTools = apiMessages.slice();
-                    const MAX_TOOL_HOPS = teamModeOn ? 12 : 8;
+                    const MAX_TOOL_HOPS = 8;
 
                     for (let hop = 0; hop < MAX_TOOL_HOPS; hop++) {
                         if (!isGenerating) throw new DOMException('Aborted', 'AbortError');
@@ -2968,9 +2646,6 @@ function showCollabPlansModal(sub) {
                                     session_id: currentSessionId || undefined,
                                     project_id: currentProjectId || undefined,
                                     workspace_tools: true,
-                                    team: teamModeOn && hop === 0,
-                                    team_followup: teamModeOn || undefined,
-                                    stream: teamModeOn && hop === 0,
                                     save_user_message: hop === 0
                                 }),
                                 signal: abortController.signal
@@ -2991,15 +2666,11 @@ function showCollabPlansModal(sub) {
                             break;
                         }
 
-                        if (teamModeOn && hop === 0) {
-                            resultJson = await streamTeamResponse(response, aiMsgObj);
-                        } else {
-                            resultJson = await response.json();
-                        }
+                        resultJson = await response.json();
                         if (resultJson.session_id) currentSessionId = resultJson.session_id;
                         if (resultJson.error && (!resultJson.tool_calls || resultJson.tool_calls.length === 0)) {
                             if (resultJson.quota_exhausted) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = resultJson.error; }
-                            else { hopError = new Error(resultJson.error || 'Tim AI gagal memproses tugas.'); }
+                            else { hopError = new Error(resultJson.error || 'AI gagal memproses permintaan.'); }
                             break;
                         }
 

@@ -90,7 +90,7 @@ const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Reset otomati
 
 // System prompt server untuk mode biasa (single) — jaring pengaman bila klien tidak
 // mengirim system prompt sendiri; klien punya versi lebih lengkap (tools super).
-const SINGLE_SYSTEM_PROMPT = 'Kamu adalah Clincoo AI, asisten super cerdas platform web-builder Clincoo. Bahasa: Indonesia, natural dan mudah dipahami. ATURAN: (1) Jika user meminta dibuatkan situs/halaman/aplikasi web atau mengubah file proyek, WAJIB memanggil tool write_file untuk setiap file (path + konten lengkap siap jalan) — DILARANG menulis kode sebagai teks obrolan tanpa menyimpannya. (2) Untuk pertanyaan & obrolan, jawab secara DETAIL, LENGKAP, MENDALAM dan TERSTRUKTUR: kalimat pertama langsung menjawab inti pertanyaan, lalu perdalam dengan penjelasan bertahap, alasan, contoh nyata, langkah praktis, dan tips. JANGAN jawab asal/sekadarnya. (3) JAWAB SESUAI DATA: gunakan data yang benar-benar tersedia — isi percakapan, hasil tool (list_items/read_file), lampiran, dan data real-time yang diberikan — sebagai sumber kebenaran. Jika data belum cukup atau kamu belum yakin, kumpulkan dulu dengan tool yang tersedia; jika tetap tidak ada, katakan jujur bagian mana yang tidak bisa dipastikan. DILARANG mengarang fakta, angka, nama file, isi file, atau hasil yang tidak pernah kamu lihat. (4) Jangan pernah menampilkan proses berpikir internal (mis. "Here\'s a thinking process") — mulai langsung dari inti jawaban.';
+const SINGLE_SYSTEM_PROMPT = 'Kamu adalah Clincoo AI, asisten super cerdas platform web-builder Clincoo. Bahasa: Indonesia, natural dan mudah dipahami. ATURAN: (1) Jika user meminta dibuatkan situs/halaman/aplikasi web atau mengubah file proyek, WAJIB memanggil tool write_file untuk setiap file (path + konten lengkap siap jalan) — DILARANG menulis kode sebagai teks obrolan tanpa menyimpannya. (2) Untuk pertanyaan & obrolan, jawab secara DETAIL, LENGKAP, MENDALAM dan TERSTRUKTUR: kalimat pertama langsung menjawab inti pertanyaan, lalu perdalam dengan penjelasan bertahap, alasan, contoh nyata, langkah praktis, dan tips. JANGAN jawab asal/sekadarnya. (3) JAWAB SESUAI DATA: gunakan data yang benar-benar tersedia — isi percakapan, hasil tool (list_items/read_file), lampiran, dan data real-time yang diberikan — sebagai sumber kebenaran. Jika data belum cukup atau kamu belum yakin, kumpulkan dulu dengan tool yang tersedia; jika tetap tidak ada, katakan jujur bagian mana yang tidak bisa dipastikan. DILARANG mengarang fakta, angka, nama file, isi file, atau hasil yang tidak pernah kamu lihat. (4) Jangan pernah menampilkan proses berpikir internal (mis. "Here\'s a thinking process") — mulai langsung dari inti jawaban (5) HEMAT TOOL: tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa (ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan) yang tidak butuh isi file, data web real-time, atau aksi apa pun — jawab LANGSUNG tanpa memanggil tool. Jangan memeriksa workspace (list_items/read_file) atau memakai run_command/web_search kecuali user memang meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. (6) OUTPUT BERSIH: jawaban final hanya berisi teks jawaban untuk user — JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], log/hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai, ke dalam jawaban.';
 
 const FALLBACK_LIMITS = { monthly: 50, daily: 10 }; // fallback (Starter) — limit asli per paket: PLAN_AI_LIMITS
 const ADMIN_LIMITS = { monthly: 5000, daily: 500 };
@@ -106,17 +106,6 @@ async function aiLimits(env, user) {
     return byPlan;
   } catch (e) {
     return isAdmin ? ADMIN_LIMITS : FALLBACK_LIMITS;
-  }
-}
-
-// Mode Tim AI hanya untuk Pro & Bisnis — diterapkan di server, bukan cuma popup UI.
-async function teamModeAllowed(env, user) {
-  if (ADMIN_EMAILS.has(user.email)) return true;
-  try {
-    const eff = await getEffectivePlanByUserKey(env.DB, user.key);
-    return eff.plan === 'Pro' || eff.plan === 'Bisnis';
-  } catch (e) {
-    return false;
   }
 }
 
@@ -412,16 +401,9 @@ function orBuildTools() {
     function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
   }));
 }
-// push_to_github HANYA tersedia di mode Kolaborasi (Tim AI + hop lanjutannya:
-// klien mengirim team_followup=true selama mode kolaborasi aktif).
-const GITHUB_PUSH_DECLARATION = { name: 'push_to_github',
-  description: 'Kirim semua file proyek aktif ke repo GitHub yang terintegrasi dengan Clincoo, lalu memicu deploy otomatis. Gunakan saat user meminta push/commit/simpan perubahan ke GitHub, atau mempublikasikan situs lewat GitHub.',
-  parameters: { type: 'OBJECT', properties: { repo: { type: 'STRING', description: 'Repo target format owner/name, contoh "muzawwied/situs-ku". Opsional — kosongkan untuk memakai repo yang sudah terhubung di pengaturan proyek.' }, commit_message: { type: 'STRING', description: 'Pesan commit singkat dan deskriptif, contoh "Update halaman utama".' } }, required: ['commit_message'] }
-};
-function workspaceDecls(body) {
-  return (body && (body.team === true || body.team_followup === true))
-    ? WORKSPACE_FUNCTION_DECLARATIONS.concat(GITHUB_PUSH_DECLARATION)
-    : WORKSPACE_FUNCTION_DECLARATIONS;
+// Tools yang diekspos ke model = tools workspace saja (fitur Mode Kolaborasi/Tim AI dihapus).
+function workspaceDecls(_body) {
+  return WORKSPACE_FUNCTION_DECLARATIONS;
 }
 function orTools(list) {
   return (list || WORKSPACE_FUNCTION_DECLARATIONS).map(d => ({
@@ -490,271 +472,6 @@ async function tryOpenRouter(apiKey, messages, tools, models) {
   }
   const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
   return { error: lastError || 'Semua model OpenRouter gagal', statuses, quotaExhausted };
-}
-
-// ===== MODE TIM AI: beberapa model berdiskusi lalu membangun web =====
-// Alur: Arsitek (rencana) -> Programmer (tulis file via tools) -> Reviewer (kritik)
-// -> Perbaikan (programmer revisi). Hasil akhir = tool_calls write_file yang
-// dieksekusi klien seperti biasa. Biaya kuota: 5 (tugas gede), lihat TEAM_COST.
-const TEAM_COST = 5;
-// Pesan saat provider AI kena limit (dipakai di beberapa titik jalur Tim AI).
-const TEAM_BUSY_MSG = 'Server AI sedang sibuk (limit provider). Coba lagi sebentar lagi.';
-// Batas waktu total orkestrasi (ms) — harus di bawah timeout klien 300s.
-// Tahap yang belum jalan saat deadline lewat dilewati (draft tetap dikirim).
-const TEAM_DEADLINE_MS = 150_000;
-const TEAM_STAGE_MODELS = {
-  arsitek: ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter/free'],
-  programmer: ['nvidia/nemotron-3.5-lightning:free', 'nvidia/nemotron-3-super-120b-a12b:free'],
-  reviewer: ['cohere/north-mini-code:free', 'nvidia/nemotron-3-super-120b-a12b:free'],
-  perbaikan: ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free']
-};
-const TEAM_LABELS = {
-  arsitek: 'Arsitek', programmer: 'Programmer', reviewer: 'Reviewer', perbaikan: 'Perbaikan'
-};
-
-
-// ===== KONTEKS MODE TIM AI: Tim melihat workspace & riwayat seperti mode biasa =====
-// File proyek tersinkron di D1 (project_files) — bisa dibaca langsung server-side.
-async function teamWorkspaceSnapshot(env, projectId) {
-  try {
-    if (!projectId || !env.DB) return '(workspace proyek tidak diketahui)';
-    const rows = await env.DB.prepare('SELECT path, LENGTH(content) AS size FROM project_files WHERE project_id = ? ORDER BY path').bind(projectId).all();
-    const files = (rows && rows.results) || [];
-    if (!files.length) return '(workspace masih kosong — semua file akan dibuat baru)';
-    return files.length + ' file:\n' + files.map(f => '- ' + f.path + ' (' + (f.size || 0) + ' karakter)').join('\n');
-  } catch (e) { return '(workspace tidak bisa dibaca)'; }
-}
-async function teamReadFile(env, projectId, path) {
-  try {
-    if (!projectId || !env.DB || !path) return { success: false, error: 'Parameter path wajib.' };
-    const p = String(path).replace(/^\/+/, '');
-    const row = await env.DB.prepare('SELECT content FROM project_files WHERE project_id = ? AND path = ?').bind(projectId, p).first();
-    if (!row) return { success: false, error: 'File tidak ditemukan di workspace: ' + p };
-    return { success: true, path: p, content: String(row.content || '').slice(0, 12000) };
-  } catch (e) { return { success: false, error: e.message }; }
-}
-// Riwayat percakapan (teks user & AI saja) supaya Tim AI punya konteks penuh.
-function teamTranscript(messages) {
-  const parts = [];
-  for (const m of (messages || [])) {
-    if (!m || m.role === 'system') continue;
-    let text = '';
-    if (typeof m.content === 'string') text = m.content;
-    else if (Array.isArray(m.content)) text = m.content.filter(b => b && b.type === 'text').map(b => b.text).join('\n');
-    if (!text) continue;
-    parts.push((m.role === 'user' ? 'USER' : 'CLINQOO') + ': ' + String(text).slice(0, 4000));
-    if (parts.join('\n').length > 9000) break;
-  }
-  return parts.join('\n\n');
-}
-
-// satu panggilan model peran (OR dulu, Gemini cadangan) — tanpa loop, untuk tahap teks (arsitek/reviewer)
-async function teamStage(env, orKey, apiKey, stage, systemPrompt, userText, tools) {
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: userText }
-  ];
-  let r = null;
-  let orQuotaExhausted = false;
-  if (orKey) { r = await tryOpenRouter(orKey, messages, tools || null, TEAM_STAGE_MODELS[stage]); orQuotaExhausted = !!(r && r.quotaExhausted); }
-  if ((!r || r.error) && apiKey.length) {
-    // cadangan Gemini (format konversi sederhana; tools Gemini pakai functionDeclarations)
-    const { systemInstruction, contents } = toGeminiPayload(messages);
-    const gTools = tools ? [{ functionDeclarations: WORKSPACE_FUNCTION_DECLARATIONS }] : null;
-    r = await tryModels(apiKey, systemInstruction, contents, gTools);
-    // limit provider hanya benar-benar "penuh" bila OpenRouter DAN Gemini cadangan sama-sama 429
-    if (r) { r.quotaExhausted = orQuotaExhausted && !!r.quotaExhausted; r.dbgStatuses = r.statuses || null; }
-  }
-  return r || { error: 'Tidak ada provider AI tersedia' };
-}
-
-// Loop multi-hop buat tahap MEMBANGUN (programmer/perbaikan): model kecil biasanya
-// cuma memanggil 1-2 tool per giliran, jadi harus diberi giliran berulang dengan
-// balasan sintetis "sukses" agar dia lanjut menulis file berikutnya — sama seperti
-// loop function-calling di sisi klien (MAX_TOOL_HOPS), tapi berjalan di server untuk
-// tahap Tim AI. Berhenti saat model tidak lagi memanggil tool, atau maxHops tercapai.
-// Tools baca-saja (reviewer): audit isi workspace lama tanpa bisa menulis.
-const READ_FUNCTION_DECLARATIONS = WORKSPACE_FUNCTION_DECLARATIONS.filter(d => ['read_file', 'list_items'].includes(d.name));
-function orReadTools() {
-  return READ_FUNCTION_DECLARATIONS.map(d => ({
-    type: 'function',
-    function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
-  }));
-}
-// QA otomatis deterministik (server-side) — menangkap draft rusak/placeholder yang
-// bisa lolos dari reviewer, supaya user tidak menerima situs setengah jadi.
-function teamQaFindings(calls) {
-  const findings = [];
-  const markers = [/\bTODO\b/i, /\bFIXME\b/i, /lorem ipsum/i, /content truncated/i, /coming soon/i, /akan segera (dilengkapi|tersedia)/i];
-  for (const tc of calls) {
-    const p = String(tc.args.path || '?');
-    const c = String(tc.args.content || '');
-    if (c.trim().length < 150) findings.push('File ' + p + ' terlalu pendek/nyaris kosong (' + c.trim().length + ' karakter) — kemungkinan kerangka kosong, wajib dilengkapi.');
-    for (const m of markers) if (m.test(c)) { findings.push('File ' + p + ' masih mengandung placeholder/teks sementara ("' + m.source.replace(/\\b/g, '') + '") — ganti dengan konten asli.'); break; }
-    if (/\.html?$/i.test(p)) {
-      if (/<html/i.test(c) && !/<\/html>/i.test(c)) findings.push('File ' + p + ' tampak terpotong: ada <html> tanpa </html>.');
-      if ((c.split('<script').length - 1) > (c.split('</script').length - 1)) findings.push('File ' + p + ': ada tag <script> yang tidak ditutup.');
-    }
-    if (/\.js$/i.test(p)) {
-      const ob = (c.match(/{/g) || []).length, cb = (c.match(/}/g) || []).length;
-      if (Math.abs(ob - cb) > 2) findings.push('File ' + p + ': kurung {} tidak seimbang (' + ob + ' vs ' + cb + ') — kemungkinan kode terpotong.');
-    }
-  }
-  return findings;
-}
-// Sanitasi tool_calls: path aman (anti traversal/URL), konten wajar, jumlah dibatasi.
-function sanitizeTeamCalls(calls, cap) {
-  const byPath = new Map();
-  for (const tc of calls) {
-    let p = String(tc.args.path || '').trim().replace(/^\/+/, '');
-    if (!p || p.includes('..') || /^[a-z][a-z0-9+.-]*:\/\//i.test(p)) continue; // tolak path berbahaya
-    const content = String(tc.args.content || '');
-    if (tc.name === 'write_file' && content.trim().length < 10) continue; // jangan menimpa file dengan kosong
-    if (byPath.size >= (cap || 25)) break;
-    byPath.set(p, { name: tc.name, args: { path: p, content: content.slice(0, 130000) } });
-  }
-  return [...byPath.values()];
-}
-async function teamBuildLoop(env, orKey, apiKey, stage, systemPrompt, userText, maxHops, deadline, projectId, readOnly) {
-  const writeHint = readOnly
-    ? '\n\nKamu PUNYA TOOL list_items dan read_file untuk membaca isi workspace proyek (dijalankan otomatis server). Gunakan untuk memverifikasi file lama yang diedit. Setelah audit selesai, berhenti memanggil tool dan tulis laporan akhir.'
-    : '\n\nPENTING: panggil tool write_file untuk BEBERAPA file SEKALIGUS dalam satu giliran bila memungkinkan (paralel). Kalau konten terlalu panjang untuk satu giliran, lanjutkan file berikutnya di giliran sesudahnya sampai SEMUA file dari rencana selesai. Setelah semua file selesai, berhenti memanggil tool dan balas teks singkat "selesai".';
-  const messages = [
-    { role: 'system', content: systemPrompt + writeHint },
-    { role: 'user', content: userText }
-  ];
-  const collected = new Map(); // key: name+':'+path -> tool_call
-  let usedModel = null;
-  let lastText = '';
-  let usedGeminiFallback = false;
-  let orQuotaExhausted = false;
-  let geminiQuotaExhausted = false;
-  let geminiStatuses = null;
-
-  for (let hop = 0; hop < maxHops; hop++) {
-    if (deadline && Date.now() > deadline) break; // jaga total waktu orkestrasi
-    let r = null;
-    const stageTools = readOnly ? orReadTools() : orBuildTools();
-    if (orKey && !usedGeminiFallback) { r = await tryOpenRouter(orKey, messages, stageTools, TEAM_STAGE_MODELS[stage]); if (r && r.error) orQuotaExhausted = !!r.quotaExhausted; }
-    if ((!r || r.error) && apiKey.length) {
-      // Gemini cadangan: satu kali percobaan non-loop (format tool berbeda), lalu hentikan loop
-      const { systemInstruction, contents } = toGeminiPayload(messages.filter(m => m.role !== 'tool' && !(m.role === 'assistant' && !m.content)));
-      const gTools = [{ functionDeclarations: readOnly ? READ_FUNCTION_DECLARATIONS : BUILD_FUNCTION_DECLARATIONS }];
-      const rg = await tryModels(apiKey, systemInstruction, contents, gTools);
-      if (!rg.error) {
-        usedModel = rg.model; lastText = rg.text || lastText;
-        for (const tc of (rg.tool_calls || [])) if (!readOnly && (tc.name === 'write_file' || tc.name === 'create_folder') && tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
-      } else {
-        geminiQuotaExhausted = !!rg.quotaExhausted;
-        if (!geminiStatuses && rg.statuses) geminiStatuses = rg.statuses;
-      }
-      usedGeminiFallback = true;
-      break; // Gemini fallback tidak diloop (format function_call beda skema)
-    }
-    if (!r || r.error) break;
-    usedModel = r.model || usedModel;
-    lastText = r.text || lastText;
-    if (!r.tool_calls || !r.tool_calls.length) break; // model selesai, tidak ada tool call lagi
-
-    const rawList = r.raw_tool_calls || r.tool_calls.map((tc, i) => ({ id: 'call_h' + hop + '_' + i, type: 'function', function: { name: tc.name, arguments: JSON.stringify(tc.args || {}) } }));
-    messages.push({ role: 'assistant', content: r.text || null, tool_calls: rawList });
-    for (let i = 0; i < r.tool_calls.length; i++) {
-      const tc = r.tool_calls[i];
-      if (!readOnly && (tc.name === 'write_file' || tc.name === 'create_folder') && tc.args && tc.args.path) collected.set(tc.name + ':' + tc.args.path, tc);
-      const callId = (rawList[i] && rawList[i].id) || tc.id || ('call_h' + hop + '_' + i);
-      // Tim AI bisa MEMBACA workspace: list/read dijalankan server-side dari D1
-      let toolResult = { success: true };
-      if (tc.name === 'read_file') toolResult = await teamReadFile(env, projectId, (tc.args || {}).path);
-      else if (tc.name === 'list_items') toolResult = { success: true, listing: await teamWorkspaceSnapshot(env, projectId) };
-      else if (readOnly) toolResult = { success: false, error: 'Tahap ini hanya boleh membaca (read-only).' };
-      messages.push({ role: 'tool', tool_call_id: callId, content: JSON.stringify(toolResult).slice(0, 13000) });
-    }
-  }
-  // limit provider "penuh" hanya bila tidak ada file yang berhasil dibuat SAMA SEKALI
-  // dan kedua provider (yang dicoba) memang kena 429
-  const quotaExhausted = collected.size === 0 && (orQuotaExhausted || geminiQuotaExhausted);
-  return { tool_calls: [...collected.values()], text: lastText, model: usedModel, quotaExhausted, dbgStatuses: geminiStatuses || null };
-}
-
-async function teamOrchestrate(env, orKey, apiKey, userPrompt, oTools, ctx) {
-  const transcript = [];
-  ctx = ctx || {};
-  const projectId = ctx.projectId || null;
-  const ctxBlock =
-    (ctx.workspace ? 'ISI WORKSPACE PROYEK SAAT INI:\n' + ctx.workspace + '\n\n' : '') +
-    (ctx.transcript ? 'RIWAYAT PERCAKAPAN SEBELUMNYA (perhatikan bila relevan, jangan diulang):\n' + ctx.transcript + '\n\n' : '') +
-    (ctx.systemPrompt ? 'IDENTITAS & KEMAMPUAN PLATFORM (untuk konteks saja):\n' + ctx.systemPrompt + '\n\n' : '');
-
-  // Tahap 1: Arsitek menyusun rencana situs
-  const r1 = await teamStage(env, orKey, apiKey, 'arsitek',
-    'Kamu adalah ARSITEK WEB paling senior di Tim AI Clincoo — teliti, analitis, dan tidak menebak. Baca permintaan user dengan saksama dan bangun rencana SEPENUHNYA dari data yang benar-benar ada di permintaan itu (tujuan, topik, nama, fitur, preferensi gaya, data/konten yang disebut user). Setiap keputusan desain & fitur harus BISA DITELUSURI ke permintaan user — jangan menambah fitur fiktif, jangan mengarang konten. Jika ada bagian permintaan yang ambigu, tulis asumsi masuk akal Anda secara eksplisit di bagian ASUMSI. Format rencana (maks 300 kata): 1) Tujuan & gaya visual (palet warna spesifik, nuansa, tipografi), 2) Daftar file yang harus dibuat — HANYA file inti yang benar-benar diperlukan, MAKSIMAL 8 file, boleh menggabung CSS/JS ke dalam HTML bila membuat situs tetap bagus (path + isi singkat + fitur penting tiap file), 3) Struktur navigasi antar halaman, 4) ASUMSI & catatan untuk programmer. Rencana ini akan dikerjakan oleh programmer, jadi harus sangat spesifik dan bisa langsung dieksekusi. JIKA workspace di konteks sudah berisi file, rencanakan EDIT/menimpa file itu (programmer bisa membacanya dengan tool read_file) alih-alih memaksakan semua file baru. JANGAN menulis kode HTML/CSS/JS di tahap ini.',
-    ctxBlock + 'PERMINTAAN USER:\n' + userPrompt, null);
-  if (r1.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r1.quotaExhausted, stageFailed: 'arsitek', dbgStatuses: r1.dbgStatuses || null };
-  transcript.push({ stage: 'arsitek', model: r1.model, text: (r1.text || '').slice(0, 1500) });
-
-  // Tahap 2: Programmer membangun file web (loop multi-hop — 1 file per giliran)
-  const startedAt = Date.now();
-  const r2 = await teamBuildLoop(env, orKey, apiKey, 'programmer',
-    'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo — standar kualitas produksi tinggi. Kerjakan rencana arsitek berikut SECARA PENUH dan SETIA pada rencana: setiap file yang disebut rencana wajib dibuat, konten harus sesuai data/asumsi yang tertulis di rencana (jangan mengarang konten baru yang bertentangan dengan rencana). Buat SEMUA file web memakai tool write_file dengan konten lengkap per file: HTML semantik yang rapi, CSS modern responsif (mobile-first, kontras baik, spacing konsisten), JS vanilla tanpa error, komentar seperlunya, SEO dasar (title, meta description, lang). Setiap halaman harus benar-benar siap jalan saat dibuka — bukan kerangka kosong. DILARANG KERAS menulis TODO, FIXME, "lorem ipsum", "coming soon", atau teks pengganti lain — QA otomatis server akan menolaknya dan hasilmu dikembalikan untuk diperbaiki. Konten nyata dan lengkap di setiap file. Sebelum menulis, baca ulang rencana dan pastikan tidak ada file yang terlewat. Tool list_items dan read_file tersedia untuk MEMBACA isi workspace yang sudah ada — WAJIB dipakai sebelum mengubah file lama supaya konten aslinya tidak hilang.',
-    ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || ''), 6, startedAt + TEAM_DEADLINE_MS, projectId);
-  if (r2.error) return { error: TEAM_BUSY_MSG, quotaExhausted: !!r2.quotaExhausted, transcript, stageFailed: 'programmer', dbgStatuses: r2.dbgStatuses || null };
-  const draftCalls = sanitizeTeamCalls((r2.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content), 25);
-  if (!draftCalls.length) {
-    // programmer cuma ngobrol tanpa bikin file valid -> gagal tahap ini
-    return { error: r2.quotaExhausted ? TEAM_BUSY_MSG : 'Programmer tidak menghasilkan file', quotaExhausted: !!r2.quotaExhausted, transcript, text: r2.text };
-  }
-  transcript.push({ stage: 'programmer', model: r2.model, text: draftCalls.map(tc => 'write_file: ' + tc.args.path).join(', ') });
-
-  // Tahap 3: Reviewer mengaudit hasil
-  const filesDigest = draftCalls.filter(tc => tc.name === 'write_file').map(tc => {
-    const p = tc.args.path || '?';
-    const c = String(tc.args.content || '');
-    return 'FILE ' + p + ' (' + c.length + ' karakter)\nawal:\n' + c.slice(0, 700) + '\nakhir:\n' + c.slice(-400);
-  }).join('\n\n');
-  // QA otomatis (deterministik): placeholder, file nyaris kosong, potongan rusak
-  const qaFindings = teamQaFindings(draftCalls);
-  if (Date.now() - startedAt > TEAM_DEADLINE_MS - 40_000) {
-    // waktu hampir habis — kirim draft apa adanya, lewati review
-    transcript.push({ stage: 'reviewer', model: null, text: '(dilewati — batas waktu tercapai)' });
-    return { transcript, tool_calls: draftCalls, text: '', fixModel: null };
-  }
-  const r3 = await teamBuildLoop(env, orKey, apiKey, 'reviewer',
-    'Kamu adalah REVIEWER KODE paling ketat di Tim AI Clincoo — audit berbasis bukti, bukan opini. Bandingkan file web berikut terhadap rencana arsitek, POTONGAN ISI FILE yang diberikan, hasil QA OTOMATIS, dan data permintaan user. Periksa sistematis: (1) apakah semua file di rencana sudah dibuat, (2) link & navigasi antar file valid, (3) HTML tidak rusak (tag tidak tertutup, struktur rusak), (4) JS tidak ada error sintaks/logika yang jelas, (5) fitur inti rencana benar-benar ada, bukan cuma teks pengganti, (6) konten sesuai data/asumsi rencana — tidak ada konten yang jelas-jelas dikarang atau bertentangan, (7) verifikasi klaim QA otomatis di bawah. Jika workspace sudah punya file lama, WAJIB baca file yang diedit memakai tool read_file sebelum menilai konsistensinya. Laporkan HANYA masalah fatal/penting dengan menyebut bukti persisnya (nama file + kutipan singkat) — maks 180 kata. Format: daftar temuan bernomor dengan nama file; jika semuanya baik tulis hanya: SEMUA OK. Jangan minta perubahan kosmetik.',
-    ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE YANG DIBUAT:\n' + filesDigest + '\n\nHASIL QA OTOMATIS (verifikasi bila relevan):\n' + (qaFindings.length ? qaFindings.join('\n') : '(tidak menemukan masalah mekanis)'), 3, startedAt + TEAM_DEADLINE_MS, projectId, true);
-  const reviewText = (r3.text || '').trim();
-  transcript.push({ stage: 'reviewer', model: r3.model, text: (reviewText.slice(0, 1000) || '(reviewer tidak menghasilkan laporan — QA otomatis dipakai)') });
-
-  // Tahap 4: Perbaikan hanya jika reviewer menemukan masalah
-  const needsFix = (reviewText.length > 0 && !/^semua ok/i.test(reviewText)) || qaFindings.length > 0;
-  let finalCalls = draftCalls;
-  let fixModel = null;
-  if (needsFix) {
-    const r4 = await teamBuildLoop(env, orKey, apiKey, 'perbaikan',
-      'Kamu adalah PROGRAMMER WEB senior di Tim AI Clincoo — presisi tinggi. Setiap temuan reviewer di bawah harus dibereskan SESUAI BUKTI yang ia sebutkan. Tulis ULANG HANYA file yang bermasalah/hilang dengan tool write_file (overwrite penuh, konten lengkap diperbaiki, tetap menjaga bagian file yang sudah benar). Jangan mengulang file yang sudah benar dan tidak disebut reviewer, jangan mengubah gaya/struktur yang tidak dikeluhkan. Baca ulang temuan reviewer satu per satu dan pastikan semuanya tertangani.',
-      ctxBlock + 'RENCANA ARSITEK:\n' + (r1.text || '') + '\n\nFILE SAAT INI (draft, tulis ulang bila perlu):\n' + filesDigest + '\n\nTEMUAN REVIEWER:\n' + (reviewText || '(tidak ada laporan reviewer)') + '\n\nTEMUAN QA OTOMATIS (WAJIB dibereskan semuanya):\n' + (qaFindings.length ? qaFindings.join('\n') : '(tidak ada)'), 4, startedAt + TEAM_DEADLINE_MS, projectId);
-    const fixCalls = sanitizeTeamCalls((r4.tool_calls || []).filter(tc => tc.name === 'write_file' && tc.args && tc.args.path && tc.args.content), 25);
-    if (!r4.error && fixCalls.length) {
-      // gabung: draft + revisi (revisi menimpa path sama)
-      const byPath = new Map();
-      for (const tc of draftCalls) byPath.set(tc.args.path, tc);
-      for (const tc of fixCalls) byPath.set(tc.args.path, tc);
-      finalCalls = [...byPath.values()];
-      fixModel = r4.model;
-      transcript.push({ stage: 'perbaikan', model: r4.model, text: fixCalls.map(tc => 'revisi: ' + tc.args.path).join(', ') });
-    }
-  }
-
-  return { transcript, tool_calls: finalCalls, text: '', fixModel };
-}
-
-function teamTranscriptText(transcript) {
-  const icons = { arsitek: '\u{1F9D1}\u200D\u{1F4BB}', reviewer: '\u{1F50D}', perbaikan: '\u{1F527}' };
-  return transcript.map(t => {
-    const label = (TEAM_LABELS[t.stage] || t.stage) + ' (' + (t.model || '?') + ')';
-    const icon = icons[t.stage] || '';
-    const body = (t.text || '').slice(0, 1200);
-    return icon + ' [' + label + ']\n' + body;
-  }).join('\n\n');
 }
 
 // GET /api/chat — status kredit AI akun ini (dipakai UI: ClincooPay top-up + banner kredit habis)
@@ -846,7 +563,7 @@ export async function onRequestPost({ request, env }) {
 
     let messages = Array.isArray(body.messages) ? body.messages : [];
     // Mode biasa: pastikan selalu ada system prompt (klien biasanya mengirim sendiri)
-    if (body.team !== true && !messages.some(m => m && m.role === 'system')) {
+    if (!messages.some(m => m && m.role === 'system')) {
       messages = [{ role: 'system', content: SINGLE_SYSTEM_PROMPT }, ...messages];
     }
     if (messages.length === 0) {
@@ -860,21 +577,11 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // --- Mode Tim AI: wajib paket Pro/Bisnis (enforcement server, bukan cuma UI) ---
-    if (body.team === true) {
-      const allowed = await teamModeAllowed(env, user);
-      if (!allowed) {
-        return new Response(JSON.stringify({ need_pro: true, error: 'Mode Tim AI hanya tersedia untuk Paket Pro dan Bisnis. Upgrade paketmu untuk mengaktifkannya.' }), {
-          status: 402, headers: { 'Content-Type': 'application/json', ...CORS }
-        });
-      }
-    }
-
     // --- Kuota: hanya pesan asli (hop 0). Hop tool lanjutan tidak dihitung ---
-    // Mode Tim AI = tugas gede: 1 pesan memakan TEAM_COST kuota.
+    // Hop tool lanjutan tidak dihitung.
     const isFirstHop = body.save_user_message !== false;
     if (isFirstHop) {
-      const q = await quotaCheck(env, user, body.team === true ? TEAM_COST : 1);
+      const q = await quotaCheck(env, user, 1);
       if (q.exceeded) {
         return new Response(JSON.stringify({ quota_exhausted: true, error: q.message || QUOTA_MSG_MONTHLY, scope: q.scope, limit: q.limit, used: q.count }), {
           status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '3600', ...CORS }
@@ -884,45 +591,6 @@ export async function onRequestPost({ request, env }) {
 
     const orKey = await getOpenRouterKey(env);
     const apiKey = await getGeminiKeys(env); // array kunci Gemini (utama + cadangan)
-
-    // ===== MODE TIM AI: diskusi multi-model lalu bangun web =====
-    if (body.team === true) {
-      const lastUser = [...messages].reverse().find(m => m.role === 'user');
-      const userPrompt = (typeof lastUser?.content === 'string' ? lastUser.content : (Array.isArray(lastUser?.content) ? (lastUser.content.find(b => b && b.type === 'text') || {}).text : '')) || '';
-      if (!userPrompt) {
-        return new Response(JSON.stringify({ error: 'Pesan kosong' }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } });
-      }
-      // Konteks penuh Tim AI: workspace (D1) + riwayat percakapan + identitas platform
-      const sysMsg = messages.find(m => m && m.role === 'system');
-      const teamCtx = {
-        workspace: await teamWorkspaceSnapshot(env, body.project_id || null),
-        transcript: teamTranscript(messages),
-        systemPrompt: sysMsg ? String(sysMsg.content || '').slice(0, 3000) : '',
-        projectId: body.project_id || null
-      };
-      const t = await teamOrchestrate(env, orKey, apiKey, userPrompt, body.workspace_tools === true ? orTools() : null, teamCtx);
-      if (t.error && !t.tool_calls) {
-        // limit/kuota provider penuh -> kunci komposer di klien (sama seperti kuota harian habis)
-        if (t.quotaExhausted) {
-          return new Response(JSON.stringify({ quota_exhausted: true, error: TEAM_BUSY_MSG,
-            stage_failed: t.stageFailed || null,
-            debug: (ADMIN_EMAILS.has(user.email) || String(user.email).startsWith('qa.')) ? { statuses: t.dbgStatuses || null, err: String(t.error || '').slice(0, 200) } : undefined }), {
-            status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '120', ...CORS }
-          });
-        }
-        // error lain: jangan pernah bocorkan detail mentah provider ke user
-        return new Response(JSON.stringify({ error: TEAM_ERROR_MSG }), { status: 502, headers: { 'Content-Type': 'application/json', ...CORS } });
-      }
-      const out = {
-        text: (t.tool_calls && t.tool_calls.length
-          ? '\u{1F9E9} Tim AI selesai berdiskusi & membangun:\n' + teamTranscriptText(t.transcript || []) + '\n\n\u2705 Semua file sudah selesai dibuat \u2014 cek hasilnya di halaman Workspace, atau balas di sini kalau masih ada yang mau diubah.'
-          : (t.text || 'Tim AI selesai.') + '\n' + teamTranscriptText(t.transcript || [])),
-        model: 'Tim AI (' + String((t.transcript || []).length + (t.tool_calls ? 1 : 0)) + ' panggilan model)',
-        session_id: body.session_id || ('ls_' + Date.now())
-      };
-      if (t.tool_calls && t.tool_calls.length) out.tool_calls = t.tool_calls;
-      return new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', ...CORS } });
-    }
 
     if (!orKey && !apiKey.length && !env.AI) {
       return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
