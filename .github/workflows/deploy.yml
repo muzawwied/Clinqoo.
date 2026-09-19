@@ -53,3 +53,43 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-production:
+    name: Deploy Produksi (app.clincoo.buzz)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Bersihkan artefak repo (tidak ikut di-publish)
+        run: rm -rf .git .github tests node_modules .wrangler package.json package-lock.json .gitignore debug debug-notif
+
+      - name: Ganti wrangler.toml ke config produksi (akun Vylonium)
+        run: |
+          cat > wrangler.toml <<'EOF'
+          name = "clinqoo"
+          compatibility_date = "2024-09-01"
+          pages_build_output_dir = "."
+
+          # Config deploy PRODUKSI (app.clincoo.buzz) — project clinqoo di akun Vylonium.
+          # Binding sama persis dengan setting dashboard project. JANGAN pakai wrangler.toml
+          # akun be2 di sini (D1 beda akun -> deploy gagal).
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "clincoo-db"
+          database_id = "887e6ab6-8470-4dc0-9345-8e204f994556"
+
+          [ai]
+          binding = "AI"
+          EOF
+
+      - name: Pasang wrangler
+        run: npm install -g wrangler
+
+      - name: Deploy ke Cloudflare Pages (produksi)
+        run: npx wrangler pages deploy . --project-name=clinqoo --branch=main
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_2 }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID_2 }}
