@@ -1412,9 +1412,23 @@
                 return 'Diperbarui baru saja';
             }
 
+            // === Judul & deskripsi kartu proyek: dari Pengaturan Umum (app_name/app_desc), BUKAN dari chat AI ===
+            const umumSettingsMap = {};
+            function umumCacheRead(pid) {
+                try { return JSON.parse(localStorage.getItem('clinqoo_umum_' + (pid || 'default')) || '{}'); } catch (e) { return {}; }
+            }
+            function projCardTitle(proj) {
+                const st = umumSettingsMap[proj.id] || umumCacheRead(proj.id);
+                return escCard(stripMdCard((st && st.app_name) || proj.title || 'Proyek Tanpa Nama'));
+            }
+            function projCardDesc(proj) {
+                const st = umumSettingsMap[proj.id] || umumCacheRead(proj.id);
+                return escCard(stripMdCard((st && st.app_desc) || proj.prompt || ''));
+            }
+
             function createHomeCard(proj) {
-                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
-                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
+                const title = projCardTitle(proj);
+                const desc = projCardDesc(proj);
                 return '<div data-proj-id="'+proj.id+'" class="relative w-56 sm:w-60 flex-shrink-0 border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20" tabindex="0" onclick="openProject(\''+proj.id+'\')" onkeydown="if(event.key===\'Enter\') openProject(\''+proj.id+'\')">' +
                     '<div class="w-full h-28 bg-[#F9FAFB] rounded-xl mb-3.5 p-3 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
                     '<div class="flex items-center justify-between"><div class="w-12 h-2 bg-gray-200 rounded-full"></div><div class="w-3 h-3 rounded-full bg-black/10"></div></div>' +
@@ -1428,8 +1442,8 @@
             }
 
             function createAllCard(proj) {
-                const title = escCard(stripMdCard(proj.aiName || proj.title || 'Proyek Tanpa Nama'));
-                const desc = escCard(stripMdCard(proj.aiDesc || proj.prompt || ''));
+                const title = projCardTitle(proj);
+                const desc = projCardDesc(proj);
                 return '<div data-proj-id="'+proj.id+'" class="relative w-full bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group flex items-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20" tabindex="0" onclick="openProject(\''+proj.id+'\')" onkeydown="if(event.key===\'Enter\') openProject(\''+proj.id+'\')">' +
                     '<div class="w-20 h-20 shrink-0 bg-[#F9FAFB] rounded-xl p-2.5 flex flex-col justify-between border border-gray-100 group-hover:border-gray-200 transition-colors">' +
                     '<div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div><div class="w-full h-1.5 bg-gray-200 rounded-full"></div>' +
@@ -1667,6 +1681,25 @@
         }
         renderProjects();
         syncProjectsFromServer();
+        // Tarik nama & deskripsi aplikasi tiap proyek dari Pengaturan Umum (backend), lalu render ulang kartu.
+        (function loadUmumSettings() {
+            try {
+                const base = PROJECTS_API.replace(/\/projects$/, '');
+                const tok = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || '';
+                const hdr = tok ? { Authorization: 'Bearer ' + tok } : {};
+                let plist = [];
+                try { plist = JSON.parse(localStorage.getItem('clinqoo_projects') || '[]'); } catch (e) {}
+                Promise.all(plist.map(function (proj) {
+                    return fetch(base + '/project-settings?project_id=' + encodeURIComponent(proj.id), { headers: hdr })
+                        .then(function (r) { return r.ok ? r.json() : null; })
+                        .then(function (d) {
+                            if (d && (d.app_name || d.app_desc)) {
+                                umumSettingsMap[proj.id] = { app_name: d.app_name || '', app_desc: d.app_desc || '' };
+                            }
+                        }).catch(function () {});
+                })).then(function () { try { renderProjects(); } catch (e) {} });
+            } catch (e) {}
+        })();
 
         setTheme(currentThemeMode);
         setAccent(currentAccentName, accentMap[currentAccentName] ? accentMap[currentAccentName].cls : 'bg-gray-900');
