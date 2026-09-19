@@ -3,6 +3,11 @@ name: Deploy Cloudflare Pages
 on:
   push:
     branches: [main]
+    # Push yang hanya dokumen (.md / docs/) tidak perlu deploy ulang situs —
+    # hindari pergantian deployment tiap jam dari laporan audit AGENTS.md.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 concurrency:
