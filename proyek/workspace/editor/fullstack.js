@@ -8,8 +8,8 @@
   function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>')
-      .replace(/"/g, '"').replace(/'/g, '&#39;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function dbStoreKey() {
     return 'clinqoo_db_' + (typeof LINK_PID !== 'undefined' && LINK_PID ? LINK_PID : 'local');

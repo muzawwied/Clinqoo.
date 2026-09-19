@@ -158,7 +158,6 @@ svg{flex-shrink:0}
 .cloud-meta{font-size:11px;color:var(--text3);margin:8px 2px}
 .cloud-note{font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.5}
 /* AI panel — gaya chat Clincoo */
-#p-ai.show{display:flex;flex-direction:column;min-height:0;height:100%}
 .ai-chat{flex:1;overflow-y:auto;padding:8px 4px 10px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .ai-empty{margin:auto;text-align:center;padding:24px 14px;display:flex;flex-direction:column;gap:14px;align-items:center}
 .ai-empty .t{font-size:15px;font-weight:600}
@@ -224,6 +223,10 @@ svg{flex-shrink:0}
 .sd-back:hover{color:var(--text);border:1px solid var(--line)}
 /* ===== Pages (Chat AI, Templates, dll) ===== */
 .page{position:fixed;inset:0;z-index:900;background:var(--bg);display:none;flex-direction:column}
+/* Chat AI: di desktop jadi panel setengah layar di kanan, di mobile tetap layar penuh */
+@media (min-width:781px){
+  #page-chat{left:auto;right:0;width:50%;max-width:760px;border-left:1px solid var(--line);box-shadow:-24px 0 60px rgba(0,0,0,.3)}
+}
 .page.show{display:flex}
 .page-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg2)}
 .page-head .ph-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
@@ -497,6 +500,9 @@ body.light #statusbar{background:#131316}
   #sidebar{position:fixed;left:0;top:48px;bottom:54px;width:min(300px,85vw);z-index:640;display:none;box-shadow:var(--shadow)}
   #sidebar.mobile-open{display:flex}
   #sidebar.hidden{display:none}
+  #btn-chat{display:none}
+  #activitybar a.act-btn{display:none}
+  #activitybar > div{display:none!important}
   .tree-item{padding:9px 8px;font-size:13.5px}
   .dd-item{padding:11px 12px;font-size:13.5px}
   #bottom{height:38%}
@@ -644,9 +650,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
     <button class="act-btn" data-panel="explorer" title="Berkas (Ctrl+Shift+E)">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>
     </button>
-    <button class="act-btn" data-panel="ai" title="AI Koding">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg>
-    </button>
     
     <div class="spacer"></div>
     <button class="act-btn" onclick="openSettings()" title="Pengaturan">
@@ -682,20 +685,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
           <div id="git-list" style="margin-top:10px"></div>
         </div>
       </div>
-
-      <div class="panel" id="p-ai">
-        <div class="ai-chat" id="ai-chat"></div>
-        <div class="ai-composer">
-          <div class="ai-card">
-            <textarea id="ai-input" rows="1" placeholder="Tanya apa saja..."></textarea>
-            <div class="ai-comp-row">
-              <button id="ai-attach" onclick="importFiles()" title="Unggah berkas ke proyek"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
-              <button id="ai-send" onclick="aiSend()" title="Kirim"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg></button>
-            </div>
-          </div>
-        </div>
-      </div>
-
 
     </div>
   </div>
@@ -1479,8 +1468,7 @@ function showPanel(name){
   $$('.panel').forEach(p=>p.classList.remove('show'));
   $('#p-'+name).classList.add('show');
   $$('.act-btn').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));
-  $('#sb-title').textContent={explorer:'Explorer',git:'Kontrol Sumber',ai:'AI Koding'}[name]||name;
-  if(name==='ai')aiBoot();
+  $('#sb-title').textContent={explorer:'Explorer',git:'Kontrol Sumber'}[name]||name;
 }
 $$('.act-btn').forEach(b=>{
   if(!b.dataset.panel)return;
@@ -1673,44 +1661,8 @@ function doCommitFromModal(){
   $('#git-msg').value=v;
   doCommit();
 }
-/* ---------- AI Koding (sidebar chat ala Clincoo, dengan tools) ---------- */
+/* ---------- AI helpers (dipakai halaman Chat AI) ---------- */
 const AI_API='https://clincoo-be2.pages.dev/api/chat';
-const TOOL_API_BASE='https://clincoo-be2.pages.dev';
-let aiHistory=[],aiBusy=false,aiBooted=false;
-function aiScroll(){const c=$('#ai-chat');if(c)c.scrollTop=c.scrollHeight;}
-function aiBoot(){
-  if(aiBooted)return;aiBooted=true;
-  aiRenderEmpty();
-  const inp=$('#ai-input');
-  inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(120,inp.scrollHeight)+'px';});
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();e.stopPropagation();aiSend();}});
-}
-function aiRenderEmpty(){
-  const c=$('#ai-chat');
-  c.innerHTML=`<div class="ai-empty"><div class="t">✦ AI Koding</div><div class="d">Asisten AI yang bisa menulis kode langsung ke berkas proyek, menjalankan perintah, mencari di web, sampai membenarkan error.</div><div class="ai-chips">
-  <button class="ai-chip" onclick="aiQuick('Buatkan halaman kontak yang rapi lalu tulis langsung ke proyek')">Buat halaman</button>
-  <button class="ai-chip" onclick="aiQuick('Cari dan perbaiki bug di berkas aktif, tulis hasil perbaikannya ke berkasnya')">Perbaiki error</button>
-  <button class="ai-chip" onclick="aiQuick('Jalankan perhitungan 2026 * 17 + 99 lewat sandbox untuk verifikasi')">Jalankan perintah</button></div></div>`;
-}
-function aiQuick(t){const inp=$('#ai-input');inp.value=t;aiSend();}
-function aiAddUser(text){
-  const c=$('#ai-chat');
-  const emp=c.querySelector('.ai-empty');if(emp)emp.remove();
-  const d=document.createElement('div');
-  d.className='ai-msg user';
-  d.innerHTML='<div class="ai-bubble-user"></div>';
-  d.firstElementChild.textContent=text;
-  c.appendChild(d);aiScroll();
-}
-function aiAddRow(){
-  const c=$('#ai-chat');
-  const d=document.createElement('div');
-  d.className='ai-msg airow';
-  d.innerHTML='<div class="ai-av">✦</div><div class="ai-body"></div>';
-  c.appendChild(d);
-  return d.querySelector('.ai-body');
-}
-function aiDots(body){body.innerHTML='<div class="ai-dots"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></div>';}
 function aiMd(text){
   const parts=String(text).split(/```/);
   let html='';
@@ -1728,21 +1680,6 @@ function aiMd(text){
     }
   }
   return html;
-}
-function aiFinalize(body,text){
-  body.innerHTML=aiMd(text);
-  aiScroll();
-}
-async function aiType(body,text){
-  const span=document.createElement('span');
-  body.innerHTML='';body.appendChild(span);
-  const step=Math.max(2,Math.ceil(text.length/420));
-  for(let i=0;i<text.length;i+=step){
-    span.textContent+=text.slice(i,i+step);
-    aiScroll();
-    await new Promise(r=>setTimeout(r,8));
-  }
-  aiFinalize(body,text);
 }
 function aiCopy(btn){
   const pre=btn.closest('.ai-codeblock').querySelector('.ai-cb-pre');
@@ -1786,12 +1723,6 @@ async function applyCodeAnimated(path,code){
   persist();renderTabs();renderTree();
   toast('Selesai — '+nameOf(path));
 }
-function aiErr(msg){
-  const body=aiAddRow();
-  body.innerHTML='<div class="ai-warn"></div>';
-  body.firstElementChild.textContent=msg;
-  aiScroll();
-}
 function aiContext(){
   const files=Object.keys(project).slice(0,60).join(', ');
   let ctx='\n\n[Berkas proyek: '+(files||'(kosong)')+']';
@@ -1800,186 +1731,6 @@ function aiContext(){
     ctx+='\n[Berkas aktif: '+activePath+' — '+c.length+' karakter]\n'+c;
   }
   return ctx;
-}
-/* ----- Eksekusi tool lokal / backend ----- */
-const AI_TOOL_LABELS={list_items:'Melihat isi proyek',read_file:'Membaca berkas',write_file:'Menulis berkas',create_folder:'Membuat folder',rename_item:'Mengganti nama',delete_item:'Menghapus',search_items:'Mencari di proyek',run_command:'Menjalankan perintah',read_web_page:'Membuka halaman web',web_search:'Menelusuri web',rename_project:'Mengganti nama proyek',deploy_project:'Deploy proyek',add_env_var:'Mengatur env',list_env_vars:'Melihat env'};
-function aiToolCardStart(name,args){
-  const c=$('#ai-chat');
-  const d=document.createElement('div');
-  d.className='ai-toolcard';
-  let detail='';
-  try{detail=args&&(args.path||args.command||args.query||args.url||args.new_name||args.key)?' — '+String(args.path||args.command||args.query||args.url||args.new_name||args.key).slice(0,42):'';}catch(e){}
-  d.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span class="tc-t">'+esc(AI_TOOL_LABELS[name]||name)+esc(detail)+'</span>';
-  c.appendChild(d);aiScroll();
-  return d;
-}
-function aiToolCardDone(card,ok){
-  if(ok)card.classList.add('ok');else card.classList.add('err');
-}
-async function aiExecTool(name,args){
-  try{
-    switch(name){
-      case 'list_items':{
-        const base=(args&&args.path&&args.path!=='root')?String(args.path).replace(/^root\//,'').replace(/\/+$/,''):'';
-        const items=[];
-        Object.keys(project).forEach(p=>{
-          if(base&&p!==base&&!p.startsWith(base+'/'))return;
-          const rest=base?(p===base?'':p.slice(base.length+1)):p;
-          if(!rest)return;
-          const seg=rest.split('/')[0];
-          const label=rest.includes('/')?seg+'/':seg;
-          if(!items.includes(label))items.push(label);
-        });
-        return {success:true,items:items};
-      }
-      case 'read_file':{
-        const p=String(args.path||'');
-        return project[p]!==undefined?{success:true,path:p,content:String(project[p]).slice(0,12000)}:{success:false,error:'Berkas tidak ditemukan: '+p};
-      }
-      case 'write_file':{
-        const p=String(args.path||'').replace(/^\/+/,'');
-        if(!p)return{success:false,error:'Path wajib.'};
-        if(project[p]===undefined)project[p]='';
-        await applyCodeAnimated(p,String(args.content||''));
-        return {success:true,path:p,note:'Kode sudah ditulis ke berkas di editor.'};
-      }
-      case 'create_folder':{
-        const p=String(args.path||'').replace(/\/+$/,'');
-        if(!p)return{success:false,error:'Path wajib.'};
-        if(!linkedEmptyFolders.includes(p))linkedEmptyFolders.push(p);
-        persist();renderTree();
-        return {success:true,path:p};
-      }
-      case 'rename_item':{
-        const p=String(args.path||''),nn=String(args.new_name||'').replace(/.*\//,'');
-        if(project[p]===undefined)return{success:false,error:'Berkas tidak ditemukan: '+p};
-        if(!nn)return{success:false,error:'Nama baru wajib.'};
-        const np=p.split('/').slice(0,-1).join('/')+(p.includes('/')?'/':'')+nn;
-        project[np]=project[p];delete project[p];
-        if(models[p]){models[np]=models[p];delete models[p];}
-        const ti=tabs.indexOf(p);if(ti>=0)tabs[ti]=np;
-        if(activePath===p)activePath=np;
-        persist();renderAll();
-        return {success:true,from:p,to:np};
-      }
-      case 'delete_item':{
-        const p=String(args.path||'');
-        const victims=Object.keys(project).filter(k=>k===p||k.startsWith(p+'/'));
-        if(!victims.length)return{success:false,error:'Tidak ditemukan: '+p};
-        victims.forEach(k=>{
-          delete project[k];
-          if(models[k]){try{models[k].dispose();}catch(e){}delete models[k];}
-          const ti=tabs.indexOf(k);if(ti>=0)closeTab(k);
-        });
-        const fi=linkedEmptyFolders.indexOf(p);if(fi>=0)linkedEmptyFolders.splice(fi,1);
-        persist();renderAll();
-        return {success:true,deleted:victims.length};
-      }
-      case 'search_items':{
-        const q=String(args.query||'').toLowerCase();
-        const hits=Object.keys(project).filter(p=>p.toLowerCase().includes(q)).slice(0,30);
-        return {success:true,results:hits};
-      }
-      case 'run_command':{
-        const cmd=args&&args.command?String(args.command):'';
-        if(!cmd)return{success:false,error:'Parameter command wajib.'};
-        let CI;
-        try{
-          const mod=await import('https://esm.sh/@e2b/code-interpreter?bundle&target=es2022');
-          CI=mod.CodeInterpreter||((mod.default||{}).CodeInterpreter);
-        }catch(e){return{success:false,error:'Gagal memuat sandbox eksekusi kode.'};}
-        if(!CI)return{success:false,error:'Sandbox tidak tersedia.'};
-        let key='';
-        try{
-          const kr=await fetch(TOOL_API_BASE+'/api/e2b');
-          if(kr.ok){const kj=await kr.json();key=kj.apiKey||'';}
-        }catch(e){}
-        if(!key)return{success:false,error:'Sandbox belum dikonfigurasi di backend Clincoo.'};
-        const sbx=await CI.create({apiKey:key});
-        try{
-          const exe=await sbx.commands.run(cmd);
-          return {success:!exe.exitCode,command:cmd,stdout:String(exe.stdout||'').slice(0,3800),stderr:String(exe.stderr||(exe.error&&exe.error.message)||'').slice(0,1500)};
-        }finally{try{await sbx.close();}catch(e){}}
-      }
-      case 'read_web_page':{
-        const url=String(args.url||'');
-        if(!/^https?:\/\//i.test(url))return{success:false,error:'URL wajib (http/https).'};
-        const res=await fetch(TOOL_API_BASE+'/api/jina',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'read',query:url})});
-        const d=await res.json();
-        if(!res.ok)return{success:false,error:d.error||'Gagal membaca halaman.'};
-        return {success:true,url:url,content:String(d.text||'').slice(0,3800)};
-      }
-      case 'web_search':{
-        const q=String(args.query||'');
-        if(!q)return{success:false,error:'Query wajib.'};
-        const res=await fetch(TOOL_API_BASE+'/api/jina',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'search',query:q})});
-        const d=await res.json();
-        if(!res.ok)return{success:false,error:d.error||'Pencarian gagal.'};
-        const results=(d.data&&Array.isArray(d.data)?d.data:[]).slice(0,6).map(r=>({title:r.title||'',url:r.url||'',snippet:String(r.content||r.description||'').slice(0,300)}));
-        return {success:true,query:q,results:results};
-      }
-      default:
-        return {success:false,error:'Tool "'+name+'" hanya tersedia di halaman Chat Clincoo, bukan di editor.'};
-    }
-  }catch(e){
-    return {success:false,error:'Gagal menjalankan tool: '+(e&&e.message?e.message:String(e))};
-  }
-}
-async function aiSend(){
-  const inp=$('#ai-input');
-  const text=inp.value.trim();
-  if(!text||aiBusy)return;
-  if(!ccAuthHeaders().Authorization){
-    aiAddUser(text);inp.value='';inp.style.height='auto';
-    aiErr('AI aktif setelah kamu login di Clincoo. Buka editor ini dari halaman proyek Clincoo agar sesi tersambung.');
-    return;
-  }
-  aiBusy=true;$('#ai-send').disabled=true;
-  aiAddUser(text);
-  inp.value='';inp.style.height='auto';
-  const body=aiAddRow();
-  aiDots(body);
-  aiHistory.push({role:'user',content:text});
-  const apiMessages=[{role:'system',content:'Kamu Clincoo AI, asisten koding di editor Clincoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: kalimat pertama langsung ke inti jawaban, lalu kembangkan pembahasan secara mendalam. Susun jawaban dengan Markdown rapi — judul bagian (###), daftar bertingkat, blok kode dengan penjelasan per bagian, contoh konkret, langkah-langkah pengerjaan, best practices, catatan penting, dan saran langkah lanjutan. Pikirkan kritis sebelum menjawab: pertimbangkan beberapa pendekatan, pilih yang terbaik, jelaskan alasannya. Kamu punya TOOLS: list_items, read_file, write_file (menulis kode langsung ke berkas editor — user melihat prosesnya), create_folder, rename_item, delete_item, search_items, run_command (sandbox bash/python), read_web_page, web_search. Gunakan tools untuk menjalankan perintah, membenahkan error (baca berkas, perbaiki, tulis balik), atau mengatur proyek — sebut singkat aksi yang kamu lakukan. ATURAN IDENTITAS: kamu hanya bernama Clincoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
-  aiHistory.slice(-12).forEach(m=>apiMessages.push({role:m.role,content:m.content}));
-  const last=apiMessages[apiMessages.length-1];
-  last.content+=aiContext();
-  const MAX_HOPS=8;
-  try{
-    for(let hop=0;hop<MAX_HOPS;hop++){
-      const res=await fetch(AI_API,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},ccAuthHeaders()),body:JSON.stringify({messages:apiMessages,workspace_tools:true,session_id:'clinqoo-editor',save_user_message:hop===0})});
-      if(!res.ok){
-        let msg='AI sedang tidak bisa dihubungi ('+res.status+').';
-        try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clincoo berakhir — buka kembali editor dari halaman proyek Clincoo.';}catch(e){}
-        aiErr(msg);
-        if(hop===0)aiHistory.pop();
-        return;
-      }
-      const d=await res.json();
-      if(d.tool_calls&&d.tool_calls.length){
-        apiMessages.push({role:'assistant',content:d.tool_calls.map(tc=>({type:'function_call',name:tc.name,args:tc.args||{},thought_signature:tc.thought_signature||undefined}))});
-        const responses=[];
-        for(const tc of d.tool_calls){
-          const card=aiToolCardStart(tc.name,tc.args||{});
-          const result=(tc.result!==undefined&&tc.result!==null)?tc.result:await aiExecTool(tc.name,tc.args||{});
-          aiToolCardDone(card,!(result&&typeof result==='object'&&result.error));
-          responses.push({type:'function_response',name:tc.name,result:result});
-        }
-        apiMessages.push({role:'user',content:responses});
-        continue;
-      }
-      const finalText=(d&&d.text||'').trim();
-      if(!finalText){aiErr('AI tidak mengembalikan jawaban. Coba lagi.');return;}
-      aiHistory.push({role:'ai',content:finalText});
-      await aiType(body,finalText);
-      return;
-    }
-    aiErr('Tugas terlalu panjang — AI berhenti di tengah proses. Coba pecah permintaanmu.');
-  }catch(e){
-    aiErr('Koneksi ke AI gagal — periksa jaringan lalu coba lagi.');
-  }finally{
-    aiBusy=false;const sb=$('#ai-send');if(sb)sb.disabled=false;
-  }
 }
 /* ---------- Sistem Pages: Chat AI & Templates ---------- */
 function closePages(){$$('.page').forEach(p=>p.classList.remove('show'));}
