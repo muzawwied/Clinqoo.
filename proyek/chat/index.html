@@ -1416,8 +1416,8 @@
             const summaryText = running
                 ? 'Menjalankan Tugas'
                 : (errCount > 0
-                    ? `Selesai — ${msg.toolCalls.length} langkah (${errCount} gagal)`
-                    : `Selesai — ${msg.toolCalls.length} langkah`);
+                    ? `Everything is finished (${errCount} gagal)`
+                    : 'Everything is finished');
             const badgeClass = running ? '' : (errCount > 0 ? ' err' : ' ok');
             const summaryIcon = running
                 ? '<i class="ph-bold ph-circle-notch tc-spin text-[15px]"></i>'
