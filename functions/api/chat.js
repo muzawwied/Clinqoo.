@@ -530,6 +530,19 @@ export async function onRequestGet({ request, env }) {
   }
 }
 
+// Teks progres real-time — diturunkan dari aksi tool yang DIPILIH AI SENDIRI
+// (nama tool + argumennya), bukan daftar status palsu yang berputar.
+function serverProgressText(tc) {
+  const a = tc.args || {};
+  if (tc.name === 'search_clinqoo_kb') return 'Menelusuri basis pengetahuan Clincoo: ' + String(a.query || '').slice(0, 60) + '…';
+  if (tc.name === 'take_screenshot') return 'Mengambil tangkapan layar situs…';
+  if (tc.name === 'create_backend_function') return 'Membuat fungsi backend: ' + String(a.name || '') + '…';
+  if (tc.name === 'call_backend_function') return 'Menjalankan fungsi backend: ' + String(a.name || '') + '…';
+  if (tc.name === 'list_backend_functions') return 'Melihat daftar fungsi backend…';
+  if (tc.name === 'delete_backend_function') return 'Menghapus fungsi backend: ' + String(a.name || '') + '…';
+  return 'Memproses: ' + tc.name + '…';
+}
+
 export async function onRequestPost({ request, env }) {
   try {
     if (!rateLimitOk(clientIp(request))) {
@@ -605,6 +618,20 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
+    // Mode streaming progres (NDJSON): klien minta status real-time.
+    // Urutan baris: {"t":"thinking"} -> {"t":"progress","text":...} -> {"t":"final",...}
+    // atau {"t":"error",...}. Klien lama (tanpa stream:true) tetap dapat JSON biasa.
+    const useStream = body.stream === true;
+    let streamWriter = null, streamSend = null, streamReadable = null;
+    if (useStream) {
+      const ts = new TransformStream();
+      streamReadable = ts.readable;
+      streamWriter = ts.writable.getWriter();
+      const enc = new TextEncoder();
+      streamSend = (obj) => streamWriter.write(enc.encode(JSON.stringify(obj) + '\n')).catch(() => {});
+      streamSend({ t: 'thinking' });
+    }
+
     // Mode workspace tools.
     // Jalur Gemini: HANYA functionDeclarations (tanpa google_search — kombinasi
     // keduanya ditolak Gemini API dan memicu bug JSON palsu).
@@ -617,7 +644,8 @@ export async function onRequestPost({ request, env }) {
     // Payload bergambar -> langsung Gemini (model gratis OpenRouter non-vision).
     const hasImages = messages.some(m => Array.isArray(m?.content) && m.content.some(b => b && b.type === 'image_url' && b.image_url?.url));
 
-    // PROVIDER UTAMA: OpenRouter. Gagal/limit/tanpa kunci -> cadangan Gemini.
+    // PROVIDER UTAMA: Gemini (kualitas jawaban & function calling paling benar).
+    // Gagal/limit/tanpa kunci -> cadangan OpenRouter (model gratis).
     // TOOLS SERVER (backend function & screenshot) dieksekusi di sini: hasil
     // ditempel ke pesan lalu provider dipanggil lagi (max 4 hop server) —
     // jalur klien (frontend) tidak berubah sama sekali.
@@ -625,12 +653,12 @@ export async function onRequestPost({ request, env }) {
     const workMessages = messages; // array sama — kita append blok function_call/response
     for (let sHop = 0; sHop <= 4; sHop++) {
       r = null;
-      if (orKey && !hasImages) {
-        r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
-      }
-      if ((!r || r.error) && apiKey.length) {
+      if (apiKey.length) {
         const { systemInstruction, contents } = toGeminiPayload(workMessages);
         r = await tryModels(apiKey, systemInstruction, contents, gTools);
+      }
+      if ((!r || r.error) && orKey && !hasImages) {
+        r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
       }
       // Fallback terakhir: Workers AI (teks saja, tanpa kunci) — chat gak mati total
       if ((!r || r.error) && env.AI && !hasImages) {
@@ -642,7 +670,10 @@ export async function onRequestPost({ request, env }) {
       if (!stCalls.length) break; // jawaban final ATAU tools klien -> keluar, kirim ke klien
       const clientCalls = (r.tool_calls || []).filter(tc => !SERVER_TOOLS.has(tc.name));
       const results = [];
-      for (const tc of stCalls) results.push(await executeServerTool(env, user, tc));
+      for (const tc of stCalls) {
+        if (streamSend) streamSend({ t: 'progress', text: serverProgressText(tc) });
+        results.push(await executeServerTool(env, user, tc));
+      }
       // catat pemanggilan & hasil ke percakapan (format blok sama seperti klien)
       workMessages.push({ role: 'assistant', content: (r.tool_calls || []).map(tc => ({ type: 'function_call', name: tc.name, args: tc.args || {}, thought_signature: tc.thought_signature || undefined })) });
       workMessages.push({ role: 'user', content: stCalls.map((tc, i) => ({ type: 'function_response', name: tc.name, result: results[i] })) });
@@ -659,6 +690,26 @@ export async function onRequestPost({ request, env }) {
     }
     if (!r || (r.error && !apiKey.length && !env.AI)) {
       if (!r) r = { error: 'Tidak ada provider AI tersedia' };
+    }
+
+    if (r && !r.error && streamSend) streamSend({ t: 'progress', text: 'Menyusun jawaban…' });
+
+    if (useStream) {
+      if (r && r.error) {
+        streamSend({ t: 'error', error: r.error, quota_exhausted: !!r.quotaExhausted });
+      } else {
+        const outS = {
+          text: r.text || '',
+          model: r.model,
+          session_id: body.session_id || ('ls_' + Date.now())
+        };
+        if (r.tool_calls) outS.tool_calls = r.tool_calls;
+        streamSend({ t: 'final', ...outS });
+      }
+      await streamWriter.close().catch(() => {});
+      return new Response(streamReadable, {
+        headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-cache', ...CORS }
+      });
     }
 
     if (r.error && r.quotaExhausted) {
