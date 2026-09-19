@@ -2573,32 +2573,47 @@
 
                     for (let hop = 0; hop < MAX_TOOL_HOPS; hop++) {
                         if (!isGenerating) throw new DOMException('Aborted', 'AbortError');
-                        try {
-                            response = await fetch(GEMINI_PROXY_URL, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    messages: apiMessagesWithTools,
-                                    session_id: currentSessionId || undefined,
-                                    project_id: currentProjectId || undefined,
-                                    workspace_tools: true,
-                                    save_user_message: hop === 0
-                                }),
-                                signal: abortController.signal
-                            });
-                        } catch (err) {
-                            if (err.name === 'AbortError') throw err;
-                            response = null;
+
+                        // Retry otomatis (maks 3x) khusus untuk gangguan jaringan sesaat
+                        // (koneksi putus/timeout di tengah proses generate beberapa file) atau
+                        // error gateway sementara (502/503/504) — supaya proses panjang yang
+                        // butuh banyak hop tidak gagal total hanya karena satu koneksi drop.
+                        const MAX_HOP_RETRIES = 3;
+                        let hopQuotaHit = false, hopErrDetail = '';
+                        for (let attempt = 0; attempt <= MAX_HOP_RETRIES; attempt++) {
+                            if (!isGenerating) throw new DOMException('Aborted', 'AbortError');
+                            try {
+                                response = await fetch(GEMINI_PROXY_URL, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        messages: apiMessagesWithTools,
+                                        session_id: currentSessionId || undefined,
+                                        project_id: currentProjectId || undefined,
+                                        workspace_tools: true,
+                                        save_user_message: hop === 0
+                                    }),
+                                    signal: abortController.signal
+                                });
+                            } catch (err) {
+                                if (err.name === 'AbortError') throw err;
+                                response = null;
+                            }
+
+                            const transientStatus = response && [502, 503, 504].indexOf(response.status) !== -1;
+                            if ((response && response.ok) || (!transientStatus && response)) break; // sukses ATAU error definitif (400/401/403/dst) -> jangan retry
+                            if (attempt < MAX_HOP_RETRIES) {
+                                await new Promise(r => setTimeout(r, 600 * Math.pow(2, attempt))); // backoff: 0.6s, 1.2s, 2.4s
+                                continue;
+                            }
                         }
 
                         if (!response || !response.ok) {
-                            let errDetail = '';
-                            let quotaHit = false;
                             if (response) {
-                                try { const errJson = await response.json(); errDetail = errJson.error || ''; quotaHit = !!errJson.quota_exhausted; } catch(e) {}
+                                try { const errJson = await response.json(); hopErrDetail = errJson.error || ''; hopQuotaHit = !!errJson.quota_exhausted; } catch(e) {}
                             }
-                            if (quotaHit) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = errDetail; }
-                            else { hopError = new Error(errDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'}`); }
+                            if (hopQuotaHit) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = hopErrDetail; }
+                            else { hopError = new Error(hopErrDetail || `Proxy AI HTTP error! status: ${response ? response.status : 'No response'} (setelah ${MAX_HOP_RETRIES + 1}x percobaan)`); }
                             break;
                         }
 
