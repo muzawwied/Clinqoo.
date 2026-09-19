@@ -12,3 +12,9 @@ database_id = "49b6fed3-a237-46e3-ab2b-b0de31cc862b"
 # Catatan: format objek (bukan [[ai]]) — wrangler >= 4.x menolak format array
 [ai]
 binding = "AI"
+
+# D1 Database wallet (wallet.clincoo.buzz) — dipakai sync laporan users-live.md
+[[d1_databases]]
+binding = "WALLET_DB"
+database_name = "wallet-db"
+database_id = "59e17832-235d-4bb4-b09e-a7f5f9c1f8db"
