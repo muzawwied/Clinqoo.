@@ -103,6 +103,10 @@ svg{flex-shrink:0}
 #sb-reopen{position:fixed;left:0;top:96px;z-index:520;width:16px;height:52px;border-radius:0 9px 9px 0;background:var(--bg3);border:1px solid var(--line2);border-left:none;color:var(--text3);display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:2px 0 8px rgba(0,0,0,.18)}
 #sb-reopen:hover{color:var(--text);background:var(--bg4)}
 #sb-reopen.show{display:flex}
+/* Cegah auto-zoom saat fokus ketikan di HP: input font <16px memicu zoom di iOS/Android.
+   .inputarea = textarea tersembunyi Monaco (tempat ngetik code) — tampilan kode tetap ukuran asli. */
+.monaco-editor .inputarea{font-size:16px!important}
+@media (pointer:coarse){input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select{font-size:16px!important}}
 @media (max-width:780px){#sb-reopen{display:none!important}}
 .panel-head{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 14px;flex-shrink:0}
 .panel-head .t{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text2)}
