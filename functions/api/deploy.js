@@ -468,6 +468,18 @@ export async function onRequestPost({ request, env }) {
         return json({ success: true, unpublished: name, note: 'Situs belum pernah dideploy — tidak ada yang perlu ditarik.' });
       }
       try {
+        // WAJIB: lepas semua custom domain dulu — Pages menolak delete project
+        // selama masih ada domain custom terpasang (error "you must first delete
+        // all custom domains associated with your project").
+        try {
+          const dl = await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains', creds.apiKey);
+          const doms = (dl && dl.result) || [];
+          for (const d of doms) {
+            try {
+              await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name + '/domains/' + encodeURIComponent(d.name), creds.apiKey, { method: 'DELETE' });
+            } catch (e2) {}
+          }
+        } catch (eD) {}
         await cfFetch('/accounts/' + creds.accountId + '/pages/projects/' + name, creds.apiKey, { method: 'DELETE' });
       } catch (e) {
         if (e.code !== 8000007) {
