@@ -67,6 +67,12 @@ Bukan All clear. HEAD wiki Clinqoo. `3f307535` (hanya docs); HEAD kode terakhir 
 
 ## Log Interaksi Agent
 
+### 2026-09-19 11:15 WIB — Superagent (Base44) fix landing + deploy
+- Fix `landing/index.html` (commits `2f4ec1a`, `3467891a`): desc SEO disamakan dengan app.clincoo.buzz; og:image + twitter:image dialihkan ke `https://app.clincoo.buzz/assets/og-image.png` (URL lama fallback HTML); semua ref `/assets/` & `../assets/` jadi absolut ke `app.clincoo.buzz` (deployment landing gak bawa folder assets); tambah tombol WhatsApp melayang kanan-bawah (logo asli, tanpa dot online).
+- Deploy: project `clinqoo-landing` (akun Vylonium) di-deploy ulang via wrangler — `clinqoo-landing.pages.dev` sudah versi baru. Project `clincoo` (akun be2) ikut auto-deploy dari repo main via workflow deploy.yml (`clincoo-be2.pages.dev/landing/` OK).
+- BUG TERBUKA: `clincoo.buzz` + `www.clincoo.buzz` masih menyajikan landing versi LAMA (deployment terpin lama, bukan production `clinqoo-landing`). Fix: di zone clincoo.buzz, arahkan DNS `clincoo.buzz`/`www` (CNAME) ke `clinqoo-landing.pages.dev` — bukan ke alias deployment tertentu — lalu purge cache. Zone belum terjangkau token Vylonium.
+- MCP 405 & oauthRedirectUri belum disentuh.
+
 ### 2026-09-19 10:10 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit Clinqoo 10:04 WIB **bukan All clear**. Tidak ada commit kode baru di Clinqoo. (HEAD wiki `3f307535`). Blog update artikel mobile + sitemap (`87bf7e44`). Editor/Data/Legal tidak berubah. `upsertOauthUser` tetap FIXED. Bug terbuka: MCP initialize HTTP 405; oauthRedirectUri github.io masih `/Clincoo./` (404). CORS/wallet/schema tidak berubah. Issue/PR 0. Rekomendasi: redeploy MCP, perbaiki path Clincoo.→Clinqoo., daftarkan `https://app.clincoo.buzz/auth/` di OAuth console.
 - Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 10:04 WIB` dari Devconium
