@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 18:25 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 19:10 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -48,26 +48,30 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. SHA file `6f6dff57`. Diverifikasi audit 18:25. Tidak disentuh. |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. SHA file `6f6dff57`. Tidak disentuh. |
 | OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`) di `auth/index.html`. Domain aktif: `location.origin + '/auth/'`. Daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`. |
+| Probe Gemini tanpa auth | KRITIS — hapus | `functions/api/auth/kbdiag.js` (HEAD `babb02a` / `c50c2d0`). POST `/api/auth/kbdiag` memakai `GEMINI_API_KEY` + system prompt + tool decls, **tanpa cek session/admin**. Risiko abuse kuota. |
+| Probe admin Gemini | Sementara | `functions/api/diag-gemini.js` — gate `ADMIN_EMAILS` / `qa.*@clincoo.dev`, tidak tampilkan key mentah (keyLen + status). Hapus setelah diagnosa. |
 | CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz`. |
-| Deploy MCP | OK (401 tanpa key) | POST `/mcp` → 401 JSON-RPC Unauthorized, bukan 405. `functions/mcp.js` hidup. Jangan treat 401 sebagai 405. |
-| Wallet / langganan / schema | Update | Binding `WALLET_DB` + tabel wallet. Path wallet repo `59fb31e8`. Pastikan binding Pages production. |
-| Sync users-live | FIXED | Clinqoo-Data sync live `cd8d859` (11:16 UTC) — sinkron jalan. |
-| Editor repo | OK | Repo HEAD `8eef3328`. Tidak ada commit baru setelah 17:03. |
-| Blog | Update | Clinqoo-Blog komunitas pages `946564c` (baru). |
-| Clinqoo-Legal | OK | HEAD `5ad44340`. Tidak ada commit baru setelah 17:03. |
-| Landing / DNS | OK | Landing repo `280302d9`. Tidak ada commit baru setelah 17:03. |
-| Chat / CI | Update | `bd1790c` skip deploy jika hanya .md/docs; `3ac5140` retry 3x backoff 502/503/504/jaringan multi-hop; `7ccf324` checkpoint token habis + kartu progres tertutup default. |
+| Deploy MCP | OK (401 tanpa key) | Live product MCP 401 tanpa key = function hidup. Connector audit initialize 405 (tool tidak terpakai; audit lewat GitHub). Jangan treat 401 sebagai 405. |
+| Wallet / langganan / schema | Update | Binding `WALLET_DB` + tabel wallet. Pastikan binding Pages production. |
+| Sync users-live | FIXED | Clinqoo-Data sync live `61de113` (12:00 UTC) — sinkron jalan. |
+| KB / blog search | Update | feat `search_clinqoo_kb` + snapshot 68 artikel + blogsearch bundled (eval diblokir Workers) + prompt frontend (`75a20746`…`71a342c1`…`fdcda3f1`). |
+| Editor / Legal / Landing | OK | Tidak ada commit baru setelah 18:25. |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan masuk | 18:25 ke muzawwied@gmail.com — **bukan All clear** |
+| Hourly audit | Laporan masuk | 19:10 ke muzawwied@gmail.com — **bukan All clear** |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
 
-Bukan All clear. HEAD Clinqoo. `7ccf324` (feat chat checkpoint + kartu progres). Bug terbuka: oauthRedirectUri github.io `/Clincoo./`.
+Bukan All clear. HEAD Clinqoo. `babb02a3` (chore: probe v2 — replikasi payload penuh, sementara). Bug terbuka: oauthRedirectUri github.io `/Clincoo./`. Temuan baru: probe `kbdiag.js` tanpa auth.
 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 19:10 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit Clinqoo 19:10 WIB **bukan All clear**. Scope sejak audit 18:25 WIB. HEAD Clinqoo. `babb02a3` (chore: probe v2 — replikasi payload penuh, sementara). `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Temuan BARU: (1) Endpoint probe tanpa auth `functions/api/auth/kbdiag.js` (commit `babb02a` / `c50c2d0`) — POST `/api/auth/kbdiag` memakai `env.GEMINI_API_KEY` dan menembak Gemini dengan system prompt + tool decls lengkap, tanpa cek session/admin; risiko abuse kuota kunci Gemini. (2) Endpoint probe admin `functions/api/diag-gemini.js` — gate `ADMIN_EMAILS` / `qa.*@clincoo.dev`, tidak menampilkan key mentah (hanya keyLen + status); masih sementara. Probe KB lama sudah dihapus (`aa750a13`, `e51736c2`) tapi probe Gemini masih di HEAD. Bug lama: oauthRedirectUri github.io masih `/Clincoo./akun/auth.html` → 404 (benar `/Clinqoo./`) di `auth/index.html`. Domain aktif: `location.origin + '/auth/'`. Perubahan sejak 18:25: feat KB `search_clinqoo_kb` + snapshot 68 artikel blog + blogsearch bundled + prompt frontend (`75a20746`…`71a342c1`…`fdcda3f1`); chore probe Gemini + kbdiag v2 (`c50c2d0`, `babb02a`); Clinqoo-Data sync live `61de113` (12:00 UTC). Editor/Legal/Landing: tidak ada commit baru. Issue/PR 0 open. Connector Clinqoo MCP initialize gagal HTTP 405 (audit lewat GitHub). Live product MCP 401 tanpa key = function hidup. Rekomendasi: HAPUS segera `kbdiag.js` dan `diag-gemini.js` setelah diagnosa; perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; daftarkan redirect URI app.clincoo.buzz/auth/ dan clinqoo.pages.dev/auth/; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB binding Pages production; rebrand jangan rename domain/repo/path github.io/identifier.
+- Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 19:10 WIB` dari Devconium
+- Status: **bukan All clear**
+
 ### 2026-09-19 18:25 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit Clinqoo 18:25 WIB **bukan All clear**. Scope sejak audit 17:03 WIB. HEAD Clinqoo. `7ccf324` (feat chat checkpoint + kartu progres). `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Bug terbuka (bukan regresi baru): oauthRedirectUri github.io masih `/Clincoo./akun/auth.html` → 404 (benar `/Clinqoo./`) di `auth/index.html`. Domain aktif memakai `location.origin + '/auth/'`. Daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`. Perubahan sejak 17:03: `bd1790c` ci skip deploy jika hanya .md/docs (kurangi putus chat); `3ac5140` fix(chat) retry 3x backoff untuk 502/503/504/jaringan di multi-hop; `7ccf324` feat(chat) checkpoint saat token habis di tengah tugas + kartu progres tertutup default; Clinqoo-Data sync live `cd8d859` (11:16 UTC) — sinkron jalan; Clinqoo-Blog komunitas pages `946564c` (baru). Wallet `59fb31e8`, Editor `8eef3328`, Legal `5ad44340`, Landing `280302d9`: tidak ada commit baru setelah 17:03. Issue/PR 0 open. CORS `*.clincoo.buzz` OK. Rekomendasi: perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; daftarkan redirect URI app.clincoo.buzz/auth/ dan clinqoo.pages.dev/auth/; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB pastikan binding Pages production; MCP 401 tanpa key = function hidup, jangan treat sebagai 405; rebrand jangan rename domain/repo/path github.io/identifier.
 - Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 18:25 WIB` dari Devconium
@@ -88,16 +92,17 @@ Log lebih lama dipotong agar wiki ringan.
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Perbaiki path github.io `Clincoo.` → `Clinqoo.` pada `oauthRedirectUri` (`auth/index.html`).
-2. Daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/` di Google/GitHub OAuth.
-3. MCP 401 tanpa key = function hidup. Jangan laporkan 405 lagi kecuali benar-benar 405.
-4. Landing: DNS ke alias project (bukan pin). Jangan hidupkan lagi deploy-landing.yml ke project mirror.
-5. CORS `*.clincoo.buzz` sudah ada — jangan ulang sebagai bug.
-6. Cek `RESEND_API_KEY`.
-7. Email hanya ke **muzawwied@gmail.com**.
-8. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
-9. Rebrand: jangan rename domain/repo/path github.io/identifier (lihat incident GH_REPO Clincoo-Data).
-10. WALLET_DB: pastikan binding Pages production; catch sudah ada jika missing.
+1. **HAPUS segera** `functions/api/auth/kbdiag.js` dan `functions/api/diag-gemini.js` setelah diagnosa selesai (probe tanpa auth = risiko kuota Gemini).
+2. Perbaiki path github.io `Clincoo.` → `Clinqoo.` pada `oauthRedirectUri` (`auth/index.html`).
+3. Daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/` di Google/GitHub OAuth.
+4. MCP 401 tanpa key = function hidup. Jangan laporkan 405 lagi kecuali benar-benar 405.
+5. Landing: DNS ke alias project (bukan pin). Jangan hidupkan lagi deploy-landing.yml ke project mirror.
+6. CORS `*.clincoo.buzz` sudah ada — jangan ulang sebagai bug.
+7. Cek `RESEND_API_KEY`.
+8. Email hanya ke **muzawwied@gmail.com**.
+9. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
+10. Rebrand: jangan rename domain/repo/path github.io/identifier (lihat incident GH_REPO Clincoo-Data).
+11. WALLET_DB: pastikan binding Pages production; catch sudah ada jika missing.
 
 ---
 
