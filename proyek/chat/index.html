@@ -1490,19 +1490,15 @@
                     let processIndicator = '';
                     if (msg.isProcessing) {
                         if (msg.processType === 'search') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Searching...</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Searching...'}</span></div>`;
                         } else if (msg.processType === 'read') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Reading URL...</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Reading URL...'}</span></div>`;
                         } else if (msg.processType === 'file') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Menganalisis...</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Menganalisis...'}</span></div>`;
                         } else if (msg.processType === 'image') {
-                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">Membuat...</span></div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Membuat...'}</span></div>`;
                         } else {
-                            processIndicator = `<div class="bouncing-dots" id="status-text-${msg.id}">
-                                <div class="bouncing-dot"></div>
-                                <div class="bouncing-dot"></div>
-                                <div class="bouncing-dot"></div>
-                            </div>`;
+                            processIndicator = `<div class="shimmer-search"><span id="status-text-${msg.id}" class="transition-opacity duration-200">${msg.statusText || 'Thinking...'}</span></div>`;
                         }
                     }
 
@@ -2238,6 +2234,59 @@
                     : '\n\n[WORKSPACE PROYEK MASIH KOSONG — buat file lewat write_file / create_folder bila user meminta]';
             } catch (e) { return ''; }
         }
+        async function readNdjsonStream(response, onProgress) {
+            const reader = response.body.getReader();
+            const dec = new TextDecoder();
+            let buf = '', finalObj = null, errObj = null;
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buf += dec.decode(value, { stream: true });
+                let idx;
+                while ((idx = buf.indexOf('\n')) !== -1) {
+                    const line = buf.slice(0, idx).trim();
+                    buf = buf.slice(idx + 1);
+                    if (!line) continue;
+                    let evt; try { evt = JSON.parse(line); } catch (e) { continue; }
+                    if (evt.t === 'progress' || evt.t === 'thinking') onProgress(evt.text || 'Thinking...');
+                    else if (evt.t === 'final') finalObj = evt;
+                    else if (evt.t === 'error') errObj = evt;
+                }
+            }
+            if (errObj && !finalObj) {
+                if (errObj.quota_exhausted) {
+                    const e = new Error('__QUOTA__');
+                    e.quotaMsg = errObj.error || 'Kuota/limit AI sedang penuh.';
+                    throw e;
+                }
+                throw new Error(errObj.error || 'AI gagal memproses permintaan.');
+            }
+            if (!finalObj) throw new Error('Koneksi AI terputus. Silakan coba lagi.');
+            return { text: finalObj.text || '', model: finalObj.model, session_id: finalObj.session_id, tool_calls: finalObj.tool_calls };
+        }
+
+        // Label progres dari aksi tool AI di sisi klien (workspace browser)
+        function clientToolProgressLabel(tc) {
+            const a = tc.args || {};
+            const p = String(a.path || '').trim();
+            const q = String(a.query || '').trim();
+            switch (tc.name) {
+                case 'list_items': return 'Melihat isi workspace' + (p ? ': ' + p : '…');
+                case 'read_file': return 'Membaca file' + (p ? ': ' + p : '…');
+                case 'write_file': return 'Menulis file' + (p ? ': ' + p : '…');
+                case 'create_folder': return 'Membuat folder' + (p ? ': ' + p : '…');
+                case 'rename_item': return 'Mengganti nama: ' + (p || 'item') + '…';
+                case 'delete_item': return 'Menghapus: ' + (p || 'item') + '…';
+                case 'search_items': return 'Mencari di workspace' + (q ? ': ' + q : '…');
+                case 'web_search': return 'Menelusuri web' + (q ? ': ' + q : '…');
+                case 'read_web_page': return 'Membaca halaman: ' + String(a.url || '') + '…';
+                case 'run_command': return 'Menjalankan perintah di sandbox…';
+                case 'search_clinqoo_kb': return 'Menelusuri basis pengetahuan Clincoo' + (q ? ': ' + q : '…');
+                case 'deploy_project': return 'Publish situs proyek ke internet…';
+                default: return 'Memproses: ' + tc.name + '…';
+            }
+        }
+
         async function executeWorkspaceTool(name, args) {
             try {
                 switch (name) {
@@ -2443,35 +2492,23 @@
             currentAiMessageId = aiMsgObj.id;
             abortController = new AbortController();
 
-            const thinkingSteps = ["Thinking..."];
-            const searchSteps = ["Searching..."];
-            const readSteps = ["Menganalisis..."];
-            const fileSteps = ["Menganalisis..."];
-            const imageSteps = ["Menganalisis..."];
-
-            let currentSteps = thinkingSteps;
-            if (processType === 'search') currentSteps = searchSteps;
-            else if (processType === 'read') currentSteps = readSteps;
-            else if (processType === 'file') currentSteps = fileSteps;
-            else if (processType === 'image') currentSteps = imageSteps;
-
-            let stepIndex = 0;
-            const statusInterval = setInterval(() => {
+            // Status progres REAL-TIME: mulai dari "Thinking...", lalu diperbarui
+            // langsung dari aksi AI yang sedang berjalan (stream NDJSON dari server
+            // + tool call AI) — bukan daftar teks hardcoded yang berputar sendiri.
+            let statusInterval = null;
+            currentStatusInterval = null;
+            const setAiStatus = (text) => {
+                if (!text) return;
+                aiMsgObj.statusText = text;
                 const statusEl = document.getElementById(`status-text-${aiMsgObj.id}`);
                 if (statusEl) {
-                    if (currentSteps.length > 1) {
-                        stepIndex = (stepIndex + 1) % currentSteps.length;
-                        statusEl.classList.add('opacity-0');
-                        setTimeout(() => {
-                            statusEl.innerText = currentSteps[stepIndex];
-                            statusEl.classList.remove('opacity-0');
-                        }, 250);
-                    }
-                } else {
-                    clearInterval(statusInterval);
+                    statusEl.classList.add('opacity-0');
+                    setTimeout(() => {
+                        statusEl.innerText = text;
+                        statusEl.classList.remove('opacity-0');
+                    }, 200);
                 }
-            }, 2000);
-            currentStatusInterval = statusInterval;
+            };
 
             let streamingBuffer = "";
             let isFetchComplete = false;
@@ -2669,7 +2706,8 @@
                                         session_id: currentSessionId || undefined,
                                         project_id: currentProjectId || undefined,
                                         workspace_tools: true,
-                                        save_user_message: hop === 0
+                                        save_user_message: hop === 0,
+                                        stream: true
                                     }),
                                     signal: abortController.signal
                                 });
@@ -2695,7 +2733,13 @@
                             break;
                         }
 
-                        resultJson = await response.json();
+                        const ctype = (response.headers.get('content-type') || '');
+                        if (ctype.indexOf('x-ndjson') !== -1) {
+                            // Stream progres real-time: thinking -> progress -> final
+                            resultJson = await readNdjsonStream(response, (t) => { hasReceivedData = true; setAiStatus(t); });
+                        } else {
+                            resultJson = await response.json();
+                        }
                         if (resultJson.session_id) currentSessionId = resultJson.session_id;
                         if (resultJson.error && (!resultJson.tool_calls || resultJson.tool_calls.length === 0)) {
                             if (resultJson.quota_exhausted) { hopError = new Error('__QUOTA__'); hopError.quotaMsg = resultJson.error; }
@@ -2705,6 +2749,9 @@
 
                         // Tidak ada tool call → jawaban final, keluar dari loop
                         if (!resultJson.tool_calls || resultJson.tool_calls.length === 0) break;
+
+                        // Progress real-time: teks diambil dari aksi AI sendiri (nama tool + argumennya)
+                        resultJson.tool_calls.forEach(tc => setAiStatus(clientToolProgressLabel(tc)));
 
                         // Eksekusi tool workspace secara lokal (localStorage browser)
                         const assistantToolParts = resultJson.tool_calls.map(function(tc) {
