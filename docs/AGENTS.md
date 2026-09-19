@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 21:29 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 22:25 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -54,22 +54,27 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 | Probe admin Gemini | Sementara | `functions/api/diag-gemini.js` masih di HEAD — gate `ADMIN_EMAILS` / `qa.*@clincoo.dev`, tidak tampilkan key mentah. Hapus setelah diagnosa. |
 | Probe streaming (`streamtest.js`) | Sementara — hapus | HEAD `b0db70da`: `functions/api/auth/streamtest.js` (TransformStream, tanpa auth; GET “streamtest up”, POST NDJSON dummy). Risiko rendah (tidak pakai GEMINI_API_KEY) tapi endpoint publik sementara. |
 | CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz`. |
-| Deploy MCP | REGRESI — HTTP 405 | Live product: POST `https://clinqoo.pages.dev/mcp` dan POST `https://app.clincoo.buzz/mcp` = 405 body kosong. GET /mcp pages.dev = 404 HTML (redirect ke app.clincoo.buzz). Audit 20:21 masih 401 = function hidup. Gejala: `functions/mcp.js` tidak ter-serve (deploy statis / tanpa function MCP). Redeploy project clinqoo BERSAMA functions/mcp.js. Jangan samakan connector-tool 405 dengan product 405. |
+| Deploy MCP | REGRESI — HTTP 405 | Live product: POST `https://clinqoo.pages.dev/mcp` dan POST `https://app.clincoo.buzz/mcp` = 405 body kosong. GET /mcp pages.dev = 404 HTML (redirect ke app.clincoo.buzz). Gejala: `functions/mcp.js` tidak ter-serve (deploy statis / tanpa function MCP). Redeploy project clinqoo BERSAMA functions/mcp.js. Jangan samakan connector-tool 405 dengan product 405. |
 | CI deploy production | Update | `e08ff661` job deploy-production `app.clincoo.buzz` otomatis tiap push (akun Vylonium). |
 | AI chat / streaming | Update | `ebf98718` backend Gemini utama + streaming progres NDJSON (`chat.js`); `16a36c55` UI progres real-time AI. |
 | Wallet / langganan / schema | Update | Binding `WALLET_DB` + tabel wallet. Pastikan binding Pages production. |
-| Sync users-live | OK — jalan | Clinqoo-Data: `fdffbe04` (13:30 UTC), `80f1afbb` (13:45), `1bc709bd` (14:00), `dd842d55` (14:15 UTC). |
-| Blog | Update | Clinqoo-Blog: tidak ada commit baru setelah 20:21. |
-| Editor / Legal / Landing | OK | Tidak ada commit baru setelah 20:21. |
+| Sync users-live | OK — jalan | Clinqoo-Data: `81f10343` (14:30 UTC), `29912bd9` (14:45), `11eec137` (15:00), `a7d9851b` (15:15 UTC). |
+| Blog | Update | Clinqoo-Blog: tidak ada commit baru setelah 21:29. |
+| Editor / Legal / Landing | OK | Tidak ada commit baru setelah 21:29. |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan masuk | 21:29 ke muzawwied@gmail.com — **bukan All clear** |
+| Hourly audit | Laporan masuk | 22:25 ke muzawwied@gmail.com — **bukan All clear** |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
 
-Bukan All clear. HEAD Clinqoo. `5a87c14b` (docs AGENTS.md 20:29 WIB). Kode app/auth/wallet/schema/middleware tidak berubah sejak `b0db70da`. Bug kritis baru: product MCP live 405 (regresi deploy). Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; `diag-gemini.js` dan `streamtest.js` masih sementara.
+Bukan All clear. HEAD Clinqoo. `dbc6ef55` (docs AGENTS.md ~21:30 WIB). Kode app/auth/wallet/schema/middleware tidak berubah sejak `b0db70da`. Bug kritis: product MCP live 405 (regresi deploy). Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; `diag-gemini.js` dan `streamtest.js` masih sementara.
 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 22:25 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit Clinqoo 22:25 WIB **bukan All clear**. Scope sejak audit 21:29 WIB. Connector Clinqoo MCP initialize gagal HTTP 405 (audit lewat GitHub). HEAD Clinqoo. `dbc6ef55` (docs: update AGENTS.md dari laporan 21:29 WIB). Kode app/auth/wallet/schema/middleware TIDAK berubah sejak `b0db70da`. `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Perubahan sejak 21:29: Clinqoo. hanya `dbc6ef55` docs AGENTS.md (21:30 UTC / ~21:30 WIB); Clinqoo-Data sync live `81f10343` (14:30 UTC), `29912bd9` (14:45), `11eec137` (15:00), `a7d9851b` (15:15 UTC); Clinqoo-Blog / Editor / Legal / Landing tidak ada commit baru; Issue/PR 0 open. Temuan live (bukan commit baru): POST `https://clinqoo.pages.dev/mcp` = HTTP 405 body kosong; POST `https://app.clincoo.buzz/mcp` = HTTP 405 body kosong; GET `https://clinqoo.pages.dev/mcp` = 404 HTML (redirect script ke app.clincoo.buzz). Regresi deploy tetap: `functions/mcp.js` tidak ter-serve. Redeploy project clinqoo BERSAMA functions/mcp.js. Bug terbuka lama (bukan regresi kode): (1) oauthRedirectUri github.io masih `/Clincoo./akun/auth.html` → 404 (benar `/Clinqoo./`) di `auth/index.html`; domain aktif `location.origin + '/auth/'`; daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`. (2) `functions/api/diag-gemini.js` masih di HEAD (gate ADMIN_EMAILS / qa.*@clincoo.dev; tidak tampilkan key mentah) — hapus setelah diagnosa. (3) `functions/api/auth/streamtest.js` probe sementara tanpa auth — hapus setelah tes streaming. Rekomendasi: PRIORITAS redeploy Pages project clinqoo dengan functions/mcp.js (verifikasi POST /mcp = JSON-RPC atau 401, bukan 405); hapus streamtest.js + diag-gemini.js; perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB binding Pages production; rebrand jangan rename domain/repo/path github.io/identifier.
+- Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 22:25 WIB` dari Devconium
+- Status: **bukan All clear** — regresi deploy MCP product 405
+
 ### 2026-09-19 21:29 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit Clinqoo 21:29 WIB **bukan All clear**. Scope sejak audit 20:21 WIB. Connector Clinqoo MCP initialize gagal HTTP 405 (audit lewat GitHub). HEAD Clinqoo. `5a87c14b` (docs: update AGENTS.md dari laporan 20:21 WIB). Kode app/auth/wallet/schema/middleware tidak berubah sejak `b0db70da`. `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Perubahan sejak 20:21: Clinqoo. hanya `5a87c14b` docs AGENTS.md (20:29 WIB); Clinqoo-Data sync live berlanjut `fdffbe04` (13:30 UTC), `80f1afbb` (13:45), `1bc709bd` (14:00), `dd842d55` (14:15 UTC); Clinqoo-Blog / Editor / Legal / Landing tidak ada commit baru; Issue/PR 0 open. Temuan baru (live, bukan commit repo): POST `https://clinqoo.pages.dev/mcp` dan POST `https://app.clincoo.buzz/mcp` sekarang HTTP 405 body kosong; GET /mcp di pages.dev 404 HTML (redirect script ke app.clincoo.buzz). Audit 20:21 masih mencatat live product MCP 401 tanpa key = function hidup. Ini regresi deploy: `functions/mcp.js` tidak ter-serve (gejala deploy statis / tanpa function MCP). Ikuti prosedur AGENTS.md: deploy project clinqoo BERSAMA functions/mcp.js; jangan treat connector-tool 405 sama dengan product 405 — product sekarang benar-benar 405. Bug terbuka (bukan regresi kode baru): (1) oauthRedirectUri github.io masih `/Clincoo./akun/auth.html` → 404 (benar `/Clinqoo./`) di `auth/index.html`; domain aktif `location.origin + '/auth/'`; daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`. (2) `functions/api/diag-gemini.js` masih di HEAD (gate ADMIN_EMAILS / qa.*@clincoo.dev; tidak tampilkan key mentah) — hapus setelah diagnosa. (3) `functions/api/auth/streamtest.js` probe sementara tanpa auth — hapus setelah tes streaming. Rekomendasi: redeploy Pages project clinqoo dengan functions/mcp.js (verifikasi POST /mcp = JSON-RPC atau 401, bukan 405); hapus streamtest.js + diag-gemini.js; perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; daftarkan redirect URI; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB binding Pages production; rebrand jangan rename domain/repo/path github.io/identifier.
 - Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 21:29 WIB` dari Devconium
