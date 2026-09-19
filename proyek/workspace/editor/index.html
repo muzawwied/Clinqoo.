@@ -157,53 +157,6 @@ svg{flex-shrink:0}
 .cloud-dot.ok{background:#2fbf71}
 .cloud-meta{font-size:11px;color:var(--text3);margin:8px 2px}
 .cloud-note{font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.5}
-/* AI panel — gaya chat Clincoo */
-.ai-chat{flex:1;overflow-y:auto;padding:8px 4px 10px;display:flex;flex-direction:column;gap:12px;min-height:0}
-.ai-empty{margin:auto;text-align:center;padding:24px 14px;display:flex;flex-direction:column;gap:14px;align-items:center}
-.ai-empty .t{font-size:15px;font-weight:600}
-.ai-empty .d{font-size:11.5px;color:var(--text3);line-height:1.6;max-width:230px}
-.ai-chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
-.ai-chip{font-size:11.5px;padding:5px 11px;border-radius:20px;border:1px solid var(--line2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:.15s}
-.ai-chip:hover{border-color:var(--accent);color:var(--accent)}
-.ai-msg{display:flex;flex-direction:column;gap:7px}
-.ai-msg.user{align-items:flex-end}
-.ai-bubble-user{background:var(--bg4);color:var(--text);padding:8px 14px;border-radius:16px 16px 4px 16px;font-size:13.5px;line-height:1.55;max-width:92%;word-break:break-word;word-wrap:break-word;white-space:pre-wrap}
-.ai-msg.airow{flex-direction:row;gap:9px;align-items:flex-start}
-.ai-av{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex-shrink:0;font-size:12px;font-weight:800}
-.ai-body{flex:1;min-width:0;font-size:13.5px;line-height:1.6;color:var(--text);word-break:break-word;overflow-wrap:break-word}
-.ai-body b{font-weight:700}
-.ai-body code{font-family:'Fira Code',monospace;font-size:12px;background:var(--bg4);padding:1px 5px;border-radius:5px}
-.ai-codeblock{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0;background:var(--bg)}
-.ai-cb-head{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--bg4);font-size:10.5px;color:var(--text3);border-bottom:1px solid var(--line)}
-.ai-cb-head b{font-size:10.5px;color:var(--text2);text-transform:lowercase}
-.ai-cb-acts{display:flex;gap:4px}
-.ai-cb-btn{font-size:10.5px;padding:2px 9px;border-radius:6px;border:1px solid var(--line2);background:var(--bg3);color:var(--text2);cursor:pointer}
-.ai-cb-btn:hover{border-color:var(--accent);color:var(--accent)}
-.ai-cb-btn.apply{color:var(--accent);border-color:var(--accent-soft)}
-.ai-cb-btn:disabled{opacity:.5;cursor:default}
-.ai-cb-pre{margin:0;padding:10px 12px;overflow-x:auto;font-family:'Fira Code',monospace;font-size:11.8px;line-height:1.55;color:var(--text);white-space:pre}
-.ai-meta{font-size:10px;color:var(--text3);display:flex;gap:10px;align-items:center}
-.ai-dots{display:inline-flex;gap:4px;padding:6px 2px}
-.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:aiB 1.2s infinite}
-.ai-dot:nth-child(2){animation-delay:.15s}.ai-dot:nth-child(3){animation-delay:.3s}
-@keyframes aiB{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
-.ai-composer{padding:9px 2px 3px;border-top:1px solid var(--line);flex-shrink:0}
-.ai-card{background:var(--bg3);border:1px solid var(--line2);border-radius:16px;padding:7px 9px 6px}
-#ai-input{width:100%;background:transparent;border:0;outline:none;resize:none;font-size:13.5px;color:var(--text);line-height:1.55;max-height:120px;font-family:inherit;padding:2px 6px}
-#ai-input::placeholder{color:var(--text3)}
-.ai-comp-row{display:flex;align-items:center;justify-content:space-between;padding-top:5px}
-#ai-attach{width:30px;height:30px;border-radius:50%;color:var(--text3);display:grid;place-items:center;transition:.15s}
-#ai-attach:hover{background:var(--bg4);color:var(--text)}
-#ai-send{width:30px;height:30px;border-radius:50%;background:var(--btn-bg);color:#fff;display:grid;place-items:center;flex-shrink:0;transition:.15s}
-#ai-send:hover{filter:brightness(1.15)}
-#ai-send:disabled{opacity:.45;filter:none;cursor:default}
-.ai-toolcard{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--text2);background:var(--bg4);border:1px solid var(--line);border-radius:9px;padding:6px 11px;margin-left:35px;max-width:88%}
-.ai-toolcard svg{flex-shrink:0}
-.ai-toolcard.ok{color:var(--text)}
-.ai-toolcard.ok svg{color:#2fbf71}
-.ai-toolcard.err svg{color:#e5604f}
-.ai-toolcard .tc-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ai-warn{background:rgba(229,96,79,.1);border:1px solid rgba(229,96,79,.35);color:#e5604f;border-radius:10px;padding:9px 12px;font-size:12px;line-height:1.5}
 
 /* settings drawer (kanan) */
 #settings-drawer{position:fixed;top:0;right:0;bottom:0;width:302px;max-width:90vw;background:var(--bg3);border-left:1px solid var(--line2);box-shadow:-10px 0 34px rgba(0,0,0,.28);z-index:955;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
@@ -221,46 +174,12 @@ svg{flex-shrink:0}
 .sd-mi-t span{font-size:11px;color:var(--text2)}
 .sd-back{display:block;width:100%;margin:8px 0 10px;padding:7px 10px;background:var(--bg2);border:none;border-radius:8px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-align:left}
 .sd-back:hover{color:var(--text);border:1px solid var(--line)}
-/* ===== Pages (Chat AI, Templates, dll) ===== */
+/* ===== Pages (Templates) ===== */
 .page{position:fixed;inset:0;z-index:900;background:var(--bg);display:none;flex-direction:column}
-/* Chat AI: di desktop jadi panel setengah layar di kanan, di mobile tetap layar penuh */
-@media (min-width:781px){
-  #page-chat{left:auto;right:0;width:50%;max-width:760px;border-left:1px solid var(--line);box-shadow:-24px 0 60px rgba(0,0,0,.3)}
-}
 .page.show{display:flex}
 .page-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg2)}
 .page-head .ph-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
 .page-body{flex:1;overflow-y:auto;min-height:0}
-.chat-wrap{max-width:900px;margin:0 auto;width:100%;display:flex;flex-direction:column;flex:1;min-height:0}
-.chat-msgs{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
-.cmsg{max-width:80%;display:flex;flex-direction:column;gap:5px}
-.cmsg.user{align-self:flex-end;align-items:flex-end}
-.cmsg.ai{align-self:flex-start}
-.cmsg .cbub{padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.65;word-break:break-word}
-.cmsg.user .cbub{background:var(--accent);color:#fff;border-bottom-right-radius:4px;white-space:pre-wrap}
-.cmsg.ai .cbub{background:var(--bg3);border:1px solid var(--line2);border-bottom-left-radius:4px}
-.cmsg.err .cbub{background:#3a1f24;border-color:#7a3644;color:#ff9aa5}
-.chat-status{align-self:flex-start;display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg3);border:1px solid var(--line2);border-radius:14px;font-size:12.5px;color:var(--text2)}
-.chat-status b{color:var(--text);font-size:12.5px}
-.chat-status .dots{display:inline-flex;gap:3px}
-.chat-status .dots span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:cblink 1.2s infinite}
-.chat-status .dots span:nth-child(2){animation-delay:.18s}
-.chat-status .dots span:nth-child(3){animation-delay:.36s}
-@keyframes cblink{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.chat-prog{font-size:11px;color:var(--text3);margin-top:2px;min-height:14px}
-.chat-composer{padding:12px 14px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg2)}
-.chat-composer .cc-row{display:flex;gap:10px;align-items:flex-end;max-width:900px;margin:0 auto}
-.chat-composer textarea{flex:1;resize:none;background:var(--bg3);border:1px solid var(--line2);border-radius:12px;color:var(--text);padding:11px 13px;font-size:13.5px;font-family:inherit;max-height:130px;outline:none;line-height:1.5}
-.chat-composer textarea:focus{border-color:var(--accent)}
-.chat-send{width:40px;height:40px;border-radius:12px;background:var(--accent);border:none;color:#fff;display:grid;place-items:center;cursor:pointer;flex-shrink:0}
-.chat-send:disabled{opacity:.45;cursor:default}
-.chat-empty{margin:auto;text-align:center;padding:40px 20px}
-.chat-empty .t{font-size:19px;font-weight:800;margin-bottom:8px}
-.chat-empty .d{font-size:13px;color:var(--text2);margin:0 auto 18px;max-width:430px;line-height:1.6}
-.chat-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.chat-chip{background:var(--bg3);border:1px solid var(--line2);border-radius:999px;padding:8px 14px;font-size:12px;color:var(--text);cursor:pointer}
-.chat-chip:hover{border-color:var(--accent);color:var(--accent)}
-.cmsg .cbub .ai-codeblock{margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid var(--line2)}
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:18px 16px 30px;max-width:1040px;margin:0 auto}
 .tpl-card{background:var(--bg3);border:1px solid var(--line2);border-radius:14px;overflow:hidden;transition:.15s}
 .tpl-card:hover{transform:translateY(-2px);border-color:var(--accent)}
@@ -271,7 +190,6 @@ svg{flex-shrink:0}
 .tpl-info p{font-size:11.5px;color:var(--text2);margin:4px 0 10px;line-height:1.5;min-height:34px}
 .tpl-use{width:100%;padding:9px;border-radius:9px;border:none;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12.5px;cursor:pointer}
 .tpl-use:hover{background:var(--accent);color:#fff}
-@media (max-width:780px){.cmsg{max-width:90%}}
 .sd-sec{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:16px 0 2px}
 .sd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--text)}
 .sd-row .sd-l{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -500,7 +418,6 @@ body.light #statusbar{background:#131316}
   #sidebar{position:fixed;left:0;top:48px;bottom:54px;width:min(300px,85vw);z-index:640;display:none;box-shadow:var(--shadow)}
   #sidebar.mobile-open{display:flex}
   #sidebar.hidden{display:none}
-  #btn-chat{display:none}
   #activitybar a.act-btn{display:none}
   #activitybar > div{display:none!important}
   .tree-item{padding:9px 8px;font-size:13.5px}
@@ -639,10 +556,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="14" x="3" y="8" rx="2"/><path d="M12 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 5v3"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M10 18h4"/></svg>
     </a>
     <div style="width:24px;height:1px;background:var(--line);margin:4px 0;flex-shrink:0"></div>
-    <button class="act-btn" id="btn-chat" onclick="openChatPage()" title="Chat AI">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.3 0-2.6-.3-3.7-.8L3 21l1.8-5.8A8.5 8.5 0 1 1 21 11.5z"/></svg>
-    </button>
-    
     <button class="act-btn" data-panel="git" title="Riwayat Versi" style="display:none">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="8" r="2.6"/><path d="M6 8.6v6.8M18 10.6c0 3-3.5 3.2-8 3.6"/></svg>
       <span class="badge" id="git-badge" style="display:none">0</span>
@@ -711,7 +624,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
           <div class="home-cta">
             <button class="home-btn primary" onclick="startCoding()">Mulai Coding</button>
             <button class="home-btn ghost" onclick="openPalette('files')">Buka Berkas</button>
-            <button class="home-btn ghost" onclick="openChatPage()">Chat AI</button>
           </div>
           <div class="home-hint"><kbd>Ctrl</kbd>+<kbd>P</kbd> buka berkas cepat &nbsp;·&nbsp; <kbd>Ctrl</kbd>+<kbd>`</kbd> terminal</div>
 
@@ -812,25 +724,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <div class="sd-body" id="sd-body"></div>
 </div>
 <div id="overlay-modal"></div>
-
-<!-- Halaman: Chat AI -->
-<div class="page" id="page-chat">
-  <div class="page-head">
-    <button class="ph-btn" onclick="closePages()" title="Kembali ke editor"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <span class="ph-title"><svg style="height:16px;display:inline-block;vertical-align:-3px" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg>Chat AI</span>
-    <div style="flex:1"></div>
-    <button class="ph-btn" onclick="chatClear()" title="Hapus percakapan"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
-  </div>
-  <div class="chat-wrap">
-    <div class="chat-msgs" id="chat-msgs"></div>
-    <div class="chat-composer">
-      <div class="cc-row">
-        <textarea id="chat-input" rows="1" placeholder="Tanya apa saja tentang proyek atau koding… (Enter kirim)"></textarea>
-        <button class="chat-send" id="chat-send" onclick="chatSend()" title="Kirim"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Halaman: Templates -->
 <div class="page" id="page-templates">
@@ -1661,175 +1554,9 @@ function doCommitFromModal(){
   $('#git-msg').value=v;
   doCommit();
 }
-/* ---------- AI helpers (dipakai halaman Chat AI) ---------- */
-const AI_API='https://clincoo-be2.pages.dev/api/chat';
-function aiMd(text){
-  const parts=String(text).split(/```/);
-  let html='';
-  for(let i=0;i<parts.length;i++){
-    if(i%2===1){
-      const seg=parts[i];
-      const nl=seg.indexOf('\n');
-      const lang=(nl>0?seg.slice(0,nl):'').trim()||'kode';
-      const code=nl>=0?seg.slice(nl+1):seg;
-      const cc=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      html+=`<div class="ai-codeblock"><div class="ai-cb-head"><b>${esc(lang)}</b><div class="ai-cb-acts"><button class="ai-cb-btn" onclick="aiCopy(this)">Salin</button><button class="ai-cb-btn apply" onclick="aiApply(this)">Terapkan</button></div></div><pre class="ai-cb-pre">${cc}</pre></div>`;
-    }else{
-      const t=esc(parts[i]).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
-      html+=t;
-    }
-  }
-  return html;
-}
-function aiCopy(btn){
-  const pre=btn.closest('.ai-codeblock').querySelector('.ai-cb-pre');
-  try{navigator.clipboard.writeText(pre.textContent);toast('Kode disalin');}catch(e){}
-}
-function aiApply(btn){
-  const pre=btn.closest('.ai-codeblock').querySelector('.ai-cb-pre');
-  const code=pre.textContent;
-  if(activePath){
-    applyCodeAnimated(activePath,code);
-  }else{
-    window._aiApplyCode=code;
-    openModal(`<div class="modal"><h3>＋ Berkas Baru dari AI</h3><label>Nama berkas</label><input type="text" id="nfa-name" placeholder="contoh: komponen.html"><div class="hint">Kode AI akan ditulis ke berkas ini secara langsung.</div><div class="row"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn primary" onclick="aiApplyNewFile()">Buat & Terapkan</button></div></div>`);
-    const inp=$('#nfa-name');inp.focus();
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter')aiApplyNewFile();if(e.key==='Escape')closeModal();e.stopPropagation();});
-  }
-}
-function aiApplyNewFile(){
-  const name=$('#nfa-name').value.trim();
-  if(!name){toast('Nama tidak boleh kosong');return;}
-  closeModal();
-  if(project[name]===undefined)project[name]='';
-  applyCodeAnimated(name,window._aiApplyCode||'');
-}
-async function applyCodeAnimated(path,code){
-  openFile(path);
-  project[path]='';
-  const m=models[path];
-  if(m)m.setValue('');
-  const total=code.length;
-  const step=Math.max(3,Math.ceil(total/220));
-  toast('AI menulis ke '+nameOf(path)+'…');
-  for(let i=0;i<total;i+=step){
-    const chunk=code.slice(i,i+step);
-    project[path]+=chunk;
-    if(m)m.setValue(project[path]);
-    await new Promise(r=>setTimeout(r,12));
-  }
-  project[path]=code;
-  if(m)m.setValue(code);
-  persist();renderTabs();renderTree();
-  toast('Selesai — '+nameOf(path));
-}
-function aiContext(){
-  const files=Object.keys(project).slice(0,60).join(', ');
-  let ctx='\n\n[Berkas proyek: '+(files||'(kosong)')+']';
-  if(activePath){
-    const c=(liveVal(activePath)||'').slice(0,8000);
-    ctx+='\n[Berkas aktif: '+activePath+' — '+c.length+' karakter]\n'+c;
-  }
-  return ctx;
-}
-/* ---------- Sistem Pages: Chat AI & Templates ---------- */
+/* ---------- Sistem Pages: Templates ---------- */
 function closePages(){$$('.page').forEach(p=>p.classList.remove('show'));}
-function openChatPage(){closePages();$('#page-chat').classList.add('show');chatBoot();}
-document.addEventListener('DOMContentLoaded',()=>{
-  const bc=document.getElementById('btn-chat');
-  if(bc)bc.addEventListener('click',e=>{e.stopPropagation();openChatPage();});
-});
 function openTemplatesPage(){closePages();$('#page-templates').classList.add('show');renderTemplates();}
-
-/* ----- Chat AI ----- */
-let chatHist=[],chatBusy=false,chatBooted=false;
-const chatKey=()=>'cc_chat_'+(LINK_PID||'local');
-function chatScroll(){const c=$('#chat-msgs');if(c)c.scrollTop=c.scrollHeight;}
-function chatBoot(){
-  if(!chatBooted){
-    chatBooted=true;
-    try{chatHist=JSON.parse(localStorage.getItem(chatKey())||'[]');}catch(e){chatHist=[];}
-    const inp=$('#chat-input');
-    inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(130,inp.scrollHeight)+'px';});
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend();}});
-    chatRender();
-  }
-  setTimeout(()=>{const i=$('#chat-input');if(i)i.focus();},100);
-}
-function chatSave(){try{localStorage.setItem(chatKey(),JSON.stringify(chatHist.slice(-60)));}catch(e){}}
-function chatRender(){
-  const c=$('#chat-msgs');
-  if(!chatHist.length){
-    c.innerHTML='<div class="chat-empty"><div class="t">Chat AI Clincoo</div><div class="d">Asisten AI untuk membantumu ngoding. Tanya cara pakai editor, minta contoh kode, atau diskusikan proyekmu — AI ini asisten, bukan pembuat web otomatis.</div><div class="chat-chips"><button class="chat-chip" onclick="chatQuick(\'Bagaimana cara membuat halaman yang responsif?\')">Tips desain responsif</button><button class="chat-chip" onclick="chatQuick(\'Beri contoh kode HTML+CSS untuk kartu profil modern\')">Contoh kode</button><button class="chat-chip" onclick="chatQuick(\'Jelaskan fitur Clincoo Code satu per satu\')">Tur fitur editor</button></div></div>';
-    return;
-  }
-  c.innerHTML=chatHist.map(m=>'<div class="cmsg '+m.role+'"><div class="cbub">'+(m.role==='ai'?aiMd(m.content):esc(m.content).replace(/\n/g,'<br>'))+'</div></div>').join('');
-  chatScroll();
-}
-function chatQuick(t){const i=$('#chat-input');i.value=t;chatSend();}
-function chatBubble(role,html){const c=$('#chat-msgs');const emp=c.querySelector('.chat-empty');if(emp)emp.remove();const d=document.createElement('div');d.className='cmsg '+role;d.innerHTML='<div class="cbub">'+html+'</div>';c.appendChild(d);return d.querySelector('.cbub');}
-function chatErr(msg){chatBubble('err','<b>Ups.</b> '+esc(msg));chatScroll();}
-async function chatSend(){
-  const inp=$('#chat-input');
-  const text=inp.value.trim();
-  if(!text||chatBusy)return;
-  if(!ccAuthHeaders().Authorization){
-    chatBubble('user',esc(text).replace(/\n/g,'<br>'));inp.value='';
-    chatErr('AI aktif setelah kamu login di Clincoo. Buka editor ini dari halaman proyek Clincoo agar sesi tersambung.');
-    return;
-  }
-  chatBusy=true;const sb=$('#chat-send');sb.disabled=true;
-  chatBubble('user',esc(text).replace(/\n/g,'<br>'));
-  inp.value='';inp.style.height='auto';
-  chatHist.push({role:'user',content:text});chatSave();
-  const c=$('#chat-msgs');
-  const st=document.createElement('div');
-  st.className='chat-status';
-  st.innerHTML='<span class="dots"><span></span><span></span><span></span></span><span><b>thinking</b><div class="chat-prog">membaca konteks proyek…</div></span>';
-  c.appendChild(st);chatScroll();
-  const steps=['membaca konteks proyek…','menganalisis pertanyaan…','menyusun jawaban…','menyempurnakan hasil…'];
-  let si=0;
-  const stTimer=setInterval(()=>{const el=st.querySelector('.chat-prog');if(el){si=(si+1)%steps.length;el.textContent=steps[si];}},900);
-  const apiMessages=[{role:'system',content:'Kamu Clincoo AI, asisten chat di editor Clincoo Code. Jawab dalam Bahasa Indonesia dengan gaya PANJANG, DETAIL, TERSTRUKTUR, dan CERDAS: mulai dari inti jawaban, lalu kembangkan mendalam. Gunakan Markdown rapi — judul bagian (###), daftar, blok kode dengan penjelasan, contoh konkret, dan saran langkah lanjutan. Kamu MEMBANTU user membangun webnya sendiri di editor Clincoo (editor, terminal, templates, deploy) — kamu BUKAN pembuat web otomatis, jangan pernah menawarkan membuatkan web sekaligus. ATURAN IDENTITAS: kamu hanya bernama Clincoo AI — jangan pernah menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu.'}];
-  chatHist.slice(-14).forEach(m=>apiMessages.push({role:m.role==='ai'?'assistant':'user',content:m.content}));
-  apiMessages[apiMessages.length-1].content+=aiContext();
-  try{
-    const res=await fetch(AI_API,{method:'POST',headers:Object.assign({'Content-Type':'application/json'},ccAuthHeaders()),body:JSON.stringify({messages:apiMessages,session_id:'clinqoo-chat'})});
-    clearInterval(stTimer);st.remove();
-    if(!res.ok){
-      let msg='AI sedang tidak bisa dihubungi ('+res.status+').';
-      try{const j=await res.json();if(j&&j.error)msg=j.error;if(j&&j.need_login)msg='Sesi Clincoo berakhir — buka kembali editor dari halaman proyek Clincoo.';}catch(e){}
-      chatErr(msg);return;
-    }
-    const d=await res.json();
-    const finalText=(d&&d.text||'').trim();
-    if(!finalText){chatErr('AI tidak mengembalikan jawaban. Coba lagi.');return;}
-    const bub=chatBubble('ai','');
-    await chatType(bub,finalText);
-    chatHist.push({role:'ai',content:finalText});chatSave();
-  }catch(e){
-    clearInterval(stTimer);st.remove();
-    chatErr('Koneksi ke AI gagal — periksa jaringan lalu coba lagi.');
-  }finally{
-    chatBusy=false;sb.disabled=false;chatScroll();
-  }
-}
-async function chatType(body,text){
-  const span=document.createElement('span');
-  body.innerHTML='';body.appendChild(span);
-  const step=Math.max(2,Math.ceil(text.length/420));
-  for(let i=0;i<text.length;i+=step){
-    span.textContent+=text.slice(i,i+step);
-    chatScroll();
-    await new Promise(r=>setTimeout(r,8));
-  }
-  body.innerHTML=aiMd(text);
-  chatScroll();
-}
-function chatClear(){
-  openModal('<div class="modal"><h3>Hapus Percakapan</h3><div class="hint">Seluruh riwayat chat di proyek ini akan dihapus permanen.</div><div class="row"><button class="btn ghost" onclick="closeModal()">Batal</button><button class="btn danger" onclick="chatDoClear()">Hapus</button></div></div>');
-}
-function chatDoClear(){closeModal();chatHist=[];chatSave();chatRender();toast('Percakapan dihapus');}
 
 /* ----- Templates ----- */
 const TEMPLATES=[
@@ -2711,7 +2438,6 @@ const SD_ICONS={
   down:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
   gear:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   reset:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
-  chat:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.3 0-2.6-.3-3.7-.8L3 21l1.8-5.8A8.5 8.5 0 1 1 21 11.5z"/></svg>',
   tpl:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   hist:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v6h6"/><path d="M3.5 9a9 9 0 1 1 .5 6"/><path d="M12 7v5l3 3"/></svg>'
 };
@@ -2721,7 +2447,6 @@ function openDrawerMenu(){
   body.innerHTML=
     '<div class="sd-sec">Menu</div>'+
     '<div class="sd-menu">'+
-    mi('chat','Chat AI','Halaman chat bersama asisten AI Clincoo','closeSettingsDrawer();openChatPage()')+
     mi('tpl','Templates','Halaman template siap pakai untuk proyek baru','closeSettingsDrawer();openTemplatesPage()')+
     mi('hist','Riwayat Versi','Simpan & pulihkan versi proyek','closeSettingsDrawer();showPanel(\'git\')')+
     mi('home','Halaman Utama','Kembali ke layar sambutan','showWelcome();closeSettingsDrawer()')+
