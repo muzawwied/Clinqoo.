@@ -286,31 +286,51 @@
         body.dark-mode .tool-task-text { color: #9ca3af !important; }
         body.dark-mode .tool-task-text.err { color: #f87171 !important; }
 
-        /* Kartu dropdown "Menjalankan Tugas" */
-        .toolcalls-card { border: none; border-radius: 0; background: none; overflow: visible; }
-        body.dark-mode .toolcalls-card { border: none; background: none; }
-        .toolcalls-summary { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #374151; }
-        body.dark-mode .toolcalls-summary { color: #d1d5db; }
-        .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; }
+        /* Kartu "Menjalankan Tugas" — modern: tertutup default, dibuka manual oleh user */
+        .toolcalls-card { border: 1px solid #e8ebef; border-radius: 14px; background: linear-gradient(180deg, #fbfcfd 0%, #f7f9fb 100%); overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+        body.dark-mode .toolcalls-card { border-color: #26262b; background: linear-gradient(180deg, #17171a 0%, #131316 100%); box-shadow: none; }
+        .toolcalls-summary { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 13px; background: none; border: none; cursor: pointer; text-align: left; font-size: 13px; font-weight: 600; color: #1f2937; transition: background 0.15s ease; }
+        .toolcalls-summary:hover { background: rgba(0,0,0,0.025); }
+        body.dark-mode .toolcalls-summary { color: #e5e7eb; }
+        body.dark-mode .toolcalls-summary:hover { background: rgba(255,255,255,0.04); }
+        .toolcalls-badge { width: 26px; height: 26px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #eef2f7; color: #475569; }
+        body.dark-mode .toolcalls-badge { background: #222228; color: #cbd5e1; }
+        .toolcalls-badge.ok { background: #e8f7ef; color: #16a34a; }
+        .toolcalls-badge.err { background: #fdecec; color: #dc2626; }
+        body.dark-mode .toolcalls-badge.ok { background: rgba(22,163,74,0.15); color: #4ade80; }
+        body.dark-mode .toolcalls-badge.err { background: rgba(220,38,38,0.15); color: #f87171; }
+        .toolcalls-summary .tc-chevron { margin-left: auto; transition: transform 0.18s ease; color: #9ca3af; }
         .toolcalls-summary.open .tc-chevron { transform: rotate(180deg); }
-        .toolcalls-list { display: flex; flex-direction: column; border-top: 1px solid #e5e7eb; }
-        body.dark-mode .toolcalls-list { border-top-color: #262626; }
-        .toolcalls-item { border-bottom: 1px solid #eef0f2; }
-        body.dark-mode .toolcalls-item { border-bottom-color: #1a1a1a; }
+        .toolcalls-count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(99,102,241,0.09); color: #6366f1; white-space: nowrap; }
+        body.dark-mode .toolcalls-count { background: rgba(99,102,241,0.16); color: #a5b4fc; }
+        .toolcalls-livebar { height: 2px; width: 100%; background: linear-gradient(90deg, transparent 0%, #6366f1 30%, #8b5cf6 50%, #6366f1 70%, transparent 100%); background-size: 220% 100%; animation: tc-sweep 1.6s ease-in-out infinite; }
+        @keyframes tc-sweep { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+        .toolcalls-list { display: flex; flex-direction: column; border-top: 1px solid #e8ebef; animation: tc-fadein 0.2s ease; }
+        @keyframes tc-fadein { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+        body.dark-mode .toolcalls-list { border-top-color: #26262b; }
+        .toolcalls-item { border-bottom: 1px solid #f0f2f5; }
+        body.dark-mode .toolcalls-item { border-bottom-color: #1e1e22; }
         .toolcalls-item:last-child { border-bottom: none; }
-        .toolcalls-item-header { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; color: #4b5563; }
+        .toolcalls-item-header { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 13px; background: none; border: none; cursor: pointer; text-align: left; font-size: 12.5px; font-weight: 500; color: #4b5563; }
         body.dark-mode .toolcalls-item-header { color: #9ca3af; }
+        .toolcalls-item-header:hover { color: #111827; }
         .toolcalls-item-header.err { color: #dc2626; }
         body.dark-mode .toolcalls-item-header.err { color: #f87171 !important; }
-        .toolcalls-item-header .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #9ca3af; flex-shrink: 0; }
+        .toolcalls-item-header .tc-chevron { margin-left: auto; transition: transform 0.15s ease; color: #c2c8d0; flex-shrink: 0; }
         .toolcalls-item-header.open .tc-chevron { transform: rotate(180deg); }
         .toolcalls-item-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .toolcalls-item-detail { padding: 0 12px 10px 32px; display: flex; flex-direction: column; gap: 6px; }
-        .toolcalls-detail-block { border-radius: 8px; overflow: hidden; background: #1e1e1e; }
+        .toolcalls-item-detail { padding: 0 13px 10px 34px; display: flex; flex-direction: column; gap: 6px; }
+        .toolcalls-detail-block { border-radius: 10px; overflow: hidden; background: #1e1e1e; border: 1px solid #2a2a2e; }
         .toolcalls-detail-label { display: flex; align-items: center; justify-content: space-between; padding: 5px 10px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #9ca3af; background: #171717; }
         .toolcalls-detail-copy { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 2px; display: flex; align-items: center; }
         .toolcalls-detail-copy:hover { color: #ffffff; }
         .toolcalls-detail-pre { margin: 0; padding: 8px 10px; font-size: 11.5px; line-height: 1.5; color: #e5e7eb; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow-y: auto; font-family: 'SF Mono', Consolas, monospace; }
+        /* Chip "Lanjutkan" pada checkpoint kehabisan token */
+        .checkpoint-chip { display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 8px 16px; border-radius: 999px; border: 1px solid #e0e4ea; background: #ffffff; color: #111827; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 1px 3px rgba(15,23,42,0.06); transition: all 0.18s ease; }
+        .checkpoint-chip:hover { border-color: #6366f1; color: #6366f1; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(99,102,241,0.14); }
+        .checkpoint-chip i { font-size: 15px; }
+        body.dark-mode .checkpoint-chip { background: #1a1a1e; border-color: #2c2c33; color: #e5e7eb; }
+        body.dark-mode .checkpoint-chip:hover { border-color: #818cf8; color: #a5b4fc; }
         body.dark-mode .bg-white { background-color: #0a0a0a !important; }
 
         body.dark-mode .text-\[\#222222\] { color: #ffffff !important; }
@@ -1288,11 +1308,55 @@
             }
         }
 
+        // ===== CHECKPOINT TOKEN: saat kuota token habis di tengah tugas, AI minta
+        // konfirmasi sebelum lanjut — dengan variasi kalimat agar tidak monoton/selalu sama.
+        const CHECKPOINT_OPENERS = [
+            'Sepertinya token saya kehabisan tepat di tengah pengerjaan. Untungnya, semuanya aman.',
+            'Kuota token untuk tugas ini habis sebentar, jadi saya jeda dulu di titik aman.',
+            'Proses berhenti sementara — token saya mentok, tapi tenang, kerjaanmu tidak hilang.',
+            'Sebentar ya, token saya kehabisan di tengah jalan. Ini laporan posisinya sejauh ini.',
+            'Oke jujur saja, token saya habis pas mengerjakan ini. Kabar baiknya: progresnya tersimpan.',
+            'Token saya kehabisan, jadi saya berhenti dulu di sini biar semuanya rapi.'
+        ];
+        const CHECKPOINT_DONE_HDRS = ['Sudah dikerjakan', 'Sudah selesai', 'Progres sejauh ini'];
+        const CHECKPOINT_TODO_HDRS = ['Belum selesai', 'Yang masih tersisa', 'Sisa pengerjaan'];
+        const CHECKPOINT_TODO_BODIES = [
+            'Sisa file dan komponen yang belum jadi akan saya kerjakan setelah kamu konfirmasi.',
+            'Tugas masih punya sisa — semuanya tersimpan rapi dan siap dilanjutkan kapan pun.',
+            'Ada beberapa bagian terakhir yang belum saya sentuh; tinggal konfirmasi untuk melanjutkan.'
+        ];
+        const CHECKPOINT_PROMPTS = [
+            'Tulis **lanjut** dan saya kerjakan sisanya.',
+            'Balas **lanjut** kalau kamu mau saya teruskan dari titik ini.',
+            'Cukup ketik **lanjut** — saya ambil lagi dari sini.',
+            'Ketik **lanjut** untuk meneruskan pengerjaannya.',
+            'Tulis **lanjut** kapan pun kamu siap — saya siap melanjutkan.'
+        ];
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function buildCheckpointText(toolCalls, reason) {
+            const doneList = toolCalls.map(function (tc) {
+                let lbl = toolCallLabel({ name: tc.name, args: tc.args });
+                return (tc.ok === false ? '⚠ ' : '✓ ') + lbl;
+            });
+            const lines = [];
+            lines.push(pickRandom(CHECKPOINT_OPENERS));
+            lines.push('');
+            lines.push('**' + pickRandom(CHECKPOINT_DONE_HDRS) + ':**');
+            doneList.forEach(function (d, i) { lines.push((i + 1) + '. ' + d); });
+            lines.push('');
+            lines.push('**' + pickRandom(CHECKPOINT_TODO_HDRS) + ':**');
+            lines.push(pickRandom(CHECKPOINT_TODO_BODIES));
+            if (reason) { lines.push(''); lines.push('*' + reason + ' Biasanya pulih sendiri dalam beberapa menit.*'); }
+            lines.push('');
+            lines.push(pickRandom(CHECKPOINT_PROMPTS));
+            return lines.join('\n');
+        }
+
         function toggleToolCallsGroup(msgId) {
             const msg = messages.find(m => m.id === msgId || m.id.toString() === msgId);
             if (!msg) return;
-            const defaultOpen = !!msg.isProcessing;
-            const current = (msg.toolCallsOpen === undefined) ? defaultOpen : msg.toolCallsOpen;
+            // Selalu tertutup default — user membuka manual, termasuk saat AI masih berjalan.
+            const current = (msg.toolCallsOpen === undefined) ? false : msg.toolCallsOpen;
             msg.toolCallsOpen = !current;
             renderMessages();
         }
@@ -1323,23 +1387,32 @@
         function renderToolCallsCard(msg) {
             if (!msg.toolCalls || msg.toolCalls.length === 0) return '';
             const running = !!msg.isProcessing;
-            const groupOpen = (msg.toolCallsOpen === undefined) ? running : msg.toolCallsOpen;
+            // Tertutup default: progres tidak auto-membuka; user membuka sendiri manual.
+            const groupOpen = (msg.toolCallsOpen === undefined) ? false : msg.toolCallsOpen;
             const errCount = msg.toolCalls.filter(tc => tc.ok === false).length;
             const summaryText = running
-                ? 'Menjalankan Tugas...'
+                ? 'Menjalankan Tugas'
                 : (errCount > 0
-                    ? `Selesai ${msg.toolCalls.length} tugas (${errCount} gagal)`
-                    : `Selesai ${msg.toolCalls.length} tugas`);
+                    ? `Selesai — ${msg.toolCalls.length} langkah (${errCount} gagal)`
+                    : `Selesai — ${msg.toolCalls.length} langkah`);
+            const badgeClass = running ? '' : (errCount > 0 ? ' err' : ' ok');
             const summaryIcon = running
-                ? '<i class="ph-bold ph-circle-notch tc-spin text-[15px]"></i>'
-                : (errCount > 0 ? '<i class="ph-bold ph-warning-circle text-[15px]" style="color:#dc2626"></i>' : '<i class="ph-bold ph-check-circle text-[15px]" style="color:#16a34a"></i>');
+                ? '<i class="ph-bold ph-circle-notch tc-spin text-[14px]"></i>'
+                : (errCount > 0 ? '<i class="ph-bold ph-warning text-[14px]"></i>' : '<i class="ph-bold ph-check text-[14px]"></i>');
+            const countChip = running
+                ? `<span class="toolcalls-count">${msg.toolCalls.length} langkah</span>`
+                : (errCount > 0
+                    ? `<span class="toolcalls-count">${(msg.toolCalls.length - errCount)}/${msg.toolCalls.length}</span>`
+                    : `<span class="toolcalls-count">${msg.toolCalls.length} langkah</span>`);
             return `
                 <div class="mb-1.5 toolcalls-card fade-in">
                     <button type="button" class="toolcalls-summary${groupOpen ? ' open' : ''}" onclick="toggleToolCallsGroup('${msg.id}')">
-                        ${summaryIcon}
+                        <span class="toolcalls-badge${badgeClass}">${summaryIcon}</span>
                         <span>${escText(summaryText)}</span>
-                        <i class="ph-bold ph-caret-down tc-chevron text-[13px]"></i>
+                        ${countChip}
+                        <i class="ph-bold ph-caret-down tc-chevron text-[12px]"></i>
                     </button>
+                    ${running ? '<div class="toolcalls-livebar"></div>' : ''}
                     ${groupOpen ? `
                         <div class="toolcalls-list">
                             ${msg.toolCalls.map((tc, idx) => {
@@ -1460,6 +1533,11 @@
                                             </div>
                                         </details>
                                     </div>
+                                ` : ''}
+                                ${(msg.checkpoint && isLastAi && !msg.isProcessing && !msg.isTyping) ? `
+                                    <button type="button" class="checkpoint-chip fade-in" onclick="handlePromptClick('lanjut')" title="Lanjutkan tugas yang tertunda">
+                                        <i class="ph-bold ph-arrow-clockwise"></i> Lanjutkan
+                                    </button>
                                 ` : ''}
                                 <div class="flex items-center gap-3 mt-1 pointer-events-auto" id="action-bar-${msg.id}" style="${(msg.isProcessing || msg.isTyping) ? 'display: none;' : ''}">
                                     ${msg.isImageResponse ? 
@@ -2670,15 +2748,29 @@
                     if (e.name !== 'AbortError') {
                         if (e.message === '__QUOTA__') {
                             const qMsg = e.quotaMsg || 'Kuota/limit AI sedang penuh.';
-                            streamingBuffer = qMsg + " Pesanmu aman di kolom ketik — upgrade paket untuk kuota & prioritas lebih besar.";
-                            const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
-                            if (lastUserIdx !== -1 && !chatInput.value.trim()) {
-                                chatInput.value = messages[lastUserIdx].text || '';
-                                messages.splice(lastUserIdx, 1);
-                                renderMessages();
-                                adjustInputHeight();
+                            const doneTools = (aiMsgObj.toolCalls || []);
+                            if (doneTools.length > 0) {
+                                // Kehabisan token di TENGAH tugas (limit provider, sementara):
+                                // jangan gagalkan seluruh proses — tampilkan checkpoint ringkas
+                                // (sudah dikerjakan / sisa) lalu minta konfirmasi "lanjut" dari user.
+                                streamingBuffer = buildCheckpointText(doneTools, qMsg);
+                                const cpIdx = messages.findIndex(m => m.id === aiMsgObj.id);
+                                if (cpIdx !== -1) messages[cpIdx].checkpoint = true;
+                                hasReceivedData = true;
+                                isFetchComplete = true;
+                                // Pesan user TIDAK dikembalikan ke kolom ketik & komposer TIDAK
+                                // dikunci — user harus bisa membalas "lanjut" untuk meneruskan.
+                            } else {
+                                streamingBuffer = qMsg + " Pesanmu aman di kolom ketik — upgrade paket untuk kuota & prioritas lebih besar.";
+                                const lastUserIdx = messages.map(m => m.role).lastIndexOf('user');
+                                if (lastUserIdx !== -1 && !chatInput.value.trim()) {
+                                    chatInput.value = messages[lastUserIdx].text || '';
+                                    messages.splice(lastUserIdx, 1);
+                                    renderMessages();
+                                    adjustInputHeight();
+                                }
+                                setQuotaLock(true, qMsg + ' Pesanmu aman di kolom ketik.');
                             }
-                            setQuotaLock(true, qMsg + ' Pesanmu aman di kolom ketik.');
                         } else {
                         // FALLBACK: /api/chat gagal karena provider (bukan kuota) -> coba /api/ai
                         // (Clincoo AI: Workers AI di backend, tanpa API key). Kuota habis TIDAK
