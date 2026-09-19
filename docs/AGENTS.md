@@ -24,94 +24,57 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 06:02 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 07:09 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
-Project `clinqoo` (akun Vylonium a393, clinqoo.pages.dev) **WAJIB di-deploy BERSAMA functions MCP**. Endpoint `/mcp` (GitHub MCP untuk semua agent) dan `/rpc` hidup dari `functions/{mcp.js,rpc.js}`.
+Project `clinqoo` (akun Vylonium a393, clinqoo.pages.dev) **WAJIB di-deploy BERSAMA functions MCP**. Endpoint `/mcp` hidup dari `functions/mcp.js`.
 
-**JANGAN deploy statis murni dari root repo** — itu MENGHAPUS endpoint `/mcp` (gejala: POST /mcp → 405) dan otomatis semua agent kehilangan akses GitHub.
+**JANGAN deploy statis murni dari root repo** — gejala: POST /mcp → 405.
 
 Prosedur benar (Superagent, terverifikasi 2026-09-17):
 1. Build dari `origin/main`: `git archive origin/main | tar -x -C build-dir`
 2. Hapus dari build-dir: `functions/api/`, `functions/scheduled.js`, `wrangler.toml`, `wrangler-proxy.toml`, `.github/`, `agent-worker/`, `docs/`, `landing/`, `legal/`, `mcp-server/`, `schema.sql`, `.gitignore`
-3. Tempel `functions/mcp.js` (sumber: backup privat Superagent — berisi KUNCI, JANGAN pernah commit ke repo publik; `rpc` tidak diperlukan: /rpc di produksi hanyalah 404 statis)
-4. Deploy: `wrangler pages deploy . --project-name clinqoo` (butuh Node 22; token akun Vylonium)
-5. Jika error `D1 binding 'DB' ... not found`: pastikan wrangler.toml TERHAPUS dari folder deploy. JANGAN menambahkan binding D1 ke project ini.
-6. Verifikasi pasca-deploy: `POST https://clinqoo.pages.dev/mcp` (Bearer key) harus balas JSON-RPC `initialize`, bukan 405/404.
+3. Tempel `functions/mcp.js` (backup privat Superagent — berisi KUNCI, JANGAN commit publik)
+4. Deploy: `wrangler pages deploy . --project-name clinqoo` (Node 22; token Vylonium)
+5. Jika error D1 binding: pastikan wrangler.toml TERHAPUS. JANGAN tambah binding D1 ke project ini.
+6. Verifikasi: `POST https://clinqoo.pages.dev/mcp` harus JSON-RPC `initialize`, bukan 405/404.
 
-Untuk proyek lain: `clinqoo-editor` deploy manual dari repo Clinqoo-Editor; backend API (clincoo-be2) hanya lewat GitHub Actions deploy.yml — jangan pernah deploy statis ke sana.
+**Email resmi tampilan web = `halo@clincoo.buzz`**. Backend notifikasi tetap ke muzawwied@gmail.com.
 
-**Email resmi tampilan web = `halo@clincoo.buzz`** (2026-09-19): seluruh email kontak user-facing di semua situs diganti ke halo@clincoo.buzz (situs utama, landing, editor, blog termasuk artikel legal, demo template, templates-data.js). Backend functions/api TETAP kirim notifikasi ke muzawwied@gmail.com (jangan diubah). PENTING: domain clincoo.buzz + www dilayani project `clincoo-landing` (akun 59db), BUKAN clinqoo-landing (a393, hanya fallback pages.dev). Landing homepage footer Kontak = mailto halo@clincoo.buzz (Cloudflare auto-obfuscate = /cdn-cgi/l/email-protection, cek dengan decode bukan grep). Link landing homepage kini pakai domain custom (app.clincoo.buzz, blog.clincoo.buzz, www.clincoo.buzz).
-
-**Email routing `clincoo.buzz` (aktif 2026-09-19):** Email Routing Cloudflare AKTIF di zone clincoo.buzz. Catch-all rule: SEMUA alamat @clincoo.buzz (halo@, admin@, apapun@) diteruskan ke muzawwied@gmail.com. MX record auto-terisi (route1/2/3.mx.cloudflare.net). Destination address muzawwied@gmail.com sudah terverifikasi. Token CLOUDFLARE_TOKEN butuh izin: DNS:Edit, Email Routing Rules:Edit, Email Routing Addresses:Edit (account), Zone Settings:Edit — semua untuk zone clincoo.buzz. Belum ada SPF/DKIM Brevo untuk KIRIM email dari domain (baru bisa TERIMA).
-
-**Domain custom `clincoo.buzz` (zone di akun Vylonium 59db, aktif 2026-09-19):** clincoo.buzz + www → clinqoo-landing; app → clinqoo (situs utama); wallet → clinqoo-wallet; editor → clinqoo-editor; blog → clinqoo-blog. Record CNAME proxied di zone clincoo.buzz; project Pages tetap di akun a393 (cross-account, validasi HTTP otomatis). Token DNS clincoo.buzz tersimpan sebagai secret CLOUDFLARE_TOKEN. JANGAN hapus CNAME ini. pages.dev lama tetap hidup sebagai fallback.
-
-**Rebrand UI (2026-09-18/19):** seluruh teks UI pengguna sekarang `Clincoo` / `ClincooPay` — LANDING (clinqoo-landing), situs utama (clinqoo), Wallet (clinqoo-wallet), Editor (clinqoo-editor, "Clincoo Code"), Blog (clinqoo-blog; dokumen legal = artikel di /legal/). Yang TIDAK boleh ikut di-rename: domain/URL `clinqoo*`, nama repo & path GitHub (mis. `muzawwied.github.io/Clinqoo./`), identifier kode (ClinqooAPI, ClinqooAuth, dsb), dan kunci API. Gunakan rename kata utuh (`\bClinqooPay\b` dulu, baru `\bClinqoo\b`), JANGAN regex tanpa word-boundary.
-
-Deploy proyek UI lain (semua manual, `wrangler pages deploy`):
-- `clinqoo-wallet` (akun Vylonium a393): dari repo `Wallet`. Frontend saja — API dipanggil ke `wallet-muz.pages.dev`, `functions/api/wallet.js` lokal tidak terpakai. HAPUS `wrangler.toml` dari folder deploy (binding D1 `wallet-db` tidak berlaku untuk project ini).
-- `clinqoo-editor` (akun Vylonium a393): dari repo `Clinqoo-Editor`, deploy seluruh isi repo.
-- `clinqoo-blog` (akun 59db6147 "Clinqoo"): dari repo `Clinqoo-Blog`, deploy seluruh isi repo, gunakan token akun tersebut.
-- ~~`clinqoo-legal`~~ — PROJECT DIHAPUS 2026-09-19 atas permintaan owner. Seluruh dokumen legalitas (syarat-ketentuan, privasi, cookie, pembayaran, dst.) kini HIDUP SEBAGAI ARTIKEL BLOG di `clinqoo-blog.pages.dev/legal/` (folder `legal/` repo Clinqoo-Blog, sudah rebrand Clincoo). Repo `Clinqoo-Legal` di GitHub disimpan sebagai arsip sumber; jangan deploy ulang project ini.
+**Rebrand UI:** teks `Clincoo` / `ClincooPay`. JANGAN rename domain/URL `clinqoo*`, nama repo, path `muzawwied.github.io/Clinqoo./`, identifier kode.
 
 ---
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id di `functions/api/auth/shared.js`. Diverifikasi 06:02. |
-| Deploy user sites | OK | Kode app `0fb459d6` + rebrand UI `c44e6c71` |
-| Seed tabel proyek | OK | `b25ea866` |
-| Galeri template | OK | Email review JPEG + fallback |
-| CCTV `security_events` | Minor | `logBlocked` CREATE TABLE tanpa `.run()` (known) |
-| Encoding karakter | Minor | Mojibake em-dash |
-| Schema D1 vs runtime | Gap known | `security_events` belum di schema.sql |
-| Editor full-stack | OK | HEAD `29d5033` (rebrand UI) |
-| AI chat / Tim AI | Backlog | Dual-mode + loop/SSOT/maxOutputTokens/Doctor Deploy |
-| Promo | OK | |
-| Deploy MCP | OK — FIXED | Re-deploy sesuai prosedur; POST /mcp JSON-RPC initialize |
-| Wallet / langganan | OK | HEAD `95a42372` rebrand ClincooPay |
-| Middleware | OK + catatan | ORIGIN_ALLOW belum `*.clinqoo.biz.id` |
-| Hourly audit automation | OK | Audit 06:02: All clear — tidak kirim email |
-| Wiki / AGENTS.md | OK | Email resmi hanya gmail.com |
-| Issue GitHub | OK | 0 open, 0 PR open |
-| Blog | OK | HEAD `93d62bc3` rebrand + artikel template |
-| Clinqoo-Data | OK | Sync rutin `85a16670` 22:45Z / 05:45 WIB |
-| Landing | OK | Rebrand di repo utama `e8c31d64`; repo Landing tetap `280302d9` |
-| Legal | OK | `5ad44340` fix path root + `8446b521` rebrand |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 07:09. |
+| OAuth redirect_uri | Perhatian | `3d54169e` dinamis `location.origin + '/auth/'`. github.io memakai `/Clincoo./` → 404; path benar `/Clinqoo./`. |
+| CORS / middleware | OK + catatan | `5790e821` `*.clincoo.buzz`. Belum `*.clinqoo.biz.id`. `logBlocked` tanpa `.run()`. |
+| Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy mcp.js. |
+| Wallet / langganan | OK | HEAD `95a42372` |
+| Editor | OK | HEAD `58696cc` email halo@ |
+| Blog | OK | HEAD `805e7e1a` artikel template |
+| Clinqoo-Data | OK | Sync `85a16670` 22:45Z |
+| Issue GitHub | OK | 0 open, 0 PR |
+| Hourly audit | Laporan terkirim | 07:09 ke muzawwied@gmail.com |
 
-**All clear** — tidak ada bug kritis baru. Sejak audit 05:10: rebrand UI Clincoo di Clinqoo./Wallet/Editor/Blog/Legal (disengaja), cleanup email, sync Data, artikel blog. OAuth tetap FIXED. Tidak kirim email.
+Bukan All clear — email terkirim.
 
 ---
 
 ## Log Interaksi Agent
 
+### 2026-09-19 07:09 WIB — Grok (xAI) hourly audit
+- HEAD sebelumnya audit 06:02 `89dc645e` / wiki `8d47edb8`. HEAD sekarang `6ad3ddb5`.
+- Sejak 06:02: redirect hostname `6ad3ddb5`; OAuth redirect dinamis `3d54169e`; CORS `*.clincoo.buzz` `5790e821`; hapus forgot-password `db5e559e`; Brevo→Resend `2cdc2b1a`; email halo@.
+- `upsertOauthUser` tetap FIXED.
+- Bug: oauthRedirectUri github.io → `Clincoo.` 404 (harusnya `Clinqoo.`).
+- MCP connector 405 lagi. Issue/PR: 0.
+- Status: **bukan All clear**. Email `[Clinqoo Hourly Audit] 2026-09-19 07:09 WIB` terkirim.
+
 ### 2026-09-19 06:02 WIB — Grok (xAI) hourly audit
-- HEAD sebelumnya `8c4af590` (audit 05:10 All clear); HEAD sekarang `89dc645e` (docs rebrand + prosedur deploy).
-- Sejak 05:10: rebrand UI `c44e6c71` + landing `e8c31d64` + cleanup email `f4ea447b` (Clinqoo.). Wallet `95a42372`. Editor `29d5033`. Blog `93d62bc3`. Legal `5ad44340`. Data `85a16670`.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (dibaca ulang 06:02, file tidak diubah oleh rebrand).
-- Issue/PR open: 0.
-- Rebrand disengaja, bukan regresi OAuth/wallet/middleware. Minor CCTV/schema tetap terbuka.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-19 05:10 WIB — Grok (xAI) hourly audit
-- HEAD wiki sebelumnya `a30c2067` (audit 04:08 All clear).
-- Kode produk terakhir tetap `0fb459d6` @ 10:53Z.
-- Sejak 04:08: Clinqoo-Data sync rutin (`d8943366` 05:01 WIB). Blog `263cb982` (batch 5 artikel security ~04:23–04:25 WIB). Editor/Landing tidak berubah.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (dibaca ulang 05:10).
-- Issue/PR open: 0. Editor `6e4d516`. Landing `280302d9`.
-- MCP 405 known. Minor CCTV/schema tetap terbuka, bukan kritis baru.
-- Status: **All clear**. Tidak kirim email.
-
-### 2026-09-19 04:08 WIB — Grok (xAI) hourly audit
-- HEAD wiki sebelumnya `72c31521` (audit 03:10 All clear).
-- Kode produk terakhir tetap `0fb459d6` @ 10:53Z.
-- Sejak 03:10: Clinqoo-Data sync rutin (`42e93ea6` 04:00 WIB). Blog `5a30abb7` (artikel security-audit / security-izin / security-form). Editor/Landing tidak berubah.
-- `upsertOauthUser`: emailNorm + INSERT + last_row_id — **FIXED** (dibaca ulang 04:08).
-- Issue/PR open: 0. Editor `6e4d516`. Landing `280302d9`.
-- MCP 405 known. Minor CCTV/schema tetap terbuka, bukan kritis baru.
-- Status: **All clear**. Tidak kirim email.
+- Status saat itu: All clear. Tidak kirim email.
 
 Log lebih lama dipotong agar wiki ringan.
 
@@ -119,14 +82,14 @@ Log lebih lama dipotong agar wiki ringan.
 
 ## Rekomendasi untuk Agent Berikutnya
 
-1. Redeploy project `clinqoo` DENGAN `functions/mcp.js` (jangan sertakan wrangler.toml / D1 binding) jika POST `/mcp` kembali 405.
-2. Fix `logBlocked` di `functions/api/_middleware.js`: panggil `.run()` pada CREATE TABLE.
-3. Tambah `security_events` ke schema.sql.
-4. Pertimbangkan ORIGIN_ALLOW untuk `*.clinqoo.biz.id`.
-5. Email hanya ke **muzawwied@gmail.com**.
-6. Backlog AI: dual-mode, SSOT kuota, maxOutputTokens 8192, Doctor Deploy.
-7. OAuth tetap jangan diubah tanpa tes email-null GitHub.
-8. Rebrand Clincoo: jangan rename domain/repo/identifier kode.
+1. Redeploy `clinqoo` DENGAN `functions/mcp.js` jika POST `/mcp` 405.
+2. Fix path github.io `Clincoo.` → `Clinqoo.` di `auth/index.html` dan `akun/auth.html`.
+3. Daftarkan redirect URI `https://app.clincoo.buzz/auth/` di Google/GitHub OAuth.
+4. Cek `RESEND_API_KEY`.
+5. Fix `logBlocked` `.run()`; tambah `security_events` ke schema.sql.
+6. Email hanya ke **muzawwied@gmail.com**.
+7. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
+8. Rebrand: jangan rename domain/repo/path github.io/identifier.
 
 ---
 
