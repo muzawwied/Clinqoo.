@@ -532,15 +532,16 @@ export async function onRequestGet({ request, env }) {
 
 // Teks progres real-time — diturunkan dari aksi tool yang DIPILIH AI SENDIRI
 // (nama tool + argumennya), bukan daftar status palsu yang berputar.
+// Server-side progress text (English -- professional, consistent with client side)
 function serverProgressText(tc) {
   const a = tc.args || {};
-  if (tc.name === 'search_clinqoo_kb') return 'Menelusuri basis pengetahuan Clincoo: ' + String(a.query || '').slice(0, 60) + '…';
-  if (tc.name === 'take_screenshot') return 'Mengambil tangkapan layar situs…';
-  if (tc.name === 'create_backend_function') return 'Membuat fungsi backend: ' + String(a.name || '') + '…';
-  if (tc.name === 'call_backend_function') return 'Menjalankan fungsi backend: ' + String(a.name || '') + '…';
-  if (tc.name === 'list_backend_functions') return 'Melihat daftar fungsi backend…';
-  if (tc.name === 'delete_backend_function') return 'Menghapus fungsi backend: ' + String(a.name || '') + '…';
-  return 'Memproses: ' + tc.name + '…';
+  if (tc.name === 'search_clinqoo_kb') return 'Searching Clincoo knowledge base: ' + String(a.query || '').slice(0, 60) + '…';
+  if (tc.name === 'take_screenshot') return 'Taking a screenshot of the site…';
+  if (tc.name === 'create_backend_function') return 'Creating backend function: ' + String(a.name || '') + '…';
+  if (tc.name === 'call_backend_function') return 'Running backend function: ' + String(a.name || '') + '…';
+  if (tc.name === 'list_backend_functions') return 'Listing backend functions…';
+  if (tc.name === 'delete_backend_function') return 'Deleting backend function: ' + String(a.name || '') + '…';
+  return 'Processing: ' + tc.name + '…';
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -700,7 +701,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }
 
     if (streamSend) {
-      if (r && !r.error) streamSend({ t: 'progress', text: 'Menyusun jawaban…' });
+      if (r && !r.error) streamSend({ t: 'progress', text: 'Composing answer…' });
       if (r && r.error) {
         streamSend({ t: 'error', error: r.error, quota_exhausted: !!r.quotaExhausted });
       } else {
