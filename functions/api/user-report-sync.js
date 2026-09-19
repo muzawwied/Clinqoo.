@@ -87,6 +87,32 @@ export async function syncUserReport(env, opts) {
   md += '|----|------|-------|-------|-------|-------|-----------|\n';
   md += rows.join('\n') + '\n';
 
+  // ---- data wallet (wallet-db via binding WALLET_DB) ----
+  md += '\n## Data Wallet Clincoo (Live)\n\n';
+  md += '> Sinkron dari database wallet (wallet.clincoo.buzz): alamat, pemilik, dan saldo.\n\n';
+  let wCount = 0, wTotal = 0;
+  try {
+    const wR = await env.WALLET_DB.prepare('SELECT address, display_name, email, role, balance, created_at FROM wallet_accounts ORDER BY created_at').all();
+    const accs = wR.results || [];
+    wCount = accs.length;
+    const wRows = accs.map(a => {
+      const bal = Number(a.balance) || 0;
+      wTotal += bal;
+      const addr = String(a.address || '-');
+      const addrShort = addr.length > 12 ? addr.slice(0, 8) + '…' + addr.slice(-4) : addr;
+      const nm = (a.display_name || '-').replace(/\|/g, '/');
+      const em = (a.email || '-').replace(/\|/g, '/');
+      const tgl = (a.created_at || '').slice(0, 10) || '-';
+      return `| ${addrShort} | ${nm} | ${em} | ${a.role || '-'} | ${rp(bal)} | ${tgl} |`;
+    });
+    md += `**Total akun wallet: ${wCount} | Total saldo wallet: ${rp(wTotal)}**\n\n`;
+    md += '| Alamat | Nama | Email | Role | Saldo | Terdaftar |\n';
+    md += '|---------|------|-------|------|-------|-----------|\n';
+    md += wRows.join('\n') + '\n';
+  } catch (e) {
+    md += `> Wallet DB tidak tersedia: ${e.message} | env: ${Object.keys(env).join(',')}\n`;
+  }
+
   // ---- push ke GitHub ----
   const ghHeaders = { 'Authorization': 'Bearer ' + token, 'User-Agent': 'clinqoo-sync', 'Accept': 'application/vnd.github+json' };
   const getRes = await fetch('https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_PATH + '?ref=' + GH_BRANCH, { headers: ghHeaders, signal });
