@@ -586,10 +586,13 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (!messages.some(m => m && m.role === 'system')) {
       messages = [{ role: 'system', content: SINGLE_SYSTEM_PROMPT }, ...messages];
     }
-    if (messages.length === 0) {
+    // Mode fallback (body.message tanpa array messages): pesan user WAJIB ikut
+    // masuk. Bug lama: pesan user dibuang (request hanya berisi system prompt,
+    // model menjawab ngawur karena tidak tahu pertanyaannya).
+    if (!messages.some(m => m && m.role === 'user')) {
       const fallback = typeof body.content === 'string' ? body.content
         : (typeof body.message === 'string' ? body.message : '');
-      if (fallback) messages = [{ role: 'user', content: fallback }];
+      if (fallback) messages.push({ role: 'user', content: fallback });
     }
     if (messages.length === 0) {
       return new Response(JSON.stringify({ error: 'Pesan kosong' }), {
