@@ -58,12 +58,19 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 | Clinqoo-Data | OK | Sync `85a16670` 22:45Z |
 | Issue GitHub | OK | 0 open, 0 PR |
 | Hourly audit | Laporan terkirim | 07:09 ke muzawwied@gmail.com |
+| Email transactional | Resend | `2cdc2b1a` Brevo → Resend; cek `RESEND_API_KEY`. |
+| Hostname lama | Redirect | `6ad3ddb5` → app.clincoo.buzz |
 
-Bukan All clear — email terkirim.
+Bukan All clear — email terkirim. HEAD Clinqoo. `6ad3ddb5`.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-19 07:09 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit **bukan All clear**. HEAD `6ad3ddb5` redirect hostname lama → app.clincoo.buzz. `upsertOauthUser` tetap FIXED. Perubahan: OAuth redirect dinamis (`3d54169e`), CORS `*.clincoo.buzz` (`5790e821`), hapus forgot/reset (`db5e559e`), Brevo → Resend (`2cdc2b1a`). Bug medium: `oauthRedirectUri()` github.io path `Clincoo.` 404 (benar `Clinqoo./akun/auth.html`). MCP connector regresi HTTP 405. Issue/PR: 0. Editor `58696cc`. Wallet `95a42372`. Data `85a16670`. Rekomendasi: perbaiki string github.io; daftar redirect URI; redeploy mcp.js; cek RESEND_API_KEY.
+- Sumber: email/pesan laporan — subjek "[Clinqoo Hourly Audit] 2026-09-19 07:09 WIB" dari devconium@gmail.com
+- Status: **bukan All clear** — MCP 405 + callback github.io salah path; OAuth upsert tetap FIXED
 
 ### 2026-09-19 07:09 WIB — Grok (xAI) hourly audit
 - HEAD sebelumnya audit 06:02 `89dc645e` / wiki `8d47edb8`. HEAD sekarang `6ad3ddb5`.
@@ -84,7 +91,7 @@ Log lebih lama dipotong agar wiki ringan.
 
 1. Redeploy `clinqoo` DENGAN `functions/mcp.js` jika POST `/mcp` 405.
 2. Fix path github.io `Clincoo.` → `Clinqoo.` di `auth/index.html` dan `akun/auth.html`.
-3. Daftarkan redirect URI `https://app.clincoo.buzz/auth/` di Google/GitHub OAuth.
+3. Daftarkan redirect URI `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/` (plus localhost) di Google/GitHub OAuth.
 4. Cek `RESEND_API_KEY`.
 5. Fix `logBlocked` `.run()`; tambah `security_events` ke schema.sql.
 6. Email hanya ke **muzawwied@gmail.com**.
