@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 10:04 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 10:10 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -48,23 +48,29 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 10:04. Tidak disentuh. |
-| OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). Domain aktif: `location.origin + '/auth/'`. |
-| CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz` (`5790e821`). |
-| Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy `functions/mcp.js`. |
-| Wallet / langganan | OK | tidak berubah |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi audit 10:04. Tidak disentuh. |
+| OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). Domain aktif: `location.origin + '/auth/'`. Daftarkan `https://app.clincoo.buzz/auth/`. |
+| CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz`. |
+| Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy `functions/mcp.js` ke project clinqoo. |
+| Wallet / langganan / schema | OK | tidak berubah |
 | Editor repo | OK | Clinqoo-Editor HEAD `8eef3328` tidak berubah sejak 09:05 |
 | Blog | Update | HEAD `87bf7e44` artikel mobile + sitemap 2026-09-19 |
-| Clinqoo-Data | OK | HEAD `85a16670` tidak berubah |
+| Clinqoo-Data | OK | HEAD `85a16670` tidak berubah (tidak ada sync baru setelah 05:45) |
+| Clinqoo-Legal | OK | tidak ada commit baru hari ini |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan terkirim | 10:04 ke muzawwied@gmail.com |
+| Hourly audit | Laporan masuk | 10:04 ke muzawwied@gmail.com — bukan All clear |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
 
-Bukan All clear — email terkirim. HEAD kode Clinqoo. `c362285c` (wiki audit ini).
+Bukan All clear. HEAD wiki Clinqoo. `3f307535` (hanya docs); HEAD kode terakhir `c362285c`.
 
 ---
 
 ## Log Interaksi Agent
+
+### 2026-09-19 10:10 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit Clinqoo 10:04 WIB **bukan All clear**. Tidak ada commit kode baru di Clinqoo. (HEAD wiki `3f307535`). Blog update artikel mobile + sitemap (`87bf7e44`). Editor/Data/Legal tidak berubah. `upsertOauthUser` tetap FIXED. Bug terbuka: MCP initialize HTTP 405; oauthRedirectUri github.io masih `/Clincoo./` (404). CORS/wallet/schema tidak berubah. Issue/PR 0. Rekomendasi: redeploy MCP, perbaiki path Clincoo.→Clinqoo., daftarkan `https://app.clincoo.buzz/auth/` di OAuth console.
+- Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 10:04 WIB` dari Devconium
+- Status: **bukan All clear**
 
 ### 2026-09-19 10:04 WIB — Grok (xAI) hourly audit
 - HEAD kode sebelumnya audit 09:05 `c362285c`. Tidak ada commit kode baru; wiki `3f307535` lalu di-update audit ini.
@@ -85,9 +91,9 @@ Log lebih lama dipotong agar wiki ringan.
 ## Rekomendasi untuk Agent Berikutnya
 
 1. Redeploy MCP ke clinqoo.pages.dev dengan `functions/mcp.js` jika POST `/mcp` 405.
-2. Perbaiki path github.io `Clincoo.` → `Clinqoo.` pada `oauthRedirectUri`.
+2. Perbaiki path github.io `Clincoo.` → `Clinqoo.` pada `oauthRedirectUri` (`auth/index.html` L419).
 3. Daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/` di Google/GitHub OAuth.
-4. CORS `*.clincoo.buzz` sudah ada (`5790e821`) — jangan ulang sebagai bug.
+4. CORS `*.clincoo.buzz` sudah ada — jangan ulang sebagai bug.
 5. Cek `RESEND_API_KEY`.
 6. Email hanya ke **muzawwied@gmail.com**.
 7. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
