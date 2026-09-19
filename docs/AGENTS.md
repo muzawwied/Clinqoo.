@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 08:05 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 09:05 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -48,36 +48,35 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 08:05. |
-| OAuth redirect_uri | Bug | `auth/index.html` default hardcode pages.dev. `akun/auth.html` github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). |
-| CORS / middleware | Perhatian | ORIGIN_ALLOW belum `*.clincoo.buzz`. |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 09:05. |
+| OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). Domain aktif: `location.origin + '/auth/'`. |
+| CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz` (`5790e821`). |
 | Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy mcp.js. |
-| Wallet / langganan | OK | tidak berubah sejak audit 07:09 |
-| Editor | OK | HEAD `af9e947c` redirect pages.dev |
-| Blog | OK | HEAD `43b0d23a` legal ClincooPay |
+| Wallet / langganan | OK | tidak berubah |
+| Editor repo | Update | Clinqoo-Editor HEAD `8eef3328` enhancements.js (GitHub only) |
+| Blog | OK | HEAD `43b0d23a` |
 | Clinqoo-Data | OK | Sync `85a16670` 22:45Z |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan terkirim | 08:05 ke muzawwied@gmail.com |
+| Hourly audit | Laporan terkirim | 09:05 ke muzawwied@gmail.com |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
-| Unpublish Pages | OK | `e0b4ddf1` lepas custom domain dulu |
-| Mode Kolaborasi | Dihapus | `6a076380` Tim AI dihapus |
 
-Bukan All clear — email terkirim. HEAD Clinqoo. `e0b4ddf1`.
+Bukan All clear — email terkirim. HEAD Clinqoo. `c362285c`.
 
 ---
 
 ## Log Interaksi Agent
 
+### 2026-09-19 09:05 WIB — Grok (xAI) hourly audit
+- HEAD sebelumnya audit 08:05 `e0b4ddf1`. HEAD sekarang `c362285c`.
+- Sejak 08:05: TikTok footer; terminal editor (mobile + perintah npm/git); activity bar Workspace/Agent. Editor repo: enhancements.js.
+- `upsertOauthUser` tetap FIXED. CORS sudah OK (koreksi wiki 08:05).
+- Bug: MCP 405; oauthRedirectUri github.io `/Clincoo./`.
+- Issue/PR: 0.
+- Status: **bukan All clear**. Email `[Clinqoo Hourly Audit] 2026-09-19 09:05 WIB` terkirim.
+
 ### 2026-09-19 08:05 WIB — Grok (xAI) hourly audit
 - HEAD sebelumnya audit 07:09 `6ad3ddb5`. HEAD sekarang `e0b4ddf1`.
-- Sejak 07:09: unpublish domain `e0b4ddf1`/`3de57491`; hapus Mode Kolaborasi `6a076380`; blog legal + ganti link; editor redirect.
-- `upsertOauthUser` tetap FIXED.
-- Bug: oauthRedirectUri tidak konsisten (pages.dev hardcode vs Clincoo. path github.io). MCP 405. ORIGIN_ALLOW tanpa clincoo.buzz.
-- Issue/PR: 0.
-- Status: **bukan All clear**. Email `[Clinqoo Hourly Audit] 2026-09-19 08:05 WIB` terkirim.
-
-### 2026-09-19 07:09 WIB — Grok (xAI) hourly audit
-- HEAD `6ad3ddb5`. Bukan All clear — MCP 405 + callback github.io.
+- Status: **bukan All clear**. Email terkirim.
 
 Log lebih lama dipotong agar wiki ringan.
 
@@ -86,13 +85,12 @@ Log lebih lama dipotong agar wiki ringan.
 ## Rekomendasi untuk Agent Berikutnya
 
 1. Redeploy `clinqoo` DENGAN `functions/mcp.js` jika POST `/mcp` 405.
-2. Samakan `oauthRedirectUri`: github.io `Clinqoo.` (bukan `Clincoo.`); default `location.origin + '/auth/'`.
+2. Samakan `oauthRedirectUri`: github.io `Clinqoo.` (bukan `Clincoo.`).
 3. Daftarkan redirect URI `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/` di Google/GitHub OAuth.
-4. Tambah `*.clincoo.buzz` ke ORIGIN_ALLOW di `_middleware.js`.
-5. Cek `RESEND_API_KEY`.
-6. Email hanya ke **muzawwied@gmail.com**.
-7. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
-8. Rebrand: jangan rename domain/repo/path github.io/identifier.
+4. Cek `RESEND_API_KEY`.
+5. Email hanya ke **muzawwied@gmail.com**.
+6. Jangan ubah `upsertOauthUser` tanpa tes email-null GitHub.
+7. Rebrand: jangan rename domain/repo/path github.io/identifier.
 
 ---
 
