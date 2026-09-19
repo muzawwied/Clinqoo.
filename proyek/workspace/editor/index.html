@@ -2380,8 +2380,12 @@ function termPrint(text,cls){
   out.appendChild(d);
   out.scrollTop=out.scrollHeight;
 }
+function pkgRead(){try{const p=JSON.parse(project['package.json']||'null');return (p&&typeof p==='object')?p:null;}catch(e){return null;}}
+function pkgWrite(p){p.name=p.name||((LINK_PID?LINK_NAME:'proyek-clinqoo')+'').toLowerCase().replace(/[^a-z0-9-]/g,'-');if(!p.version)p.version='1.0.0';if(!p.scripts)p.scripts={dev:'clinqoo serve',build:'clinqoo build'};project['package.json']=JSON.stringify(p,null,2)+'\n';}
+const NPX_BACKEND_SERVER="const express=require('express');\nconst cors=require('cors');\nrequire('dotenv').config();\n\nconst app=express();\napp.use(cors());\napp.use(express.json());\n\napp.use('/api', require('./routes/health'));\n\nconst PORT=process.env.PORT || 3000;\napp.listen(PORT, () => console.log('Server jalan di http://localhost:' + PORT));\n";
+const NPX_BACKEND_HEALTH="const express=require('express');\nconst router=express.Router();\n\nrouter.get('/health', (req,res) => res.json({ status:'ok', time:new Date().toISOString() }));\n\nmodule.exports=router;\n";
 const CMDS={
-  help(){return ['Perintah tersedia:','  help            — panduan ini','  ls / tree       — daftar / struktur berkas','  cd / pwd        — pindah & lihat folder kerja','  cat <berkas>    — tampilkan isi berkas','  open <berkas>   — buka di editor','  touch <nama>    — buat berkas baru','  mkdir <nama>    — buat folder','  rm <berkas>     — hapus berkas','  mv <a> <b>      — pindah/ganti nama','  cp <a> <b>      — salin berkas','  echo teks > f   — tulis teks ke berkas','  find <kata>     — cari berkas & isi','  stat <berkas>   — ukuran & tanggal','  save            — simpan semua berkas','  clear           — bersihkan terminal','  date            — tanggal & waktu','  git status      — status perubahan','  git log         — riwayat versi','  git commit -m <pesan> — simpan versi','  git checkout <id> — pulihkan versi','  git pull        — tarik berkas terbaru dari cloud','  git push        — kirim ke cloud Clincoo','  npm run dev     — jalankan pratinjau','  npm run build   — unduh proyek jadi satu berkas HTML','  zip             — unduh proyek sebagai arsip .zip','  grep <f> <kata> — cari dalam berkas','  wc <berkas>     — hitung baris/kata/karakter','  ↑ / ↓           — riwayat perintah'].join('\n');},
+  help(){return ['Perintah tersedia:','  help            — panduan ini','  ls / tree       — daftar / struktur berkas','  cd / pwd        — pindah & lihat folder kerja','  cat <berkas>    — tampilkan isi berkas','  open <berkas>   — buka di editor','  touch <nama>    — buat berkas baru','  mkdir <nama>    — buat folder','  rm <berkas>     — hapus berkas','  mv <a> <b>      — pindah/ganti nama','  cp <a> <b>      — salin berkas','  echo teks > f   — tulis teks ke berkas','  find <kata>     — cari berkas & isi','  stat <berkas>   — ukuran & tanggal','  save            — simpan semua berkas','  clear           — bersihkan terminal','  date            — tanggal & waktu','  git status      — status perubahan','  git log         — riwayat versi','  git commit -m <pesan> — simpan versi','  git checkout <id> — pulihkan versi','  git pull        — tarik berkas terbaru dari cloud','  git push        — kirim ke cloud Clincoo','  git clone <url> — impor repo publik GitHub ke folder','  npm run dev     — jalankan pratinjau','  npm run build   — unduh proyek jadi satu berkas HTML','  npm install <paket> — tambah dependensi (mis. npm install dotenv)','  npm uninstall <paket> / npm init / npm ls','  node <berkas.js> — jalankan simulasi JS (console.log tampil)','  npx create-backend [nama] — scaffold backend Express + dotenv','  zip             — unduh proyek sebagai arsip .zip','  grep <f> <kata> — cari dalam berkas','  wc <berkas>     — hitung baris/kata/karakter','  ↑ / ↓           — riwayat perintah'].join('\n');},
   tree(){const t=treeData();let out=LINK_PID?LINK_NAME:'proyek-clinqoo';const walk=(node,pre)=>{const ds=Object.keys(node.dirs).sort(),fs=node.files.sort((a,b)=>nameOf(a).localeCompare(nameOf(b)));ds.forEach((d,i)=>{const last=i===ds.length-1&&!fs.length;out+='\n'+pre+(last?'└─ ':'├─ ')+d+'/';walk(node.dirs[d],pre+(last?'   ':'│  '));});fs.forEach((f,i)=>{out+='\n'+pre+(i===fs.length-1?'└─ ':'├─ ')+nameOf(f);});};walk(t,'');return out;},
   cd(a){const target=(a[0]||'').replace(/\/$/,'');if(!target||target==='/'){termCwd='';return 'OK — root';}const ok=Object.keys(project).some(p=>p===target||p.startsWith(target+'/')||linkedEmptyFolders.some(f=>f===target||f.startsWith(target+'/')));if(!ok)return 'cd: '+target+': folder tidak ada';termCwd=target;return 'OK — '+target;},
   pwd(){return '/'+termCwd;},
@@ -2406,10 +2410,115 @@ const CMDS={
     if(s==='checkout'){const id=a[1];if(!id)return 'Penggunaan: git checkout <id> — lihat id di git log';if(!getCommits().some(c=>c.id===id))return 'checkout: '+id+': versi tidak ada';checkoutCommit(id);return 'Dipulihkan ke versi '+id;}
     if(s==='push'){if(!LINK_PID)return 'git push: hanya berlaku untuk proyek Clincoo.';linkedCloudPush();return 'Mengirim '+Object.keys(project).length+' berkas ke cloud Clincoo…';}
     if(s==='pull'){if(!LINK_PID)return 'git pull: hanya berlaku untuk proyek Clincoo.';linkedCloudPullForce();return 'Menarik berkas terbaru dari cloud Clincoo…';}
-    return 'git: perintah tidak dikenali. Coba: status / log / commit -m / checkout / pull / push';},
-  npm(a){if((a[0]==='run')&&(a[1]==='dev')){setTimeout(()=>{runPreview();termPrint('  ➜ Pratinjau live berjalan — berkas proyek nyata, bukan simulasi ✨','ok');},250);return '> proyek-clinqoo@1.0.0 dev\n> clinqoo serve';}
-    if((a[0]==='run')&&(a[1]==='build')){setTimeout(()=>{const out=buildBundle();if(out){downloadFile(LINK_PID?LINK_NAME:'proyek-clinqoo',out);termPrint('  ➜ Build selesai — HTML gabungan diunduh ('+out.length+' byte) ✨','ok');}},250);return '> proyek-clinqoo@1.0.0 build\n> clinqoo build (menggabungkan HTML/CSS/JS menjadi satu berkas)';}
-    return 'npm: coba "npm run dev" (pratinjau) atau "npm run build" (unduh HTML)';},
+    if(s==='clone'){
+      const url=a.slice(1).join(' ');
+      const m=url.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?(?:\/tree\/([^\/]+)(?:\/(.+))?)?\/?$/i);
+      if(!m)return 'Penggunaan: git clone https://github.com/user/repo\n  (hanya repo publik GitHub; tambah /tree/cabang/subfolder bila perlu)';
+      const owner=m[1],repo=m[2];
+      setTimeout(async()=>{
+        try{
+          termPrint("Cloning into '"+repo+"'…");
+          const rr=await fetch('https://api.github.com/repos/'+owner+'/'+repo,{headers:{Accept:'application/vnd.github+json'}});
+          if(!rr.ok){termPrint('remote: repository tidak ditemukan / tidak publik (HTTP '+rr.status+')','err');return;}
+          const info=await rr.json();
+          const branch=m[3]||info.default_branch||'main';
+          const tr=await fetch('https://api.github.com/repos/'+owner+'/'+repo+'/git/trees/'+encodeURIComponent(branch)+'?recursive=1');
+          const tree=(await tr.json()).tree||[];
+          const skipExt=/\.(png|jpe?g|gif|webp|bmp|ico|zip|gz|tgz|rar|7z|mp3|mp4|mov|wav|pdf|woff2?|ttf|eot|otf|jar|exe|dll|bin|wasm|lock)$/i;
+          let files=tree.filter(x=>x.type==='blob'&&!skipExt.test(x.path)&&(x.size||0)<200000);
+          if(m[4])files=files.filter(x=>x.path.startsWith(m[4]+'/'));
+          const total=files.length;files=files.slice(0,300);
+          if(!files.length){termPrint('remote: tidak ada berkas teks (<200KB) yang bisa diimpor','err');return;}
+          let ok=0,skip=0;
+          for(const fx of files){
+            const rel=m[4]?fx.path.slice(m[4].length+1):fx.path;
+            const dest=repo+'/'+rel;
+            if(project[dest]!==undefined){skip++;continue;}
+            try{
+              const rf=await fetch('https://raw.githubusercontent.com/'+owner+'/'+repo+'/'+encodeURIComponent(branch)+'/'+fx.path.split('/').map(encodeURIComponent).join('/'));
+              if(!rf.ok){skip++;continue;}
+              project[dest]=await rf.text();ok++;
+            }catch(e){skip++;}
+          }
+          if(!linkedEmptyFolders.includes(repo))linkedEmptyFolders.push(repo);
+          persist();renderTree();
+          termPrint('Selesai: '+ok+' berkas dari '+owner+'/'+repo+'@'+branch+(skip?' ('+skip+' dilewati)':'')+(total>300?' [dipotong 300 pertama]':'')+' → folder '+repo+'/ ✨','ok');
+        }catch(e){termPrint('clone: gagal — '+((e&&e.message)||e)+' (butuh koneksi internet, repo harus publik)','err');}
+      },100);
+      return 'Menghubungi github.com…';}
+    return 'git: perintah tidak dikenali. Coba: status / log / commit -m / checkout / pull / push / clone <url>';},
+  npm(a){
+    const sub=(a[0]||'').toLowerCase();
+    if(sub==='run'&&(a[1]||'').toLowerCase()==='dev'){setTimeout(()=>{runPreview();termPrint('  ➜ Pratinjau live berjalan — berkas proyek nyata, bukan simulasi ✨','ok');},250);return '> proyek-clinqoo@1.0.0 dev\n> clinqoo serve';}
+    if(sub==='run'&&(a[1]||'').toLowerCase()==='build'){setTimeout(()=>{const out=buildBundle();if(out){downloadFile(LINK_PID?LINK_NAME:'proyek-clinqoo',out);termPrint('  ➜ Build selesai — HTML gabungan diunduh ('+out.length+' byte) ✨','ok');}},250);return '> proyek-clinqoo@1.0.0 build\n> clinqoo build (menggabungkan HTML/CSS/JS menjadi satu berkas)';}
+    if(sub==='run'&&!a[1]){const p=pkgRead();const sc=p&&p.scripts?Object.keys(p.scripts):[];return sc.length?'Script tersedia (package.json):\n'+sc.map(k=>'  npm run '+k+'  — '+p.scripts[k]).join('\n'):'npm run: tidak ada script di package.json — coba npm run dev / npm run build';}
+    if(sub==='install'||sub==='i'||sub==='add'){
+      const pkgs=a.slice(1).filter(x=>x&&!x.startsWith('-'));
+      if(!pkgs.length)return 'up to date in 512ms\n\ntemukan paket baru dengan: npm install <nama-paket>';
+      const p=pkgRead()||{};p.dependencies=p.dependencies||{};
+      const VER={express:'^4.19.2',dotenv:'^16.4.5',cors:'^2.8.5',mongoose:'^8.4.0',axios:'^1.7.2',jsonwebtoken:'^9.0.2',bcrypt:'^5.1.1',nodemon:'^3.1.4',mysql2:'^3.10.0',pg:'^8.12.0',ejs:'^3.1.10',firebase:'^10.12.2','socket.io':'^4.7.5'};
+      const HINT={dotenv:'// akses: require("dotenv").config(); lalu process.env.NAMA_VAR',express:'// server: const app=require("express"); app.listen(process.env.PORT||3000)',cors:'// pasang: app.use(require("cors"))',mongoose:'// koneksi: mongoose.connect(process.env.MONGO_URI)',mysql2:'// koneksi: require("mysql2/promise").createConnection(process.env.DB_URL)',pg:'// koneksi: new (require("pg").Pool)({connectionString:process.env.DB_URL})',axios:'// panggil API: axios.get("https://…")',jsonwebtoken:'// token: jwt.sign({id},"rahasia",{expiresIn:"7d"})',bcrypt:'// hash sandi: bcrypt.hash(sandi,10)',nodemon:'// dev auto-restart: nodemon server.js','socket.io':'// realtime: const io=require("socket.io")(server)'};
+      const lines=[];pkgs.forEach(pk=>{const v=VER[pk]||'latest';p.dependencies[pk]=v;lines.push('  + '+pk+'@'+v+(HINT[pk]?HINT[pk]:''));});
+      pkgWrite(p);
+      let extra='';
+      if(pkgs.includes('dotenv')){
+        if(project['.env']===undefined){project['.env']='# Konfigurasi lokal — jangan di-commit\nPORT=3000\n# RAHASIA_API=contoh-isi\n';extra+='\n  ✔ dibuat .env (contoh konfigurasi)';}
+        if(project['.gitignore']===undefined){project['.gitignore']='node_modules/\n.env\n';extra+='\n  ✔ dibuat .gitignore (node_modules & .env diabaikan)';}
+      }
+      persist();renderTree();
+      return 'added '+pkgs.length+' package'+(pkgs.length>1?'s':'')+' in '+(380+Math.floor(Math.random()*700))+'ms'+extra+'\n\n'+lines.join('\n');
+    }
+    if(sub==='uninstall'||sub==='remove'||sub==='rm'){
+      const pk=a[1];if(!pk)return 'Penggunaan: npm uninstall <paket>';
+      const p=pkgRead();if(!p||!p.dependencies||p.dependencies[pk]===undefined)return 'npm: paket "'+pk+'" tidak ada di package.json';
+      delete p.dependencies[pk];pkgWrite(p);persist();renderTree();
+      return 'removed 1 package in '+(220+Math.floor(Math.random()*400))+'ms\n\n  - '+pk;
+    }
+    if(sub==='init'){if(project['package.json']!==undefined)return 'package.json sudah ada — sunting langsung di editor.';
+      pkgWrite({});persist();renderTree();return 'created package.json ✨\n  Tambah dependensi: npm install <paket>';}
+    if(sub==='ls'||sub==='list'){const p=pkgRead();if(!p||!p.dependencies)return 'npm ls: belum ada package.json — ketik npm init';
+      const d=Object.keys(p.dependencies);
+      return p.name+'@'+(p.version||'1.0.0')+'\n'+(d.length?d.map(k=>'  ├─ '+k+'@'+p.dependencies[k]).join('\n'):'  (kosong — ketik npm install <paket>)');}
+    return 'npm: coba npm install <paket…> · npm uninstall <paket> · npm init · npm ls · npm run dev/build';},
+  node(a){
+    const sub=a[0];
+    if(!sub||sub==='-v'||sub==='--version')return 'v20.11.1 (Clincoo Code — simulasi ringan di browser)';
+    const f=(termCwd&&!sub.includes('/')?termCwd+'/':'')+sub;
+    if(project[f]===undefined)return 'node: cannot find module \''+sub+'\'';
+    const code=project[f];
+    const listen=code.match(/\.listen\s*\(\s*(?:process\.env\.PORT\s*\|\|\s*)?(\d+)/);
+    if(listen){
+      setTimeout(()=>{
+        const eps=[];const re=/\b(?:app|router)\.(?:get|post|put|delete|patch|use)\s*\(\s*['"\`]([^'"\`]+)['"\`]/g;let m;
+        while((m=re.exec(code)))if(!eps.includes(m[1]))eps.push(m[1]);
+        termPrint('➜ Server (simulasi) berjalan di http://localhost:'+listen[1]+(eps.length?'\n  Endpoint terdeteksi:\n'+eps.slice(0,15).map(e=>'   http://localhost:'+listen[1]+e).join('\n'):'')+'\n  (Frontend bisa dilihat nyata lewat: npm run dev)','ok');
+      },120);
+      return 'Menjalankan '+f+'…';
+    }
+    setTimeout(()=>{
+      const logs=[];
+      const c={log:(...x)=>logs.push(x.map(v=>typeof v==='object'?JSON.stringify(v):String(v)).join(' ')),error:(...x)=>logs.push('✖ '+x.map(String).join(' ')),warn:(...x)=>logs.push('⚠ '+x.map(String).join(' '))};
+      try{
+        const fn=new Function('console','module','exports','require',code);
+        const mod={exports:{}};
+        fn(c,mod,mod.exports,n=>{throw new Error('require("'+n+'") tidak tersedia di simulasi browser — untuk backend, coba: npx create-backend');});
+        termPrint(logs.length?logs.join('\n'):'(selesai — tanpa output console.log)');
+      }catch(e){termPrint((logs.length?logs.join('\n')+'\n':'')+((e&&e.message)||'error'),'err');}
+    },120);
+    return 'Menjalankan '+f+'…';},
+  npx(a){
+    const sub=(a[0]||'').toLowerCase();
+    if(sub==='create-backend'||sub==='create-api'||sub==='create-express'){
+      const dir=((a[1]||'')+'').replace(/[^a-zA-Z0-9-_]/g,'-').replace(/^[-.]+/,'')||'backend';
+      project[dir+'/server.js']=NPX_BACKEND_SERVER;
+      project[dir+'/routes/health.js']=NPX_BACKEND_HEALTH;
+      project[dir+'/.env']='# Konfigurasi lokal — jangan di-commit\nPORT=3000\n# RAHASIA_API=ganti-isi\n';
+      project[dir+'/.gitignore']='node_modules/\n.env\n';
+      const p=pkgRead()||{};p.dependencies=Object.assign({express:'^4.19.2',dotenv:'^16.4.5',cors:'^2.8.5'},p.dependencies||{});pkgWrite(p);
+      if(!linkedEmptyFolders.includes(dir))linkedEmptyFolders.push(dir);
+      persist();renderTree();
+      return '✨ Backend dibuat di '+dir+'/ (Express + dotenv + cors)\n  server.js — entry point, baca .env, jalan di PORT\n  routes/health.js — contoh endpoint GET /api/health\n  .env / .gitignore — konfigurasi lokal\n\nCoba simulasi: node '+dir+'/server.js';}
+    return 'npx: coba "npx create-backend [nama-folder]"';},
   zip(){downloadZip();return 'Membuat arsip .zip — '+Object.keys(project).length+' berkas…';},
   grep(a){const f=a[0],q=a.slice(1).join(' ');if(!f||!q)return 'Penggunaan: grep <berkas> <kata>';if(project[f]===undefined)return 'grep: '+f+': tidak ada';const hits=[];project[f].split('\n').forEach((ln,i)=>{if(ln.toLowerCase().includes(q.toLowerCase()))hits.push((i+1)+': '+ln.trim().slice(0,80));});return hits.length?hits.slice(0,40).join('\n'):'grep: tidak ada baris yang cocok.';},
   wc(a){const f=a[0];if(!f)return 'Penggunaan: wc <berkas>';if(project[f]===undefined)return 'wc: '+f+': tidak ada';const t=project[f];return t.split('\n').length+' baris  '+t.split(/\s+/).filter(Boolean).length+' kata  '+t.length+' karakter';}
