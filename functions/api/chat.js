@@ -543,7 +543,7 @@ function serverProgressText(tc) {
   return 'Memproses: ' + tc.name + '…';
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   try {
     if (!rateLimitOk(clientIp(request))) {
       return new Response(JSON.stringify({ error: 'Terlalu banyak permintaan. Coba lagi dalam 1 menit.' }), {
@@ -621,6 +621,9 @@ export async function onRequestPost({ request, env }) {
     // Mode streaming progres (NDJSON): klien minta status real-time.
     // Urutan baris: {"t":"thinking"} -> {"t":"progress","text":...} -> {"t":"final",...}
     // atau {"t":"error",...}. Klien lama (tanpa stream:true) tetap dapat JSON biasa.
+    // PENTING (runtime Workers): JANGAN menunggu write/close stream sebelum
+    // Response dikembalikan — worker akan hang (error 1101). Response stream
+    // dikirim SEKARANG, pemrosesan chat berjalan di belakang (waitUntil).
     const useStream = body.stream === true;
     let streamWriter = null, streamSend = null, streamReadable = null;
     if (useStream) {
@@ -629,9 +632,10 @@ export async function onRequestPost({ request, env }) {
       streamWriter = ts.writable.getWriter();
       const enc = new TextEncoder();
       streamSend = (obj) => streamWriter.write(enc.encode(JSON.stringify(obj) + '\n')).catch(() => {});
-      streamSend({ t: 'thinking' });
     }
 
+    const processChat = async () => {
+    if (streamSend) streamSend({ t: 'thinking' });
     // Mode workspace tools.
     // Jalur Gemini: HANYA functionDeclarations (tanpa google_search — kombinasi
     // keduanya ditolak Gemini API dan memicu bug JSON palsu).
@@ -692,9 +696,8 @@ export async function onRequestPost({ request, env }) {
       if (!r) r = { error: 'Tidak ada provider AI tersedia' };
     }
 
-    if (r && !r.error && streamSend) streamSend({ t: 'progress', text: 'Menyusun jawaban…' });
-
-    if (useStream) {
+    if (streamSend) {
+      if (r && !r.error) streamSend({ t: 'progress', text: 'Menyusun jawaban…' });
       if (r && r.error) {
         streamSend({ t: 'error', error: r.error, quota_exhausted: !!r.quotaExhausted });
       } else {
@@ -706,10 +709,8 @@ export async function onRequestPost({ request, env }) {
         if (r.tool_calls) outS.tool_calls = r.tool_calls;
         streamSend({ t: 'final', ...outS });
       }
-      await streamWriter.close().catch(() => {});
-      return new Response(streamReadable, {
-        headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-cache', ...CORS }
-      });
+      streamWriter.close().catch(() => {}); // TANPA await: antrean writer sudah berurutan
+      return; // mode stream: respons sudah terkirim sejak awal
     }
 
     if (r.error && r.quotaExhausted) {
@@ -732,6 +733,19 @@ export async function onRequestPost({ request, env }) {
     return new Response(JSON.stringify(out), {
       headers: { 'Content-Type': 'application/json', ...CORS }
     });
+    }; // akhir processChat
+
+    if (useStream) {
+      const p = processChat().catch((e) => {
+        if (streamSend) streamSend({ t: 'error', error: 'Server error: ' + ((e && e.message) || e) });
+        if (streamWriter) streamWriter.close().catch(() => {});
+      });
+      if (waitUntil) waitUntil(p);
+      return new Response(streamReadable, {
+        headers: { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-cache', ...CORS }
+      });
+    }
+    return await processChat();
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Server error: ' + err.message }), {
       status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
