@@ -8,10 +8,10 @@ export async function onRequestPost({ request, env }) {
   if (!key) return new Response(JSON.stringify({ error: 'no key' }), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } });
   const mk = (name, payload) => ({ name });
   const tests = [
-    ['minimal', { contents: [{ role: 'user', parts: [{ text: 'jawab: ok' }] }] }]],
-    ['tools_saja', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], tools: [{ functionDeclarations: DECLS }] }]],
-    ['sysinstr_penuh', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], systemInstruction: { parts: [{ text: SYSPROMPT }] } }]],
-    ['komplit', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], systemInstruction: { parts: [{ text: SYSPROMPT }] }, tools: [{ functionDeclarations: DECLS }] }]]
+    ['minimal', { contents: [{ role: 'user', parts: [{ text: 'jawab: ok' }] }] }],
+    ['tools_saja', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], tools: [{ functionDeclarations: DECLS }] }],
+    ['sysinstr_penuh', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], systemInstruction: { parts: [{ text: SYSPROMPT }] } }],
+    ['komplit', { contents: [{ role: 'user', parts: [{ text: 'siapa pendiri clincoo' }] }], systemInstruction: { parts: [{ text: SYSPROMPT }] }, tools: [{ functionDeclarations: DECLS }] }]
   ];
   for (const [name, payload] of tests) {
     try {
