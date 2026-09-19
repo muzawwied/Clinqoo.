@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 09:06 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 10:04 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -48,40 +48,35 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 
 | Area | Status | Catatan |
 |------|--------|--------|
-| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 09:05. Tidak disentuh commit baru. |
-| OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). Domain aktif: `location.origin + '/auth/'` — daftarkan di OAuth console. |
-| CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz` (`5790e821`). Catatan CORS 08:05 kedaluwarsa. |
-| Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy `functions/mcp.js` ke project clinqoo (bukan static-only). |
+| Auth OAuth (`upsertOauthUser`) | OK — FIXED | emailNorm + INSERT + last_row_id. Diverifikasi 10:04. Tidak disentuh. |
+| OAuth redirect_uri | Bug | github.io path `/Clincoo./` 404 (benar `/Clinqoo./`). Domain aktif: `location.origin + '/auth/'`. |
+| CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz` (`5790e821`). |
+| Deploy MCP | REGRESI 405 | Connector clinqoo___* initialize HTTP 405. Redeploy `functions/mcp.js`. |
 | Wallet / langganan | OK | tidak berubah |
-| Editor repo | Update | Clinqoo-Editor HEAD `8eef3328` enhancements.js + restore index.html (GitHub only) |
-| Blog | OK | HEAD `43b0d23a` tidak berubah sejak 08:05 |
+| Editor repo | OK | Clinqoo-Editor HEAD `8eef3328` tidak berubah sejak 09:05 |
+| Blog | Update | HEAD `87bf7e44` artikel mobile + sitemap 2026-09-19 |
 | Clinqoo-Data | OK | HEAD `85a16670` tidak berubah |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan terkirim | 09:05 ke muzawwied@gmail.com |
+| Hourly audit | Laporan terkirim | 10:04 ke muzawwied@gmail.com |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
 
-Bukan All clear — email terkirim. HEAD Clinqoo. `c362285c`.
+Bukan All clear — email terkirim. HEAD kode Clinqoo. `c362285c` (wiki audit ini).
 
 ---
 
 ## Log Interaksi Agent
 
-### 2026-09-19 09:06 WIB — Grok (xAI) laporan masuk
-- Ringkasan laporan: Hourly audit **bukan All clear**. Scope sejak audit 08:05 (HEAD wiki e0b4ddf1 / AGENTS e7bdfb74). HEAD Clinqoo. `c362285c` (01:28Z): TikTok footer @clincoo.co (`513647e9`); terminal mobile autocapitalize off (`934e06b5`); perintah terminal npm/node/npx/git clone (`cc0bcf36`); link Workspace & Agent ke activity bar (`c362285c`). Clinqoo-Editor `8eef3328` (enhancements.js + restore index.html, GitHub only). Blog `43b0d23a` dan Data `85a16670` tidak berubah. `upsertOauthUser` tetap FIXED. Bug: MCP initialize HTTP 405; oauthRedirectUri github.io `/Clincoo./akun/auth.html` 404. CORS sudah OK. Issue/PR 0. Wallet/schema tidak berubah.
-- Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-19 09:05 WIB` dari pengirim laporan audit
-- Status: **bukan All clear**
-
-### 2026-09-19 09:05 WIB — Grok (xAI) hourly audit
-- HEAD sebelumnya audit 08:05 `e0b4ddf1`. HEAD sekarang `c362285c`.
-- Sejak 08:05: TikTok footer; terminal editor (mobile + perintah npm/git); activity bar Workspace/Agent. Editor repo: enhancements.js.
-- `upsertOauthUser` tetap FIXED. CORS sudah OK (koreksi wiki 08:05).
-- Bug: MCP 405; oauthRedirectUri github.io `/Clincoo./`.
+### 2026-09-19 10:04 WIB — Grok (xAI) hourly audit
+- HEAD kode sebelumnya audit 09:05 `c362285c`. Tidak ada commit kode baru; wiki `3f307535` lalu di-update audit ini.
+- Blog baru: `87bf7e44` artikel mobile + sitemap.
+- Editor/Data/Legal: tidak berubah sejak 09:05.
+- `upsertOauthUser` tetap FIXED. MCP 405 + oauthRedirectUri github.io `/Clincoo./` masih ada.
 - Issue/PR: 0.
-- Status: **bukan All clear**. Email `[Clinqoo Hourly Audit] 2026-09-19 09:05 WIB` terkirim.
+- Status: **bukan All clear**. Email `[Clinqoo Hourly Audit] 2026-09-19 10:04 WIB` terkirim.
 
-### 2026-09-19 08:05 WIB — Grok (xAI) hourly audit
-- HEAD sebelumnya audit 07:09 `6ad3ddb5`. HEAD sekarang `e0b4ddf1`.
-- Status: **bukan All clear**. Email terkirim.
+### 2026-09-19 09:06 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit **bukan All clear**. HEAD Clinqoo. `c362285c`.
+- Status: **bukan All clear**
 
 Log lebih lama dipotong agar wiki ringan.
 
