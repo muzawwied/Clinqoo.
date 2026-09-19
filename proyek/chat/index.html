@@ -286,13 +286,15 @@
         body.dark-mode .tool-task-text { color: #9ca3af !important; }
         body.dark-mode .tool-task-text.err { color: #f87171 !important; }
 
-        /* Kartu "Menjalankan Tugas" — modern: tertutup default, dibuka manual oleh user */
-        .toolcalls-card { border: 1px solid #e8ebef; border-radius: 14px; background: linear-gradient(180deg, #fbfcfd 0%, #f7f9fb 100%); overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
-        body.dark-mode .toolcalls-card { border-color: #26262b; background: linear-gradient(180deg, #17171a 0%, #131316 100%); box-shadow: none; }
-        .toolcalls-summary { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 13px; background: none; border: none; cursor: pointer; text-align: left; font-size: 13px; font-weight: 600; color: #1f2937; transition: background 0.15s ease; }
-        .toolcalls-summary:hover { background: rgba(0,0,0,0.025); }
+        /* "Menjalankan Tugas" — TANPA kartu: nempel bersih ke background halaman,
+           tidak ada border/shadow/box terpisah. Hanya untuk tool workspace/aksi nyata
+           (bukan sekadar pencarian info — lihat isInfoOnlyToolCalls di JS). */
+        .toolcalls-card { border: none; border-radius: 0; background: transparent; overflow: visible; box-shadow: none; }
+        body.dark-mode .toolcalls-card { border: none; background: transparent; box-shadow: none; }
+        .toolcalls-summary { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 0; margin: 0; background: none; border: none; cursor: pointer; text-align: left; font-size: 13px; font-weight: 600; color: #1f2937; transition: opacity 0.15s ease; }
+        .toolcalls-summary:hover { opacity: 0.75; }
         body.dark-mode .toolcalls-summary { color: #e5e7eb; }
-        body.dark-mode .toolcalls-summary:hover { background: rgba(255,255,255,0.04); }
+        body.dark-mode .toolcalls-summary:hover { opacity: 0.8; }
         .toolcalls-badge { width: 26px; height: 26px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #eef2f7; color: #475569; }
         body.dark-mode .toolcalls-badge { background: #222228; color: #cbd5e1; }
         .toolcalls-badge.ok { background: #e8f7ef; color: #16a34a; }
@@ -305,9 +307,9 @@
         body.dark-mode .toolcalls-count { background: rgba(99,102,241,0.16); color: #a5b4fc; }
         .toolcalls-livebar { height: 2px; width: 100%; background: linear-gradient(90deg, transparent 0%, #6366f1 30%, #8b5cf6 50%, #6366f1 70%, transparent 100%); background-size: 220% 100%; animation: tc-sweep 1.6s ease-in-out infinite; }
         @keyframes tc-sweep { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
-        .toolcalls-list { display: flex; flex-direction: column; border-top: 1px solid #e8ebef; animation: tc-fadein 0.2s ease; }
+        .toolcalls-list { display: flex; flex-direction: column; border-top: none; border-left: 2px solid #eef0f3; margin-left: 12px; padding-left: 6px; animation: tc-fadein 0.2s ease; }
         @keyframes tc-fadein { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
-        body.dark-mode .toolcalls-list { border-top-color: #26262b; }
+        body.dark-mode .toolcalls-list { border-left-color: #26262b; }
         .toolcalls-item { border-bottom: 1px solid #f0f2f5; }
         body.dark-mode .toolcalls-item { border-bottom-color: #1e1e22; }
         .toolcalls-item:last-child { border-bottom: none; }
@@ -1247,6 +1249,19 @@
 
         fileUpload.addEventListener('change', handleFileUpload);
 
+        function pinMessageToTop(msgId) {
+            // autoScrollActive dimatikan: render berikutnya (jawaban AI yang sedang
+            // streaming) TIDAK menarik scroll balik ke bawah — posisi pin ini yang jadi acuan,
+            // persis seperti "pesan lama di-atasin sampai pesan baru saya".
+            autoScrollActive = false;
+            requestAnimationFrame(() => {
+                const el = document.getElementById('msg-row-' + msgId);
+                if (!el) return;
+                const target = Math.max(0, el.offsetTop - 10);
+                chatContainer.scrollTo({ top: target, behavior: 'smooth' });
+            });
+        }
+
         function scrollToBottom(forceSmooth = false) {
             if (forceSmooth) {
                 autoScrollActive = true;
@@ -1384,8 +1399,17 @@
             `;
         }
 
+        // Tool pencarian/pembacaan info murni — tidak ada aksi/perubahan nyata,
+        // jadi tidak perlu kartu "Menjalankan Tugas". Status shimmer teks saja sudah cukup.
+        const INFO_ONLY_TOOLS = new Set(['web_search', 'read_web_page', 'search_clinqoo_kb']);
+        function isInfoOnlyToolCalls(toolCalls) {
+            if (!toolCalls || toolCalls.length === 0) return true;
+            return toolCalls.every(tc => INFO_ONLY_TOOLS.has(tc.name));
+        }
+
         function renderToolCallsCard(msg) {
             if (!msg.toolCalls || msg.toolCalls.length === 0) return '';
+            if (isInfoOnlyToolCalls(msg.toolCalls)) return ''; // murni search -> tanpa kartu
             const running = !!msg.isProcessing;
             // Tertutup default: progres tidak auto-membuka; user membuka sendiri manual.
             const groupOpen = (msg.toolCallsOpen === undefined) ? false : msg.toolCallsOpen;
@@ -1481,6 +1505,7 @@
 
             visibleMessages.forEach((msg, index) => {
                 const messageEl = document.createElement('div');
+                messageEl.id = 'msg-row-' + msg.id;
                 messageEl.classList.add('flex', 'w-full', 'fade-in');
 
                 if (msg.role === 'ai') {
@@ -1507,7 +1532,7 @@
                             <div class="flex flex-col gap-2 pt-1 w-full min-w-0">
                                 ${renderToolCallsCard(msg)}
                                 <div class="text-black text-[15px] leading-relaxed break-words w-full md-content pointer-events-auto overflow-hidden" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;" id="msg-text-${msg.id}">
-                                    ${(msg.isProcessing && (!msg.toolCalls || msg.toolCalls.length === 0)) ? processIndicator : (msg.isImageResponse ? msg.text : formatMarkdown(balanceMarkdown(msg.text)))}
+                                    ${(msg.isProcessing && isInfoOnlyToolCalls(msg.toolCalls)) ? processIndicator : (msg.isImageResponse ? msg.text : formatMarkdown(balanceMarkdown(msg.text)))}
                                 </div>
                                 ${(msg.sources && msg.sources.length > 0) ? `
                                     <div class="mt-2 mb-1 pointer-events-auto w-full fade-in">
@@ -2485,9 +2510,11 @@
             };
             messages.push(aiMsgObj);
             renderMessages();
-            // FIX: pastikan indikator "mengetik" langsung terlihat di layar walau user
-            // sebelumnya sedang membaca riwayat di atas.
-            scrollToBottom(true);
+            // Tidak lagi force-scroll ke bawah di sini: kalau pesan user baru saja
+            // di-pin ke atas (pinMessageToTop), indikator "mengetik" ini muncul tepat
+            // di bawahnya secara alami — memaksa scroll ke bawah akan membatalkan pin itu.
+            // scrollToBottom(false) tetap menghormati autoScrollActive (mis. saat user scroll manual).
+            scrollToBottom(false);
             
             currentAiMessageId = aiMsgObj.id;
             abortController = new AbortController();
@@ -3001,9 +3028,8 @@
             chatInput.value = '';
             adjustInputHeight();
             
-            autoScrollActive = true; 
             renderMessages();
-            scrollToBottom(true);
+            pinMessageToTop(userMsg.id);
             
             if (agentModeOn && val) { runAgentTask(val); return; }
             fetchAIResponse();
