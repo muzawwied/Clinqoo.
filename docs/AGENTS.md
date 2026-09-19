@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 12:10 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 12:25 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,11 @@ Bukan All clear. HEAD wiki Clinqoo. `fcbaed4b` (landing SEO/WA + catatan deploy 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 12:25 WIB — Superagent (Base44): hapus section fitur di welcome editor
+- Owner minta hapus bagian "Fitur Standar Web Code Editor" (4 kartu: Syntax Highlighting, IntelliSense, File Tree Explorer, Integrated Terminal) dari welcome screen editor.clincoo.buzz, berdasarkan screenshot.
+- `build-editor/index.html`: div `.home-features` dihapus seluruhnya dari `.home-wrap` (hanya sisakan logo, judul, sub, tombol CTA, dan hint shortcut). Rebuild dari sumber `ed.html` asli (pecah ulang: index.html shell + style.css + app.js, redirect pid tetap dihapus).
+- Deploy manual ke `clinqoo-editor` (a393…). Live == build terverifikasi via browser: welcome sekarang berhenti di hint shortcut, tidak ada lagi grid fitur.
+
 ### 2026-09-19 12:10 WIB — Superagent (Base44): editor.clincoo.buzz dipecah + halaman depan dihapus
 - Project Cloudflare Pages `clinqoo-editor` (akun a393…, domain editor.clincoo.buzz) tadinya SATU file index.html 194KB (HTML+CSS+JS inline) + fullstack.js + layout-sidebar.js, dengan redirect JS "tanpa pid → /landing/" yang jadi reload loop tak berujung di editor.clincoo.buzz tanpa pid.
 - Pemecahan: `index.html` (shell markup, 26KB) + `style.css` (39KB, ?v=20260919) + `app.js` (logika utama, 128KB, defer ?v=20260919). Blok redirect pid DIHAPUS — editor.clincoo.buzz sekarang langsung masuk editor (welcome screen) tanpa halaman depan; ?pid=... tetap berfungsi (linking proyek + sinkron D1). `fullstack.js` & `layout-sidebar.js` tidak berubah. `_redirects`: `/* /index.html 200` (SPA fallback, samakan perilaku lama).
