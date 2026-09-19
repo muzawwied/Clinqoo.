@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-19 12:20 WIB)
+## Status Saat Ini (update terakhir: 2026-09-19 11:55 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,10 @@ Bukan All clear. HEAD wiki Clinqoo. `fcbaed4b` (landing SEO/WA + catatan deploy 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-19 11:55 WIB — Superagent (Base44): mode push workspace jadi permanen
+- `proyek/chat/index.html` commit `712c7bc`: tombol toggle `#ws-auto-btn` DIHAPUS (permintaan owner: tanpa CTA, otomatis). Aturan "MODE WORKSPACE LANGSUNG" kini selalu aktif di system prompt tanpa kondisi — AI selalu simpan file/kode via `write_file` ke workspace, tidak menampilkan blok kode di chat (kecuali diminta eksplisit).
+- Deploy manual project `clinqoo` (a393…, tanpa `functions/mcp.js` — `/mcp` tetap 405, kondisi sama). Live == build terverifikasi.
+
 ### 2026-09-19 12:20 WIB — Superagent (Base44): setting push otomatis ke workspace (chat)
 - `proyek/chat/index.html` commit `918a639`: tombol toggle `#ws-auto-btn` (ikon folder+plus, sebelah tombol "+") untuk mode "kode langsung dipush ke workspace". State di localStorage `clinqoo_ws_auto_push`. Saat AKTIF: system prompt per-request ditambah aturan — AI dilarang menampilkan blok kode, WAJIB simpan via `write_file` (path+isi lengkap, `create_folder` bila perlu), lalu jawab ringkas nama file/path/isi pokok. Gaya aktif menyesuaikan tema (terang: kapsul hitam; gelap: putih).
 - Deploy manual project `clinqoo` (a393…, tanpa `functions/mcp.js` — `/mcp` tetap 405, kondisi sama). Live == build terverifikasi.
