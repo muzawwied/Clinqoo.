@@ -2248,7 +2248,7 @@
                     buf = buf.slice(idx + 1);
                     if (!line) continue;
                     let evt; try { evt = JSON.parse(line); } catch (e) { continue; }
-                    if (evt.t === 'progress' || evt.t === 'thinking') onProgress(evt.text || 'Thinking...');
+                    if (evt.t === 'progress' || evt.t === 'thinking') onProgress(evt);
                     else if (evt.t === 'final') finalObj = evt;
                     else if (evt.t === 'error') errObj = evt;
                 }
@@ -2736,7 +2736,7 @@
                         const ctype = (response.headers.get('content-type') || '');
                         if (ctype.indexOf('x-ndjson') !== -1) {
                             // Stream progres real-time: thinking -> progress -> final
-                            resultJson = await readNdjsonStream(response, (t) => { hasReceivedData = true; setAiStatus(t); });
+                            resultJson = await readNdjsonStream(response, (evt) => { if (evt.t === 'progress') hasReceivedData = true; setAiStatus(evt.text || 'Thinking...'); });
                         } else {
                             resultJson = await response.json();
                         }
