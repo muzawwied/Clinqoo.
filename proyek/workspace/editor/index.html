@@ -61,7 +61,6 @@ svg{flex-shrink:0}
 #logo .logo-img{width:24px;height:24px;display:block;background:#fff;border-radius:7px;padding:3px;box-sizing:border-box}
 #logo .logo-code{display:flex;align-items:center;color:var(--accent)}
 #logo .logo-code svg{width:22px;height:22px}
-.home-logo .logo-home-code{width:66%;height:66%}
 #logo b{color:var(--text)}#logo span{color:var(--accent)}
 #menubar{display:flex;gap:2px}
 .menu-btn{padding:5px 9px;border-radius:6px;color:var(--text2);font-size:12.5px;font-weight:500}
@@ -262,32 +261,6 @@ body.light .fico-mono{color:#2b2b30}
 #split-close:hover{background:var(--bg4);color:var(--text)}
 #monaco2{flex:1;min-height:0}
 
-/* welcome / halaman utama editor — full screen, bersih, tanpa toolbar */
-#welcome{position:fixed;inset:0;z-index:900;display:none;background:var(--editor-bg);overflow-y:auto}
-#welcome.show{display:flex}
-body.home-mode #titlebar,body.home-mode #activitybar,body.home-mode #sidebar,body.home-mode #sb-reopen,
-body.home-mode #tabsbar,body.home-mode #breadcrumbs,body.home-mode #quicktools,
-body.home-mode #bt-resize,body.home-mode #bottom,body.home-mode #statusbar{display:none!important}
-.home-wrap{max-width:760px;margin:0 auto;padding:64px 24px 80px;text-align:center;width:100%}
-.home-logo{width:60px;height:60px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:16px}
-.home-logo img{width:66%;height:66%;object-fit:contain}
-#welcome .big{font-size:40px;font-weight:800;letter-spacing:-.03em}
-#welcome .big b{color:var(--accent)}
-#welcome .sub{color:var(--text2);margin:10px 0 34px;font-size:14px}
-.home-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
-.home-btn{border-radius:10px;padding:12px 26px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;border:1px solid transparent}
-.home-btn.primary{background:var(--accent);color:#fff}
-.home-btn.primary:hover{opacity:.88;transform:translateY(-1px)}
-.home-btn.ghost{background:transparent;border-color:var(--line);color:var(--text2)}
-.home-btn.ghost:hover{border-color:var(--accent);color:var(--text)}
-.home-hint{color:var(--text3);font-size:12px;margin-bottom:56px}
-.home-hint kbd{background:var(--bg3);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:inherit;font-size:11px}
-.home-features{border-top:1px solid var(--line);padding-top:36px;text-align:left}
-.home-features-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:18px;text-align:center}
-.home-features-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.hf-card{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
-.hf-title{font-weight:700;font-size:13.5px;color:var(--text);margin-bottom:6px}
-.hf-desc{font-size:12px;line-height:1.55;color:var(--text3)}
 kbd{font-family:'Fira Code',monospace;background:var(--bg4);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:2px 6px;font-size:10.5px;color:var(--text2)}
 
 /* ===== Bottom panel ===== */
@@ -428,11 +401,6 @@ body.light #statusbar{background:#131316}
   #statusbar{overflow-x:auto}
   #statusbar .sb{padding:0 7px;font-size:11px}
   #sb-enc,#sb-eol{display:none}
-  #welcome .big{font-size:28px}
-  .home-wrap{padding:44px 18px 60px}
-  .home-features-grid{grid-template-columns:1fr}
-  .home-btn{width:100%}
-  .home-cta{flex-direction:column}
   #run-btn{height:34px;padding:0 10px;font-size:12px}
   #palette-in input{font-size:13.5px}
   .pal-item{padding:12px;font-size:13.5px}
@@ -541,7 +509,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
   <div class="dd-item" onclick="openSettings()">Pengaturan Editor</div>
 </div>
 <div class="dropdown" id="m-help">
-  <div class="dd-item" onclick="showWelcome()">Halaman Selamat Datang</div>
   <div class="dd-item" onclick="termRun('help')">Panduan Terminal</div>
   <div class="dd-item" onclick="toast('Clincoo Code v1.0 — dibuat dengan ❤️')">Tentang Clincoo Code</div>
 </div>
@@ -616,40 +583,6 @@ body.light #titlebar,body.light #sidebar{background:rgba(238,238,241,.93);backdr
     <div id="monaco-wrap">
       <div id="monaco-main">
       <div id="monaco"></div>
-      <div id="welcome" class="show">
-        <div class="home-wrap">
-          <div class="home-logo"><svg class="logo-home-code" viewBox="0 0 32 32" fill="none" stroke="#16161a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg></div>
-          <div class="big">Clincoo <b>Code</b></div>
-          <div class="sub">Editor kode full-stack — ringan, rapi, langsung jalan di browser.</div>
-          <div class="home-cta">
-            <button class="home-btn primary" onclick="startCoding()">Mulai Coding</button>
-            <button class="home-btn ghost" onclick="openPalette('files')">Buka Berkas</button>
-          </div>
-          <div class="home-hint"><kbd>Ctrl</kbd>+<kbd>P</kbd> buka berkas cepat &nbsp;·&nbsp; <kbd>Ctrl</kbd>+<kbd>`</kbd> terminal</div>
-
-          <div class="home-features">
-            <div class="home-features-title">Fitur Standar Web Code Editor</div>
-            <div class="home-features-grid">
-              <div class="hf-card">
-                <div class="hf-title">Syntax Highlighting</div>
-                <div class="hf-desc">Pewarnaan teks kode secara otomatis berdasarkan bahasa pemrograman untuk memudahkan membaca logika dan struktur.</div>
-              </div>
-              <div class="hf-card">
-                <div class="hf-title">IntelliSense &amp; Auto-completion</div>
-                <div class="hf-desc">Sistem penyelesaian kode otomatis yang menyarankan nama variabel, fungsi, atau tag HTML saat Anda mengetik untuk mengurangi kesalahan sintaks.</div>
-              </div>
-              <div class="hf-card">
-                <div class="hf-title">File Tree Explorer</div>
-                <div class="hf-desc">Panel navigasi (biasanya di sisi kiri) untuk membuat, menghapus, dan mengatur struktur folder atau file dalam proyek.</div>
-              </div>
-              <div class="hf-card">
-                <div class="hf-title">Integrated Terminal</div>
-                <div class="hf-desc">Akses command line langsung di dalam editor yang terhubung ke cloud container atau sistem WebContainers, memungkinkan Anda menjalankan perintah server lokal.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       </div>
       <div id="split-pane" class="hidden">
         <div id="split-head"><span id="split-name">—</span><button id="split-close" onclick="closeSplit()" title="Tutup panel split"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -1201,15 +1134,6 @@ function modelFor(path){
   return models[path];
 }
 
-/* ---------- Halaman utama (welcome) ---------- */
-function enterHome(){
-  $('#welcome').classList.add('show');
-  document.body.classList.add('home-mode');
-}
-function exitHome(){
-  $('#welcome').classList.remove('show');
-  document.body.classList.remove('home-mode');
-}
 function startCoding(){
   if(Object.keys(project).length){openDefaultTabs();}
   else{createStarterFiles();}
@@ -1222,7 +1146,6 @@ function openFile(path,focus=true){
   activePath=path;
   const m=modelFor(path);
   editor.setModel(m);
-  exitHome();
   renderAll();
   if(focus){editor.focus();closeMobileSidebar();}
 }
@@ -1239,9 +1162,7 @@ function createStarterFiles(){
 function openDefaultTabs(){
   const keys=Object.keys(project);
   if(!keys.length){
-    const sub=document.querySelector('#welcome .sub');
-    if(sub&&LINK_PID)sub.innerHTML='Belum ada berkas di proyek <b>'+esc(LINK_NAME)+'</b>.<br>Buat berkas pertama, atau mulai dengan kerangka standar.';
-    enterHome();
+    createStarterFiles();
     return;
   }
   ['index.html','app.js','style.css'].forEach(f=>{if(f in project)openFile(f,false);});
@@ -1253,7 +1174,7 @@ function closeTab(path){
   if(activePath===path){
     activePath=tabs[Math.min(i,tabs.length-1)]||null;
     if(activePath)editor.setModel(modelFor(activePath));
-    else{editor.setModel(null);enterHome();}
+    else{editor.setModel(null);openDefaultTabs();}
   }
   renderAll();
 }
@@ -2423,7 +2344,7 @@ function doReset(){
   project=JSON.parse(JSON.stringify(FILES));
   Object.values(models).forEach(m=>m.dispose());models={};
   tabs=[];activePath=null;
-  editor.setModel(null);enterHome();
+  editor.setModel(null);openDefaultTabs();
   renderAll();closeModal();toast('Proyek direset ke contoh awal');
 }
 
@@ -2449,7 +2370,6 @@ function openDrawerMenu(){
     '<div class="sd-menu">'+
     mi('tpl','Templates','Halaman template siap pakai untuk proyek baru','closeSettingsDrawer();openTemplatesPage()')+
     mi('hist','Riwayat Versi','Simpan & pulihkan versi proyek','closeSettingsDrawer();showPanel(\'git\')')+
-    mi('home','Halaman Utama','Kembali ke layar sambutan','showWelcome();closeSettingsDrawer()')+
     mi('play','Jalankan Pratinjau','Menjalankan proyek (F5)','closeSettingsDrawer();runPreview()')+
     mi('theme','Ganti Tema','Gelap atau terang','toggleTheme()')+
     mi('down','Unduh Proyek','Simpan sebagai .zip','closeSettingsDrawer();downloadZip()')+
@@ -2593,12 +2513,6 @@ function toggleTheme(){
   monaco.editor.setTheme(light?'clinqoo-light':'clinqoo-dark');
   localStorage.setItem('cc_theme',light?'light':'dark');
   toast('Tema: '+(light?'Terang ☀':'Gelap 🌙'));
-}
-function showWelcome(){
-  tabs=[];activePath=null;
-  if(editor)editor.setModel(null);
-  renderAll();
-  enterHome();
 }
 /* Status inline: pengganti toast — pesan tampil di status bar, tanpa popup */
 function toast(msg){
