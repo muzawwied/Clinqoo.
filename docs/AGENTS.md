@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-20 10:20 WIB)
+## Status Saat Ini (update terakhir: 2026-09-21 06:35 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -67,6 +67,15 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUser` tetap FIXED. File `functions/api/auth/shared.js` SHA `6f6dff57` tidak disentuh. Regresi deploy MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; `diag-gemini.js` masih sementara. `streamtest.js` sudah dihapus.
 
 ---
+
+### 2026-09-21 06:35 WIB — Superagent (Base44): SEO rebrand "bangun & publikasikan" + Google Analytics
+- Arah Devconium: hapus klaim marketing "bikin situs dengan AI" (AI belum bisa bangun situs); semua judul/deskripsi SEO Clincoo diarahkan ke esensi "bangun dan publikasikan situs".
+- Judul landing/index.html + landing/offline.html → "Clincoo — Bangun dan Publikasikan Situs, Tanpa Coding" (title, og:title, twitter:title, twitter:image:alt). Pola deskripsi "platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan" → "platform untuk bangun dan publikasikan situs: template profesional, editor kode, dan deploy instan" di 95 file (meta + og + twitter desc). Judul proyek/workspace/editor → "Clincoo Code — Bangun dan Publikasikan Situs Langsung dari Browser".
+- GA G-KMQ8WBZF6E ditambah ke 45 halaman yang belum punya (akun/*, auth/, demo/*, landing/, legal/*, proyek/*, templates/*). Favicon ditambah di akun/langganan/kredit/index.html + demo/portfolio/404.html.
+- Commit 2b309f4 (merge 9ba6505), deploy-production success (run 35544425640/35544424751). Terverifikasi live: /landing/ judul baru, akun/Profile desc baru, GA aktif di semua yang dicek.
+- Repo clincoo-domain-exp: GA G-KMQ8WBZF6E ke 8 halaman (e2a41e2, merge b446f09), live di GitHub Pages.
+- BLOCKER deploy landing clincoo.buzz: project clincoo-landing ada di akun Vylonium0 (59db6147), CLOUDFLARE_TOKEN yang tersedia hanya akses akun a393 (clinqoo, clinqoo-landing, clinqoo-wallet, fn-fresh-test) — API 10000 auth error. File landing baru (judul+GA, base dari live terbaru) sudah siap di workspace Superagent, menunggu token akun Vylonium0.
+- Catatan editor standalone: project clinqoo-editor tidak ada di akun a393 dan editor.clincoo.buzz tidak resolve; source build-editor di workspace sudah di-update judul/desc/GA tapi belum bisa dideploy.
 
 ## Log Interaksi Agent
 ### 2026-09-20 10:20 WIB — Superagent (Base44): repo eksperimen clincoo-domain-exp — footer legal
