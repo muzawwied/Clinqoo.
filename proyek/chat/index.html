@@ -228,11 +228,11 @@
         .md-content h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #000; }
         .md-content h3 { font-size: 1.125rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; color: #000; }
         .md-content h4, .md-content h5, .md-content h6 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #000; }
-        .md-content p { margin-bottom: 0.75rem; }
+        .md-content p { margin-bottom: 0.5rem; }
         .md-content p:last-child { margin-bottom: 0; }
-        .md-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .md-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .md-content li { margin-bottom: 0.6rem; }
+        .md-content ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+        .md-content ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.5rem; }
+        .md-content li { margin-bottom: 0.35rem; }
         .md-content { max-width: 100%; overflow-wrap: break-word; word-wrap: break-word; }
         .md-content * { max-width: 100%; }
         .md-content code:not(.hljs) { 
@@ -252,18 +252,23 @@
         }
         .md-content pre { margin: 0; }
         .md-content blockquote { border-left: 4px solid #d1d5db; padding-left: 1rem; color: #4b5563; font-style: italic; margin-bottom: 1rem; }
-        .md-content a { color: #2563eb; text-decoration: underline; }
+        .md-content a { color: #111827; text-decoration: underline; text-decoration-color: rgba(17,24,39,0.35); text-decoration-thickness: 1px; text-underline-offset: 2px; font-weight: 500; transition: text-decoration-color 0.15s ease; }
+        .md-content a:hover { text-decoration-color: rgba(17,24,39,0.75); }
+        body.dark-mode .md-content a { color: #f3f4f6; text-decoration-color: rgba(243,244,246,0.35); }
+        body.dark-mode .md-content a:hover { text-decoration-color: rgba(243,244,246,0.8); }
         .md-content strong { font-weight: 700; }
         .md-content em { font-style: italic; }
         .md-content tbody td:first-child { font-weight: 600; background-color: #f9fafb; }
 
         .header-glass {
-            background: linear-gradient(to bottom, rgba(247, 247, 249, 1) 0%, rgba(247, 247, 249, 0) 100%);
-            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            background: linear-gradient(to bottom, rgba(247, 247, 249, 0.95) 0%, rgba(247, 247, 249, 0.7) 65%, rgba(247, 247, 249, 0) 100%);
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            backdrop-filter: blur(9px);
+            -webkit-backdrop-filter: blur(9px);
         }
         body.dark-mode .header-glass {
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%) !important;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 65%, rgba(0, 0, 0, 0) 100%) !important;
         }
 
         .tc-spin { display: inline-block; animation: tc-spin-anim 0.9s linear infinite; }
@@ -475,7 +480,7 @@
         </button>
     </header>
 
-    <main id="chat-container" class="flex-1 overflow-y-auto px-4 pt-20 pb-32 space-y-8 w-full relative z-10">
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 pt-20 pb-32 space-y-6 w-full relative z-10">
     </main>
 
     <footer class="fixed bottom-0 left-0 right-0 w-full bg-transparent px-4 py-4 z-20 pointer-events-none flex flex-col justify-end">
@@ -1068,12 +1073,33 @@
             }
         }
 
-        chatContainer.addEventListener('touchstart', () => isUserInteracting = true, {passive: true});
+        // FIX: bug "tidak bisa scroll saat AI thinking, nempel di bawah" — sebelumnya
+        // autoScrollActive hanya dimatikan lewat heuristik event 'scroll' (bandingkan posisi
+        // sebelum/sesudah), yang gampang telat/kalah race saat konten terus tumbuh cepat
+        // ketika AI sedang streaming/thinking (tiap render baru langsung menarik balik ke
+        // bawah sebelum jari sempat menggeser). Sekarang gesture NAIK asli (jari geser ke
+        // bawah / wheel ke atas) langsung mematikan auto-scroll di momen itu juga — tidak
+        // menunggu event scroll berikutnya — supaya user selalu bisa baca pesan lama walau
+        // AI masih mengetik.
+        let touchStartY = 0;
+        chatContainer.addEventListener('touchstart', (e) => {
+            isUserInteracting = true;
+            touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+        }, {passive: true});
+        chatContainer.addEventListener('touchmove', (e) => {
+            const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+            if (touchStartY && y - touchStartY > 6) {
+                // jari geser ke bawah -> isi discroll ke atas -> user sedang membaca ke atas
+                autoScrollActive = false;
+            }
+            touchStartY = y;
+        }, {passive: true});
         chatContainer.addEventListener('touchend', () => isUserInteracting = false, {passive: true});
         chatContainer.addEventListener('mousedown', () => isUserInteracting = true);
         document.addEventListener('mouseup', () => isUserInteracting = false);
-        chatContainer.addEventListener('wheel', () => {
+        chatContainer.addEventListener('wheel', (e) => {
             isUserInteracting = true;
+            if (e.deltaY < 0) autoScrollActive = false; // scroll ke atas -> matikan auto-scroll seketika
             clearTimeout(chatContainer.wheelTimeout);
             chatContainer.wheelTimeout = setTimeout(() => isUserInteracting = false, 250);
         }, {passive: true});
@@ -1559,7 +1585,7 @@
                         <div class="flex max-w-[95%] sm:max-w-[90%] w-full min-w-0">
                             <div class="flex flex-col gap-2 pt-1 w-full min-w-0">
                                 ${renderToolCallsCard(msg)}
-                                <div class="text-black text-[15px] leading-relaxed break-words w-full md-content pointer-events-auto overflow-hidden" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;" id="msg-text-${msg.id}">
+                                <div class="text-black text-[15px] leading-normal break-words w-full md-content pointer-events-auto overflow-hidden" style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;" id="msg-text-${msg.id}">
                                     ${(msg.isProcessing && isInfoOnlyToolCalls(msg.toolCalls)) ? processIndicator : (msg.isImageResponse ? msg.text : formatMarkdown(balanceMarkdown(msg.text)))}
                                 </div>
                                 ${(msg.sources && msg.sources.length > 0) ? `
@@ -2645,6 +2671,12 @@
                     const seed = Math.floor(Math.random() * 1000000);
                     const imageUrl = `https://image.pollinations.ai/prompt/${safePrompt}?seed=${seed}&nologo=true`;
                     
+                    // FIX: dulu ada delay artifisial 3500ms di sini sebelum blok gambar
+                    // (skeleton + <img>) dirender — padahal prompt & URL sudah pasti sejak baris
+                    // di atas, jadi delay itu cuma bikin gambar "telat tampil" tanpa alasan
+                    // teknis. Sekarang blok gambar langsung dirender saat ini juga; skeleton
+                    // loading yang sudah ada di renderImageGenBlock() tetap menutupi waktu
+                    // generate asli dari image.pollinations.ai (biasanya beberapa detik).
                     imageGenerationTimeout = setTimeout(() => {
                         const msgIndex = messages.findIndex(m => m.id === aiMsgObj.id);
                         if (msgIndex !== -1) {
@@ -2655,7 +2687,7 @@
                             messages[msgIndex].imageUrl = imageUrl;
                         }
                         stopGeneration();
-                    }, 3500);
+                    }, 120);
                     return; 
                 } catch (e) {
                     clearTimeout(apiTimeout);
@@ -2755,7 +2787,9 @@
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nHEMAT TOOL (WAJIB): tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa — ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan — jawab LANGSUNG tanpa memanggil tool apa pun. JANGAN memeriksa workspace (list_items/read_file), menjalankan run_command, atau memakai web_search/read_web_page kecuali user meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. Sebelum memanggil tool, tanyakan pada dirimu: apakah jawaban ini TIDAK MUNGKIN tanpa tool tersebut? Kalau masih mungkin dijawab tanpa tool, jangan panggil.\n\nTOOLS (dipakai sesuai kebutuhan, bukan otomatis): search_clinqoo_kb (cari informasi RESMI tentang Clincoo — founder, visi, fitur, editor, AI, template, deploy, saldo, kebijakan, tips — di basis pengetahuan internal yang diindeks dari blog resmi blog.clincoo.buzz; WAJIB dipanggil untuk setiap pertanyaan tentang Clincoo sebagai produk/perusahaan, dan hasilnya adalah sumber kebenaran resmi — jangan mengarang), run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode yang kompleks — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown, saat user memberi link atau jawaban butuh isi halaman itu), web_search (cari info terbaru/real-time di web, saat pertanyaan butuh data terkini), rename_project (ganti nama proyek aktif saat diminta), deploy_project (publish situs proyek aktif ke internet saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri), add_env_var (tambah/ubah env var proyek saat diminta), list_env_vars (lihat env var proyek saat diminta).\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nOUTPUT BERSIH (WAJIB): jawaban final hanya berisi teks jawaban untuk user. JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], proses/logika berpikirmu, log atau hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai ke dalam jawaban. Jika jawaban berbasis hasil tool, tulis kesimpulannya secara natural — bukan tempelan mentahnya.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup dan pertanyaan memang butuh data itu, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.' + wsAutoRuleText();
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nHEMAT TOOL (WAJIB): tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa — ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan — jawab LANGSUNG tanpa memanggil tool apa pun. JANGAN memeriksa workspace (list_items/read_file), menjalankan run_command, atau memakai web_search/read_web_page kecuali user meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. Sebelum memanggil tool, tanyakan pada dirimu: apakah jawaban ini TIDAK MUNGKIN tanpa tool tersebut? Kalau masih mungkin dijawab tanpa tool, jangan panggil.\n\nTOOLS (dipakai sesuai kebutuhan, bukan otomatis): search_clinqoo_kb (cari informasi RESMI tentang Clincoo — founder, visi, fitur, editor, AI, template, deploy, saldo, kebijakan, tips — di basis pengetahuan internal yang diindeks dari blog resmi blog.clincoo.buzz; WAJIB dipanggil untuk setiap pertanyaan tentang Clincoo sebagai produk/perusahaan, dan hasilnya adalah sumber kebenaran resmi — jangan mengarang), run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode yang kompleks — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown, saat user memberi link atau jawaban butuh isi halaman itu), web_search (cari info terbaru/real-time di web, saat pertanyaan butuh data terkini), take_screenshot (ambil screenshot statis sebuah URL dan kembalikan link gambarnya — PAKAI INI setiap kali user minta lihat tampilan/preview/screenshot sebuah situs, jangan cuma menjelaskan dengan teks kalau kamu bisa langsung menunjukkan gambarnya), rename_project (ganti nama proyek aktif saat diminta), deploy_project (publish situs proyek aktif ke internet saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri), add_env_var (tambah/ubah env var proyek saat diminta), list_env_vars (lihat env var proyek saat diminta).\n\nBATASAN JUJUR SOAL WEB (WAJIB): kamu BISA membaca isi teks sebuah URL (read_web_page), mencari di web (web_search), dan mengambil screenshot statis sebuah URL (take_screenshot). Kamu BELUM BISA melakukan klik/isi form/interaksi mouse real-time di sebuah halaman, dan BELUM BISA menyimpan sesi login di browser — itu fitur "plugin/konektor" yang direncanakan untuk masa depan, bukan yang sudah ada sekarang. Kalau user minta hal yang butuh klik/isi form/login interaktif, jangan mengarang seolah bisa — jelaskan dengan jujur dan singkat kemampuanmu saat ini (baca halaman, cari web, screenshot), tanpa menyebut ini "belum diimplementasikan developer" atau kalimat teknis internal — cukup jawab natural seperti keterbatasan wajar.
+
+ATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nOUTPUT BERSIH (WAJIB): jawaban final hanya berisi teks jawaban untuk user. JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], proses/logika berpikirmu, log atau hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai ke dalam jawaban. Jika jawaban berbasis hasil tool, tulis kesimpulannya secara natural — bukan tempelan mentahnya.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup dan pertanyaan memang butuh data itu, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.' + wsAutoRuleText();
                 
                 try {
                     const apiMessages = [
