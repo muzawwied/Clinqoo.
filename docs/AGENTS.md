@@ -74,6 +74,8 @@ Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUs
 - Commit `8eec80b`: hilangkan tap-highlight putih saat klik (CSS tap-highlight-color transparent) & card/circle hover di icon aksi titik tiga (jadi icon polos).
 - Commit `341b929`: baris daftar domain — hover/tap tidak lagi jadi abu-abu; klik baris domain → muncul garis bawah di nama domain lalu buka situs domain (anchor target _blank via goDomain()).
 - Commit `ab17884`: halaman verifikasi disederhanakan sesuai arah backend nanti: hanya metode TXT record (tab Nameserver dihapus, TXT dipilih karena paling gampang dicek backend via DNS-over-HTTPS lookup), label "Belum terverifikasi" + tombol "Periksa Status Verifikasi" + hint dihapus (verifikasi langsung oleh sistem), CTA bawah jadi "Konfirmasi" → domain ditandai aktif di daftar.
+- Commit `26390ed`: hapus arrow kanan di CTA Konfirmasi.
+- Commit `0aa3c97`: Konfirmasi di halaman verifikasi kini TIDAK menandai domain aktif — status tetap "Belum terverifikasi", verifikasi menyusul oleh sistem/backend (cek TXT via DNS lookup). Label "Aktif" di daftar domain tanpa dot. Item "Edit Catatan" (modal + fungsi openEdit/saveNote) dihapus dari pop-up aksi — menu kini hanya Verifikasi Domain (jika pending) dan Hapus Domain.
 
 
 ### 2026-09-20 07:18 WIB — Grok (xAI) laporan masuk
