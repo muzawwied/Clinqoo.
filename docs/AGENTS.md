@@ -76,6 +76,7 @@ Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUs
 - Commit `ab17884`: halaman verifikasi disederhanakan sesuai arah backend nanti: hanya metode TXT record (tab Nameserver dihapus, TXT dipilih karena paling gampang dicek backend via DNS-over-HTTPS lookup), label "Belum terverifikasi" + tombol "Periksa Status Verifikasi" + hint dihapus (verifikasi langsung oleh sistem), CTA bawah jadi "Konfirmasi" → domain ditandai aktif di daftar.
 - Commit `26390ed`: hapus arrow kanan di CTA Konfirmasi.
 - Commit `0aa3c97`: Konfirmasi di halaman verifikasi kini TIDAK menandai domain aktif — status tetap "Belum terverifikasi", verifikasi menyusul oleh sistem/backend (cek TXT via DNS lookup). Label "Aktif" di daftar domain tanpa dot. Item "Edit Catatan" (modal + fungsi openEdit/saveNote) dihapus dari pop-up aksi — menu kini hanya Verifikasi Domain (jika pending) dan Hapus Domain.
+- Commit `2a96170`: halaman `tambah/` judulnya jadi "Hubungkan Domain" (semantik connect domain), blok info "verifikasi lewat record DNS atau nameserver" dihapus (sudah tidak akurat, tinggal TXT). Modal hapus domain disederhanakan: tanpa ikon card, judul + teks domain saja, CTA "Batal"/"Hapus" jadi teks polos rata kanan (tanpa card/border/fill), radius modal rounded-lg.
 
 
 ### 2026-09-20 07:18 WIB — Grok (xAI) laporan masuk
