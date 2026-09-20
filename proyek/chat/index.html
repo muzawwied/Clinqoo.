@@ -269,6 +269,11 @@
         .tc-spin { display: inline-block; animation: tc-spin-anim 0.9s linear infinite; }
         @keyframes tc-spin-anim { to { transform: rotate(360deg); } }
 
+        /* Skeleton loading untuk gambar yang sedang dibuat -- abu2 bawaan Clincoo, modern & rapi */
+        .img-skeleton { width: 100%; aspect-ratio: 1 / 1; border-radius: 0.75rem; background: linear-gradient(100deg, #eef0f3 30%, #f8f9fb 50%, #eef0f3 70%); background-size: 200% 100%; animation: imgSkeletonShimmer 1.4s ease-in-out infinite; }
+        body.dark-mode .img-skeleton { background: linear-gradient(100deg, #1c1c1f 30%, #2a2a30 50%, #1c1c1f 70%); background-size: 200% 100%; }
+        @keyframes imgSkeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -2335,6 +2340,55 @@
             }
         }
 
+        // Blok generate-image dengan skeleton loading + auto-retry sekali (seed baru) +
+        // fallback rapi kalau tetap gagal -- gantikan ikon "broken image" bawaan browser
+        // yang terlihat seperti pill kecil "Generated Image" pas gambar gagal termuat.
+        function renderImageGenBlock(msgId, imageUrl, prompt) {
+            return `<div class="flex justify-center w-full my-2 pointer-events-auto">
+                <div class="w-full max-w-sm" id="imgwrap-${msgId}">
+                    <div class="img-skeleton rounded-xl" id="imgskel-${msgId}"></div>
+                    <img src="${imageUrl}" data-prompt="${escText(prompt)}" data-retried="0"
+                         class="w-full max-w-sm rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-gray-200"
+                         alt="Generated Image" style="display:none"
+                         onload="document.getElementById('imgskel-${msgId}')?.remove(); this.style.display='block'; scrollToBottom(true);"
+                         onerror="handleImageGenError(this, '${msgId}')">
+                </div>
+            </div>`;
+        }
+        function handleImageGenError(imgEl, msgId) {
+            const wrap = document.getElementById('imgwrap-' + msgId);
+            if (!wrap) return;
+            const prompt = imgEl.getAttribute('data-prompt') || '';
+            const retried = imgEl.getAttribute('data-retried') === '1';
+            if (!retried) {
+                // Coba sekali lagi diam-diam dengan seed baru sebelum benar2 dianggap gagal.
+                const newSeed = Math.floor(Math.random() * 1000000);
+                imgEl.setAttribute('data-retried', '1');
+                imgEl.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${newSeed}&nologo=true`;
+                return;
+            }
+            wrap.innerHTML = `
+                <div class="flex flex-col items-center justify-center gap-2 py-8 px-4 rounded-xl" style="background:rgba(120,120,130,0.08); border:1px solid rgba(120,120,130,0.18);">
+                    <i class="ph-bold ph-image-broken text-[22px]" style="color:#8b8b93"></i>
+                    <span style="color:#8b8b93; font-size:13px;">Failed to generate the image.</span>
+                    <button type="button" onclick="retryImageGeneration('${msgId}', '${encodeURIComponent(prompt)}')" style="color:#9ca3af; font-size:13px; text-decoration:underline; text-underline-offset:2px; cursor:pointer; background:none; border:none;">Try again</button>
+                </div>`;
+        }
+        function retryImageGeneration(msgId, encodedPrompt) {
+            const wrap = document.getElementById('imgwrap-' + msgId);
+            if (!wrap) return;
+            const prompt = decodeURIComponent(encodedPrompt);
+            const seed = Math.floor(Math.random() * 1000000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&nologo=true`;
+            wrap.innerHTML = `
+                <div class="img-skeleton rounded-xl" id="imgskel-${msgId}"></div>
+                <img src="${imageUrl}" data-prompt="${escText(prompt)}" data-retried="0"
+                     class="w-full max-w-sm rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-gray-200"
+                     alt="Generated Image" style="display:none"
+                     onload="document.getElementById('imgskel-${msgId}')?.remove(); this.style.display='block'; scrollToBottom(true);"
+                     onerror="handleImageGenError(this, '${msgId}')">`;
+        }
+
         async function executeWorkspaceTool(name, args) {
             try {
                 switch (name) {
@@ -2594,7 +2648,7 @@
                     imageGenerationTimeout = setTimeout(() => {
                         const msgIndex = messages.findIndex(m => m.id === aiMsgObj.id);
                         if (msgIndex !== -1) {
-                            messages[msgIndex].text = `<div class="flex justify-center w-full my-2 pointer-events-auto"><img src="${imageUrl}" class="w-full max-w-sm rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-gray-200" alt="Generated Image" loading="lazy" onload="scrollToBottom(true)"></div>`;
+                            messages[msgIndex].text = renderImageGenBlock(aiMsgObj.id, imageUrl, finalPrompt);
                             messages[msgIndex].isProcessing = false;
                             messages[msgIndex].isTyping = false;
                             messages[msgIndex].isImageResponse = true;
