@@ -2493,18 +2493,22 @@ outPrint('<b>Clincoo Code</b> siap digunakan.');
 outPrint('Monaco engine dimuat. Semua perubahan tersimpan otomatis di browser.');
 </script>
 <script>
-/* Anti-zoom adaptif untuk HP di mode desktop: browser ngezoom kalau input yang difokus
-   terlihat kecil di layar. Di mode desktop halaman dirender ~0.4x, jadi 16px saja kurang.
-   Inputarea Monaco (textarea tersembunyi tempat ngetik) dibesarkan 17/skala supaya
-   ukuran visualnya selalu >= 17px di layar — browser tidak perlu zoom-in otomatis.
-   Elemen ini tak terlihat, jadi tampilan kode & UI tidak berubah. */
+/* Anti-zoom ngetik di HP — 2 lapis:
+   (1) Di perangkat sentuh, inputarea Monaco (textarea TERSEMBUNYI tempat ngetik)
+       dipaksa font besar: minimal 44px, atau 17/skala bila halaman zoom-out lebih dalam.
+       Browser HP ngezoom saat fokus input yang terlihat KECIL DI LAYAR. Di mode desktop
+       halaman dirender ~0.4x: 16px terlihat cuma ~6px, makanya aturan 16px biasa kurang.
+       Dengan min 44px, ukuran visualnya tetap ~16px+ di layar mana pun.
+       Elemen ini tak terlihat: tampilan kode & UI tidak berubah.
+   (2) Fallback: kalau browser masih juga zoom (perilaku mode desktop yang membandel),
+       skala direset lewat toggle meta viewport (trik klasik reset zoom iOS/Chrome). */
 (function(){
+  var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints|0) > 0;
+  if(!isTouch || !window.visualViewport) return;
   var vv = window.visualViewport;
-  if(!vv) return;
   function fit(){
     var sc = vv.scale || 1;
-    if(sc > 0.95) return; /* skala normal — aturan CSS 16px sudah cukup */
-    var fs = Math.min(90, Math.ceil(17 / sc));
+    var fs = Math.min(90, Math.max(44, Math.ceil(17 / sc)));
     var areas = document.querySelectorAll('.monaco-editor .inputarea');
     for(var i = 0; i < areas.length; i++){
       areas[i].style.setProperty('font-size', fs + 'px', 'important');
@@ -2512,8 +2516,27 @@ outPrint('Monaco engine dimuat. Semua perubahan tersimpan otomatis di browser.')
   }
   vv.addEventListener('resize', fit);
   document.addEventListener('focusin', fit);
-  var iv = setInterval(fit, 1500); /* Monaco atur ulang inputarea saat ganti tab/pengaturan */
+  var iv = setInterval(fit, 1500); /* Monaco atur ulang inputarea saat ganti tab */
   setTimeout(function(){ clearInterval(iv); fit(); }, 8000);
+
+  var meta = document.querySelector('meta[name="viewport"]');
+  var lastFocus = 0, scaleAtFocus = null, lastSnap = 0;
+  document.addEventListener('focusin', function(){
+    lastFocus = Date.now();
+    scaleAtFocus = vv.scale;
+  });
+  vv.addEventListener('resize', function(){
+    var now = Date.now();
+    if(!meta || scaleAtFocus == null) return;
+    if(now - lastFocus > 2500 || now - lastSnap < 5000) return;
+    if(document.documentElement.clientWidth < 900) return; /* hanya layout desktop */
+    var sc = vv.scale || 1;
+    if(sc - scaleAtFocus < 0.08) return; /* bukan zoom-in, abaikan (mis. keyboard muncul) */
+    lastSnap = now;
+    var orig = meta.getAttribute('content');
+    meta.setAttribute('content', 'width=device-width,initial-scale=1.0');
+    setTimeout(function(){ meta.setAttribute('content', orig); }, 60);
+  });
 })();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
