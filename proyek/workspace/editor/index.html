@@ -1974,7 +1974,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* ---------- Problems & Output ---------- */
 function renderProblems(){
-  const all=monaco.editor.getAllModels().flatMap(m=>monaco.editor.getModelMarkers({resource:m.uri}).map(mk=>({msg:mk.message,sev:mk.severity,file:m.uri.path.split('/').pop(),line:mk.startLineNumber,resource:m})));
+  const all=monaco.editor.getModels().flatMap(m=>monaco.editor.getModelMarkers({resource:m.uri}).map(mk=>({msg:mk.message,sev:mk.severity,file:m.uri.path.split('/').pop(),line:mk.startLineNumber,resource:m})));
   const errs=all.filter(p=>p.sev===8), warns=all.filter(p=>p.sev!==8);
   $('#sb-err').textContent=errs.length;$('#sb-warn').textContent=warns.length;
   const cnt=$('#prob-cnt');
