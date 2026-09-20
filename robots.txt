@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://muzawwied.github.io/Clinqoo./sitemap.xml
+Sitemap: https://app.clincoo.buzz/sitemap.xml
