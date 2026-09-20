@@ -6,7 +6,7 @@
   <script src="../../js/accent-init.js"></script>
 <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clinqoo_current_project_id',__p);}}catch(e){}})();</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <link rel="icon" type="image/png" sizes="64x64" href="../../assets/favicon.png">
     <link rel="manifest" href="../../manifest.json">
     <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
@@ -1351,14 +1351,34 @@
             }
         }
 
+        // FIX KEYBOARD MOBILE: dulu pakai hack document.body.style.height = tinggi
+        // viewport terlihat. Akibatnya composer (position:fixed bottom-0, yang tidak
+        // ikut menyusut) berakhir MELAYANG MENIMPA area pesan seperti "card hitam"
+        // saat keyboard terbuka (terlihat jelas di dark mode). Solusi yang benar:
+        // (a) angkat composer persis ke atas keyboard via transform mengikuti
+        //     visualViewport, dan (b) tambah padding bawah area chat sebesar keyboard
+        //     supaya pesan terakhir tetap terlihat, bukan nyelip ke belakang keyboard.
         if (window.visualViewport) {
+            const vv = window.visualViewport;
+            const chatFooter = document.querySelector('footer.fixed');
+            let vvRaf = null;
             const handleViewportResize = () => {
-                const visibleHeight = window.visualViewport.height;
-                document.body.style.height = `${visibleHeight}px`;
-                scrollToBottom(false);
+                cancelAnimationFrame(vvRaf);
+                vvRaf = requestAnimationFrame(() => {
+                    // tinggi area tertutup keyboard relatif layout viewport
+                    const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+                    if (covered > 24) {
+                        if (chatFooter) chatFooter.style.transform = `translateY(${-covered}px)`;
+                        chatContainer.style.paddingBottom = `${Math.round(covered + 8)}px`;
+                    } else {
+                        if (chatFooter) chatFooter.style.transform = '';
+                        chatContainer.style.paddingBottom = '';
+                    }
+                    scrollToBottom(false);
+                });
             };
-            window.visualViewport.addEventListener('resize', handleViewportResize);
-            window.visualViewport.addEventListener('scroll', handleViewportResize);
+            vv.addEventListener('resize', handleViewportResize);
+            vv.addEventListener('scroll', handleViewportResize);
         }
 
         chatInput.addEventListener('focus', () => {
