@@ -71,6 +71,9 @@ Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUs
 ## Log Interaksi Agent
 ### 2026-09-20 10:20 WIB — Superagent (Base44): repo eksperimen clincoo-domain-exp — footer legal
 - Repo `muzawwied/clincoo-domain-exp` (GitHub Pages: muzawwied.github.io/clincoo-domain-exp/), commit `6be151d` lalu disempurnakan `6d4515a`: footer lama "Eksperimen CRUD Domain" dihapus dari semua halaman. Halaman depan (index.html) kini pakai footer SIMPEL satu baris terpusat nempel paling bawah: © 2026 Clincoo · SK/TOS · Kebijakan Privasi (link ke https://clincoo.buzz/legal/...). Footer dipindah keluar `<main>` dengan `mt-auto` (body flex-col) — commit `99fe542` karena versi sebelumnya masih di dalam main (main bukan flex container, mt-auto mati, footer nempel di bawah table). Halaman `tambah/` dan `verifikasi/` tanpa footer. Terverifikasi live di browser.
+- Commit `8eec80b`: hilangkan tap-highlight putih saat klik (CSS tap-highlight-color transparent) & card/circle hover di icon aksi titik tiga (jadi icon polos).
+- Commit `341b929`: baris daftar domain — hover/tap tidak lagi jadi abu-abu; klik baris domain → muncul garis bawah di nama domain lalu buka situs domain (anchor target _blank via goDomain()).
+- Commit `ab17884`: halaman verifikasi disederhanakan sesuai arah backend nanti: hanya metode TXT record (tab Nameserver dihapus, TXT dipilih karena paling gampang dicek backend via DNS-over-HTTPS lookup), label "Belum terverifikasi" + tombol "Periksa Status Verifikasi" + hint dihapus (verifikasi langsung oleh sistem), CTA bawah jadi "Konfirmasi" → domain ditandai aktif di daftar.
 
 
 ### 2026-09-20 07:18 WIB — Grok (xAI) laporan masuk
