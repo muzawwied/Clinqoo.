@@ -2492,6 +2492,30 @@ $('#sb-indent').textContent='Spasi: '+(localStorage.getItem('cc_tab')||'2');
 outPrint('<b>Clincoo Code</b> siap digunakan.');
 outPrint('Monaco engine dimuat. Semua perubahan tersimpan otomatis di browser.');
 </script>
+<script>
+/* Anti-zoom adaptif untuk HP di mode desktop: browser ngezoom kalau input yang difokus
+   terlihat kecil di layar. Di mode desktop halaman dirender ~0.4x, jadi 16px saja kurang.
+   Inputarea Monaco (textarea tersembunyi tempat ngetik) dibesarkan 17/skala supaya
+   ukuran visualnya selalu >= 17px di layar — browser tidak perlu zoom-in otomatis.
+   Elemen ini tak terlihat, jadi tampilan kode & UI tidak berubah. */
+(function(){
+  var vv = window.visualViewport;
+  if(!vv) return;
+  function fit(){
+    var sc = vv.scale || 1;
+    if(sc > 0.95) return; /* skala normal — aturan CSS 16px sudah cukup */
+    var fs = Math.min(90, Math.ceil(17 / sc));
+    var areas = document.querySelectorAll('.monaco-editor .inputarea');
+    for(var i = 0; i < areas.length; i++){
+      areas[i].style.setProperty('font-size', fs + 'px', 'important');
+    }
+  }
+  vv.addEventListener('resize', fit);
+  document.addEventListener('focusin', fit);
+  var iv = setInterval(fit, 1500); /* Monaco atur ulang inputarea saat ganti tab/pengaturan */
+  setTimeout(function(){ clearInterval(iv); fit(); }, 8000);
+})();
+</script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
 </body>
 </html>
