@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-20 05:03 WIB)
+## Status Saat Ini (update terakhir: 2026-09-20 07:18 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -56,19 +56,24 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 | CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz`. |
 | Deploy MCP | REGRESI — HTTP 405 | Live product: POST `https://clinqoo.pages.dev/mcp` dan POST `https://app.clincoo.buzz/mcp` = 405 body kosong. Gejala: `functions/mcp.js` tidak ter-serve (deploy statis / tanpa function MCP). Redeploy project clinqoo BERSAMA functions/mcp.js. Jangan samakan connector-tool 405 dengan product 405. |
 | CI deploy production | Update | `e08ff661` job deploy-production `app.clincoo.buzz` otomatis tiap push (akun Vylonium). |
-| AI chat / streaming | Update | HEAD `ea49c002`: `body.message` dipertahankan pada fallback tanpa `messages[]`. Juga `b060dca2` proses streaming di `waitUntil` (error 1101); `b91e73f6` event thinking tidak menonaktifkan timeout retry 120s. |
+| Editor / UI | Update | HEAD `57e484ca`: fix mobile auto-zoom Monaco 16px. Sejak 05:03: UI chat/progress + esc(); hapus AI dari editor Clincoo Code; hapus welcome; badge English; hapus drawer/CTA/settings popup; IIFE mati; inline code color + English task labels; hapus fullstack.js Database Lokal & API Tester. Bukan auth/wallet/schema. |
 | Wallet / langganan / schema | Update | Binding `WALLET_DB` + tabel wallet. Pastikan binding Pages production. |
-| Sync users-live | OK — jalan | Clinqoo-Data: `a65c89fe` (21:15 UTC), `0e8c983a` (21:31), `f9fc4370` (21:46), `f56334d6` (22:01 UTC). |
-| Blog / Editor / Landing / Legal | OK | Tidak ada commit baru sejak audit 04:09. |
+| Sync users-live | OK — jalan | Clinqoo-Data terbaru `1de2e8c8` (00:16 UTC). |
+| Blog | OK | Clinqoo-Blog: artikel/sitemap akses & SEO (bukan kode app). |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan masuk | 05:03 WIB ke muzawwied@gmail.com — **bukan All clear** |
+| Hourly audit | Laporan masuk | 07:18 WIB ke muzawwied@gmail.com — **bukan All clear** |
 | Email transactional | Resend | cek `RESEND_API_KEY` |
 
-Bukan All clear. HEAD Clinqoo. `ea49c002` (fix: `body.message` tidak dibuang saat fallback tanpa array messages; author-date 2026-09-19T21:54:25Z). `upsertOauthUser` tetap FIXED. Regresi deploy MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; `diag-gemini.js` masih sementara. `streamtest.js` sudah dihapus.
+Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUser` tetap FIXED. File `functions/api/auth/shared.js` SHA `6f6dff57` tidak disentuh. Regresi deploy MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; `diag-gemini.js` masih sementara. `streamtest.js` sudah dihapus.
 
 ---
 
 ## Log Interaksi Agent
+### 2026-09-20 07:18 WIB — Grok (xAI) laporan masuk
+- Ringkasan laporan: Hourly audit Clinqoo 07:18 WIB **bukan All clear**. Scope sejak audit 2026-09-20 05:03 WIB. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Live MCP: POST `https://clinqoo.pages.dev/mcp` = HTTP 405 body kosong; POST `https://app.clincoo.buzz/mcp` = HTTP 405 body kosong. Regresi deploy tetap: `functions/mcp.js` tidak ter-serve. Perubahan kode sejak 05:03 (editor/UI, bukan auth/wallet/schema): `d5841c11` docs AGENTS.md laporan 05:03; `93247b61`, `88444814`, `ed293e92`, `9556cc90` UI chat/progress + fix fullstack esc(); `87736d16`, `c7a27a8c` hapus AI dari editor Clincoo Code; `0a16c10d` hapus halaman welcome; `1348bd07`, `e4726554` badge selesai English; `fae8c8ce`, `4eb2bcea` hapus drawer/CTA/settings popup; `09ffbbed` chore IIFE mati; `ba04b62c` inline code color + English task labels; `8dcd31bd` hapus fullstack.js Database Lokal & API Tester; `57e484ca` fix mobile auto-zoom Monaco 16px. Clinqoo-Data sync live jalan (terbaru `1de2e8c8` 00:16 UTC). Clinqoo-Blog: artikel/sitemap akses & SEO (bukan kode app). Issue/PR: 0 open. Bug terbuka lama: (1) oauthRedirectUri github.io masih `/Clincoo./` (benar `/Clinqoo./`) di `auth/index.html` SHA `c79d1748`; (2) `functions/api/diag-gemini.js` masih di HEAD (gate ADMIN_EMAILS / qa.*@clincoo.dev); (3) `streamtest.js` sudah dihapus (`9b8f4564`). Rekomendasi: PRIORITAS redeploy Pages project clinqoo BERSAMA functions/mcp.js (verifikasi POST /mcp = JSON-RPC atau 401, bukan 405); hapus diag-gemini.js setelah diagnosa; perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB binding production; rebrand jangan rename domain/repo/path github.io/identifier.
+- Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-20 07:18 WIB` dari Devconium
+- Status: **bukan All clear** — regresi deploy MCP product 405; UI/editor berubah; auth tetap FIXED
+
 ### 2026-09-20 05:03 WIB — Grok (xAI) laporan masuk
 - Ringkasan laporan: Hourly audit Clinqoo 05:03 WIB **bukan All clear**. Scope sejak audit 2026-09-20 04:09 WIB. Connector Clinqoo MCP initialize: HTTP 405 (audit lewat GitHub + curl live). HEAD Clinqoo. `ea49c002` — fix: pesan user (`body.message`) tidak dibuang saat fallback tanpa array messages (2026-09-19T21:54:25Z). `upsertOauthUser` TETAP FIXED (emailNorm + INSERT + last_row_id). File `functions/api/auth/shared.js` SHA `6f6dff57` — tidak disentuh. Perubahan sejak 04:09: Clinqoo. kode app `6fb39df1` docs AGENTS.md dari laporan 04:09 WIB; `b060dca2` fix streaming progres: proses di waitUntil (error 1101); `9b8f4564` chore: hapus probe streamtest; `b91e73f6` fix: event thinking tidak menonaktifkan timeout retry 120s; `ea49c002` fix: body.message dipertahankan pada fallback tanpa messages[]. Clinqoo-Data sync live: `a65c89fe` (21:15 UTC), `0e8c983a` (21:31), `f9fc4370` (21:46), `f56334d6` (22:01 UTC). Clinqoo-Blog / Editor / Landing / Legal: tidak ada commit baru. Issue/PR: 0 open. Temuan live: POST `https://clinqoo.pages.dev/mcp` = HTTP 405 body kosong; POST `https://app.clincoo.buzz/mcp` = HTTP 405 body kosong. Regresi deploy tetap: `functions/mcp.js` tidak ter-serve. Bug terbuka lama: (1) oauthRedirectUri github.io masih `/Clincoo./` (benar `/Clinqoo./`) di `auth/index.html` SHA `c79d1748`; domain aktif `location.origin + '/auth/'`; daftarkan `https://app.clincoo.buzz/auth/` dan `https://clinqoo.pages.dev/auth/`. (2) `functions/api/diag-gemini.js` masih di HEAD (gate ADMIN_EMAILS / qa.*@clincoo.dev). (3) `streamtest.js` SUDAH dihapus (`9b8f4564`) — item probe streaming selesai. Rekomendasi: PRIORITAS redeploy Pages project clinqoo BERSAMA functions/mcp.js (verifikasi POST /mcp = JSON-RPC atau 401, bukan 405); hapus diag-gemini.js setelah diagnosa; perbaiki Clincoo.→Clinqoo. pada oauthRedirectUri github.io; jangan ubah upsertOauthUser tanpa tes email-null GitHub; cek RESEND_API_KEY; WALLET_DB binding Pages production; rebrand jangan rename domain/repo/path github.io/identifier.
 - Sumber: email/pesan laporan — subjek `[Clinqoo Hourly Audit] 2026-09-20 05:03 WIB` dari Devconium
