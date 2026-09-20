@@ -256,6 +256,18 @@
         .md-content a:hover { text-decoration-color: rgba(17,24,39,0.75); }
         body.dark-mode .md-content a { color: #f3f4f6; text-decoration-color: rgba(243,244,246,0.35); }
         body.dark-mode .md-content a:hover { text-decoration-color: rgba(243,244,246,0.8); }
+        /* FIX kontras dark mode: heading Markdown (h1-h6) di pesan AI dulu hardcode
+           color:#000 tanpa versi dark — teks hitam di atas background hitam, tak
+           terbaca sama sekali. Sekalian benerin blockquote & kolom tabel pertama
+           yang punya masalah kontras serupa di dark mode. */
+        body.dark-mode .md-content h1, body.dark-mode .md-content h2, body.dark-mode .md-content h3,
+        body.dark-mode .md-content h4, body.dark-mode .md-content h5, body.dark-mode .md-content h6 { color: #f9fafb !important; }
+        body.dark-mode .md-content blockquote { border-left-color: #3f3f46; color: #a1a1aa; }
+        body.dark-mode .md-content tbody td:first-child { background-color: #18181b; }
+        /* Safety-net: pastikan SELURUH teks pesan AI selalu kontras di dark mode,
+           apa pun elemen Markdown-nya (p, li, td, dst) — tanpa !important supaya
+           warna khusus (link, code, error) yang sudah diatur di atas tetap menang. */
+        body.dark-mode .md-content { color: #f3f4f6; }
         .md-content strong { font-weight: 700; }
         .md-content em { font-style: italic; }
         .md-content tbody td:first-child { font-weight: 600; background-color: #f9fafb; }
