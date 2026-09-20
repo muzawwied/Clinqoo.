@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-21 07:10 WIB)
+## Status Saat Ini (update terakhir: 2026-09-21 06:55 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -81,6 +81,11 @@ Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUs
 - Judul utama → "Clincoo — Bangun & Publikasikan Situsmu dengan Mudah"; deskripsi → "Bangun situs profesional dengan bantuan AI dan Monaco Editor, lalu publikasikan ke internet hanya dengan satu klik. Tanpa setup, tanpa ribet." Diterapkan di: index.html root (title/og/twitter + desc), landing/index.html + offline.html, dan pola deskripsi 95 halaman (prefix halaman tetap, mis. "Profil — kelola langsung di Clincoo. Bangun situs profesional...").
 - Commit 42b0cb9 (merge d29606c), deploy-production success (run 35545176038). Terverifikasi live: /, /landing/, /akun/Profile/.
 - deploy-landing/ + deploy-landing2/ (clincoo.buzz): file sudah pakai judul/deskripsi baru + GA — masih menunggu token akun Vylonium0 untuk deploy (blocker sama seperti entri sebelumnya).
+
+### 2026-09-21 06:55 WIB — Superagent (Base44): hapus path /landing/ dari app.clincoo.buzz
+- Arah Devconium: path /landing/ dihapus dari app.clincoo.buzz (landing Clincoo dilayani clincoo.buzz, bukan app). Commit 716f90c menghapus folder landing/ dari repo; deploy-production success (run 35545424455).
+- Verifikasi origin: /landing/index.html 404, /landing/assets/* 404, /landing tanpa slash 404, request cache-busted ke /landing/ 404 — origin bersih.
+- CATATAN cache: /landing/ (dengan slash) masih menyajikan HTML basi dari cache tepi zona clincoo.buzz (cache-control s-maxage=604800, aturan cache HTML 7 hari). Token a393 tidak punya akses zona clincoo.buzz (list zones kosong) jadi tidak bisa purge via API — perlu purge manual di dashboard (akun Vylonium0) atau tunggu max 7 hari.
 
 ## Log Interaksi Agent
 ### 2026-09-20 10:20 WIB — Superagent (Base44): repo eksperimen clincoo-domain-exp — footer legal
