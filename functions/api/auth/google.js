@@ -8,7 +8,8 @@ export async function onRequestGet({ request, env }) {
   const db = env.DB;
   const clientId = db ? await getEnvVarDb(db, 'GOOGLE_CLIENT_ID') : null;
   if (!clientId) return json({ error: 'Client ID Google tidak tersedia.' }, 500);
-  return json({ client_id: clientId });
+  const tsKey = db ? await getEnvVarDb(db, 'TURNSTILE_SITEKEY') : null;
+  return tsKey ? json({ client_id: clientId, turnstile_sitekey: tsKey }) : json({ client_id: clientId });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -22,6 +23,18 @@ export async function onRequestPost({ request, env }) {
 
     const body = await request.json().catch(() => ({}));
     if (!body.code) return json({ error: 'Authorization code diperlukan' }, 400);
+    // ANTI-BOT: verifikasi Cloudflare Turnstile — aktif otomatis begitu TURNSTILE_SECRET
+    // diisi di env_vars (dormant selama belum diisi, jadi tidak ada regresi).
+    const tsSecret = await getEnvVarDb(db, 'TURNSTILE_SECRET');
+    if (tsSecret) {
+      if (!body.turnstile_token) return json({ error: 'Verifikasi anti-bot diperlukan.', need_turnstile: true }, 403);
+      const v = await (await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ secret: tsSecret, response: body.turnstile_token })
+      })).json().catch(() => ({}));
+      if (!v || v.success !== true) return json({ error: 'Verifikasi anti-bot gagal atau kedaluwarsa.', need_turnstile: true }, 403);
+    }
 
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',

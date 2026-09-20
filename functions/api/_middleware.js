@@ -149,6 +149,25 @@ export async function onRequest({ request, env, next }) {
     });
   }
 
+  // 2b. ANTI-BOT /api/auth: hanya browser sungguhan yang sah.
+  //     Auth email sudah dihapus total -> tidak ada lagi klien non-browser (curl/SDK)
+  //     yang sah menyentuh /api/auth. UA bot diblok; request yang mengubah data WAJIB
+  //     membawa Origin browser resmi (sebelumnya origin kosong masih diizinkan).
+  if (/^\/api\/auth(\/|$)/.test(path)) {
+    const ua = request.headers.get('user-agent') || '';
+    const BOT_UA = /(curl|wget|python-requests|python-urllib|scrapy|httpclient|go-http|java\/|libwww|okhttp|axios|node-fetch|bot|crawler|spider|headlesschrome|phantomjs|selenium|puppeteer|playwright)/i;
+    if (!ua || BOT_UA.test(ua)) {
+      await logBlocked(env, 'bot_ua_blocked', ip, path + ' UA=' + (ua || 'kosong').slice(0, 90));
+      return new Response(JSON.stringify({ error: 'Ditolak.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (mutates && !(request.headers.get('origin') && originOk(request))) {
+      await logBlocked(env, 'origin_blocked', ip, 'auth-wajib-origin ' + path);
+      return new Response(JSON.stringify({ error: 'Permintaan lintas situs ditolak.' }), {
+        status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+  }
+
   // 3. Cap ukuran body (anti flood payload besar)
   const cl = parseInt(request.headers.get('content-length') || '0', 10);
   if (cl > 1500000) {

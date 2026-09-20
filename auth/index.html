@@ -428,6 +428,46 @@
             // WAJIB semua domain yang dipakai didaftarkan di Google Console & GitHub OAuth App.
             return location.origin + '/auth/';
         }
+        // ==== ANTI-BOT Cloudflare Turnstile ====
+        // Dormant sampai admin mengisi TURNSTILE_SITEKEY + TURNSTILE_SECRET di env_vars.
+        // Begitu diisi: widget muncul otomatis & login wajib lolos verifikasi bot.
+        let _tsSiteKey = null, _tsWidgetId = null, _tsToken = null;
+        function setupTurnstile(siteKey) {
+            return new Promise((resolve) => {
+                _tsSiteKey = siteKey;
+                if (!siteKey) { resolve(null); return; }
+                const ensureBox = () => {
+                    let box = document.getElementById('ts-widget');
+                    if (!box) {
+                        box = document.createElement('div');
+                        box.id = 'ts-widget';
+                        box.className = 'mt-5 flex justify-center';
+                        const anchor = document.querySelector('[onclick^="startOAuth"]');
+                        (anchor && anchor.parentElement ? anchor.parentElement : document.body).appendChild(box);
+                    }
+                    return box;
+                };
+                const render = () => {
+                    try {
+                        if (_tsWidgetId !== null && window.turnstile) { try { window.turnstile.remove(_tsWidgetId); } catch (e2) {} _tsWidgetId = null; }
+                        _tsToken = null;
+                        _tsWidgetId = window.turnstile.render(ensureBox(), {
+                            sitekey: siteKey,
+                            callback: (t) => { _tsToken = t; resolve(t); },
+                            'expired-callback': () => { _tsToken = null; },
+                            'error-callback': () => resolve(null)
+                        });
+                    } catch (e) { resolve(null); }
+                };
+                if (window.turnstile) { render(); return; }
+                window.__tsReady = render;
+                const s = document.createElement('script');
+                s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__tsReady';
+                s.onerror = () => resolve(null);
+                document.head.appendChild(s);
+            });
+        }
+
         function startOAuth(provider) {
             const redirectUri = oauthRedirectUri();
             // State acak per sesi — cegah serangan login-CSRF (callback jahat memaksa
@@ -461,12 +501,18 @@
             const redirectUri = oauthRedirectUri();
             window.history.replaceState({}, document.title, window.location.pathname);
             try {
-                const res = await fetch(API_BASE + '/' + provider, {
+                const send = (tok) => fetch(API_BASE + '/' + provider, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: code, redirect_uri: redirectUri })
+                    body: JSON.stringify(Object.assign({ code: code, redirect_uri: redirectUri }, tok ? { turnstile_token: tok } : {}))
                 });
-                const data = await res.json();
+                let res = await send(_tsToken);
+                let data = await res.json();
+                // Token Turnstile bisa kedaluwarsa saat user lama di halaman Google/GitHub -> minta baru & ulang
+                if (res.status === 403 && data && data.need_turnstile && _tsSiteKey) {
+                    const t = await setupTurnstile(_tsSiteKey);
+                    if (t) { res = await send(t); data = await res.json(); }
+                }
                 if (!res.ok || !data.token) throw new Error(data.error || 'Login ' + provider + ' gagal.');
                 saveSession(data);
 
@@ -479,6 +525,10 @@
 
         // Handle callback OAuth & sesi aktif saat halaman dibuka
         document.addEventListener('DOMContentLoaded', () => {
+            // Anti-bot: pramuat pengaturan Turnstile (diam bila belum dikonfigurasi)
+            fetch(API_BASE + '/google').then(r => r.json())
+                .then(d => { if (d && d.turnstile_sitekey) setupTurnstile(d.turnstile_sitekey); })
+                .catch(() => {});
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             const oauthError = params.get('error');
