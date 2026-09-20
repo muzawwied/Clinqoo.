@@ -39,7 +39,7 @@ export async function syncUserReport(env, opts) {
   const signal = AbortSignal.timeout(timeoutMs);
 
   const [usersR, oauthR, subsR, balR] = await Promise.all([
-    db.prepare('SELECT id, name, email, password_hash, created_at FROM auth_users ORDER BY id').all(),
+    db.prepare('SELECT id, name, email, created_at FROM auth_users ORDER BY id').all(),
     db.prepare('SELECT user_id, provider FROM auth_oauth_accounts').all(),
     db.prepare("SELECT key, value FROM subscription WHERE key LIKE '%:plan'").all(),
     db.prepare("SELECT key, value FROM wallet_balance WHERE key LIKE '%:balance'").all()
@@ -66,15 +66,14 @@ export async function syncUserReport(env, opts) {
   const rows = users.map(u => {
     const id = String(u.id);
     const provs = provMap[id] || [];
-    const hasEmail = u.password_hash && u.password_hash !== '';
-    const login = provs.length ? provs.join(', ') : 'email';
+    const login = provs.length ? provs.join(', ') : '-';
     if (provs.length) oauthCount++;
     const plan = planMap[id] || 'Gratis';
     if (planMap[id] && planMap[id] !== 'Gratis') paidCount++;
     const bal = balMap[id] || 0;
     totalBal += bal;
     const tgl = (u.created_at || '').slice(0, 10) || '-';
-    return `| ${u.id} | ${(u.name || '-').replace(/\|/g, '/')} | ${(u.email || '-').replace(/\|/g, '/')} | ${login}${hasEmail && provs.length ? ' + email' : ''} | ${plan} | ${rp(bal)} | ${tgl} |`;
+    return `| ${u.id} | ${(u.name || '-').replace(/\|/g, '/')} | ${(u.email || '-').replace(/\|/g, '/')} | ${login} | ${plan} | ${rp(bal)} | ${tgl} |`;
   });
 
   const now = new Date();

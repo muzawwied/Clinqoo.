@@ -1,6 +1,7 @@
 // Helper bersama untuk /api/auth/* — JANGAN pakai prefix "_" (wrangler mengecualikannya dari bundle)
-// Skema mengikuti tabel production yang sudah ada: auth_users(name, email, password_hash, avatar_url)
-// Format hash: "pbkdf2:<iterations>:<salthex>:<hashhex>"
+// Login Clincoo: HANYA OAuth (Google/GitHub). Auth email/sandi dihapus total
+// (login.js & register.js sudah dihapus). Kolom password_hash di tabel auth_users
+// hanyalah legasi skema (user baru selalu kosong) dan tidak pernah dibaca lagi.
 export const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -42,11 +43,6 @@ export async function initTables(db) {
   try { await db.prepare('ALTER TABLE auth_oauth_accounts ADD COLUMN scope TEXT').run(); } catch (e) {}
 }
 
-function hexToBytes(hex) {
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
-  return out;
-}
 function bytesToHex(bytes) {
   return Array.from(bytes).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
 }
@@ -55,27 +51,6 @@ export function randomHex(nBytes) {
   crypto.getRandomValues(b);
   return bytesToHex(b);
 }
-async function pbkdf2(password, saltHex, iterations) {
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: hexToBytes(saltHex), iterations }, key, 256);
-  return bytesToHex(new Uint8Array(bits));
-}
-export async function makePasswordHash(password) {
-  const iterations = 100000;
-  const salt = randomHex(16);
-  const hash = await pbkdf2(password, salt, iterations);
-  return 'pbkdf2:' + iterations + ':' + salt + ':' + hash;
-}
-export async function verifyPassword(password, stored) {
-  try {
-    const parts = String(stored || '').split(':');
-    if (parts.length !== 4 || parts[0] !== 'pbkdf2') return false;
-    const iterations = parseInt(parts[1], 10) || 100000;
-    const hash = await pbkdf2(password, parts[2], iterations);
-    return hash === parts[3];
-  } catch (e) { return false; }
-}
-export function validEmail(e) { return typeof e === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim()); }
 
 export function publicUser(u) {
   return { id: u.id, email: u.email, name: u.name || '', avatar_url: u.avatar_url || '' };
