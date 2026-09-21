@@ -44,7 +44,7 @@ function rp(n) {
 }
 
 function esc(v) {
-  return String(v == null ? '-' : v).replace(/\|/g, '/');
+  return String(v == null || v === '' ? '(tanpa data)' : v).replace(/\|/g, '/');
 }
 
 function botVerdict(u, hasOauth, projCount, visitCount) {
@@ -53,7 +53,7 @@ function botVerdict(u, hasOauth, projCount, visitCount) {
   const dom = String(u.email || '').split('@')[1] || '';
   if (DISPOSABLE_DOMAINS.includes(dom.toLowerCase())) return 'Curiga (email sekali pakai)';
   if (!u.password_hash && projCount === 0 && visitCount === 0) return 'Curiga (akun kosong)';
-  return 'Tidak terdeteksi';
+  return 'Tidak';
 }
 
 export async function syncUserReport(env, opts) {
@@ -133,25 +133,25 @@ export async function syncUserReport(env, opts) {
   const rows = users.map(u => {
     const id = String(u.id);
     const provs = provMap[id] || [];
-    const login = provs.length ? provs.join(', ') : '-';
+    const login = provs.length ? provs.join(', ') : 'Email';
     if (provs.length) oauthCount++;
     const plan = planMap[id] || 'Gratis';
     if (planMap[id] && planMap[id] !== 'Gratis') paidCount++;
     const bal = balMap[id] || 0;
     totalBal += bal;
-    const tgl = (u.created_at || '').slice(0, 10) || '-';
+    const tgl = (u.created_at || '').slice(0, 10) || 'Tidak ada data';
 
     // status akun
     const status = u.status === 'active' ? 'Aktif'
       : u.status === 'suspended' ? 'Ditangguhkan'
       : u.status === 'deleted' ? 'Terhapus'
-      : (u.status || '-');
+      : (u.status || 'Tidak diketahui');
     if (u.status === 'suspended') suspCount++;
 
     // terakhir aktif: max(aktivitas, login)
     const v = visitMap[id] || {};
     const la = [lastActMap[id], v.t].filter(Boolean).sort().pop();
-    const lastActive = la ? String(la).slice(0, 10) : '-';
+    const lastActive = la ? String(la).slice(0, 10) : 'Belum pernah';
 
     const visits = v.c || 0;
     const projCount = projCountMap[id] || 0;
@@ -169,7 +169,7 @@ export async function syncUserReport(env, opts) {
 
     // CTA kelola akun (admin/owner tidak bisa di-suspend/hapus dari UI)
     const isAdminAcct = u.role === 'admin' || u.role === 'owner';
-    let aksi = '—';
+    let aksi = isAdminAcct ? ((u.role === 'owner' ? 'Owner' : 'Admin') + ' (dilindungi)') : '(terhapus)';
     if (!isAdminAcct && u.status !== 'deleted') {
       aksi = u.status === 'suspended'
         ? `[Aktifkan](${ADMIN_USERS_URL}#unsuspend-${u.id}) · [Hapus](${ADMIN_USERS_URL}#delete-${u.id})`
@@ -195,8 +195,9 @@ export async function syncUserReport(env, opts) {
   md += '- **Project Aktif**: jumlah proyek milik user di workspace.\n';
   md += '- **Situs Publik**: jumlah proyek dengan deploy terakhir sukses (masih live di Pages).\n';
   md += '- **Pelanggaran**: ⚠️ n = ada laporan admin / indikasi pelanggaran S&K & hukum (spam, phishing, judi, malware, dsb.). "Bersih" = tidak ada.\n';
-  md += '- **Bot**: heuristik — akun tanpa OAuth dengan email sekali pakai / pola akun kosong ditandai "Curiga".\n';
-  md += `- **Aksi**: tautan langsung ke panel admin (\`akun/profile/admin/users\`) — Tangguhkan / Aktifkan / Hapus (butuh login admin).\n`;
+  md += '- **Login**: metode daftar/masuk akun — Google/GitHub = OAuth; Email = email & sandi (bukan OAuth).\n';
+  md += '- **Bot**: heuristik — akun tanpa OAuth dengan email sekali pakai / pola akun kosong ditandai "Curiga". "Tidak" = tidak terdeteksi bot.\n';
+  md += `- **Aksi**: tautan langsung ke panel admin (\`akun/profile/admin/users\`) — Tangguhkan / Aktifkan / Hapus (butuh login admin). Admin/Owner dilindungi (tidak bisa di-suspend/hapus dari UI).\n`;
 
   // ---- push ke GitHub ----
   const ghHeaders = { 'Authorization': 'Bearer ' + token, 'User-Agent': 'clinqoo-sync', 'Accept': 'application/vnd.github+json' };
