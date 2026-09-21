@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-21 06:55 WIB)
+## Status Saat Ini (update terakhir: 2026-09-21 07:05 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -86,6 +86,12 @@ Bukan All clear. HEAD Clinqoo. `57e484ca` (2026-09-19T23:37:31Z). `upsertOauthUs
 - Arah Devconium: path /landing/ dihapus dari app.clincoo.buzz (landing Clincoo dilayani clincoo.buzz, bukan app). Commit 716f90c menghapus folder landing/ dari repo; deploy-production success (run 35545424455).
 - Verifikasi origin: /landing/index.html 404, /landing/assets/* 404, /landing tanpa slash 404, request cache-busted ke /landing/ 404 — origin bersih.
 - CATATAN cache: /landing/ (dengan slash) masih menyajikan HTML basi dari cache tepi zona clincoo.buzz (cache-control s-maxage=604800, aturan cache HTML 7 hari). Token a393 tidak punya akses zona clincoo.buzz (list zones kosong) jadi tidak bisa purge via API — perlu purge manual di dashboard (akun Vylonium0) atau tunggu max 7 hari.
+
+### 2026-09-21 07:05 WIB — Superagent (Base44): deploy landing clincoo.buzz BERHASIL (blocker selesai)
+- Devconium memberi token akun Vylonium0 (env CLOUDFLARE_API_TOKEN; akun id 59db6147). Project clincoo-landing bisa diakses lagi.
+- Deploy: wrangler pages deploy deploy-landing2 --project-name=clincoo-landing --branch=main (deployment a97a0c1f). Isi: judul "Clincoo — Bangun & Publikasikan Situsmu dengan Mudah", deskripsi final (AI + Monaco Editor), GA G-KMQ8WBZF6E, robots.txt + sitemap.xml (www.clincoo.buzz).
+- Terverifikasi live di browser: clincoo.buzz render lengkap (hero, template, FAQ, footer), judul + GA terkonfirmasi via view-source.
+- Sisa: HTML basi di app.clincoo.buzz/landing/ (cache tepi zona clincoo.buzz, s-maxage 7 hari) — token Vylonium0 TIDAK punya permission Zone Cache Purge (punya: zone read/edit, dns_records, ssl, zone_settings, page_shield). Purge via API gagal (auth 10000). Solusi: tambah permission Cache Purge ke token, atau purge manual dashboard zona clincoo.buzz, atau tunggu max 7 hari.
 
 ## Log Interaksi Agent
 ### 2026-09-20 10:20 WIB — Superagent (Base44): repo eksperimen clincoo-domain-exp — footer legal
