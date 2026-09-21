@@ -8,13 +8,27 @@
 //      upgrade paket, topup saldo, dsb.)
 //   3. Manual: panggil endpoint ini dengan x-cron-secret
 //
-// Sengiku disimpan di env_vars D1: GITHUB_DATA_TOKEN (akses push repo Clinqoo-Data).
+// Kolom per user: status akun, terakhir aktif, kunjungan (jumlah login),
+// project aktif, situs terpublikasi, indikasi pelanggaran S&K/hukum, deteksi
+// bot, dan CTA kelola akun (tangguhkan/aktifkan/hapus) menuju panel admin.
+//
+// Sengiku disimpan di env_vars D1: GITHUB_DATA_TOKEN (akses push repo Clincoo-Data).
 
 import { getSecret } from './notify-helpers.js';
 
 const GH_REPO = 'muzawwied/Clinqoo-Data';
 const GH_PATH = 'users-live.md';
 const GH_BRANCH = 'main';
+
+// Panel admin tujuan CTA (anchor per-baris: #suspend-<id> / #unsuspend-<id> / #delete-<id>)
+const ADMIN_USERS_URL = 'https://app.clincoo.buzz/akun/profile/admin/users/';
+
+// Domain email sekali pakai untuk heuristik deteksi bot
+const DISPOSABLE_DOMAINS = [
+  'mailinator.com', 'tempmail.com', 'temp-mail.org', '10minutemail.com',
+  'guerrillamail.com', 'yopmail.com', 'sharklasers.com', 'grr.la',
+  'trashmail.com', 'throwawaymail.com', 'dispostable.com', 'maildrop.cc'
+];
 
 function b64utf8(s) {
   const bytes = new TextEncoder().encode(s);
@@ -29,21 +43,44 @@ function rp(n) {
   return 'Rp' + v.toLocaleString('id-ID');
 }
 
+function esc(v) {
+  return String(v == null ? '-' : v).replace(/\|/g, '/');
+}
+
+function botVerdict(u, hasOauth, projCount, visitCount) {
+  if (u.role === 'admin' || u.role === 'owner') return 'Tidak';
+  if (hasOauth) return 'Tidak';
+  const dom = String(u.email || '').split('@')[1] || '';
+  if (DISPOSABLE_DOMAINS.includes(dom.toLowerCase())) return 'Curiga (email sekali pakai)';
+  if (!u.password_hash && projCount === 0 && visitCount === 0) return 'Curiga (akun kosong)';
+  return 'Tidak terdeteksi';
+}
+
 export async function syncUserReport(env, opts) {
   const db = env.DB;
   if (!db) return { ok: 0, error: 'D1 not bound' };
   const token = await getSecret(env, 'GITHUB_DATA_TOKEN');
   if (!token) return { ok: 0, error: 'GITHUB_DATA_TOKEN tidak tersedia di env_vars' };
 
-  const timeoutMs = (opts && opts.timeoutMs) || 15000;
+  const timeoutMs = (opts && opts.timeoutMs) || 25000;
   const signal = AbortSignal.timeout(timeoutMs);
 
-  const [usersR, oauthR, subsR, balR] = await Promise.all([
-    db.prepare('SELECT id, name, email, created_at FROM auth_users ORDER BY id').all(),
+  const [
+    usersR, oauthR, subsR, balR, sessR, actR, projR, repR, abuseR, dlTablesR, projOwnerR
+  ] = await Promise.all([
+    db.prepare('SELECT id, name, email, password_hash, created_at, role, status FROM auth_users ORDER BY id').all(),
     db.prepare('SELECT user_id, provider FROM auth_oauth_accounts').all(),
     db.prepare("SELECT key, value FROM subscription WHERE key LIKE '%:plan'").all(),
-    db.prepare("SELECT key, value FROM wallet_balance WHERE key LIKE '%:balance'").all()
+    db.prepare("SELECT key, value FROM wallet_balance WHERE key LIKE '%:balance'").all(),
+    db.prepare('SELECT user_id, COUNT(*) c, MAX(created_at) t FROM auth_sessions GROUP BY user_id').all(),
+    db.prepare('SELECT user_id, MAX(created_at) t FROM activity_log WHERE user_id IS NOT NULL GROUP BY user_id').all(),
+    db.prepare('SELECT user_id, COUNT(*) c FROM user_projects GROUP BY user_id').all(),
+    db.prepare('SELECT target_user_id, COUNT(*) c FROM admin_reports WHERE target_user_id IS NOT NULL GROUP BY target_user_id').all(),
+    db.prepare("SELECT user_id, COUNT(*) c FROM activity_log WHERE user_id IS NOT NULL AND (action LIKE '%abuse%' OR details LIKE '%judi%' OR details LIKE '%phishing%' OR details LIKE '%malware%' OR details LIKE '%scam%' OR details LIKE '%spam%' OR details LIKE '%illegal%' OR details LIKE '%banned%') GROUP BY user_id").all(),
+    db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'p|_proj%' ESCAPE '|' AND name LIKE '%deploy_logs'").all(),
+    db.prepare('SELECT id, user_id FROM user_projects').all()
   ]);
+
   const users = usersR.results || [];
   const provMap = {};
   (oauthR.results || []).forEach(o => {
@@ -60,9 +97,38 @@ export async function syncUserReport(env, opts) {
     const m = /^u(\d+):balance$/.exec(b.key || '');
     if (m) balMap[m[1]] = Number(b.value) || 0;
   });
+  const visitMap = {}; // user_id -> { c: jumlah login, t: login terakhir }
+  (sessR.results || []).forEach(s => { visitMap[s.user_id] = { c: s.c || 0, t: s.t || null }; });
+  const lastActMap = {};
+  (actR.results || []).forEach(a => { lastActMap[a.user_id] = a.t; });
+  const projCountMap = {};
+  (projR.results || []).forEach(p => { projCountMap[p.user_id] = p.c || 0; });
+  const reportMap = {};
+  (repR.results || []).forEach(r => { reportMap[r.target_user_id] = r.c || 0; });
+  const abuseMap = {};
+  (abuseR.results || []).forEach(a => { abuseMap[a.user_id] = a.c || 0; });
+  const ownerMap = {}; // project_id -> user_id
+  (projOwnerR.results || []).forEach(p => { ownerMap[p.id] = p.user_id; });
+
+  // Situs terpublikasi: status deploy TERAKHIR per project = 'success'
+  const pubSiteMap = {}; // user_id -> jumlah situs live
+  const dlTables = (dlTablesR.results || [])
+    .map(r => r.name)
+    .filter(n => /^p_proj\d+_deploy_logs$/.test(n));
+  await Promise.all(dlTables.map(async tn => {
+    try {
+      const projId = tn.slice(2, -12); // buang prefix 'p_' dan suffix '_deploy_logs'
+      const owner = ownerMap[projId];
+      if (!owner) return;
+      const r = await db.prepare('SELECT status FROM ' + tn + ' ORDER BY id DESC LIMIT 1').first();
+      if (r && r.status === 'success') {
+        pubSiteMap[owner] = (pubSiteMap[owner] || 0) + 1;
+      }
+    } catch (e) { /* tabel project bisa jadi kosong / belum ada */ }
+  }));
 
   // ---- susun laporan markdown ----
-  let oauthCount = 0, paidCount = 0, totalBal = 0;
+  let oauthCount = 0, paidCount = 0, totalBal = 0, suspCount = 0, totalPub = 0, botCount = 0, violCount = 0;
   const rows = users.map(u => {
     const id = String(u.id);
     const provs = provMap[id] || [];
@@ -73,7 +139,43 @@ export async function syncUserReport(env, opts) {
     const bal = balMap[id] || 0;
     totalBal += bal;
     const tgl = (u.created_at || '').slice(0, 10) || '-';
-    return `| ${u.id} | ${(u.name || '-').replace(/\|/g, '/')} | ${(u.email || '-').replace(/\|/g, '/')} | ${login} | ${plan} | ${rp(bal)} | ${tgl} |`;
+
+    // status akun
+    const status = u.status === 'active' ? 'Aktif'
+      : u.status === 'suspended' ? 'Ditangguhkan'
+      : u.status === 'deleted' ? 'Terhapus'
+      : (u.status || '-');
+    if (u.status === 'suspended') suspCount++;
+
+    // terakhir aktif: max(aktivitas, login)
+    const v = visitMap[id] || {};
+    const la = [lastActMap[id], v.t].filter(Boolean).sort().pop();
+    const lastActive = la ? String(la).slice(0, 10) : '-';
+
+    const visits = v.c || 0;
+    const projCount = projCountMap[id] || 0;
+    const pubSites = pubSiteMap[u.id] || 0;
+    if (pubSites) totalPub += pubSites;
+
+    // pelanggaran S&K / hukum: laporan admin + indikasi otomatis dari activity log
+    const viol = (reportMap[id] || 0) + (abuseMap[id] || 0);
+    const violLabel = viol > 0 ? ('⚠️ ' + viol) : 'Bersih';
+    if (viol > 0) violCount++;
+
+    // heuristik deteksi bot
+    const bot = botVerdict(u, provs.length > 0, projCount, visits);
+    if (bot !== 'Tidak' && bot !== 'Tidak terdeteksi') botCount++;
+
+    // CTA kelola akun (admin/owner tidak bisa di-suspend/hapus dari UI)
+    const isAdminAcct = u.role === 'admin' || u.role === 'owner';
+    let aksi = '—';
+    if (!isAdminAcct && u.status !== 'deleted') {
+      aksi = u.status === 'suspended'
+        ? `[Aktifkan](${ADMIN_USERS_URL}#unsuspend-${u.id}) · [Hapus](${ADMIN_USERS_URL}#delete-${u.id})`
+        : `[Tangguhkan](${ADMIN_USERS_URL}#suspend-${u.id}) · [Hapus](${ADMIN_USERS_URL}#delete-${u.id})`;
+    }
+
+    return `| ${u.id} | ${esc(u.name)} | ${esc(u.email)} | ${login} | ${plan} | ${rp(bal)} | ${status} | ${lastActive} | ${visits} | ${projCount} | ${pubSites} | ${violLabel} | ${bot} | ${aksi} | ${tgl} |`;
   });
 
   const now = new Date();
@@ -81,36 +183,19 @@ export async function syncUserReport(env, opts) {
   let md = '# Data User Clincoo (Live)\n\n';
   md += `> Tersinkron otomatis dari database: langsung saat ada pendaftaran baru, plus tiap 15 menit (paket, saldo, dsb.).\n`;
   md += `> Terakhir diperbarui: ${tglNow}\n\n`;
-  md += `**Total user: ${users.length}** | Login Google/GitHub: ${oauthCount} | Paket berbayar: ${paidCount} | Total saldo dompet: ${rp(totalBal)}\n\n`;
-  md += '| ID | Nama | Email | Login | Paket | Saldo | Terdaftar |\n';
-  md += '|----|------|-------|-------|-------|-------|-----------|\n';
-  md += rows.join('\n') + '\n';
-
-  // ---- data wallet (wallet-db via binding WALLET_DB) ----
-  md += '\n## Data Wallet Clincoo (Live)\n\n';
-  md += '> Sinkron dari database wallet (wallet.clincoo.buzz): alamat, pemilik, dan saldo.\n\n';
-  let wCount = 0, wTotal = 0;
-  try {
-    const wR = await env.WALLET_DB.prepare('SELECT address, display_name, email, role, balance, created_at FROM wallet_accounts ORDER BY created_at').all();
-    const accs = wR.results || [];
-    wCount = accs.length;
-    const wRows = accs.map(a => {
-      const bal = Number(a.balance) || 0;
-      wTotal += bal;
-      const addr = String(a.address || '-');
-      const addrShort = addr.length > 12 ? addr.slice(0, 8) + '…' + addr.slice(-4) : addr;
-      const nm = (a.display_name || '-').replace(/\|/g, '/');
-      const em = (a.email || '-').replace(/\|/g, '/');
-      const tgl = (a.created_at || '').slice(0, 10) || '-';
-      return `| ${addrShort} | ${nm} | ${em} | ${a.role || '-'} | ${rp(bal)} | ${tgl} |`;
-    });
-    md += `**Total akun wallet: ${wCount} | Total saldo wallet: ${rp(wTotal)}**\n\n`;
-    md += '| Alamat | Nama | Email | Role | Saldo | Terdaftar |\n';
-    md += '|---------|------|-------|------|-------|-----------|\n';
-    md += wRows.join('\n') + '\n';
-  } catch (e) {
-    md += `> Wallet DB tidak tersedia: ${e.message}\n`;
-  }
+  md += `**Total user: ${users.length}** | Login Google/GitHub: ${oauthCount} | Paket berbayar: ${paidCount} | Total saldo dompet: ${rp(totalBal)} | Ditangguhkan: ${suspCount} | Situs terpublikasi: ${totalPub} | Pelanggaran S&K: ${violCount} | Curiga bot: ${botCount}\n\n`;
+  md += '| ID | Nama | Email | Login | Paket | Saldo | Status | Terakhir Aktif | Kunjungan | Project Aktif | Situs Publik | Pelanggaran | Bot | Aksi | Terdaftar |\n';
+  md += '|----|------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-----------|\n';
+  md += rows.join('\n') + '\n\n';
+  md += '### Keterangan\n\n';
+  md += '- **Status**: Aktif / Ditangguhkan / Terhapus (soft-delete) sesuai `auth_users.status`.\n';
+  md += '- **Terakhir Aktif**: tanggal aktivitas atau login terakhir yang tercatat.\n';
+  md += '- **Kunjungan**: jumlah login (sesi) yang pernah dibuat.\n';
+  md += '- **Project Aktif**: jumlah proyek milik user di workspace.\n';
+  md += '- **Situs Publik**: jumlah proyek dengan deploy terakhir sukses (masih live di Pages).\n';
+  md += '- **Pelanggaran**: ⚠️ n = ada laporan admin / indikasi pelanggaran S&K & hukum (spam, phishing, judi, malware, dsb.). "Bersih" = tidak ada.\n';
+  md += '- **Bot**: heuristik — akun tanpa OAuth dengan email sekali pakai / pola akun kosong ditandai "Curiga".\n';
+  md += `- **Aksi**: tautan langsung ke panel admin (\`akun/profile/admin/users\`) — Tangguhkan / Aktifkan / Hapus (butuh login admin).\n`;
 
   // ---- push ke GitHub ----
   const ghHeaders = { 'Authorization': 'Bearer ' + token, 'User-Agent': 'clinqoo-sync', 'Accept': 'application/vnd.github+json' };
