@@ -33,24 +33,32 @@ function isUserAdmin(user) {
   return false;
 }
 
-// Callback top up (Base44/Xendit) datang TANPA login — identifikasi pemilik akun
-// dari email di payload (email/payer_email) saja, lalu scope saldo/transaksi/notifikasi/email
-// ke akun pemilik. Tanpa token ATAU email dikenal => ditolak (fail-closed).
-// Webhook Xendit asli memakai /api/topup dengan verifikasi x-callback-token, bukan endpoint ini.
+// KEAMANAN SALDO (fix 21 Sep 2026): dulunya email di payload SAJA cukup untuk
+// dianggap pemilik akun — siapa pun yang tahu email user (termasuk akun sendiri)
+// bisa menambah transaksi "in" tanpa gateway = cetak saldo gratis. Sekarang
+// fail-closed: identitas hanya dari sesi login, ATAU email + x-callback-token
+// yang cocok dengan XENDIT_CALLBACK_TOKEN (callback gateway legacy Base44/Koda).
+// Webhook Xendit asli tetap memakai /api/topup dengan verifikasi x-callback-token.
 async function resolveOwner(env, request, body) {
   const u = await currentUser(env, request);
-  if (u) return u;
-  const cands = [];
-  if (body) {
-    if (body.email) cands.push(body.email);
-    if (body.payer_email) cands.push(body.payer_email);
+  if (u) return { user: u, callbackVerified: false };
+  const cbToken = request.headers.get('x-callback-token');
+  if (cbToken) {
+    const expected = await getSecret(env, 'XENDIT_CALLBACK_TOKEN');
+    if (expected && cbToken === expected) {
+      const cands = [];
+      if (body) {
+        if (body.email) cands.push(body.email);
+        if (body.payer_email) cands.push(body.payer_email);
+      }
+      for (const c of cands) {
+        if (!c) continue;
+        const found = await getUserByEmail(env.DB, c);
+        if (found) return { user: found, callbackVerified: true };
+      }
+    }
   }
-  for (const c of cands) {
-    if (!c) continue;
-    const found = await getUserByEmail(env.DB, c);
-    if (found) return found;
-  }
-  return null;
+  return { user: null, callbackVerified: false };
 }
 
 // GET /api/wallet?action=transactions — list transaksi; GET /api/wallet — saldo
@@ -94,7 +102,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
     const action = body.action || 'add_transaction';
-    const user = await resolveOwner(env, request, body);
+    const { user, callbackVerified } = await resolveOwner(env, request, body);
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const uid = user ? user.id : null;
 
@@ -106,6 +114,17 @@ export async function onRequestPost({ request, env }) {
       if (!title || amount == null || !type) return j({ error: 'title, amount, type required' }, 400);
       const parsedAmount = parseFloat(amount);
       if (isNaN(parsedAmount)) return j({ error: 'amount tidak valid' }, 400);
+
+      // KEAMANAN SALDO (fix 21 Sep 2026): kredit "in" hanya dari sumber terverifikasi —
+      // (a) callback gateway bertoken valid, atau (b) ClincooPay terhubung (saldo diambil
+      // nyata dari web Wallet lewat mirrorDelta di bawah; gagal potong = gagal kredit).
+      // User biasa TIDAK lagi bisa mencatat transaksi masuk sendiri dari endpoint ini.
+      if (type === 'in' && !callbackVerified) {
+        const conn0 = await getCpConnection(db, uid);
+        if (!conn0) {
+          return j({ error: 'Kredit saldo hanya melalui top up (QRIS/Xendit) atau ClincooPay yang terhubung.' }, 403);
+        }
+      }
 
       await rowScope(db, 'wallet_transactions', user);
 
@@ -320,6 +339,9 @@ export async function onRequestPost({ request, env }) {
     }
 
     if (action === 'clear_transactions') {
+      // KEAMANAN SALDO: penghapusan riwayat + reset saldo kini khusus admin —
+      // user biasa bisa memakainya untuk menghilangkan jejak audit saldo.
+      if (!isUserAdmin(user)) return j({ error: 'Aksi clear_transactions hanya untuk admin' }, 403);
       await rowScope(db, 'wallet_transactions', user);
       await db.prepare('DELETE FROM wallet_transactions WHERE user_id = ?').bind(uid).run();
       await db.prepare('INSERT INTO wallet_balance (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
@@ -344,8 +366,13 @@ export async function onRequestDelete({ request, env }) {
     const balKey = await scopedKey(db, 'wallet_balance', user, 'balance');
     const uid = user ? user.id : null;
 
-    // Hapus transaksi wajib login — mencegah penghapusan data akun lain
+    // KEAMANAN SALDO (fix 21 Sep 2026): hapus transaksi kini khusus admin.
+    // Dulunya user biasa bisa menghapus transaksi "out" miliknya dan saldonya
+    // dikembalikan penuh — jalan pintas refund (mis. hapus riwayat bayar
+    // Langganan Pro -> saldo balik -> beli lagi). Mencegah penghapusan data
+    // akun lain sekaligus mencegah manipulasi saldo.
     if (!uid) return j({ error: 'Login diperlukan', need_login: true }, 401);
+    if (!isUserAdmin(user)) return j({ error: 'Hanya admin yang dapat menghapus transaksi dompet' }, 403);
     await rowScope(db, 'wallet_transactions', user);
 
     if (id) {
