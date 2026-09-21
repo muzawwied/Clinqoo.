@@ -95,15 +95,16 @@ async function getEnvKey(env, name) {
   } catch { return null; }
 }
 
-// Gemini multi-kunci: utama (GEMINI_API_KEY) + cadangan (_2, _3); prefiks "AQ." dipakai apa adanya.
+// Gemini multi-kunci: utama (GEMINI_API_KEY) + cadangan (_2, _3, _4); prefiks "AQ." dipakai apa adanya.
 async function getGeminiKeys(env) {
   const keys = [];
   const seen = new Set();
   const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
   add(env.GEMINI_API_KEY);
+  add(env.GEMINI_API_KEY_4);
   if (env.DB) {
     try {
-      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3')").all();
+      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3','GEMINI_API_KEY_4')").all();
       for (const r of rows.results || []) add(r.value);
     } catch {}
   }

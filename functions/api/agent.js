@@ -135,6 +135,20 @@ async function getEnvKey(env, name) {
   try { const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind(name).first(); return row?.value || null; } catch { return null; }
 }
 
+// Gemini multi-kunci: utama (GEMINI_API_KEY) + cadangan (_2, _3, _4) — sama dengan chat.js.
+async function getGeminiKeys(env) {
+  const keys = []; const seen = new Set();
+  const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
+  add(env.GEMINI_API_KEY); add(env.GEMINI_API_KEY_2); add(env.GEMINI_API_KEY_3); add(env.GEMINI_API_KEY_4);
+  if (env.DB) {
+    try {
+      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3','GEMINI_API_KEY_4')").all();
+      for (const r of rows.results || []) add(r.value);
+    } catch {}
+  }
+  return keys;
+}
+
 // ===== AI call: rantai provider + auto-retry per provider =====
 async function aiCall(env, messages, orKey, gemKey) {
   // 1) Workers AI — retry 2x per model (transient rate-limit edge)
@@ -164,15 +178,16 @@ async function aiCall(env, messages, orKey, gemKey) {
       } catch (e) {}
     }
   }
-  // 3) Gemini
-  if (gemKey) {
-    for (const model of GEMINI_MODELS) {
+  // 3) Gemini (multi-kunci: utama + cadangan)
+  const gKeys = Array.isArray(gemKey) ? gemKey.filter(Boolean) : (gemKey ? [gemKey] : []);
+  for (const gKey of gKeys) {
+   for (const model of GEMINI_MODELS) {
       try {
         const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
         const contents = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
         const body = { contents }; if (sys) body.systemInstruction = { parts: [{ text: sys }] };
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey }, body: JSON.stringify(body)
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gKey }, body: JSON.stringify(body)
         });
         const data = await res.json().catch(() => ({}));
         const text = res.ok ? ((data?.candidates?.[0]?.content?.parts) || []).map(p => p.text || '').join('') : '';
@@ -306,7 +321,7 @@ export async function onRequestPost({ request, env }) {
       const q = await quotaSpend(env, user, 1);
       if (q.exceeded) return json({ quota_exhausted: true, error: QUOTA_MSG }, 429);
       const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
-      const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
+      const gemKey = await getGeminiKeys(env);
       const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
       const done = await agentTick(env, t, budget, orKey, gemKey);
       return json({ ok: true, task: taskJson(done) });
@@ -358,7 +373,7 @@ export async function onRequestPost({ request, env }) {
       .bind(t.id, t.user_key, t.project_id, t.goal, t.status, t.plan, t.transcript, t.current_step, t.result, t.error, t.created_at, t.updated_at).run();
     addEvent(env.DB, t.id, t.user_key, 'start', 'Tugas dimulai.');
     const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
-    const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
+    const gemKey = await getGeminiKeys(env);
     const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
     const done = await agentTick(env, t, budget, orKey, gemKey);
     return json({ ok: true, task: taskJson(done) });
