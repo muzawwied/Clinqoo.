@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-21 07:17 WIB)
+## Status Saat Ini (update terakhir: 2026-09-21 08:20 WIB)
 
 ## ATURAN WAJIB: Deploy ke Cloudflare Pages project `clinqoo` (clinqoo.pages.dev)
 
@@ -56,15 +56,15 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 | CORS / middleware | OK | ORIGIN_ALLOW sudah `*.clincoo.buzz`. |
 | Deploy MCP | REGRESI — HTTP 405 | POST clinqoo.pages.dev/mcp dan app.clincoo.buzz/mcp = 405 body kosong. Redeploy project clinqoo BERSAMA functions/mcp.js. |
 | CI deploy production | Update | job deploy-production app.clincoo.buzz otomatis tiap push. |
-| Editor / UI | Update | HEAD `a9f30c47`: hapus bottom activity bar; editor kode sederhana dari chat; SEO+GA; hapus /landing/ di app. Bukan auth/wallet/schema. |
-| Wallet / langganan / schema | Update | Binding WALLET_DB. Pastikan binding Pages production. |
-| Sync users-live | OK — jalan | Clinqoo-Data terbaru `59fe545b` (00:16 UTC). |
+| Editor / UI | Update | CodeMirror editor lama + polling stepper + prompt builder v2 (833fe49c / 8397b1cd). Bukan auth/schema. |
+| Wallet / langganan / schema | PATCHED | e638daf: resolveOwner fail-closed; kredit in hanya callback/ClincooPay; clear/DELETE admin-only. Binding WALLET_DB production. |
+| Sync users-live | OK — jalan | Clinqoo-Data terbaru `2c2cc8e8` (01:16 UTC). |
 | Blog | OK | Clinqoo-Blog artikel/sitemap (bukan kode app). |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan masuk | 07:17 WIB ke muzawwied@gmail.com — **bukan All clear** |
+| Hourly audit | Laporan masuk | 08:20 WIB ke muzawwied@gmail.com — **bukan All clear** |
 | Email transactional | Resend | cek RESEND_API_KEY |
 
-Bukan All clear. HEAD Clinqoo. `a9f30c47`. `upsertOauthUser` tetap FIXED. Live MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; diag-gemini.js; cache `/landing/` di app.
+Bukan All clear. HEAD Clinqoo. `b6875700`. `upsertOauthUser` tetap FIXED. Wallet celah cetak saldo ditutup di `e638daf`. Live MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; diag-gemini.js.
 
 ---
 
@@ -79,6 +79,12 @@ Bukan All clear. HEAD Clinqoo. `a9f30c47`. `upsertOauthUser` tetap FIXED. Live M
 - Catatan tindak lanjut (belum diubah, di luar scope repo ini): /api/wallet-sync external_push masih tanpa auth (by design utk web wallet standalone, alamat = identitas). Tidak mempengaruhi saldo Clincoo (mirror ClincooPay baca server wallet eksternal, bukan tabel wallet_web_*), tapi data sync web wallet bisa ditulis siapa pun yang tahu alamat — perlu token per-address di project wallet bila mau dikunci.
 
 ## Log Interaksi Agent
+### 2026-09-21 08:20 WIB — Grok (xAI) hourly audit
+- Status: **bukan All clear**. HEAD `b6875700`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
+- Wallet: e638daf diverifikasi di source — fail-closed + kredit in terkunci + DELETE admin-only.
+- Live: POST /mcp di clinqoo.pages.dev dan app.clincoo.buzz = HTTP 405.
+- Email: `[Clinqoo Hourly Audit] 2026-09-21 08:20 WIB` ke muzawwied@gmail.com.
+
 ### 2026-09-21 07:17 WIB — Grok (xAI) hourly audit
 - Status: **bukan All clear**. HEAD `a9f30c47`. upsertOauthUser TETAP FIXED.
 - Live: POST /mcp di clinqoo.pages.dev dan app.clincoo.buzz = HTTP 405.
@@ -97,7 +103,7 @@ Log lebih lama dipotong agar wiki ringan. Salinan penuh ada di history git sebel
 5. Jangan ubah upsertOauthUser tanpa tes email-null GitHub.
 6. Email hanya ke muzawwied@gmail.com.
 7. WALLET_DB binding production.
-8. Purge cache /landing/ zona clincoo.buzz.
+8. Token per-address untuk `/api/wallet-sync` jika mau dikunci.
 
 ---
 
