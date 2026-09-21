@@ -208,7 +208,7 @@
     </button>
     <div id="logo">
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg>
-      <b>Clinqoo</b> <span>Code</span>
+      <b>Clincoo</b> <span>Code</span>
     </div>
     <div class="spacer"></div>
     <button id="save-btn" onclick="editorSaveInPlace()" disabled title="Simpan">
@@ -450,7 +450,7 @@
       if (isCode) renderQuickTools();
       if (sbPath) {
         const folder = (currentFolderPath === 'root' || !currentFolderPath) ? '' : currentFolderPath + '/';
-        sbPath.textContent = 'workspace/' + folder + (editingFileName || '');
+        sbPath.textContent = (folder ? folder : '') + (editingFileName || '');
       }
       if (sbSaved) {
         if (!editingFileName) { sbSaved.textContent = ''; }
