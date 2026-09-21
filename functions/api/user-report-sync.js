@@ -118,7 +118,8 @@ export async function syncUserReport(env, opts) {
   await Promise.all(dlTables.map(async tn => {
     try {
       const projId = tn.slice(2, -12); // buang prefix 'p_' dan suffix '_deploy_logs'
-      const owner = ownerMap[projId];
+      // user_projects.id = 'proj_<ts>' (dengan underscore), nama tabel = 'p_proj<ts>_...' (tanpa)
+      const owner = ownerMap[projId] || ownerMap['proj_' + projId.slice(4)] || ownerMap[projId.replace('proj', 'proj_')];
       if (!owner) return;
       const r = await db.prepare('SELECT status FROM ' + tn + ' ORDER BY id DESC LIMIT 1').first();
       if (r && r.status === 'success') {
