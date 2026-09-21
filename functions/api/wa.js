@@ -40,12 +40,10 @@ async function hmacSha256(secret, message) {
   return [...new Uint8Array(sig)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// ===== AI provider chain (Workers AI -> OpenRouter -> Gemini) =====
+// ===== AI provider chain (Workers AI -> Gemini) =====
 const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
-const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 async function aiCall(env, messages) {
-  const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
   const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
   if (env.AI) {
     for (const model of WORKERS_AI_MODELS) {
@@ -57,19 +55,6 @@ async function aiCall(env, messages) {
           if (text) return { text };
         } catch (e) {}
       }
-    }
-  }
-  if (orKey) {
-    for (const model of OPENROUTER_MODELS) {
-      try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + orKey },
-          body: JSON.stringify({ model, messages })
-        });
-        const d = await res.json().catch(() => ({}));
-        const text = res.ok ? (d?.choices?.[0]?.message?.content || '') : '';
-        if (text) return { text };
-      } catch (e) {}
     }
   }
   if (gemKey) {

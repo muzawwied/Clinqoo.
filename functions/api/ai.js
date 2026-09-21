@@ -1,6 +1,6 @@
 // Cloudflare Pages Function — /api/ai "Clincoo AI" (SELF-CONTAINED)
 // Endpoint asisten AI persona Clincoo. Provider utama: Workers AI (binding "AI",
-// tanpa API key) -> fallback OpenRouter (model gratis) -> fallback Gemini.
+// tanpa API key) -> fallback Gemini (multi-kunci).
 // Fitur:
 //   - Auth per-user (middleware /api/* sudah menolak tanpa Bearer)
 //   - Kuota harian bersama dengan chat (tabel ai_quota: 25 gratis / 500 admin)
@@ -165,31 +165,7 @@ async function tryWorkersAI(env, messages, stream) {
   return { error: lastErr || 'Workers AI gagal' };
 }
 
-// ===== Provider 2: OpenRouter (model gratis — pola chat.js) =====
-const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free', 'openrouter/free'];
-
-async function tryOpenRouter(key, messages) {
-  let lastErr = null;
-  for (const model of OPENROUTER_MODELS) {
-    try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-        body: JSON.stringify({ model, messages })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) { lastErr = `Model ${model}: HTTP ${res.status}`; continue; }
-      const text = data?.choices?.[0]?.message?.content || '';
-      if (text) return { text, model };
-      lastErr = `Model ${model}: respons kosong`;
-    } catch (e) {
-      lastErr = `Model ${model}: ${e && e.message}`;
-    }
-  }
-  return { error: lastErr || 'OpenRouter gagal' };
-}
-
-// ===== Provider 3: Gemini (cadangan — pola chat.js) =====
+// ===== Provider 2: Gemini (multi-kunci — pola chat.js) =====
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
 async function tryGemini(keys, messages) {
@@ -229,19 +205,16 @@ export async function onRequestGet({ request, env }) {
   if (!rateLimitOk(clientIp(request))) return json({ error: 'Terlalu banyak permintaan. Coba lagi sebentar.' }, 429);
   const user = await resolveUser(env, request);
   if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
-  const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
   const gemKey = await getGeminiKeys(env); // array kunci (utama + cadangan)
   return json({
     ok: true,
     persona: 'Clincoo AI',
     providers: {
       workers_ai: !!env.AI,
-      openrouter: !!orKey,
       gemini: !!(gemKey && gemKey.length)
     },
     models: {
       workers_ai: WORKERS_AI_MODELS,
-      openrouter: OPENROUTER_MODELS,
       gemini: GEMINI_MODELS
     }
   });
@@ -276,17 +249,15 @@ export async function onRequestPost({ request, env }) {
   const finalMessages = [{ role: 'system', content: system.join('\n\n') }, ...messages.filter(m => m.role !== 'system')];
 
   const stream = body?.stream === true;
-  const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
   const gemKey = await getGeminiKeys(env); // array kunci (utama + cadangan)
 
   // Provider utama: Workers AI (binding, tanpa API key)
   let r = null;
   if (env.AI) r = await tryWorkersAI(env, finalMessages, stream);
-  if ((!r || r.error) && orKey) r = await tryOpenRouter(orKey, finalMessages);
   if ((!r || r.error) && gemKey.length) r = await tryGemini(gemKey, finalMessages);
 
   if (!r || r.error) {
-    return json({ error: 'Tidak ada provider AI tersedia. Aktifkan binding Workers AI atau set kunci OpenRouter/Gemini di Pengaturan → Environment.' }, 502);
+    return json({ error: 'Tidak ada provider AI tersedia. Aktifkan binding Workers AI atau set kunci Gemini di Pengaturan → Environment.' }, 502);
   }
 
   if (r.stream) {

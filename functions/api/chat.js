@@ -47,7 +47,7 @@ function clientIp(request) {
 const PREFERRED_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
 // ===== FALLBACK TERAKHIR: Workers AI (binding, tanpa API key, teks saja) =====
-// Dipakai saat OpenRouter limit & Gemini gagal/tanpa kunci — chat tetap jalan.
+// Dipakai saat Gemini gagal/limit/tanpa kunci — chat tetap jalan.
 const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
 function textOf(m) {
   if (typeof m.content === 'string') return m.content;
@@ -76,16 +76,6 @@ async function tryWorkersAIText(env, messages) {
   return null;
 }
 
-// ===== PROVIDER UTAMA: OpenRouter (model gratis, tool calling) =====
-// Rantai fallback: nemotron-3-super (nalar+tools terkuat) -> nemotron-3.5-lightning
-// (eksekusi agent cepat) -> openrouter/free (router, tahan model delist).
-// Gemini hanya cadangan: dipanggil saat OpenRouter gagal/limit/tanpa kunci.
-const OPENROUTER_MODELS = [
-  'nvidia/nemotron-3-super-120b-a12b:free',
-  'nvidia/nemotron-3.5-lightning:free',
-  'openrouter/free'
-];
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const QUOTA_MSG_DAILY = 'Kuota AI Clincoo hari ini sudah habis. Batas harian paket Anda tercapai — silakan coba lagi besok.';
 const QUOTA_MSG_MONTHLY = 'Kuota AI Clincoo bulan ini sudah habis. Reset otomatis awal bulan depan — atau upgrade paket / beli Paket Kredit AI di menu Profil > Kredit AI.';
 
@@ -124,15 +114,6 @@ async function getGeminiKeys(env) {
     for (const r of rows.results || []) add(r.value);
   } catch {}
   return keys;
-}
-
-async function getOpenRouterKey(env) {
-  if (env.OPENROUTER_API_KEY) return env.OPENROUTER_API_KEY;
-  if (!env.DB) return null;
-  try {
-    const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('OPENROUTER_API_KEY').first();
-    return row?.value || null;
-  } catch { return null; }
 }
 
 async function resolveUser(env, request) {
@@ -362,7 +343,6 @@ async function tryModels(apiKeys, systemInstruction, contents, tools) {
   return { error: lastError || 'All models failed', quotaExhausted, statuses };
 }
 
-// ===== OpenRouter: konversi format =====
 // ===== TOOLS SERVER-SIDE (backend function & screenshot) =====
 // Tool ini dieksekusi DI SERVER (bukan di browser user): hasil langsung
 // ditempel ke percakapan dan provider dipanggil lagi — user/frontend tidak berubah.
@@ -413,74 +393,7 @@ function orBuildTools() {
 function workspaceDecls(_body) {
   return WORKSPACE_FUNCTION_DECLARATIONS;
 }
-function orTools(list) {
-  return (list || WORKSPACE_FUNCTION_DECLARATIONS).map(d => ({
-    type: 'function',
-    function: { name: d.name, description: d.description || '', parameters: orParam(d.parameters || { type: 'OBJECT', properties: {} }) }
-  }));
-}
 // messages klien (format blok Clincoo) -> pesan OpenAI-compatible
-function orMessages(messages) {
-  const out = [];
-  const pushText = (role, text) => { if (text) out.push({ role, content: text }); };
-  for (const m of messages) {
-    if (!m) continue;
-    const role = m.role === 'assistant' ? 'assistant' : m.role === 'system' ? 'system' : 'user';
-    if (typeof m.content === 'string') { pushText(role, m.content); continue; }
-    const blocks = Array.isArray(m.content) ? m.content : [];
-    let pendingText = '';
-    for (const b of blocks) {
-      if (!b) continue;
-      if (b.type === 'text' && b.text) pendingText += (pendingText ? '\n' : '') + b.text;
-      else if (b.type === 'function_call' && b.name) {
-        pushText(role === 'assistant' ? 'assistant' : 'user', pendingText); pendingText = '';
-        out.push({ role: 'assistant', content: null, tool_calls: [{ id: 'call_' + (b.call_id || b.name), type: 'function', function: { name: b.name, arguments: JSON.stringify(b.args || {}) } }] });
-      } else if (b.type === 'function_response' && b.name) {
-        pushText('user', pendingText); pendingText = '';
-        out.push({ role: 'tool', tool_call_id: 'call_' + (b.call_id || b.name), content: JSON.stringify({ result: b.result }) });
-      }
-      // image_url dibiarkan (model gratis OR non-vision; payload bergambar diarahkan ke Gemini)
-    }
-    pushText(role, pendingText);
-  }
-  // konteks panjang: 30 pesan terakhir (sama seperti jalur Gemini)
-  if (out.length > 30) out.splice(0, out.length - 30);
-  return out;
-}
-async function tryOpenRouter(apiKey, messages, tools, models) {
-  const statuses = [];
-  let lastError = null;
-  for (const model of (models || OPENROUTER_MODELS)) {
-    try {
-      const payload = { model, messages };
-      if (tools) { payload.tools = tools; payload.tool_choice = 'auto'; }
-      const res = await fetch(OPENROUTER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey, 'HTTP-Referer': 'https://clincoo-be2.pages.dev', 'X-Title': 'Clincoo' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) {
-        await res.text().catch(() => ''); // buang body error mentah provider
-        const reason = res.status === 429 ? 'limit tercapai' : (res.status >= 500 ? 'server bermasalah' : 'gagal (' + res.status + ')');
-        lastError = `OpenRouter ${model}: ${reason}`; statuses.push(res.status); continue;
-      }
-      const d = await res.json();
-      const m = d?.choices?.[0]?.message;
-      const text = (typeof m?.content === 'string' ? m.content : '') || '';
-      const rawToolCalls = m?.tool_calls || [];
-      const toolCalls = rawToolCalls.map(tc => {
-        let args = {};
-        try { args = JSON.parse(tc.function?.arguments || '{}'); } catch (e) {}
-        return { name: tc.function?.name || '', args, id: tc.id };
-      }).filter(tc => tc.name);
-      if (toolCalls.length > 0) return { tool_calls: toolCalls, text, model, raw_tool_calls: rawToolCalls };
-      if (text) return { text, model };
-      lastError = `OpenRouter ${model} returned empty response`; statuses.push(0);
-    } catch (err) { lastError = 'OpenRouter ' + err.message; statuses.push(0); }
-  }
-  const quotaExhausted = statuses.length > 0 && statuses.every(st => st === 429);
-  return { error: lastError || 'Semua model OpenRouter gagal', statuses, quotaExhausted };
-}
 
 // GET /api/chat — status kredit AI akun ini (dipakai UI: ClincooPay top-up + banner kredit habis)
 // read-only, TIDAK memakai/mengurangi kuota atau kredit paket (beda dari quotaCheck yg dipanggil saat kirim pesan).
@@ -614,11 +527,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
       }
     }
 
-    const orKey = await getOpenRouterKey(env);
     const apiKey = await getGeminiKeys(env); // array kunci Gemini (utama + cadangan)
 
-    if (!orKey && !apiKey.length && !env.AI) {
-      return new Response(JSON.stringify({ error: 'Kunci AI (OpenRouter/Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
+    if (!apiKey.length && !env.AI) {
+      return new Response(JSON.stringify({ error: 'Kunci AI (Gemini) belum dikonfigurasi. Tambahkan lewat Pengaturan → Environment (global).' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
       });
     }
@@ -648,13 +560,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const gTools = body.workspace_tools === true
       ? [{ functionDeclarations: decls }]
       : null;
-    const oTools = body.workspace_tools === true ? orTools(decls) : null;
 
-    // Payload bergambar -> langsung Gemini (model gratis OpenRouter non-vision).
+    // Payload bergambar -> hanya Gemini (Workers AI tidak support vision).
     const hasImages = messages.some(m => Array.isArray(m?.content) && m.content.some(b => b && b.type === 'image_url' && b.image_url?.url));
 
     // PROVIDER UTAMA: Gemini (kualitas jawaban & function calling paling benar).
-    // Gagal/limit/tanpa kunci -> cadangan OpenRouter (model gratis).
+    // Gagal/limit/tanpa kunci -> cadangan Workers AI (teks saja, tanpa kunci).
     // TOOLS SERVER (backend function & screenshot) dieksekusi di sini: hasil
     // ditempel ke pesan lalu provider dipanggil lagi (max 4 hop server) —
     // jalur klien (frontend) tidak berubah sama sekali.
@@ -665,9 +576,6 @@ export async function onRequestPost({ request, env, waitUntil }) {
       if (apiKey.length) {
         const { systemInstruction, contents } = toGeminiPayload(workMessages);
         r = await tryModels(apiKey, systemInstruction, contents, gTools);
-      }
-      if ((!r || r.error) && orKey && !hasImages) {
-        r = await tryOpenRouter(orKey, orMessages(workMessages), oTools);
       }
       // Fallback terakhir: Workers AI (teks saja, tanpa kunci) — chat gak mati total
       if ((!r || r.error) && env.AI && !hasImages) {

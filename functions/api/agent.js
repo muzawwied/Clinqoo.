@@ -3,7 +3,7 @@
 // SECARA OTOMATIS tanpa konfirmasi per langkah — seperti agen di platform builder:
 //   1. AI menyusun rencana terstruktur (JSON langkah-langkah)
 //   2. Loop server-side menjalankan langkah satu per satu dengan auto-retry
-//      dan failover provider (GLM-5.2 -> DeepSeek V4 -> GLM-4.7 Flash -> OpenRouter -> Gemini)
+//      dan failover provider (GLM-5.2 -> DeepSeek V4 -> GLM-4.7 Flash -> Gemini)
 //   3. State tersimpan di D1 SETIAP langkah — kena limit/error pun, task di-RESUME
 //      otomatis dari posisi terakhir, bukan mulai dari nol
 // Endpoint (murni backend — frontend belum perlu berubah):
@@ -52,7 +52,6 @@ const MAX_BUDGET_MS = 90_000;
 
 // ===== Provider chain (sama filosofi /api/ai, model 2026 non-Llama) =====
 const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
-const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
 const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clincoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
@@ -150,7 +149,7 @@ async function getGeminiKeys(env) {
 }
 
 // ===== AI call: rantai provider + auto-retry per provider =====
-async function aiCall(env, messages, orKey, gemKey) {
+async function aiCall(env, messages, gemKey) {
   // 1) Workers AI — retry 2x per model (transient rate-limit edge)
   if (env.AI) {
     for (const model of WORKERS_AI_MODELS) {
@@ -164,21 +163,7 @@ async function aiCall(env, messages, orKey, gemKey) {
       }
     }
   }
-  // 2) OpenRouter free
-  if (orKey) {
-    for (const model of OPENROUTER_MODELS) {
-      try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + orKey },
-          body: JSON.stringify({ model, messages })
-        });
-        const data = await res.json().catch(() => ({}));
-        const text = res.ok ? (data?.choices?.[0]?.message?.content || '') : '';
-        if (text) return { text, model };
-      } catch (e) {}
-    }
-  }
-  // 3) Gemini (multi-kunci: utama + cadangan)
+  // 2) Gemini (multi-kunci: utama + cadangan)
   const gKeys = Array.isArray(gemKey) ? gemKey.filter(Boolean) : (gemKey ? [gemKey] : []);
   for (const gKey of gKeys) {
    for (const model of GEMINI_MODELS) {
@@ -214,7 +199,7 @@ function parsePlan(text) {
 }
 
 // ===== Loop agent — jalan sampai selesai ATAU budget habis (resume-able) =====
-async function agentTick(env, t, budgetMs, orKey, gemKey) {
+async function agentTick(env, t, budgetMs, gemKey) {
   const deadline = Date.now() + budgetMs;
   let plan = safeJson(t.plan, []);
   let transcript = safeJson(t.transcript, []);
@@ -224,7 +209,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     const r = await aiCall(env, [
       { role: 'system', content: PLANNER_SYSTEM },
       { role: 'user', content: 'TUJUAN: ' + t.goal }
-    ], orKey, gemKey);
+    ], gemKey);
     if (r.error) { t.status = 'paused'; t.error = 'Gagal menyusun rencana: ' + r.error; await saveTask(env.DB, t); return t; }
     plan = parsePlan(r.text) || [{ title: 'Kerjakan tujuan langsung', detail: t.goal, done: false }];
     t.plan = JSON.stringify(plan);
@@ -244,7 +229,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
       { role: 'system', content: AGENT_SYSTEM },
       { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nRENCANA:\n' + plan.map((p, i) => (i + 1) + '. ' + p.title + (p.done ? ' (selesai)' : '')).join('\n') + '\n\nLANGKAH SEKARANG (' + (t.current_step + 1) + '/' + plan.length + '): ' + step.title + (step.detail ? '\n' + step.detail : '') + (transcript.length ? '\n\nKERJA SEBELUMNYA (ringkas):\n' + transcript.slice(-6).map(m => (m.role === 'user' ? '[user] ' : '[agent] ') + String(m.content).slice(0, 400)).join('\n') : '') }
     ];
-    const r = await aiCall(env, msgs, orKey, gemKey);
+    const r = await aiCall(env, msgs, gemKey);
     if (r.error) {
       // provider mati total -> pause (resume nanti), JANGAN gagalkan progres
       t.status = 'paused'; t.error = 'Provider AI tidak tersedia: ' + r.error;
@@ -267,7 +252,7 @@ async function agentTick(env, t, budgetMs, orKey, gemKey) {
     { role: 'system', content: AGENT_SYSTEM },
     { role: 'user', content: 'TUJUAN: ' + t.goal + '\n\nHASIL KERJA PER LANGKAH:\n' + transcript.map(m => (m.role === 'assistant' ? '[agent] ' : '[user] ') + String(m.content).slice(0, 600)).join('\n') + '\n\nRangkum hasil akhir untuk user: apa yang sudah selesai, hasil penting per langkah, dan saran tindak lanjut. Detail, lengkap, dan konkret — multi-paragraf jika perlu, bahasa Indonesia.' }
   ];
-  const rf = await aiCall(env, doneMsgs, orKey, gemKey);
+  const rf = await aiCall(env, doneMsgs, gemKey);
   t.result = rf.text || rf.error || '(rangkuman dilewati)';
   t.status = 'done'; t.error = null;
   await saveTask(env.DB, t);
@@ -320,10 +305,9 @@ export async function onRequestPost({ request, env }) {
       if (t.status === 'done') return json({ ok: true, task: taskJson(t), message: 'Task sudah selesai.' });
       const q = await quotaSpend(env, user, 1);
       if (q.exceeded) return json({ quota_exhausted: true, error: QUOTA_MSG }, 429);
-      const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
       const gemKey = await getGeminiKeys(env);
       const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
-      const done = await agentTick(env, t, budget, orKey, gemKey);
+      const done = await agentTick(env, t, budget, gemKey);
       return json({ ok: true, task: taskJson(done) });
     }
 
@@ -372,10 +356,9 @@ export async function onRequestPost({ request, env }) {
     await env.DB.prepare('INSERT INTO agent_tasks (id, user_key, project_id, goal, status, plan, transcript, current_step, result, error, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
       .bind(t.id, t.user_key, t.project_id, t.goal, t.status, t.plan, t.transcript, t.current_step, t.result, t.error, t.created_at, t.updated_at).run();
     addEvent(env.DB, t.id, t.user_key, 'start', 'Tugas dimulai.');
-    const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
     const gemKey = await getGeminiKeys(env);
     const budget = Math.min(parseInt(body.budget_seconds || '', 10) * 1000 || DEFAULT_BUDGET_MS, MAX_BUDGET_MS);
-    const done = await agentTick(env, t, budget, orKey, gemKey);
+    const done = await agentTick(env, t, budget, gemKey);
     return json({ ok: true, task: taskJson(done) });
   } catch (e) {
     return json({ error: 'Server error: ' + (e && e.message) }, 500);

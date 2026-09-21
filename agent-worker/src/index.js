@@ -25,7 +25,6 @@ const STALE_MS = 15 * 60 * 1000; // task 'running' tanpa kabar > 15 menit → an
 const STEP_RETRIES = { limit: 5, delay: '30 seconds', backoff: 'exponential' };
 
 const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
-const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'nvidia/nemotron-3.5-lightning:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash', 'gemini-3-flash-preview'];
 
 const PLANNER_SYSTEM = `Kamu adalah perencana tugas agent untuk platform Clincoo (pembuatan website dengan AI, template, editor kode, deploy Cloudflare Pages, domain kustom, paket Starter/Pro/Bisnis).
@@ -65,7 +64,6 @@ async function addEvent(env, task_id, kind, text) {
 
 // ===== AI provider chain (sama filosofi /api/agent) =====
 async function aiCall(env, messages) {
-  const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
   const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
   if (env.AI) {
     for (const model of WORKERS_AI_MODELS) {
@@ -77,19 +75,6 @@ async function aiCall(env, messages) {
           if (text) return { text, model };
         } catch (e) {}
       }
-    }
-  }
-  if (orKey) {
-    for (const model of OPENROUTER_MODELS) {
-      try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + orKey },
-          body: JSON.stringify({ model, messages })
-        });
-        const d = await res.json().catch(() => ({}));
-        const text = res.ok ? (d?.choices?.[0]?.message?.content || '') : '';
-        if (text) return { text, model };
-      } catch (e) {}
     }
   }
   if (gemKey) {

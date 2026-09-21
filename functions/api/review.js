@@ -3,7 +3,7 @@
 // bug, kelemahan keamanan & masalah logika, lalu memberi laporan perbaikan.
 //   POST /api/review { files: [{path, content}], question? }  → { ok, findings }
 // Provider chain: Workers AI (GLM-5.2 -> DeepSeek V4 Flash -> GLM-4.7 Flash)
-//                 -> OpenRouter free -> Gemini.
+//                 -> Gemini.
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -34,10 +34,8 @@ async function getEnvKey(env, name) {
   try { const row = await env.DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind(name).first(); return row?.value || null; } catch { return null; }
 }
 const WORKERS_AI_MODELS = ['@cf/zai-org/glm-5.2', '@cf/deepseek-ai/deepseek-v4-flash-0731', '@cf/zai-org/glm-4.7-flash'];
-const OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free', 'openrouter/free'];
 const GEMINI_MODELS = ['gemini-3.6-flash'];
 async function aiCall(env, messages) {
-  const orKey = await getEnvKey(env, 'OPENROUTER_API_KEY');
   const gemKey = await getEnvKey(env, 'GEMINI_API_KEY');
   if (env.AI) {
     for (const model of WORKERS_AI_MODELS) {
@@ -49,19 +47,6 @@ async function aiCall(env, messages) {
           if (text) return { text };
         } catch (e) {}
       }
-    }
-  }
-  if (orKey) {
-    for (const model of OPENROUTER_MODELS) {
-      try {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + orKey },
-          body: JSON.stringify({ model, messages })
-        });
-        const d = await res.json().catch(() => ({}));
-        const text = res.ok ? (d?.choices?.[0]?.message?.content || '') : '';
-        if (text) return { text };
-      } catch (e) {}
     }
   }
   if (gemKey) {
