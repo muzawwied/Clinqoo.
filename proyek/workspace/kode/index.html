@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kode — Editor Sederhana | Clincoo</title>
+<meta name="description" content="Editor kode sederhana Clincoo — lihat dan sunting kode berkas proyek langsung, ringan dan cepat.">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --bg:#fafafa; --bg2:#ffffff; --line:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af;
+    --code-bg:#111827; --code-text:#e5e7eb; --accent:#111827; --ok:#2fbf71; --warn:#e5604f;
+  }
+  html.dark-mode {
+    --bg:#0a0a0a; --bg2:#111113; --line:#2a2a30; --text:#e5e7eb; --text2:#9ca3af; --text3:#6b7280;
+    --code-bg:#0d0d0f; --code-text:#e5e7eb; --accent:#f3f4f6; --ok:#2fbf71; --warn:#e5604f;
+  }
+  html, body { height:100%; }
+  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100dvh; overflow:hidden; }
+
+  header { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--bg2); border-bottom:1px solid var(--line); flex-shrink:0; }
+  .back { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:12px; border:1px solid var(--line); background:transparent; color:var(--text2); cursor:pointer; transition:background .15s ease; flex-shrink:0; }
+  .back:hover { background:var(--bg); }
+  .title-wrap { min-width:0; flex:1; display:flex; flex-direction:column; }
+  .title { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .subtitle { font-size:11px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tools { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .tool-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:12px; border:1px solid var(--line); background:var(--bg2); color:var(--text); font-size:12.5px; font-weight:500; cursor:pointer; transition:background .15s ease, border-color .15s ease; }
+  .tool-btn:hover { background:var(--bg); border-color:var(--text3); }
+  .tool-btn.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  html.dark-mode .tool-btn.primary { color:#111827; }
+  .save-dot { width:7px; height:7px; border-radius:50%; background:var(--ok); transition:background .2s ease; }
+  .save-dot.dirty { background:var(--warn); }
+
+  .filebar { display:flex; align-items:center; gap:10px; padding:8px 14px; background:var(--bg2); border-bottom:1px solid var(--line); flex-shrink:0; }
+  select { appearance:none; -webkit-appearance:none; max-width:60vw; padding:8px 30px 8px 12px; border-radius:12px; border:1px solid var(--line); background:var(--bg2) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center; color:var(--text); font-size:12.5px; font-weight:500; font-family:inherit; cursor:pointer; }
+  .meta { font-size:11px; color:var(--text3); margin-left:auto; white-space:nowrap; }
+
+  main { flex:1; display:flex; min-height:0; }
+  #code { flex:1; width:100%; resize:none; border:none; outline:none; background:var(--code-bg); color:var(--code-text); font-family:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace; font-size:13px; line-height:1.6; padding:14px 16px; tab-size:2; white-space:pre; overflow:auto; caret-color:var(--code-text); }
+  #code::selection { background:rgba(120,120,140,.35); }
+
+  .empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--text3); font-size:13px; text-align:center; padding:24px; }
+
+  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(8px); background:var(--bg2); border:1px solid var(--line); color:var(--text); font-size:12.5px; font-weight:500; padding:9px 16px; border-radius:12px; box-shadow:0 4px 18px rgba(0,0,0,.10); opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; max-width:88vw; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back" onclick="goBack()" title="Kembali ke Workspace" aria-label="Kembali ke Workspace">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  </button>
+  <div class="title-wrap">
+    <span class="title" id="docTitle">Kode</span>
+    <span class="subtitle" id="projName">Proyek</span>
+  </div>
+  <div class="tools">
+    <button class="tool-btn" onclick="copyCode()" title="Salin seluruh kode">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Salin
+    </button>
+    <button class="tool-btn" onclick="downloadCode()" title="Unduh berkas ini">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </button>
+    <button class="tool-btn primary" onclick="saveCode()" title="Simpan (Ctrl+S)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+      Simpan
+    </button>
+    <span class="save-dot" id="saveDot" title="Status penyimpanan"></span>
+  </div>
+</header>
+
+<div class="filebar">
+  <select id="fileSel" onchange="pickFile(this.value)" title="Pilih berkas"></select>
+  <span class="meta" id="fileMeta"></span>
+</div>
+
+<main>
+  <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" placeholder="// pilih berkas untuk mulai"></textarea>
+  <div class="empty" id="emptyState" style="display:none">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
+    <span>Belum ada berkas di proyek ini.</span>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+  try {
+    var t = localStorage.getItem('clinqoo_theme') || 'Sistem (Default)';
+    var isDark = (t === 'Gelap') || ((!t || t === 'Sistem (Default)') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    if (isDark) document.body.classList.add('dark-mode');
+  } catch (e) {}
+
+  var QP = new URLSearchParams(location.search);
+  var PID = QP.get('id') || QP.get('pid') || '';
+  var PNAME = QP.get('name') || 'Proyek';
+  var WS_API = 'https://clincoo-be2.pages.dev/api/project-files';
+
+  var files = {};
+  var emptyFolders = [];
+  var currentFile = QP.get('file') || '';
+  var dirty = false;
+  var cloudTimer = null;
+
+  var elCode = document.getElementById('code');
+  var elSel = document.getElementById('fileSel');
+  var elMeta = document.getElementById('fileMeta');
+  var elToast = document.getElementById('toast');
+  var elEmpty = document.getElementById('emptyState');
+  document.getElementById('projName').textContent = PNAME;
+
+  function filesKey() { return 'clinqoo_workspace_files_' + PID; }
+  function authHeaders() {
+    var tk = ''; try { tk = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) {}
+    return tk ? { 'Authorization': 'Bearer ' + tk } : {};
+  }
+  function toast(msg) {
+    elToast.textContent = msg;
+    elToast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { elToast.classList.remove('show'); }, 2200);
+  }
+  function setDirty(d) {
+    dirty = d;
+    document.getElementById('saveDot').classList.toggle('dirty', d);
+  }
+
+  function toFlat(data) {
+    var out = { files: {}, emptyFolders: [] };
+    Object.keys(data || {}).forEach(function (fk) {
+      (data[fk] || []).forEach(function (it) {
+        if (!it || !it.path) return;
+        if (it.type === 'file') out.files[it.path] = it.content || '';
+        else if (it.type === 'folder') {
+          var hasKids = Object.keys(data).some(function (k) { return k === it.path || k.indexOf(it.path + '/') === 0; });
+          if (!hasKids) out.emptyFolders.push(it.path);
+        }
+      });
+    });
+    return out;
+  }
+  function toWs() {
+    var data = { root: [] };
+    function ensureChain(fk) {
+      if (fk === 'root') return;
+      var parts = fk.split('/').filter(Boolean), parent = 'root', cum = '';
+      parts.forEach(function (pt) {
+        cum = cum ? cum + '/' + pt : pt;
+        if (!Array.isArray(data[parent])) data[parent] = [];
+        if (!data[parent].some(function (i) { return i && i.type === 'folder' && i.name.toLowerCase() === pt.toLowerCase(); }))
+          data[parent].push({ type: 'folder', name: pt, path: cum, fileCount: 0, previewText: 'Folder' });
+        if (!Array.isArray(data[cum])) data[cum] = [];
+        parent = cum;
+      });
+    }
+    Object.keys(files).sort().forEach(function (p) {
+      var parts = p.split('/'), nm = parts.pop();
+      if (!nm) return;
+      var fk = parts.length ? parts.join('/') : 'root';
+      ensureChain(fk);
+      if (!Array.isArray(data[fk])) data[fk] = [];
+      if (!data[fk].some(function (i) { return i.path === p; }))
+        data[fk].push({ type: 'file', name: nm, path: p, content: files[p], size: sizeLabel(files[p]), previewText: (files[p] || '').slice(0, 60) });
+    });
+    emptyFolders.forEach(function (fp) { ensureChain(fp); });
+    return data;
+  }
+  function sizeLabel(c) { var kb = (c || '').length / 1024; return kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb.toFixed(1) + ' KB'; }
+
+  function loadFiles(cb) {
+    if (PID) {
+      try {
+        var raw = localStorage.getItem(filesKey());
+        if (!raw) raw = localStorage.getItem('clinqoo_workspace_files');
+        if (raw) {
+          var r = toFlat(JSON.parse(raw));
+          files = r.files; emptyFolders = r.emptyFolders;
+          try { localStorage.setItem(filesKey(), raw); } catch (e) {}
+          if (Object.keys(files).length) { cb(); return; }
+        }
+      } catch (e) {}
+      fetch(WS_API + '?project_id=' + encodeURIComponent(PID), { headers: authHeaders() })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (d) {
+          (d && d.files || []).forEach(function (f) {
+            var p = String(f.path);
+            if (p.slice(-1) === '/') { emptyFolders.push(p.slice(0, -1)); return; }
+            files[p] = f.content || '';
+          });
+          try { localStorage.setItem(filesKey(), JSON.stringify(toWs())); } catch (e) {}
+          cb();
+        })
+        .catch(function () { cb(); });
+    } else {
+      try {
+        var raw2 = localStorage.getItem('clinqoo_editor_project');
+        if (raw2) { var p2 = JSON.parse(raw2); if (p2) { files = p2; } }
+      } catch (e) {}
+      cb();
+    }
+  }
+
+  function renderSelector() {
+    var paths = Object.keys(files).sort();
+    elSel.innerHTML = '';
+    paths.forEach(function (p) {
+      var o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      elSel.appendChild(o);
+    });
+    var has = paths.length > 0;
+    elSel.style.display = has ? '' : 'none';
+    elEmpty.style.display = has ? 'none' : '';
+    elCode.style.display = has ? '' : 'none';
+    if (!currentFile && has) currentFile = paths.indexOf('index.html') !== -1 ? 'index.html' : paths[0];
+    if (has && files[currentFile] === undefined) currentFile = paths[0];
+    elSel.value = currentFile || '';
+    renderCode();
+  }
+
+  function renderCode() {
+    if (!currentFile || files[currentFile] === undefined) { elCode.value = ''; updateMeta(); setTitle(''); return; }
+    elCode.value = files[currentFile];
+    setTitle(currentFile);
+    updateMeta();
+    setDirty(false);
+    elCode.scrollTop = 0; elCode.scrollLeft = 0;
+  }
+  function setTitle(f) {
+    document.getElementById('docTitle').textContent = f ? f : 'Kode';
+    try { document.title = (f ? f + ' — ' : '') + 'Kode | Clincoo'; } catch (e) {}
+  }
+  function updateMeta() {
+    var lines = 0;
+    if (currentFile && files[currentFile] !== undefined) {
+      lines = files[currentFile].split('\n').length;
+    }
+    elMeta.textContent = currentFile ? (lines + ' baris · ' + sizeLabel(files[currentFile])) : '';
+  }
+
+  window.pickFile = function (p) {
+    if (dirty && currentFile && files[currentFile] !== undefined) { files[currentFile] = elCode.value; persist(); }
+    currentFile = p;
+    renderCode();
+  };
+
+  function persist() {
+    if (!currentFile) return;
+    files[currentFile] = elCode.value;
+    try { localStorage.setItem(filesKey(), JSON.stringify(toWs())); } catch (e) {}
+    if (!PID) { try { localStorage.setItem('clinqoo_editor_project', JSON.stringify(files)); } catch (e) {} }
+    updateMeta();
+    setDirty(false);
+    scheduleCloudPush();
+  }
+  function scheduleCloudPush() {
+    if (!PID) return;
+    clearTimeout(cloudTimer);
+    cloudTimer = setTimeout(cloudPush, 2500);
+  }
+  function cloudPush() {
+    cloudTimer = null;
+    if (!PID) return;
+    var list = [];
+    Object.keys(files).forEach(function (p) { list.push({ path: p, content: files[p] }); });
+    emptyFolders.forEach(function (f) { list.push({ path: f + '/', content: '' }); });
+    var H = Object.assign({ 'Content-Type': 'application/json' }, authHeaders());
+    fetch(WS_API + '?project_id=' + encodeURIComponent(PID), { method: 'DELETE', headers: H })
+      .then(function (r) { return r.ok ? fetch(WS_API, { method: 'POST', headers: H, body: JSON.stringify({ project_id: PID, files: list }) }) : Promise.reject(); })
+      .then(function () { toast('Tersimpan & tersinkron cloud'); })
+      .catch(function () { toast('Tersimpan lokal — sinkron cloud menyusul'); });
+  }
+
+  window.saveCode = function () {
+    if (!currentFile) { toast('Pilih berkas dulu'); return; }
+    persist();
+    toast('Tersimpan');
+  };
+  window.copyCode = function () {
+    if (!currentFile) return;
+    var t = elCode.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { toast('Kode disalin'); }).catch(function () { legacyCopy(t); });
+    } else legacyCopy(t);
+  };
+  function legacyCopy(t) {
+    var ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Kode disalin'); } catch (e) { toast('Gagal menyalin'); }
+    document.body.removeChild(ta);
+  }
+  window.downloadCode = function () {
+    if (!currentFile) return;
+    var blob = new Blob([elCode.value], { type: 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = currentFile.split('/').pop() || 'berkas.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+  };
+  window.goBack = function () {
+    if (dirty) { if (currentFile && files[currentFile] !== undefined) files[currentFile] = elCode.value; persist(); }
+    window.location.href = PID ? ('/proyek/workspace/?id=' + encodeURIComponent(PID)) : '/proyek/workspace/';
+  };
+
+  elCode.addEventListener('input', function () { setDirty(true); });
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); window.saveCode(); }
+  });
+  elCode.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      var s = elCode.selectionStart, en = elCode.selectionEnd, v = elCode.value;
+      elCode.value = v.slice(0, s) + '  ' + v.slice(en);
+      elCode.selectionStart = elCode.selectionEnd = s + 2;
+      setDirty(true);
+    } else if (e.key === 'Enter') {
+      var s2 = elCode.selectionStart, v2 = elCode.value;
+      var lineStart = v2.lastIndexOf('\n', s2 - 1) + 1;
+      var indent = '';
+      for (var i = lineStart; i < s2; i++) { var ch = v2[i]; if (ch === ' ' || ch === '\t') indent += ch; else break; }
+      e.preventDefault();
+      var ins = '\n' + indent;
+      elCode.value = v2.slice(0, s2) + ins + v2.slice(elCode.selectionEnd);
+      elCode.selectionStart = elCode.selectionEnd = s2 + ins.length;
+      setDirty(true);
+    }
+  });
+
+  loadFiles(function () { renderSelector(); });
+})();
+</script>
+</body>
+</html>
