@@ -2240,7 +2240,7 @@ function clinqooLaunchEditor(pid) {
       // Editor sederhana terpisah: satu halaman ringan khusus lihat/sunting kode
       // (beda dari editor workspace penuh dan editor luar /editor/).
       window.location.href = '../workspace/kode/?id=' + encodeURIComponent(wsProjectId()) +
-        '&file=' + encodeURIComponent(filename);
+        '&folder=' + encodeURIComponent(currentFolderPath) + '&file=' + encodeURIComponent(filename);
     }
     // Initialize application
     // Boot secepat mungkin: jangan nunggu semua resource CDN (window.onload) —

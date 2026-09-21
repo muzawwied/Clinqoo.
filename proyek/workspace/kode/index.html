@@ -1,342 +1,757 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Kode — Editor Sederhana | Clincoo</title>
-<meta name="description" content="Editor kode sederhana Clincoo — lihat dan sunting kode berkas proyek langsung, ringan dan cepat.">
-<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<script>(function(){var m={"clinqoo.pages.dev":"app.clincoo.buzz","clinqoo.biz.id":"app.clincoo.buzz","www.clinqoo.biz.id":"app.clincoo.buzz"};var t=m[location.hostname];if(t)location.replace("https://"+t+location.pathname+location.search+location.hash);})();</script>
+  
+  <script src="../../../js/ws-github-sync.js"></script>
+  <script src="../../../js/accent-init.js"></script>
+  <script>(function(){try{var __p=new URLSearchParams(location.search).get('id');if(__p){localStorage.setItem('clinqoo_current_project_id',__p);}}catch(e){}})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
+    <link rel="manifest" href="../../../manifest.json">
+    <link rel="apple-touch-icon" href="../../../assets/icons/apple-touch-icon.png">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://unpkg.com; img-src 'self' https: data: blob:; connect-src 'self' https: blob:;">
+  <title>Editor Kode — Clincoo</title>
+
+
+    <meta name="description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clincoo">
+    <meta property="og:title" content="Editor Kode — Clincoo">
+    <meta property="og:description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Clincoo">
+    <meta property="og:url" content="https://clinqoo.pages.dev/">
+    <meta property="og:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Editor Kode — Clincoo">
+    <meta name="twitter:description" content="Editor Kode — kelola langsung di Clincoo, platform pembuatan website dengan AI: template profesional, generate AI, editor kode, dan deploy instan.">
+    <meta name="twitter:image" content="https://clinqoo.pages.dev/assets/og-image.png?v=7">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===== Clinqoo Code — style editor workspace (dari repo Clinqoo-Editor) ===== */
+    :root{ --err:#e55454; --ok:#7dca7d; --status:#131316; --radius:10px; }
+    body{
+      --accent:#4a4a55; --accent-soft:rgba(74,74,85,.12); --btn-bg:#1a1a1e;
+      --bg:#f4f4f6; --bg2:#ececef; --bg3:#e4e4e8; --bg4:#dcdce2;
+      --line:#d8d8de; --line2:#c8c8d0;
+      --text:#24242a; --text2:#5c5c66; --text3:#90909a;
+      --tab-bg:#e9e9ee; --editor-bg:#ffffff;
+      --shadow:0 12px 40px rgba(0,0,0,.18);
+    }
+    body.dark-mode{
+      --accent:#b6b6c2; --accent-soft:rgba(182,182,194,.13); --btn-bg:#34343c;
+      --bg:#141416; --bg2:#1a1a1d; --bg3:#202024; --bg4:#26262b;
+      --line:#2c2c33; --line2:#3a3a42;
+      --text:#d6d6dc; --text2:#9a9aa4; --text3:#6c6c76;
+      --tab-bg:#1d1d21; --editor-bg:#1a1a1d;
+      --shadow:0 12px 40px rgba(0,0,0,.5);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:13px;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+    button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+    svg{flex-shrink:0}
+    .hidden{display:none!important}
+    ::-webkit-scrollbar{width:10px;height:10px}
+    ::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px;border:2px solid transparent;background-clip:content-box}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text3);border:2px solid transparent;background-clip:content-box}
+
+    /* ===== Title bar ===== */
+    #titlebar{height:48px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;gap:10px;flex-shrink:0;user-select:none}
+    .tb-btn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--text2)}
+    .tb-btn:hover{background:var(--bg4);color:var(--text)}
+    #logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;letter-spacing:-.01em;padding:0 4px}
+    #logo svg{width:22px;height:22px;color:var(--text)}
+    #logo b{color:var(--text)}#logo span{color:var(--accent)}
+    #titlebar .spacer{flex:1}
+    #save-btn{display:flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:8px;background:var(--btn-bg);color:#fff;font-weight:600;font-size:12.5px;transition:.15s}
+    #save-btn:hover{filter:brightness(1.12)}
+    #save-btn:disabled{opacity:.4;pointer-events:none}
+
+    /* ===== Tabs bar ===== */
+    #tabsbar{height:40px;background:var(--tab-bg);display:flex;align-items:stretch;border-bottom:1px solid var(--line);flex-shrink:0}
+    #tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+    #tabs::-webkit-scrollbar{display:none}
+    .tab{display:flex;align-items:center;gap:7px;padding:0 16px;font-size:12.6px;color:var(--text2);cursor:default;border-right:1px solid var(--line);position:relative;white-space:nowrap;max-width:260px}
+    .tab .nm{overflow:hidden;text-overflow:ellipsis;font-weight:500}
+    .tab.active{color:var(--text);background:var(--editor-bg)}
+    .tab.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+    .tab .dirty{width:7px;height:7px;border-radius:50%;background:var(--text2);display:none}
+    .tab.dirty .dirty{display:block}
+    .fico{width:15px;height:15px;display:inline-grid;place-items:center;flex-shrink:0}
+    .fico svg{width:15px;height:15px;display:block}
+
+    /* ===== Editor stage ===== */
+    #stage{flex:1;display:flex;min-height:0;position:relative}
+    #editor-code-container{flex:1;display:flex;min-width:0}
+    #editor-code-container .CodeMirror{flex:1;height:100%;font-family:'Fira Code',monospace;font-size:14px;line-height:1.65}
+    .media-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;background:var(--editor-bg)}
+    .media-inner{display:flex;flex-direction:column;align-items:center;gap:26px;width:100%;max-width:420px}
+    .audio-circle{width:112px;height:112px;border-radius:50%;background:var(--bg3);border:1px solid var(--line2);display:grid;place-items:center;color:var(--accent)}
+    .audio-circle svg{width:52px;height:52px}
+    #audio-player{width:100%;border-radius:12px;outline:none}
+    .media-card{background:var(--bg3);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);max-width:100%}
+    .media-card.wide{width:100%;max-width:960px;display:flex;justify-content:center}
+    #video-player{width:100%;max-height:calc(100vh - 200px);border-radius:9px;background:#000;outline:none;object-fit:contain}
+    #image-preview{max-width:100%;max-height:calc(100vh - 200px);object-fit:contain;border-radius:9px;display:block}
+
+    /* ===== CodeMirror theme: clinqoo-dark / clinqoo-light ===== */
+    .CodeMirror{background:var(--editor-bg)!important;color:var(--text)!important}
+    .CodeMirror-gutters{background:var(--editor-bg)!important;border-right:1px solid var(--line)!important}
+    .CodeMirror-linenumber{color:var(--text3)!important}
+    .CodeMirror-activeline-background{background:rgba(127,127,140,.08)}
+    .CodeMirror-selected{background:rgba(127,127,140,.22)!important}
+    .CodeMirror-focused .CodeMirror-selected{background:rgba(127,127,140,.26)!important}
+    .CodeMirror-cursor{border-left:2px solid var(--accent)!important}
+    .CodeMirror-matchingbracket{color:var(--accent)!important;font-weight:600;text-decoration:none!important}
+    .cm-s-clinqoo-dark .cm-keyword{color:#569cd6}.cm-s-clinqoo-dark .cm-atom{color:#569cd6}
+    .cm-s-clinqoo-dark .cm-number{color:#b5cea8}.cm-s-clinqoo-dark .cm-def{color:#9cdcfe}
+    .cm-s-clinqoo-dark .cm-variable{color:#9cdcfe}.cm-s-clinqoo-dark .cm-variable-2{color:#9cdcfe}
+    .cm-s-clinqoo-dark .cm-variable-3{color:#9cdcfe}.cm-s-clinqoo-dark .cm-property{color:#9cdcfe}
+    .cm-s-clinqoo-dark .cm-operator{color:#d4d4d4}.cm-s-clinqoo-dark .cm-comment{color:#6a9955;font-style:italic}
+    .cm-s-clinqoo-dark .cm-string{color:#ce9178}.cm-s-clinqoo-dark .cm-string-2{color:#ce9178}
+    .cm-s-clinqoo-dark .cm-meta{color:#c586c0}.cm-s-clinqoo-dark .cm-qualifier{color:#d7ba7d}
+    .cm-s-clinqoo-dark .cm-builtin{color:#dcdcaa}.cm-s-clinqoo-dark .cm-bracket{color:#d6d6dc}
+    .cm-s-clinqoo-dark .cm-tag{color:#569cd6}.cm-s-clinqoo-dark .cm-attribute{color:#9cdcfe}
+    .cm-s-clinqoo-dark .cm-error{color:#e55454}
+    .cm-s-clinqoo-light .cm-keyword{color:#0000ff}.cm-s-clinqoo-light .cm-atom{color:#0000ff}
+    .cm-s-clinqoo-light .cm-number{color:#098658}.cm-s-clinqoo-light .cm-def{color:#001080}
+    .cm-s-clinqoo-light .cm-variable{color:#001080}.cm-s-clinqoo-light .cm-variable-2{color:#001080}
+    .cm-s-clinqoo-light .cm-variable-3{color:#001080}.cm-s-clinqoo-light .cm-property{color:#001080}
+    .cm-s-clinqoo-light .cm-operator{color:#24242a}.cm-s-clinqoo-light .cm-comment{color:#008000;font-style:italic}
+    .cm-s-clinqoo-light .cm-string{color:#a31515}.cm-s-clinqoo-light .cm-string-2{color:#a31515}
+    .cm-s-clinqoo-light .cm-meta{color:#795e26}.cm-s-clinqoo-light .cm-qualifier{color:#0000cc}
+    .cm-s-clinqoo-light .cm-builtin{color:#0000ff}.cm-s-clinqoo-light .cm-bracket{color:#24242a}
+    .cm-s-clinqoo-light .cm-tag{color:#800000}.cm-s-clinqoo-light .cm-attribute{color:#e50000}
+    .cm-s-clinqoo-light .cm-error{color:#e55454}
+    body.dark-mode .CodeMirror-linenumber{color:#4c4c56!important}
+    body.dark-mode .CodeMirror-activeline .CodeMirror-linenumber{color:#9a9aa4!important}
+    body:not(.dark-mode) .CodeMirror-activeline .CodeMirror-linenumber{color:#5c5c66!important}
+
+    /* ===== Quick tools ===== */
+    #quicktools{height:40px;display:flex;align-items:center;background:var(--bg2);border-bottom:1px solid var(--line);flex-shrink:0;padding:0 6px;gap:6px}
+    .qt-fixed{display:flex;align-items:center;gap:2px;flex-shrink:0}
+    .qt-btn{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--text2);font-size:13px;font-weight:700;flex-shrink:0}
+    .qt-btn:hover{background:var(--bg4);color:var(--text)}
+    .qt-sep{width:1px;height:20px;background:var(--line);flex-shrink:0}
+    .qt-swatch{width:16px;height:16px;border-radius:50%;background:conic-gradient(from 180deg,#ff5f5f,#ffd15f,#6bff6b,#5fd8ff,#7a6bff,#ff5fd1,#ff5f5f);border:1.5px solid var(--line2)}
+    .qt-snippets{flex:1;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;min-width:0}
+    .qt-snippets::-webkit-scrollbar{display:none}
+    .qt-chip{flex-shrink:0;height:28px;padding:0 11px;border-radius:7px;background:var(--bg3);border:1px solid var(--line);color:var(--text);font-family:'Fira Code',monospace;font-size:12px;white-space:nowrap;cursor:pointer}
+    .qt-chip:hover{border-color:var(--line2);background:var(--bg4)}
+    #color-picker{position:fixed;z-index:970;display:none;background:var(--bg3);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow);padding:12px;width:216px}
+    #color-picker.show{display:block}
+    .cp-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
+    .cp-swatch{width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+    .cp-swatch:hover{transform:scale(1.15)}
+    .cp-hexrow{display:flex;gap:6px}
+    .cp-hexrow input{flex:1;height:30px;background:var(--bg);border:1px solid var(--line2);border-radius:7px;padding:0 9px;font-size:12px;font-family:'Fira Code',monospace;outline:none;color:var(--text)}
+    .cp-hexrow button{height:30px;padding:0 12px;border-radius:7px;background:var(--btn-bg);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+
+    /* ===== Status bar ===== */
+    #statusbar{height:25px;background:var(--status);color:#fff;display:flex;align-items:center;font-size:11.5px;flex-shrink:0;user-select:none}
+    #statusbar .sb{padding:0 10px;height:100%;display:flex;align-items:center;gap:5px;cursor:default;white-space:nowrap;color:rgba(255,255,255,.85)}
+    #statusbar .spacer{flex:1}
+    #statusbar .sb.err{color:#ff9b9b}
+    #statusbar .sb.ok{color:rgba(255,255,255,.85)}
+
+    /* ===== Modal konfirmasi (minimalis) ===== */
+    .ee-overlay{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);padding:1rem}
+    .ee-card{background:var(--bg3);border:1px solid var(--line2);border-radius:8px;padding:1rem;width:100%;max-width:300px;box-shadow:var(--shadow)}
+    .ee-card h3{color:var(--text);font-weight:500;font-size:.9375rem;margin:0 0 .25rem}
+    .ee-card p{font-size:.8125rem;color:var(--text2);margin:0 0 1rem}
+    .ee-card p span{color:var(--text);font-weight:500}
+    .ee-btns{display:flex;flex-direction:column}
+    .ee-btns button{cursor:pointer;font-size:.8125rem;border-radius:6px;width:100%}
+    #ee-save{background:#000;color:#fff;font-weight:500;padding:.5rem}
+    #ee-discard{border:1px solid var(--line2);color:var(--text);background:transparent;padding:.5rem;margin-top:.375rem}
+    #ee-cancel{color:var(--text3);background:none;border:none;padding:.4rem 0 0;margin-top:.125rem}
+    #ee-cancel:hover{color:var(--text2)}
+  </style>
+<!-- no-flash-v2: background tema diterapkan sebelum paint pertama (warna persis tema gelap Clinqoo) -->
 <script>(function(){try{var t=localStorage.getItem('clinqoo_theme')||'Sistem (Default)';var d=(t==='Gelap')||((t==='Sistem (Default)'||!t)&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.style.background='#0a0a0a';document.documentElement.style.colorScheme='dark';}}catch(e){}})();</script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  :root {
-    --bg:#fafafa; --bg2:#ffffff; --line:#e5e7eb; --text:#111827; --text2:#6b7280; --text3:#9ca3af;
-    --code-bg:#111827; --code-text:#e5e7eb; --accent:#111827; --ok:#2fbf71; --warn:#e5604f;
-  }
-  html.dark-mode {
-    --bg:#0a0a0a; --bg2:#111113; --line:#2a2a30; --text:#e5e7eb; --text2:#9ca3af; --text3:#6b7280;
-    --code-bg:#0d0d0f; --code-text:#e5e7eb; --accent:#f3f4f6; --ok:#2fbf71; --warn:#e5604f;
-  }
-  html, body { height:100%; }
-  body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100dvh; overflow:hidden; }
 
-  header { display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--bg2); border-bottom:1px solid var(--line); flex-shrink:0; }
-  .back { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; border:none; background:transparent; color:var(--text2); cursor:pointer; transition:background .15s ease; flex-shrink:0; }
-  .back:hover { background:var(--bg); }
-  .title-wrap { min-width:0; flex:1; display:flex; flex-direction:column; justify-content:center; }
-  .title { font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .subtitle { font-size:10.5px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tool-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:opacity .15s ease; flex-shrink:0; position:relative; }
-  html.dark-mode .tool-btn { color:#111827; }
-  .tool-btn:hover { opacity:.88; }
-  .save-dot { position:absolute; top:-2px; right:-2px; width:8px; height:8px; border-radius:50%; background:var(--ok); border:2px solid var(--bg2); transition:background .2s ease; }
-  .save-dot.dirty { background:var(--warn); }
-
-  .filebar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg2); border-bottom:1px solid var(--line); flex-shrink:0; }
-  select { appearance:none; -webkit-appearance:none; min-width:0; flex:1; padding:7px 26px 7px 10px; border-radius:10px; border:1px solid var(--line); background:var(--bg) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; color:var(--text); font-size:12.5px; font-weight:500; font-family:inherit; cursor:pointer; }
-  .icon-group { display:flex; align-items:center; gap:4px; flex-shrink:0; }
-  .icon-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:9px; border:none; background:transparent; color:var(--text2); cursor:pointer; transition:background .15s ease, color .15s ease; }
-  .icon-btn:hover { background:var(--bg); color:var(--text); }
-  .meta { font-size:10.5px; color:var(--text3); white-space:nowrap; flex-shrink:0; }
-  @media (max-width:380px) { .meta { display:none; } }
-
-  main { flex:1; display:flex; min-height:0; }
-  #code { flex:1; width:100%; resize:none; border:none; outline:none; background:var(--code-bg); color:var(--code-text); font-family:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace; font-size:13px; line-height:1.6; padding:14px 16px; tab-size:2; white-space:pre; overflow:auto; caret-color:var(--code-text); }
-  #code::selection { background:rgba(120,120,140,.35); }
-
-  .empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--text3); font-size:13px; text-align:center; padding:24px; }
-
-  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(8px); background:var(--bg2); border:1px solid var(--line); color:var(--text); font-size:12.5px; font-weight:500; padding:9px 16px; border-radius:12px; box-shadow:0 4px 18px rgba(0,0,0,.10); opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; max-width:88vw; text-align:center; }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-</style>
+    <script>/* clinqoo-seo-auto: canonical & og mengikuti domain aktif */
+(function(){try{var u=location.origin+location.pathname.replace(/(index\.html|[^\/]+\.html)$/,"").replace(/\/$/,"");var s2=u;for(var i=0;i<3;i++)s2=s2.slice(0,s2.lastIndexOf("/"));var c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement("link");c.setAttribute("rel","canonical");document.head.appendChild(c);}c.setAttribute("href",u+"/");var m=document.querySelector('meta[property="og:url"]');if(m)m.setAttribute("content",u+"/");var g=document.querySelector('meta[property="og:image"]');if(g)g.setAttribute("content",s2+"/assets/og-image.png?v=7");var t=document.querySelector('meta[name="twitter:image"]');if(t)t.setAttribute("content",s2+"/assets/og-image.png?v=7");}catch(e){}})();
+    </script>
+<!-- Google tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KMQ8WBZF6E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KMQ8WBZF6E');
+</script>
+<!-- End Google tag -->
+<script src="../../../js/i18n-dict.js" defer></script>
+<script src="../../../js/i18n.js" defer></script>
 </head>
 <body>
+    <script>(function(){var t=localStorage.getItem("clinqoo_theme");var isDark=(t==="Gelap")||((!t||t==="Sistem (Default)")&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(isDark){document.body.classList.add("dark-mode");}})();</script>
 
-<header>
-  <button class="back" onclick="goBack()" title="Kembali ke Workspace" aria-label="Kembali ke Workspace">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-  </button>
-  <div class="title-wrap">
-    <span class="title" id="docTitle">Kode</span>
-    <span class="subtitle" id="projName">Proyek</span>
-  </div>
-  <button class="tool-btn" onclick="saveCode()" title="Simpan (Ctrl+S)">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-    Simpan
-    <span class="save-dot" id="saveDot" title="Status penyimpanan"></span>
-  </button>
-</header>
 
-<div class="filebar">
-  <select id="fileSel" onchange="pickFile(this.value)" title="Pilih berkas"></select>
-  <span class="meta" id="fileMeta"></span>
-  <div class="icon-group">
-    <button class="icon-btn" onclick="copyCode()" title="Salin seluruh kode" aria-label="Salin">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  <div id="titlebar">
+    <button id="back-btn" class="tb-btn" onclick="navigateBackFromEditor()" title="Kembali ke Workspace">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     </button>
-    <button class="icon-btn" onclick="downloadCode()" title="Unduh berkas ini" aria-label="Unduh">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    <div id="logo">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 9.5L5 16L11 22.5"/><path d="M21 9.5L27 16L21 22.5"/><path d="M16 8.5V23.5"/></svg>
+      <b>Clinqoo</b> <span>Code</span>
+    </div>
+    <div class="spacer"></div>
+    <button id="save-btn" onclick="editorSaveInPlace()" disabled title="Simpan">
+     
+      <span>Simpan</span>
     </button>
   </div>
-</div>
-
-<main>
-  <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" placeholder="// pilih berkas untuk mulai"></textarea>
-  <div class="empty" id="emptyState" style="display:none">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>
-    <span>Belum ada berkas di proyek ini.</span>
+  
+  <div id="quicktools" class="hidden">
+    <div class="qt-fixed">
+      <button class="qt-btn" onclick="edAction('undo')" title="Urungkan"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg></button>
+      <button class="qt-btn" onclick="edAction('redo')" title="Ulangi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 8"/></svg></button>
+      <button class="qt-btn" onclick="qtInsert('\t')" title="Tab">&#8677;</button>
+      <button class="qt-btn" onclick="qtMoveCursor(-1)" title="Kiri"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="qt-btn" onclick="qtMoveCursor(1)" title="Kanan"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="qt-btn qt-color" onclick="toggleColorPicker(event)" title="Pemetik warna"><span class="qt-swatch" id="qt-swatch-dot"></span></button>
+    </div>
+    <div class="qt-sep"></div>
+    <div class="qt-snippets" id="qt-snippets"></div>
   </div>
-</main>
+  <div id="color-picker"></div>
+  <div id="stage">
+    <div id="editor-code-container">
+      <textarea id="editor-code-textarea" class="hidden"></textarea>
+    </div>
+    <div id="editor-audio-container" class="hidden media-wrap">
+      <div class="media-inner">
+        <div class="audio-circle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg>
+        </div>
+        <audio id="audio-player" controls></audio>
+      </div>
+    </div>
+    <div id="editor-video-container" class="hidden media-wrap">
+      <div class="media-card wide"><video id="video-player" controls></video></div>
+    </div>
+    <div id="editor-image-container" class="hidden media-wrap">
+      <div class="media-card"><img id="image-preview" src="" alt="Preview"></div>
+    </div>
+  </div>
+  <div id="statusbar">
+    <div class="sb" id="sb-path">workspace/</div>
+    <div class="spacer"></div>
+    <div class="sb ok" id="sb-saved">Tersimpan</div>
+    <div class="sb" id="sb-pos"></div>
+  </div>
 
-<div class="toast" id="toast"></div>
+    <script>
+    const WS_CLOUD_API = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1 ? 'https://clincoo-be2.pages.dev/api' : '/api') + '/project-files';
+    let currentFolderPath = 'root';
+    let editingFileName = null;
+    let projectFilesData = { 'root': [] };
+    let codeEditor = null;
+    let editorOriginalContent = null;
+    let editorDirty = false;
 
-<script>
-(function () {
-  'use strict';
-  try {
-    var t = localStorage.getItem('clinqoo_theme') || 'Sistem (Default)';
-    var isDark = (t === 'Gelap') || ((!t || t === 'Sistem (Default)') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (isDark) document.body.classList.add('dark-mode');
-  } catch (e) {}
+    function wsFilesKey() {
+      let pid = null;
+      try { pid = localStorage.getItem('clinqoo_current_project_id'); } catch (e) {}
+      return 'clinqoo_workspace_files_' + (pid ? String(pid) : 'global');
+    }
 
-  var QP = new URLSearchParams(location.search);
-  var PID = QP.get('id') || QP.get('pid') || '';
-  var PNAME = QP.get('name') || 'Proyek';
-  var WS_API = 'https://clincoo-be2.pages.dev/api/project-files';
 
-  var files = {};
-  var emptyFolders = [];
-  var currentFile = QP.get('file') || '';
-  var dirty = false;
-  var cloudTimer = null;
+    function wsAuthHeaders() {
+      var t = '';
+      try { t = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) {}
+      return t ? { Authorization: 'Bearer ' + t } : {};
+    }
 
-  var elCode = document.getElementById('code');
-  var elSel = document.getElementById('fileSel');
-  var elMeta = document.getElementById('fileMeta');
-  var elToast = document.getElementById('toast');
-  var elEmpty = document.getElementById('emptyState');
-  document.getElementById('projName').textContent = PNAME;
 
-  function filesKey() { return 'clinqoo_workspace_files_' + PID; }
-  function authHeaders() {
-    var tk = ''; try { tk = localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) {}
-    return tk ? { 'Authorization': 'Bearer ' + tk } : {};
-  }
-  function toast(msg) {
-    elToast.textContent = msg;
-    elToast.classList.add('show');
-    clearTimeout(toast._t);
-    toast._t = setTimeout(function () { elToast.classList.remove('show'); }, 2200);
-  }
-  function setDirty(d) {
-    dirty = d;
-    document.getElementById('saveDot').classList.toggle('dirty', d);
-  }
+    function wsProjectId() {
+      try { return localStorage.getItem('clinqoo_current_project_id') || ''; } catch (e) { return ''; }
+    }
 
-  function toFlat(data) {
-    var out = { files: {}, emptyFolders: [] };
-    Object.keys(data || {}).forEach(function (fk) {
-      (data[fk] || []).forEach(function (it) {
-        if (!it || !it.path) return;
-        if (it.type === 'file') out.files[it.path] = it.content || '';
-        else if (it.type === 'folder') {
-          var hasKids = Object.keys(data).some(function (k) { return k === it.path || k.indexOf(it.path + '/') === 0; });
-          if (!hasKids) out.emptyFolders.push(it.path);
+
+    function wsFlatten(data) {
+      const files = [];
+      Object.keys(data || {}).forEach(function(folderKey) {
+        (data[folderKey] || []).forEach(function(it) {
+          if (!it || !it.path) return;
+          if (it.type === 'file') {
+            files.push({ path: it.path, content: it.content || '' });
+          } else if (it.type === 'folder') {
+            const hasChildren = Object.keys(data).some(function(k) { return k === it.path || k.startsWith(it.path + '/'); });
+            if (!hasChildren) files.push({ path: it.path + '/', content: '' }); // penanda folder kosong
+          }
+        });
+      });
+      return files;
+    }
+
+
+    function wsSizeLabel(content) {
+      const b = new Blob([content || '']).size;
+      if (b > 1024 * 1024) return (b / (1024 * 1024)).toFixed(2) + ' MB';
+      if (b > 1024) return (b / 1024).toFixed(1) + ' KB';
+      return b + ' B';
+    }
+
+
+    function wsUnflatten(files) {
+      const data = { 'root': [] };
+      const ensureChain = function(folderKey) {
+        if (folderKey === 'root') return;
+        const parts = folderKey.split('/').filter(Boolean);
+        let parent = 'root', cum = '';
+        parts.forEach(function(part) {
+          cum = cum ? cum + '/' + part : part;
+          if (!Array.isArray(data[parent])) data[parent] = [];
+          if (!data[parent].some(function(i) { return i && i.type === 'folder' && i.name.toLowerCase() === part.toLowerCase(); })) {
+            data[parent].push({ type: 'folder', name: part, path: cum, fileCount: 0, previewText: 'Folder' });
+          }
+          if (!Array.isArray(data[cum])) data[cum] = [];
+          parent = cum;
+        });
+      };
+      (files || []).forEach(function(f) {
+        const p = String((f && f.path) || '').trim();
+        const content = (f && f.content) || '';
+        if (p.slice(-1) === '/') { ensureChain(p.slice(0, -1)); return; }
+        const parts = p.split('/').filter(Boolean);
+        const name = parts.pop();
+        if (!name) return;
+        const folderKey = parts.length ? parts.join('/') : 'root';
+        ensureChain(folderKey);
+        if (!Array.isArray(data[folderKey])) data[folderKey] = [];
+        if (!data[folderKey].some(function(i) { return i.path.toLowerCase() === p.toLowerCase(); })) {
+          data[folderKey].push({ type: 'file', name: name, size: wsSizeLabel(content), path: p, content: content });
         }
       });
-    });
-    return out;
-  }
-  function toWs() {
-    var data = { root: [] };
-    function ensureChain(fk) {
-      if (fk === 'root') return;
-      var parts = fk.split('/').filter(Boolean), parent = 'root', cum = '';
-      parts.forEach(function (pt) {
-        cum = cum ? cum + '/' + pt : pt;
-        if (!Array.isArray(data[parent])) data[parent] = [];
-        if (!data[parent].some(function (i) { return i && i.type === 'folder' && i.name.toLowerCase() === pt.toLowerCase(); }))
-          data[parent].push({ type: 'folder', name: pt, path: cum, fileCount: 0, previewText: 'Folder' });
-        if (!Array.isArray(data[cum])) data[cum] = [];
-        parent = cum;
+      return data;
+    }
+
+
+    function loadWorkspaceFiles() {
+      const key = wsFilesKey();
+      let savedFiles = null;
+      try { savedFiles = localStorage.getItem(key); } catch (e) {}
+      // Migrasi sekali: data lama tersimpan di kunci global, pindahkan ke kunci proyek ini.
+      if (!savedFiles) {
+        try {
+          const legacy = localStorage.getItem('clinqoo_workspace_files');
+          if (legacy) { localStorage.setItem(key, legacy); savedFiles = legacy; }
+        } catch (e) {}
+      }
+      if (savedFiles) {
+        try { projectFilesData = JSON.parse(savedFiles); } catch (e) { projectFilesData = { 'root': [] }; }
+      } else {
+        projectFilesData = { 'root': [] };
+      }
+    }
+
+
+
+    function saveData() {
+      try { localStorage.setItem(wsFilesKey(), JSON.stringify(projectFilesData)); } catch (e) { console.error('Gagal menyimpan workspace:', e); }
+      // Sync GitHub: perubahan dari editor ikut tersinkron (debounce di engine)
+      try { if (window.WSGitHubSync) WSGitHubSync.schedule(); } catch (e) {}
+    }
+
+    // Push cloud LANGSUNG (bukan debounce) — halaman editor berpindah URL,
+    // timer debounce dari halaman workspace tidak hidup di sini.
+    function wsCloudPushNow() {
+      const pid = wsProjectId();
+      if (!pid) return Promise.resolve();
+      const payload = { project_id: pid, files: wsFlatten(projectFilesData) };
+      return fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { method: 'DELETE', headers: wsAuthHeaders() })
+        .then(function(r) { return r.ok ? fetch(WS_CLOUD_API, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, wsAuthHeaders()), body: JSON.stringify(payload) }) : Promise.reject(); });
+    }
+
+    // Tarik data cloud (dipakai bila file tidak ada di localStorage perangkat ini)
+    function wsCloudPullNow() {
+      const pid = wsProjectId();
+      if (!pid) return Promise.resolve(null);
+      return fetch(WS_CLOUD_API + '?project_id=' + encodeURIComponent(pid), { headers: wsAuthHeaders() })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .catch(function() { return null; });
+    }
+
+    function getFileType(filename) {
+      if (!filename) return 'code';
+      let ext = getFileExtension(filename);
+      const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
+      const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'webm'];
+      const imageExts = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'bmp', 'ico'];
+      if (audioExts.includes(ext)) return 'audio';
+      if (videoExts.includes(ext)) return 'video';
+      if (imageExts.includes(ext)) return 'image';
+      return 'code';
+    }
+
+
+    function getFileExtension(filename) {
+      let name = filename ? filename.trim() : '';
+      if (!name) return 'html';
+      if (name.startsWith('.') && !name.includes('.', 1)) return name.substring(1).toLowerCase();
+      if (name.includes('.')) return name.split('.').pop().toLowerCase();
+      return name.toLowerCase();
+    }
+
+
+    function getFileIcon(filename) {
+      let ext = getFileExtension(filename);
+      const w = function(inner){ return '<span class="fico">' + inner + '</span>'; };
+      switch(ext) {
+        case 'mp3': case 'wav': case 'ogg': case 'flac': case 'm4a':
+          return w('<svg viewBox="0 0 24 24" fill="#E04A3A"><path d="M20 3h-7v10.55A3.98 3.98 0 0 0 11 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h5v6.55A3.98 3.98 0 0 0 14 13c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3z"/></svg>');
+        case 'mp4': case 'avi': case 'mkv': case 'mov': case 'webm':
+          return w('<svg viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="3.5" fill="#5B51DC"/><polygon points="10,8.5 15,12 10,15.5" fill="#FFFFFF"/></svg>');
+        case 'png': case 'jpg': case 'jpeg': case 'svg': case 'gif': case 'webp':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5" fill="#0D9488" stroke="none"/><path d="M21 15l-5-5L5 21"/></svg>');
+        case 'py': case 'python':
+          return w('<svg viewBox="0 0 24 24"><path fill="#3776AB" d="M11.898 2c-3.15 0-5.068.322-5.068 2.373v1.89h10.136v.945H6.83c-2.453 0-4.33 1.488-4.33 4.33 0 2.843 1.877 4.33 4.33 4.33h1.892v-2.373c0-2.316 1.83-4.254 4.148-4.254h5.068c1.94 0 2.453-.562 2.453-2.373 0-2.115-1.913-4.868-8.523-4.868zm-2.58 1.418a.945.945 0 1 1 0 1.89.945.945 0 0 1 0-1.89z"/><path fill="#FFD43B" d="M12.102 22c3.15 0 5.068-.322 5.068-2.373v-1.89H7.034v-.945h10.136c2.453 0 4.33-1.488 4.33-4.33 0-2.843-1.877-4.33-4.33-4.33h-1.892v2.373c0 2.316-1.83 4.254-4.148 4.254H6.062c-1.94 0-2.453.562-2.453 2.373 0 2.115 1.913 4.868 8.493 4.868zm2.58-1.418a.945.945 0 1 1 0-1.89.945.945 0 0 1 0 1.89z"/></svg>');
+        case 'txt':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#546E7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
+        case 'html': case 'htm':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#E34F26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>');
+        case 'js': case 'ts': case 'jsx':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#F7DF1E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4" fill="#F7DF1E"/><text x="12" y="16" font-size="8" font-weight="800" fill="#000" stroke="none" text-anchor="middle">JS</text></svg>');
+        case 'css':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><text x="12" y="15.5" font-size="7" font-weight="800" fill="#16A34A" stroke="none" text-anchor="middle">css</text></svg>');
+        default:
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
+      }
+    }
+
+    // Status bar & tab dirty — dipanggil setiap perubahan/kursor
+    function updateEditorStatus() {
+      const isCode = editingFileName && getFileType(editingFileName) === 'code';
+      const tab = document.getElementById('editor-tab');
+      const sbSaved = document.getElementById('sb-saved');
+      const sbPos = document.getElementById('sb-pos');
+      const sbPath = document.getElementById('sb-path');
+      const saveBtn = document.getElementById('save-btn');
+      if (tab) tab.classList.toggle('dirty', !!(isCode && editorDirty));
+      if (saveBtn) saveBtn.disabled = !isCode;
+      const qt = document.getElementById('quicktools');
+      if (qt) qt.classList.toggle('hidden', !isCode);
+      if (isCode) renderQuickTools();
+      if (sbPath) {
+        const folder = (currentFolderPath === 'root' || !currentFolderPath) ? '' : currentFolderPath + '/';
+        sbPath.textContent = 'workspace/' + folder + (editingFileName || '');
+      }
+      if (sbSaved) {
+        if (!editingFileName) { sbSaved.textContent = ''; }
+        else if (!isCode) { sbSaved.textContent = 'Media'; sbSaved.className = 'sb'; }
+        else if (editorDirty) { sbSaved.textContent = '\u25CF Belum tersimpan'; sbSaved.className = 'sb err'; }
+        else { sbSaved.textContent = 'Tersimpan'; sbSaved.className = 'sb ok'; }
+      }
+      if (sbPos) {
+        if (isCode && codeEditor) {
+          const pos = codeEditor.getCursor();
+          sbPos.textContent = 'Ln ' + (pos.line + 1) + ', Col ' + (pos.ch + 1);
+        } else { sbPos.textContent = ''; }
+      }
+    }
+
+    // Simpan tanpa keluar (tombol Simpan di title bar)
+    async function editorSaveInPlace() {
+      if (!editingFileName || !codeEditor || getFileType(editingFileName) !== 'code') return;
+      const codeContent = codeEditor.getValue();
+      if (Array.isArray(projectFilesData[currentFolderPath])) {
+        const itemIndex = projectFilesData[currentFolderPath].findIndex(function(i) { return i.type === 'file' && i.name === editingFileName; });
+        if (itemIndex !== -1) {
+          projectFilesData[currentFolderPath][itemIndex].content = codeContent;
+          projectFilesData[currentFolderPath][itemIndex].size = wsSizeLabel(codeContent);
+        }
+      }
+      saveData();
+      editorOriginalContent = codeContent;
+      editorDirty = false;
+      updateEditorStatus();
+      try { await wsCloudPushNow(); } catch (e) {}
+    }
+
+
+
+    function initCodeEditor() {
+      if (codeEditor) return;
+      const textarea = document.getElementById('editor-code-textarea');
+      if (textarea) {
+        const cmTheme = document.body.classList.contains('dark-mode') ? 'clinqoo-dark' : 'clinqoo-light';
+        codeEditor = CodeMirror.fromTextArea(textarea, {
+          lineNumbers: true,
+          theme: cmTheme,
+          mode: 'htmlmixed',
+          indentUnit: 4,
+          lineWrapping: true,
+          scrollbarStyle: 'native'
+        });
+        codeEditor.on('change', function() {
+          if (editorOriginalContent !== null) {
+            editorDirty = codeEditor.getValue() !== editorOriginalContent;
+          }
+          updateEditorStatus();
+        });
+        codeEditor.on('cursorActivity', function() { updateEditorStatus(); });
+      }
+    }
+
+    function findFileObj(filename) {
+      const items = projectFilesData[currentFolderPath] || [];
+      return items.find(function(i) { return i.type === 'file' && i.name === filename; });
+    }
+
+    async function openFileInEditor(filename) {
+      editingFileName = filename;
+      let fileObj = findFileObj(filename);
+      if (!fileObj) {
+        // mungkin data di perangkat ini belum terisi: coba tarik dari cloud
+        const d = await wsCloudPullNow();
+        const files = (d && d.files) || [];
+        if (files.length) {
+          projectFilesData = wsUnflatten(files);
+          try { localStorage.setItem(wsFilesKey(), JSON.stringify(projectFilesData)); } catch (e) {}
+          fileObj = findFileObj(filename);
+        }
+      }
+      if (!fileObj) { console.warn('File tidak ditemukan.'); if (window.ClinqooBack) { window.ClinqooBack('../workspace/?id=' + encodeURIComponent(wsProjectId())); } else { location.href = '../workspace/?id=' + encodeURIComponent(wsProjectId()); } return; }
+
+      const fileType = getFileType(filename);
+      const ext = getFileExtension(filename);
+      const labelEl = document.getElementById('editor-filename-label');
+      const iconEl = document.getElementById('editor-file-icon');
+      if (labelEl) labelEl.textContent = filename;
+      if (iconEl) iconEl.innerHTML = getFileIcon(filename);
+
+      const codeContainer = document.getElementById('editor-code-container');
+      const audioContainer = document.getElementById('editor-audio-container');
+      const videoContainer = document.getElementById('editor-video-container');
+      const imageContainer = document.getElementById('editor-image-container');
+      codeContainer.classList.add('hidden'); audioContainer.classList.add('hidden');
+      videoContainer.classList.add('hidden'); imageContainer.classList.add('hidden');
+
+      if (fileType === 'audio') {
+        audioContainer.classList.remove('hidden');
+        const audioPlayer = document.getElementById('audio-player');
+        if (audioPlayer) { audioPlayer.src = fileObj.content || ''; audioPlayer.load(); }
+      } else if (fileType === 'video') {
+        videoContainer.classList.remove('hidden');
+        const videoPlayer = document.getElementById('video-player');
+        if (videoPlayer) { videoPlayer.src = fileObj.content || ''; videoPlayer.load(); }
+      } else if (fileType === 'image') {
+        imageContainer.classList.remove('hidden');
+        const img = document.getElementById('image-preview');
+        if (img) img.src = fileObj.content || '';
+      } else {
+        codeContainer.classList.remove('hidden');
+        initCodeEditor();
+        let mode = 'htmlmixed';
+        if (ext === 'js' || ext === 'json' || ext === 'ts' || ext === 'jsx') mode = 'javascript';
+        else if (ext === 'css') mode = 'css';
+        else if (ext === 'py' || ext === 'python') mode = 'python';
+        if (codeEditor) {
+          codeEditor.setOption('mode', mode);
+          codeEditor.setValue(fileObj.content || '');
+          setTimeout(() => codeEditor.refresh(), 50);
+        }
+        editorOriginalContent = fileObj.content || '';
+        editorDirty = false;
+      }
+      updateEditorStatus();
+    }
+
+    function showEditorExitConfirm() {
+      const oldModal = document.getElementById('editor-exit-modal');
+      if (oldModal) oldModal.remove();
+      const ov = document.createElement('div');
+      ov.id = 'editor-exit-modal';
+      ov.className = 'ee-overlay';
+      const fileName = editingFileName || 'file ini';
+      ov.innerHTML = '<div class="ee-card">'
+        + '<h3>Simpan perubahan?</h3>'
+        + '<p>Ada perubahan pada <span></span> yang belum disimpan.</p>'
+        + '<div class="ee-btns">'
+        + '<button id="ee-save">Simpan &amp; Keluar</button>'
+        + '<button id="ee-discard">Keluar Tanpa Simpan</button>'
+        + '<button id="ee-cancel">Batal</button>'
+        + '</div></div>';
+      ov.querySelector('p span').textContent = fileName;
+      document.body.appendChild(ov);
+      ov.querySelector('#ee-cancel').onclick = function () { ov.remove(); };
+      ov.querySelector('#ee-discard').onclick = function () { ov.remove(); editorDoExit(false); };
+      ov.querySelector('#ee-save').onclick = function () { ov.remove(); editorDoExit(true); };
+      ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+    }
+
+    async function navigateBackFromEditor() {
+      if (editingFileName && codeEditor && editorDirty && getFileType(editingFileName) === 'code') {
+        showEditorExitConfirm();
+        return;
+      }
+      await editorDoExit(true);
+    }
+
+    async function editorDoExit(saveChanges) {
+      if (saveChanges && editingFileName && codeEditor && getFileType(editingFileName) === 'code') {
+        const codeContent = codeEditor.getValue();
+        if (Array.isArray(projectFilesData[currentFolderPath])) {
+          const itemIndex = projectFilesData[currentFolderPath].findIndex(function(i) { return i.type === 'file' && i.name === editingFileName; });
+          if (itemIndex !== -1) {
+            projectFilesData[currentFolderPath][itemIndex].content = codeContent;
+            projectFilesData[currentFolderPath][itemIndex].size = wsSizeLabel(codeContent);
+          }
+        }
+        saveData();
+        editorDirty = false;
+      }
+      const audioPlayer = document.getElementById('audio-player');
+      if (audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
+      const videoPlayer = document.getElementById('video-player');
+      if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ''; }
+      editingFileName = null;
+      // tunggu push cloud selesai supaya simpanan tidak hilang saat pindah halaman
+      try { await wsCloudPushNow(); } catch (e) {}
+      window.location.href = '../?id=' + encodeURIComponent(wsProjectId());
+    }
+
+    // ---------- Quick tools (ala Clinqoo-Editor) ----------
+    const SNIPPETS = {
+      html: ['<div>|</div>','<a href="|"></a>','<img src="|" alt="">',' class="|"',' id="|"','<!-- | -->','<span>|</span>','&nbsp;'],
+      css: ['{\n\t|\n}',':hover{|}','@media{|}','.class{|}','#id{|}','px','rem','%'],
+      javascript: ['(|)','{|}','[|]','=>','console.log(|)','function () {|}','const |','===','!=='],
+      python: ['(|)','{|}','[|]','=>','print(|)','def |():\n\t','if |:\n\t','===','!='],
+      json: ['{|}','[|]',':',',','"|": ""'],
+      markdown: ['**|**','_|_','# |','- |','[|]()','```|```','> |'],
+      plaintext: ['(',')','[',']','{','}','<','>','=','-','_','|']
+    };
+    function qtLangOf(filename) {
+      const ext = getFileExtension(filename || '');
+      if (ext === 'html' || ext === 'htm') return 'html';
+      if (ext === 'css') return 'css';
+      if (ext === 'js' || ext === 'jsx' || ext === 'ts') return 'javascript';
+      if (ext === 'py' || ext === 'python') return 'python';
+      if (ext === 'json') return 'json';
+      if (ext === 'md' || ext === 'markdown') return 'markdown';
+      return 'plaintext';
+    }
+    function qtEsc(x) { return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    let qtRenderedLang = null;
+    function renderQuickTools() {
+      const lang = editingFileName ? qtLangOf(editingFileName) : 'plaintext';
+      const list = SNIPPETS[lang] || SNIPPETS.plaintext;
+      const el = document.getElementById('qt-snippets');
+      if (!el) return;
+      if (qtRenderedLang === lang) return;
+      qtRenderedLang = lang;
+      el.innerHTML = list.map(function(sn, i) {
+        return '<button class="qt-chip" data-qi="' + i + '">' + qtEsc(sn.replace(/\|/g,'').replace(/\n/g,' ').replace(/\t/g,'')) + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(el.querySelectorAll('.qt-chip'), function(btn) {
+        btn.onclick = function() { qtInsert(list[+btn.dataset.qi]); };
       });
     }
-    Object.keys(files).sort().forEach(function (p) {
-      var parts = p.split('/'), nm = parts.pop();
-      if (!nm) return;
-      var fk = parts.length ? parts.join('/') : 'root';
-      ensureChain(fk);
-      if (!Array.isArray(data[fk])) data[fk] = [];
-      if (!data[fk].some(function (i) { return i.path === p; }))
-        data[fk].push({ type: 'file', name: nm, path: p, content: files[p], size: sizeLabel(files[p]), previewText: (files[p] || '').slice(0, 60) });
+    function qtInsert(snippet) {
+      if (!codeEditor || !editingFileName) return;
+      const idx = snippet.indexOf('|');
+      const clean = idx >= 0 ? snippet.replace('|', '') : snippet;
+      const from = codeEditor.getCursor('from');
+      codeEditor.replaceSelection(clean);
+      if (idx >= 0) {
+        const before = clean.slice(0, idx);
+        const bl = before.split('\n');
+        if (bl.length === 1) codeEditor.setCursor({ line: from.line, ch: from.ch + before.length });
+        else codeEditor.setCursor({ line: from.line + bl.length - 1, ch: bl[bl.length - 1].length });
+      }
+      codeEditor.focus();
+    }
+    function qtMoveCursor(dir) {
+      if (!codeEditor) return;
+      const cur = codeEditor.getCursor();
+      codeEditor.setCursor({ line: cur.line, ch: Math.max(0, cur.ch + dir) });
+      codeEditor.focus();
+    }
+    function edAction(a) {
+      if (!codeEditor) return;
+      if (a === 'undo') codeEditor.undo();
+      else if (a === 'redo') codeEditor.redo();
+      codeEditor.focus();
+    }
+    const CP_COLORS = ['#000000','#ffffff','#e55454','#f0ad4e','#f5d76e','#2fbf71','#3ba9e0','#5c6bc0','#8a5cf6','#e5604f','#9a9aa4','#4a4a55','#d6d6dc','#6c6c76','#26262b','#1a1a1d'];
+    function toggleColorPicker(e) {
+      const cp = document.getElementById('color-picker');
+      if (!cp) return;
+      if (cp.classList.contains('show')) { closeColorPicker(); return; }
+      cp.innerHTML = '<div class="cp-grid">' + CP_COLORS.map(function(c) { return '<div class="cp-swatch" style="background:' + c + '" onclick="pickColor(\'' + c + '\')" title="' + c + '"></div>'; }).join('') +
+        '</div><div class="cp-hexrow"><input id="cp-hex" placeholder="#3ba9e0" maxlength="9"><button onclick="pickColor(document.getElementById(\'cp-hex\').value)">Sisip</button></div>';
+      cp.classList.add('show');
+      const r = e.currentTarget.getBoundingClientRect();
+      cp.style.left = Math.min(r.left, innerWidth - 226) + 'px';
+      cp.style.top = (r.bottom + 8) + 'px';
+    }
+    function closeColorPicker() { const cp = document.getElementById('color-picker'); if (cp) cp.classList.remove('show'); }
+    function pickColor(hex) {
+      if (!hex) return;
+      hex = String(hex).trim();
+      if (!hex.startsWith('#')) hex = '#' + hex;
+      const dot = document.getElementById('qt-swatch-dot');
+      if (dot) dot.style.background = hex;
+      qtInsert(hex);
+      closeColorPicker();
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#color-picker') && !e.target.closest('.qt-color')) closeColorPicker();
     });
-    emptyFolders.forEach(function (fp) { ensureChain(fp); });
-    return data;
-  }
-  function sizeLabel(c) { var kb = (c || '').length / 1024; return kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb.toFixed(1) + ' KB'; }
 
-  function loadFiles(cb) {
-    if (PID) {
-      try {
-        var raw = localStorage.getItem(filesKey());
-        if (!raw) raw = localStorage.getItem('clinqoo_workspace_files');
-        if (raw) {
-          var r = toFlat(JSON.parse(raw));
-          files = r.files; emptyFolders = r.emptyFolders;
-          try { localStorage.setItem(filesKey(), raw); } catch (e) {}
-          if (Object.keys(files).length) { cb(); return; }
-        }
-      } catch (e) {}
-      fetch(WS_API + '?project_id=' + encodeURIComponent(PID), { headers: authHeaders() })
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (d) {
-          (d && d.files || []).forEach(function (f) {
-            var p = String(f.path);
-            if (p.slice(-1) === '/') { emptyFolders.push(p.slice(0, -1)); return; }
-            files[p] = f.content || '';
+    window.addEventListener('beforeunload', function (e) {
+      if (editorDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const params = new URLSearchParams(window.location.search);
+      currentFolderPath = params.get('folder') || 'root';
+      let fileParam = params.get('file') || '';
+      loadWorkspaceFiles();
+      // Tidak ada ?file= (mis. tombol Editor dari chat): buka berkas kode pertama
+      if (!fileParam) {
+        let first = null;
+        Object.keys(projectFilesData).forEach(function(fk) {
+          if (first) return;
+          (projectFilesData[fk] || []).forEach(function(it) {
+            if (!first && it && it.type === 'file') first = { folder: fk, name: it.name };
           });
-          try { localStorage.setItem(filesKey(), JSON.stringify(toWs())); } catch (e) {}
-          cb();
-        })
-        .catch(function () { cb(); });
-    } else {
-      try {
-        var raw2 = localStorage.getItem('clinqoo_editor_project');
-        if (raw2) { var p2 = JSON.parse(raw2); if (p2) { files = p2; } }
-      } catch (e) {}
-      cb();
-    }
-  }
-
-  function renderSelector() {
-    var paths = Object.keys(files).sort();
-    elSel.innerHTML = '';
-    paths.forEach(function (p) {
-      var o = document.createElement('option');
-      o.value = p; o.textContent = p;
-      elSel.appendChild(o);
+        });
+        if (first) { currentFolderPath = first.folder; fileParam = first.name; }
+      } else {
+        // File tidak ada di folder param: cari di semua folder by nama
+        const folderGuess = projectFilesData[currentFolderPath] || [];
+        const inFolder = folderGuess.some(function(i) { return i && i.type === 'file' && i.name === fileParam; });
+        if (!inFolder) {
+          Object.keys(projectFilesData).forEach(function(fk) {
+            if (projectFilesData[fk] && projectFilesData[fk].some(function(i) { return i && i.type === 'file' && i.name === fileParam; })) {
+              currentFolderPath = fk;
+            }
+          });
+        }
+      }
+      openFileInEditor(fileParam);
     });
-    var has = paths.length > 0;
-    elSel.style.display = has ? '' : 'none';
-    elEmpty.style.display = has ? 'none' : '';
-    elCode.style.display = has ? '' : 'none';
-    if (!currentFile && has) currentFile = paths.indexOf('index.html') !== -1 ? 'index.html' : paths[0];
-    if (has && files[currentFile] === undefined) currentFile = paths[0];
-    elSel.value = currentFile || '';
-    renderCode();
-  }
+  </script>
 
-  function renderCode() {
-    if (!currentFile || files[currentFile] === undefined) { elCode.value = ''; updateMeta(); setTitle(''); return; }
-    elCode.value = files[currentFile];
-    setTitle(currentFile);
-    updateMeta();
-    setDirty(false);
-    elCode.scrollTop = 0; elCode.scrollLeft = 0;
-  }
-  function setTitle(f) {
-    document.getElementById('docTitle').textContent = f ? f : 'Kode';
-    try { document.title = (f ? f + ' — ' : '') + 'Kode | Clincoo'; } catch (e) {}
-  }
-  function updateMeta() {
-    var lines = 0;
-    if (currentFile && files[currentFile] !== undefined) {
-      lines = files[currentFile].split('\n').length;
-    }
-    elMeta.textContent = currentFile ? (lines + ' baris · ' + sizeLabel(files[currentFile])) : '';
-  }
-
-  window.pickFile = function (p) {
-    if (dirty && currentFile && files[currentFile] !== undefined) { files[currentFile] = elCode.value; persist(); }
-    currentFile = p;
-    renderCode();
-  };
-
-  function persist() {
-    if (!currentFile) return;
-    files[currentFile] = elCode.value;
-    try { localStorage.setItem(filesKey(), JSON.stringify(toWs())); } catch (e) {}
-    if (!PID) { try { localStorage.setItem('clinqoo_editor_project', JSON.stringify(files)); } catch (e) {} }
-    updateMeta();
-    setDirty(false);
-    scheduleCloudPush();
-  }
-  function scheduleCloudPush() {
-    if (!PID) return;
-    clearTimeout(cloudTimer);
-    cloudTimer = setTimeout(cloudPush, 2500);
-  }
-  function cloudPush() {
-    cloudTimer = null;
-    if (!PID) return;
-    var list = [];
-    Object.keys(files).forEach(function (p) { list.push({ path: p, content: files[p] }); });
-    emptyFolders.forEach(function (f) { list.push({ path: f + '/', content: '' }); });
-    var H = Object.assign({ 'Content-Type': 'application/json' }, authHeaders());
-    fetch(WS_API + '?project_id=' + encodeURIComponent(PID), { method: 'DELETE', headers: H })
-      .then(function (r) { return r.ok ? fetch(WS_API, { method: 'POST', headers: H, body: JSON.stringify({ project_id: PID, files: list }) }) : Promise.reject(); })
-      .then(function () { toast('Tersimpan & tersinkron cloud'); })
-      .catch(function () { toast('Tersimpan lokal — sinkron cloud menyusul'); });
-  }
-
-  window.saveCode = function () {
-    if (!currentFile) { toast('Pilih berkas dulu'); return; }
-    persist();
-    toast('Tersimpan');
-  };
-  window.copyCode = function () {
-    if (!currentFile) return;
-    var t = elCode.value;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(t).then(function () { toast('Kode disalin'); }).catch(function () { legacyCopy(t); });
-    } else legacyCopy(t);
-  };
-  function legacyCopy(t) {
-    var ta = document.createElement('textarea');
-    ta.value = t; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); toast('Kode disalin'); } catch (e) { toast('Gagal menyalin'); }
-    document.body.removeChild(ta);
-  }
-  window.downloadCode = function () {
-    if (!currentFile) return;
-    var blob = new Blob([elCode.value], { type: 'text/plain;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = currentFile.split('/').pop() || 'berkas.txt';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-  };
-  window.goBack = function () {
-    if (dirty) { if (currentFile && files[currentFile] !== undefined) files[currentFile] = elCode.value; persist(); }
-    window.location.href = PID ? ('/proyek/workspace/?id=' + encodeURIComponent(PID)) : '/proyek/workspace/';
-  };
-
-  elCode.addEventListener('input', function () { setDirty(true); });
-  document.addEventListener('keydown', function (e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) { e.preventDefault(); window.saveCode(); }
-  });
-  elCode.addEventListener('keydown', function (e) {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      var s = elCode.selectionStart, en = elCode.selectionEnd, v = elCode.value;
-      elCode.value = v.slice(0, s) + '  ' + v.slice(en);
-      elCode.selectionStart = elCode.selectionEnd = s + 2;
-      setDirty(true);
-    } else if (e.key === 'Enter') {
-      var s2 = elCode.selectionStart, v2 = elCode.value;
-      var lineStart = v2.lastIndexOf('\n', s2 - 1) + 1;
-      var indent = '';
-      for (var i = lineStart; i < s2; i++) { var ch = v2[i]; if (ch === ' ' || ch === '\t') indent += ch; else break; }
-      e.preventDefault();
-      var ins = '\n' + indent;
-      elCode.value = v2.slice(0, s2) + ins + v2.slice(elCode.selectionEnd);
-      elCode.selectionStart = elCode.selectionEnd = s2 + ins.length;
-      setDirty(true);
-    }
-  });
-
-  loadFiles(function () { renderSelector(); });
-})();
-</script>
+    <script>/* clinqoo-sw-register */
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('../../../sw.js').catch(function () {}); }); }
+    </script>
 </body>
 </html>
