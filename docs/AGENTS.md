@@ -36,8 +36,8 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 1. Build dari `origin/main`: `git archive origin/main | tar -x -C build-dir`
 2. Hapus dari build-dir: `functions/api/`, `functions/scheduled.js`, `wrangler.toml`, `wrangler-proxy.toml`, `.github/`, `agent-worker/`, `docs/`, `landing/`, `legal/`, `mcp-server/`, `schema.sql`, `.gitignore`
 3. Tempel `functions/mcp.js` (backup privat Superagent — berisi KUNCI, JANGAN commit publik)
-4. Deploy: `wrangler pages deploy . --project-name clinqoo` (Node 22; token Vylonium)
-5. Jika error D1 binding: pastikan wrangler.toml TERHAPUS. JANGAN tambah binding D1 ke project ini.
+4. Deploy: `wrangler pages deploy . --project-name clinqoo` (token Vylonium a393). **PENTING (pelajaran 2026-09-21): jalankan dari folder terisolasi DI LUAR repo** — wrangler menemukan `wrangler.toml` repo lewat parent directory, lalu menulis ulang binding D1 basi (DB 49b6fed3 + WALLET_DB 59e17832 lintas akun) ke config project dan deploy gagal "database not found". Salin build-dir ke folder terpisah (mis. workspace root) sebelum deploy.
+5. Jika error D1 binding: bersihkan binding basi via API — `PATCH /pages/projects/clinqoo` dengan `deployment_configs.production.d1_databases = {"DB": null, "WALLET_DB": null}` (nilai `null` per-binding menghapus; `{}` atau config kosong TIDAK bisa). JANGAN tambah binding D1 ke project ini.
 6. Verifikasi: `POST https://clinqoo.pages.dev/mcp` harus JSON-RPC. Tanpa key → 401 Unauthorized (function hidup). Bukan 405/404.
 
 **Email resmi tampilan web = `halo@clincoo.buzz`**. Backend notifikasi tetap ke muzawwied@gmail.com.
