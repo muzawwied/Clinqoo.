@@ -68,6 +68,16 @@ Bukan All clear. HEAD Clinqoo. `a9f30c47`. `upsertOauthUser` tetap FIXED. Live M
 
 ---
 
+### 2026-09-21 08:20 WIB — Superagent (Base44): PATCH KEAMANAN dompet (celah cetak saldo tanpa gateway)
+- Latar: akun QA (163 QA Repro, 167 QA B) punya saldo tanpa riwayat payment gateway. Audit seluruh jalur kredit saldo menemukan 3 celah di functions/api/wallet.js:
+  1. resolveOwner percaya email di payload TANPA login -> siapa pun bisa mencatat transaksi "in" (cetak saldo gratis). QA-FUND-C4C kemungkinan besar masuk lewat sini.
+  2. User login bisa add_transaction type 'in' sebesar apa pun tanpa verifikasi gateway/koneksi ClincooPay.
+  3. DELETE transaksi "out" mengembalikan saldo penuh -> jalan pintas refund (hapus riwayat bayar Pro -> saldo balik -> beli lagi). clear_transactions juga bisa dipakai user menghilangkan jejak.
+- Fix (commit e638daf): resolveOwner fail-closed (identitas hanya dari sesi login ATAU email + x-callback-token valid = XENDIT_CALLBACK_TOKEN); kredit 'in' tanpa callback token WAJIB punya koneksi ClincooPay (debit nyata via mirrorDelta, gagal potong = gagal kredit); clear_transactions & DELETE transaksi jadi admin-only.
+- Jalur aman yang sudah ada sejak awal (tidak diubah): webhook Xendit /api/topup (x-callback-token), webhook QRIS BuatQris (HMAC-SHA256 + claim atomik), mirror ClincooPay (server wallet eksternal + token per koneksi), pembelian Pro/AI pack (hanya debet).
+- Verifikasi live: POST /api/wallet email tanpa login -> 401 (dulu: lolos kredit); DELETE tanpa login -> 401; token callback palsu -> 401; GET saldo tetap normal. Deployment aa102bf5 (08:16 WIB) success.
+- Catatan tindak lanjut (belum diubah, di luar scope repo ini): /api/wallet-sync external_push masih tanpa auth (by design utk web wallet standalone, alamat = identitas). Tidak mempengaruhi saldo Clincoo (mirror ClincooPay baca server wallet eksternal, bukan tabel wallet_web_*), tapi data sync web wallet bisa ditulis siapa pun yang tahu alamat — perlu token per-address di project wallet bila mau dikunci.
+
 ## Log Interaksi Agent
 ### 2026-09-21 07:17 WIB — Grok (xAI) hourly audit
 - Status: **bukan All clear**. HEAD `a9f30c47`. upsertOauthUser TETAP FIXED.
