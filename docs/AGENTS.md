@@ -24,7 +24,7 @@ Halaman ini berfungsi sebagai **wiki ringan** dan papan komunikasi antar agent (
 
 ---
 
-## Status Saat Ini (update terakhir: 2026-09-22 01:16 WIB)
+## Status Saat Ini (update terakhir: 2026-09-22 03:17 WIB)
 
 **INSIDEN SELESAI (21 Sep ~10.05 WIB):** app.clincoo.buzz sempat dialihkan ke project `clinqoo` (a393, D1 kosong 887e6ab6) sejak ~09.20 WIB → user tidak bisa login. Sudah dipulihkan: domain kembali ke project `clincoo` (akun Vylonium0, clincoo-be2.pages.dev, DB asli 49b6fed3). **JANGAN pasang domain app.clincoo.buzz ke project clinqoo** dan JANGAN tambahkan D1 binding ke project clinqoo. Job `deploy-production` di deploy.yml DIHAPUS (dialah yang men-deploy salinan app dengan D1 kosong 887e6ab6 ke project clinqoo tiap push).
 
@@ -60,18 +60,25 @@ Prosedur benar (Superagent, terverifikasi 2026-09-17):
 | CI deploy production | Dihapus | job `deploy-production` dihapus di `76792d3b`. CI tersisa: deploy project `clincoo` + agent-worker. |
 | Rantai AI | Update | `834bad05` hapus OpenRouter; Gemini multi-kunci (KEY..KEY_6) utama, Workers AI cadangan. Pastikan secret KEY_4..6 di production. |
 | Chat project info | Update | `12c90d80` tool `set_project_info` — AI isi app_name/app_desc. |
-| User report | Update | Gate x-cron-secret (POST tanpa secret = 403). Sync Clinqoo-Data `852e939a`. |
+| User report | Update | Gate x-cron-secret (POST tanpa secret = 403). Sync Clinqoo-Data `9e856203`. |
 | Wallet / langganan / schema | PATCHED | e638daf: resolveOwner fail-closed; kredit in hanya callback/ClincooPay; clear/DELETE admin-only. |
-| Sync users-live | OK — jalan | Clinqoo-Data `852e939a` (01:15 WIB / 18:15 UTC). |
-| Blog | Update | Clinqoo-Blog `d7f8e7ea` artikel i18n 01:11 WIB. |
+| Sync users-live | OK — jalan | Clinqoo-Data `9e856203` (03:15 WIB / 20:15 UTC). |
+| Blog | Update | Clinqoo-Blog `b78277fd` artikel i18n 03:13 WIB. |
 | Komunitas | Update UI | Clinqoo-Komunitas `a93f3683` restore header (13:42 WIB). |
 | Issue GitHub | OK | 0 open, 0 PR |
-| Hourly audit | Laporan masuk | 01:16 WIB ke muzawwied@gmail.com — **bukan All clear** |
+| Hourly audit | Laporan masuk | 03:17 WIB ke muzawwied@gmail.com — **bukan All clear** |
 | Email transactional | Resend | cek RESEND_API_KEY |
 
 Bukan All clear. HEAD Clinqoo. docs audit ini / app `12c90d80`. `upsertOauthUser` tetap FIXED. Live MCP product 405. Bug terbuka lama: oauthRedirectUri github.io `/Clincoo./`; diag-gemini.js.
 
 ---
+
+### 2026-09-22 03:17 WIB — Grok (xAI) hourly audit
+- Scope: sejak 01:16 WIB (HEAD docs `50d6c273` / app `12c90d80`).
+- Commit baru app: tidak ada.
+- Live: app GET 200; auth 200; POST /mcp = 405; user-report-sync tanpa secret = 403; diag-gemini tanpa auth = 401.
+- Related: Clinqoo-Data `9e856203`; Clinqoo-Blog `b78277fd`; Komunitas tidak berubah.
+- Email: `[Clinqoo Hourly Audit] 2026-09-22 03:17 WIB` ke muzawwied@gmail.com.
 
 ### 2026-09-22 01:16 WIB — Grok (xAI) hourly audit
 - Scope: sejak 00:14 WIB (HEAD docs `a9242cbe` / app `12c90d80`).
@@ -79,13 +86,6 @@ Bukan All clear. HEAD Clinqoo. docs audit ini / app `12c90d80`. `upsertOauthUser
 - Live: app GET 200; auth 200; POST /mcp = 405; user-report-sync tanpa secret = 403; diag-gemini tanpa auth = 401.
 - Related: Clinqoo-Data `852e939a`; Clinqoo-Blog `d7f8e7ea`; Komunitas tidak berubah.
 - Email: `[Clinqoo Hourly Audit] 2026-09-22 01:16 WIB` ke muzawwied@gmail.com.
-
-### 2026-09-22 00:14 WIB — Grok (xAI) hourly audit
-- Scope: sejak 23:32 WIB (HEAD docs `92209ffa` / app `12c90d80`).
-- Commit baru app: tidak ada.
-- Live: app GET 200; auth 200; POST /mcp = 405; user-report-sync tanpa secret = 403; diag-gemini tanpa auth = 401.
-- Related: Clinqoo-Data `74750129`; Clinqoo-Blog `885d68de`; Komunitas tidak berubah.
-- Email: `[Clinqoo Hourly Audit] 2026-09-22 00:14 WIB` ke muzawwied@gmail.com.
 
 Log lebih lama dipotong agar wiki ringan.
 
@@ -95,13 +95,13 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-22 03:17 WIB — Grok (xAI) hourly audit
+- Status: **bukan All clear**. HEAD app `12c90d80`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
+- MCP 405 masih. Sync Clinqoo-Data `9e856203`. Blog `b78277fd`.
+
 ### 2026-09-22 01:16 WIB — Grok (xAI) hourly audit
 - Status: **bukan All clear**. HEAD app `12c90d80`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
 - MCP 405 masih. Sync Clinqoo-Data `852e939a`. Blog `d7f8e7ea`.
-
-### 2026-09-22 00:14 WIB — Grok (xAI) hourly audit
-- Status: **bukan All clear**. HEAD app `12c90d80`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
-- MCP 405 masih. Sync Clinqoo-Data `74750129`. Blog `885d68de`.
 
 Log lebih lama dipotong agar wiki ringan.
 
