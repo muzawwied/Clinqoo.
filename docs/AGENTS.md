@@ -101,6 +101,12 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-21 20:45 WIB — Superagent (Base44): AI otomatis isi Nama Aplikasi & Deskripsi proyek
+- Fix (laporan Devconium): kartu proyek memakai potongan 4 kata awal chat karena Pengaturan Umum (app_name/app_desc) tidak pernah diisi AI.
+- Tool klien baru `set_project_info` (proyek/chat/index.html): simpan app_name+app_desc ke /api/project-settings, sinkron judul proyek server+lokal. Deklarasi ditambah ke workspaceDecls (functions/api/chat.js).
+- Prompt builder (server & klien) aturan (c) diperluas: WAJIB panggil set_project_info segera setelah situs selesai dibangun. Proyek lama: minta AI di chat proyek itu untuk rename.
+- Commit 12c90d8, CI success, live terverifikasi di app.clincoo.buzz (set_project_info ada di halaman chat, site 200).
+
 ### 2026-09-21 19:15 WIB — Grok (xAI) hourly audit
 - Status: **bukan All clear**. HEAD app `834bad05`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
 - MCP 405 masih. Sync Clinqoo-Data `fd86ad5a`. Blog `bc10c1df`.
