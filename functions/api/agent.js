@@ -139,10 +139,10 @@ async function getEnvKey(env, name) {
 async function getGeminiKeys(env) {
   const keys = []; const seen = new Set();
   const add = v => { v = String(v || '').trim(); if (v && !seen.has(v)) { seen.add(v); keys.push(v); } };
-  add(env.GEMINI_API_KEY); add(env.GEMINI_API_KEY_2); add(env.GEMINI_API_KEY_3); add(env.GEMINI_API_KEY_4); add(env.GEMINI_API_KEY_5);
+  add(env.GEMINI_API_KEY); add(env.GEMINI_API_KEY_2); add(env.GEMINI_API_KEY_3); add(env.GEMINI_API_KEY_4); add(env.GEMINI_API_KEY_5); add(env.GEMINI_API_KEY_6);
   if (env.DB) {
     try {
-      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3','GEMINI_API_KEY_4','GEMINI_API_KEY_5')").all();
+      const rows = await env.DB.prepare("SELECT key, value FROM env_vars WHERE key IN ('GEMINI_API_KEY','GEMINI_API_KEY_2','GEMINI_API_KEY_3','GEMINI_API_KEY_4','GEMINI_API_KEY_5','GEMINI_API_KEY_6')").all();
       for (const r of rows.results || []) add(r.value);
     } catch {}
   }
