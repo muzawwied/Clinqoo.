@@ -2237,7 +2237,9 @@ function clinqooLaunchEditor(pid) {
     }
 
     function openFileInEditor(filename) {
-      window.location.href = '../workspace/editor/?id=' + encodeURIComponent(wsProjectId()) +
+      // Editor sederhana terpisah: satu halaman ringan khusus lihat/sunting kode
+      // (beda dari editor workspace penuh dan editor luar /editor/).
+      window.location.href = '../workspace/kode/?id=' + encodeURIComponent(wsProjectId()) +
         '&folder=' + encodeURIComponent(currentFolderPath) + '&file=' + encodeURIComponent(filename);
     }
     // Initialize application
