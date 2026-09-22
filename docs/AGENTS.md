@@ -95,6 +95,10 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-22 16:43 WIB — Superagent (Base44): UI halaman Plugin
+- `integrasi/index.html`: seluruh teks UI utama "Integrasi" diganti "Plugin" (title, heading, pencarian, empty state, pesan login).
+- Card/dekorasi pembungkus logo konektor dihapus; logo GitHub kini tampil langsung tanpa background, border, radius, atau shadow.
+- Menunggu commit/deploy dan verifikasi live browser.
 ### 2026-09-22 16:31 WIB — Superagent (Base44): FIX konektor GitHub chat
 - Temuan: badge Integrasi hanya mengecek keberadaan `clincoo_gh_token` di localStorage, bukan validitasnya; pertanyaan akses GitHub juga tidak membawa status konektor terverifikasi ke AI sehingga AI tetap bisa menjawab "tidak bisa" setelah reconnect.
 - Fix: `integrasi/index.html` memvalidasi token ke GitHub `/user` sebelum badge hijau; `proyek/chat/index.html` melakukan health-check `/user` untuk pesan akses/cek/tes GitHub dan menyuntikkan hasil terverifikasi tanpa token ke prompt; `functions/api/chat.js` membedakan pertanyaan kapabilitas abstrak dari permintaan verifikasi nyata.

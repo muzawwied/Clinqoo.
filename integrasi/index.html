@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Integrasi - Clincoo AI</title>
+    <title>Plugin - Clincoo AI</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%0A%20%20%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2216%22%20fill%3D%22%23ffffff%22%2F%3E%0A%20%20%3Cg%20fill%3D%22%23000000%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M10%2016C7%2010%209%207%2012%207C14%207%2015%2011%2013%2016Z%22%2F%3E%3Cpath%20d%3D%22M12%209C10.5%2011%2011%2013%2012%2014.5C13%2013%2013.5%2011%2012%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M22%2016C25%2010%2023%207%2020%207C18%207%2017%2011%2019%2016Z%22%2F%3E%3Cpath%20d%3D%22M20%209C21.5%2011%2021%2013%2020%2014.5C19%2013%2018.5%2011%2020%209Z%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.25%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M16%2027C24%2027%2028%2022.5%2028%2017C28%2012.5%2021%2011.5%2016%2011.5C11%2011.5%204%2012.5%204%2017C4%2022.5%208%2027%2016%2027Z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Ccircle%20cx%3D%2212.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Ccircle%20cx%3D%2219.5%22%20cy%3D%2217%22%20r%3D%221.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.6%22%2F%3E%3Cpolygon%20points%3D%2216%2C20%2015%2C18.5%2017%2C18.5%22%20fill%3D%22%23ffffff%22%20opacity%3D%220.5%22%2F%3E%0A%3C%2Fsvg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -181,13 +181,13 @@
         
         <div id="main-view">
             <div class="mb-6 md:mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 font-montserrat tracking-tight mb-2">Integrasi</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 font-montserrat tracking-tight mb-2">Plugin</h1>
                 <p class="text-base text-gray-500 max-w-2xl">Hubungkan Clincoo dengan alat dan platform favorit Anda untuk memperluas kemampuan AI Agent dalam alur kerja Anda.</p>
             </div>
 
             <div class="relative w-full mb-4">
                 <i class="ph ph-magnifying-glass absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-                <input type="text" id="search-integrations" placeholder="Cari integrasi..." class="w-full pl-12 pr-5 py-2.5 bg-white border border-gray rounded-full text-[14px] focus:outline-none  transition-all placeholder-gray-400 font-medium shadow-sm">
+                <input type="text" id="search-integrations" placeholder="Cari plugin..." class="w-full pl-12 pr-5 py-2.5 bg-white border border-gray rounded-full text-[14px] focus:outline-none  transition-all placeholder-gray-400 font-medium shadow-sm">
             </div>
 
             <div class="w-full border-t border-gray-100 mb-4"></div>
@@ -206,7 +206,7 @@
 
                 <div id="github-integration-card" class="integration-card group bg-white border border-gray-100 rounded-2xl p-4 sm:p-4.5 hover:border-gray-200 hover:shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-300 w-full cursor-pointer" data-title="github" data-category="developer" role="button" tabindex="0">
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
                             <svg viewBox="0 0 24 24" aria-hidden="true" class="w-5 h-5 text-[#181717]"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"></path></svg>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -223,8 +223,8 @@
 
                 <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center w-full">
                     <i class="ph ph-magnifying-glass text-5xl text-gray-300 mb-4"></i>
-                    <h3 class="text-xl font-bold text-gray-900 font-montserrat mb-2">Tidak ada integrasi</h3>
-                    <p class="text-[14.5px] text-gray-500 max-w-sm mx-auto">Kami tidak dapat menemukan integrasi yang cocok dengan pencarian Anda.</p>
+                    <h3 class="text-xl font-bold text-gray-900 font-montserrat mb-2">Tidak ada plugin</h3>
+                    <p class="text-[14.5px] text-gray-500 max-w-sm mx-auto">Kami tidak dapat menemukan plugin yang cocok dengan pencarian Anda.</p>
                 </div>
 
             </div>
@@ -627,7 +627,7 @@
             });
             const data = await res.json().catch(function () { return {}; });
             if (data && data.upgrade_needed) throw new Error(data.error || 'Fitur ini tersedia di paket Pro & Bisnis.');
-            if (res.status === 401) throw new Error('Silakan login Clincoo dulu, lalu buka halaman Integrasi lagi untuk menghubungkan GitHub.');
+            if (res.status === 401) throw new Error('Silakan login Clincoo dulu, lalu buka halaman Plugin lagi untuk menghubungkan GitHub.');
             if (!res.ok || !data.access_token) throw new Error(data.error || 'Gagal mendapatkan token GitHub (HTTP ' + res.status + ').');
             return data.access_token;
         }
