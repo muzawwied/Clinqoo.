@@ -568,10 +568,15 @@
 
         function startOAuth() {
             const scope = "repo user:email delete_repo";
-            // Redirect langsung ke halaman ini; ?code= dipertukarkan jadi token via
-            // backend Clincoo sendiri (/api/github-oauth) — bukan exchange function lama.
             const redirectUri = getRedirectUri();
-            const authUrl = "https://github.com/login/oauth/authorize?client_id=" + GITHUB_CLIENT_ID + "&scope=" + encodeURIComponent(scope) + "&redirect_uri=" + encodeURIComponent(redirectUri);
+            let targetRedirect = redirectUri;
+            // Di domain luar (GitHub Pages dll) tidak ada /api/github-oauth Clincoo —
+            // pakai redirect-dance: GitHub -> /api/github-oauth Clincoo -> balik ke sini
+            // dengan ?gh_token=... (pola yang sama dengan connector lama, client ID baru).
+            if (location.hostname.indexOf('clincoo') === -1) {
+                targetRedirect = "https://app.clincoo.buzz/api/github-oauth?redirect_uri=" + encodeURIComponent(redirectUri);
+            }
+            const authUrl = "https://github.com/login/oauth/authorize?client_id=" + GITHUB_CLIENT_ID + "&scope=" + encodeURIComponent(scope) + "&redirect_uri=" + encodeURIComponent(targetRedirect);
             window.location.href = authUrl;
         }
         async function exchangeCodeForToken(code) {
