@@ -921,15 +921,41 @@
             }
         }
 
+        async function validateSavedGitHubConnection() {
+            const token = localStorage.getItem('clincoo_gh_token');
+            const btn = document.getElementById('github-connect-btn');
+            if (!token) { if (btn) btn.classList.remove('hidden'); setGitHubBadge(false); return false; }
+            // Jangan tampilkan "Terhubung" hanya karena string token ada di localStorage.
+            // Badge hijau baru muncul setelah GitHub /user menerima token tersebut.
+            try {
+                const r = await fetch('https://api.github.com/user', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } });
+                if (!r.ok) {
+                    if (r.status === 401) {
+                        localStorage.removeItem('clincoo_gh_token');
+                        localStorage.removeItem('clincoo_gh_user');
+                    }
+                    if (btn) btn.classList.remove('hidden');
+                    setGitHubBadge(false);
+                    return false;
+                }
+                const user = await r.json();
+                localStorage.setItem('clincoo_gh_user', JSON.stringify(user));
+                if (btn) btn.classList.add('hidden');
+                setGitHubBadge(true);
+                return true;
+            } catch (e) {
+                // Gangguan jaringan bukan bukti token dicabut; jangan hapus token,
+                // tetapi juga jangan klaim "Terhubung" tanpa verifikasi.
+                if (btn) btn.classList.remove('hidden');
+                setGitHubBadge(false);
+                return false;
+            }
+        }
+
         window.addEventListener('load', () => {
             handleOAuthCallback();
             syncGitHubFromDB();
-            const token = localStorage.getItem('clincoo_gh_token');
-            if (token) {
-                const btn = document.getElementById('github-connect-btn');
-                if (btn) btn.classList.add('hidden');
-                setGitHubBadge(true);
-            }
+            validateSavedGitHubConnection();
 
             const permCheck = document.getElementById('gh-permission-check');
             const ghCta = document.getElementById('gh-connect-cta');

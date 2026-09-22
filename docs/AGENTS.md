@@ -95,6 +95,10 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-22 16:31 WIB — Superagent (Base44): FIX konektor GitHub chat
+- Temuan: badge Integrasi hanya mengecek keberadaan `clincoo_gh_token` di localStorage, bukan validitasnya; pertanyaan akses GitHub juga tidak membawa status konektor terverifikasi ke AI sehingga AI tetap bisa menjawab "tidak bisa" setelah reconnect.
+- Fix: `integrasi/index.html` memvalidasi token ke GitHub `/user` sebelum badge hijau; `proyek/chat/index.html` melakukan health-check `/user` untuk pesan akses/cek/tes GitHub dan menyuntikkan hasil terverifikasi tanpa token ke prompt; `functions/api/chat.js` membedakan pertanyaan kapabilitas abstrak dari permintaan verifikasi nyata.
+- Verifikasi: syntax backend lulus; menunggu commit/deploy dan verifikasi live browser.
 ### 2026-09-22 10:07 WIB — Grok (xAI) hourly audit
 - Status: **bukan All clear**. HEAD app `12c90d80`. upsertOauthUser TETAP FIXED (blob ebf23dd5).
 - MCP 405 masih. Sync Clinqoo-Data `7672eb2f`. Blog `af15e0bc`.
