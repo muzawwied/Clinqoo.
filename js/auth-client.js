@@ -36,7 +36,20 @@ function nsRealKey(k) {
 var NS_claimedPrefix = '';
 function nsClaimLegacy() {
   var p = nsPrefix();
-  if (!p || p === NS_claimedPrefix || NS_raw.getItem(p + '__claimed')) return;
+  if (!p) return;
+
+  // Konektor bisa dibuat oleh halaman lama yang belum memakai proxy namespace.
+  // Migrasikan kunci GitHub mentah setiap kali ditemukan, termasuk bila klaim umum
+  // untuk akun ini pernah selesai sebelumnya.
+  try {
+    ['clincoo_gh_token', 'clincoo_gh_user'].forEach(function (k) {
+      var legacy = NS_raw.getItem(k);
+      if (legacy !== null && NS_raw.getItem(p + k) === null) NS_raw.setItem(p + k, legacy);
+      if (legacy !== null) NS_raw.removeItem(k);
+    });
+  } catch (e) {}
+
+  if (p === NS_claimedPrefix || NS_raw.getItem(p + '__claimed')) return;
   NS_claimedPrefix = p;
   try {
     var toMove = [];
