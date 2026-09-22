@@ -82,6 +82,49 @@ async function testSecret(body) {
   }
 }
 
+// ---------- github_request: proxy GitHub API memakai token KONEKTOR user ----------
+// Token berasal dari halaman /integrasi/ (OAuth GitHub Clincoo), di-inject otomatis
+// oleh halaman chat dari localStorage — user tidak perlu menempel token manual.
+async function githubRequest(body) {
+  const secret = String(body.token || '').trim();
+  if (!secret) return jsonOut({ ok: false, error: 'GitHub belum terhubung — hubungkan dulu lewat halaman Integrasi.' }, 400);
+  const method = String(body.method || 'GET').toUpperCase();
+  if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return jsonOut({ ok: false, error: 'Method tidak didukung: ' + method }, 400);
+  let path = String(body.path || '').trim();
+  // AI kadang mengirim full URL — normalisasi ke path GitHub API
+  path = path.replace(/^https?:\/\/api\.github\.com/i, '');
+  if (/^(https?:)?\/\//i.test(path) || /\s/.test(path)) return jsonOut({ ok: false, error: 'Path harus berupa path API GitHub, contoh: /user/repos atau /repos/owner/repo/contents/path' }, 400);
+  if (!path.startsWith('/')) path = '/' + path;
+  const url = 'https://api.github.com' + path;
+  let payload;
+  if (body.body !== undefined && body.body !== null && method !== 'GET' && method !== 'DELETE') {
+    payload = typeof body.body === 'string' ? body.body : JSON.stringify(body.body);
+    if (payload.length > 300000) return jsonOut({ ok: false, error: 'Body terlalu besar (maks 300KB).' }, 413);
+  }
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: {
+        Authorization: 'Bearer ' + secret,
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'clincoo-ai',
+        'X-GitHub-Api-Version': '2022-11-28',
+        ...(payload ? { 'Content-Type': 'application/json' } : {})
+      },
+      body: payload
+    });
+    const text = await r.text();
+    let d = null;
+    try { d = JSON.parse(text); } catch (e) { d = { raw: text.slice(0, 2000) }; }
+    // ringkas supaya konteks AI tidak meledak
+    const slim = JSON.stringify(d);
+    if (slim && slim.length > 30000) d = { truncated: true, note: 'Respons dipangkas (maks 30KB). Gunakan path yang lebih spesifik.', preview: slim.slice(0, 28000) };
+    return jsonOut({ ok: true, http_status: r.status, result: d });
+  } catch (e) {
+    return jsonOut({ ok: false, error: 'Gagal memanggil GitHub API: ' + (e && e.message ? e.message : String(e)) }, 502);
+  }
+}
+
 // ---------- cloudflare_request: proxy aman ke Cloudflare API dengan token user ----------
 async function cloudflareRequest(body) {
   const secret = String(body.secret || '').trim();
@@ -124,7 +167,8 @@ export async function onRequestPost({ request, env }) {
     const action = String(body.action || '');
     if (action === 'test_secret') return testSecret(body);
     if (action === 'cloudflare_request') return cloudflareRequest(body);
-    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret atau cloudflare_request.' }, 400);
+    if (action === 'github_request') return githubRequest(body);
+    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret, cloudflare_request, atau github_request.' }, 400);
   } catch (e) {
     return jsonOut({ ok: false, error: 'Gagal memproses: ' + (e && e.message ? e.message : String(e)) }, 500);
   }
