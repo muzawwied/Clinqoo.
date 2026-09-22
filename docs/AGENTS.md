@@ -95,6 +95,9 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-22 16:49 WIB — Superagent (Base44): Perbesar logo Plugin
+- `integrasi/index.html`: logo GitHub pada daftar Plugin diperbesar dari 20px (`w-5 h-5`) menjadi 32px (`w-8 h-8`), tetap tanpa card pembungkus.
+- Menunggu commit/deploy dan verifikasi live browser.
 ### 2026-09-22 16:43 WIB — Superagent (Base44): UI halaman Plugin
 - `integrasi/index.html`: seluruh teks UI utama "Integrasi" diganti "Plugin" (title, heading, pencarian, empty state, pesan login).
 - Card/dekorasi pembungkus logo konektor dihapus; logo GitHub kini tampil langsung tanpa background, border, radius, atau shadow.
