@@ -44,6 +44,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script src="https://unpkg.com/lucide@1.41.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -936,6 +939,9 @@
                 }
             });
         }
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        }
         const uploadFileBtn = document.getElementById('upload-file-btn');
         const realFileInput = document.getElementById('real-file-input');
         const filePreviewContainer = document.getElementById('file-preview-container');
@@ -950,6 +956,41 @@
                 }
                 realFileInput.click();
             });
+            // Parser file "berat" (diparse sekarang di halaman utama, hasil teksnya
+            // yang distage — sama persis dengan yang dipakai halaman chat):
+            // - pdf.js untuk PDF (maks 10 halaman)
+            // - SheetJS untuk Excel/CSV (xlsx/xls/xlsm/ods): sheet -> baris teks
+            // - mammoth untuk DOCX -> teks bersih
+            window.__loadPdf = async function (f) {
+                try {
+                    const buf = await f.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(buf).promise;
+                    let t = '';
+                    for (let p = 1; p <= Math.min(pdf.numPages, 10); p++) {
+                        const c = await pdf.getPage(p).getTextContent();
+                        t += c.items.map(it => it.str).join(' ') + '\n';
+                    }
+                    return t;
+                } catch (e) { return null; }
+            };
+            window.__loadSpreadsheet = async function (f) {
+                try {
+                    const buf = await f.arrayBuffer();
+                    const wb = XLSX.read(buf, { type: 'array' });
+                    let t = '';
+                    wb.SheetNames.forEach(function (sn) {
+                        t += '[Sheet: ' + sn + ']\n' + XLSX.utils.sheet_to_csv(wb.Sheets[sn], { FS: ' | ' }) + '\n\n';
+                    });
+                    return (t || '(sheet kosong)').substring(0, 50000);
+                } catch (e) { return null; }
+            };
+            window.__loadDocx = async function (f) {
+                try {
+                    const buf = await f.arrayBuffer();
+                    const r = await window.mammoth.extractRawText({ arrayBuffer: buf });
+                    return (r.value || '').substring(0, 50000);
+                } catch (e) { return null; }
+            };
             // Upload dari halaman utama: ISI file dibaca sekarang (bukan cuma nama),
             // distage di localStorage lalu dibawa ke halaman chat saat prompt dikirim.
             window.__stagedAtt = [];
@@ -1039,7 +1080,8 @@
                         let iconStr = 'file';
                         if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) iconStr = 'image';
                         else if (['html', 'css', 'js', 'json', 'xml', 'jsx', 'tsx', 'php'].includes(ext)) iconStr = 'file-code-2';
-                        else if (['pdf', 'txt', 'doc', 'docx', 'md'].includes(ext)) iconStr = 'file-text';
+                        else if (['xlsx', 'xls', 'xlsm', 'ods'].includes(ext)) iconStr = 'file-spreadsheet';
+                        else if (['pdf', 'txt', 'doc', 'docx', 'md', 'csv'].includes(ext)) iconStr = 'file-text';
                         else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) iconStr = 'file-archive';
                         const attId = 'att_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
                         let data = null, text = null;
@@ -1047,7 +1089,13 @@
                         try {
                             if (isImage && file.size <= 2 * 1024 * 1024) {
                                 data = await __readFileAsDataURL(file);
-                            } else if (!isImage && !['zip', 'rar', '7z', 'tar', 'gz', 'pdf', 'doc', 'docx'].includes(ext) && file.size <= 150 * 1024) {
+                            } else if (!isImage && ext === 'pdf' && file.size <= 10 * 1024 * 1024) {
+                                text = await __loadPdf(file);
+                            } else if (!isImage && ['xlsx', 'xls', 'xlsm', 'csv', 'ods'].includes(ext) && file.size <= 10 * 1024 * 1024) {
+                                text = await __loadSpreadsheet(file);
+                            } else if (!isImage && ext === 'docx' && file.size <= 10 * 1024 * 1024) {
+                                text = await __loadDocx(file);
+                            } else if (!isImage && !['zip', 'rar', '7z', 'tar', 'gz', 'pdf', 'doc', 'docx', 'xlsx', 'xls', 'xlsm', 'csv', 'ods'].includes(ext) && file.size <= 150 * 1024) {
                                 text = await __readFileAsText(file);
                             }
                         } catch (err) {}
