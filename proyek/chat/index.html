@@ -33,6 +33,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: ["class", ".dark-mode"] };</script>
     <script defer src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -1248,6 +1250,34 @@
             }
         }
 
+        // SPREADSHEET (xlsx/xls/xlsm/csv/ods): format biner — WAJIB diparse, readAsText
+        // biasa hanya menghasilkan sampah karakter. SheetJS ubah tiap sheet jadi baris
+        // "nilai | nilai | nilai" yang bisa dibaca AI.
+        async function loadSpreadsheet(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const wb = XLSX.read(arrayBuffer, { type: 'array' });
+                let text = '';
+                wb.SheetNames.forEach(function (sheetName) {
+                    const rows = XLSX.utils.sheet_to_csv(wb.Sheets[sheetName], { FS: ' | ' });
+                    text += '[Sheet: ' + sheetName + ']\n' + rows + '\n\n';
+                });
+                return (text || '(sheet kosong)').substring(0, 50000);
+            } catch (err) {
+                return "Gagal membaca file spreadsheet.";
+            }
+        }
+        // DOCX: format ZIP berisi XML — diparse via mammoth jadi teks bersih.
+        async function loadDocx(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                return (result.value || '').substring(0, 50000);
+            } catch (err) {
+                return "Gagal membaca file dokumen.";
+            }
+        }
+
         function formatSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -1270,8 +1300,12 @@
                 if (type === 'image') {
                     data = await readAsDataURL(file);
                 } else {
-                    if (file.type === 'application/pdf') {
+                    if (file.type === 'application/pdf' || extension === 'pdf') {
                         text = await loadPDF(file);
+                    } else if (['xlsx', 'xls', 'xlsm', 'csv', 'ods'].includes(extension)) {
+                        text = await loadSpreadsheet(file);
+                    } else if (extension === 'docx') {
+                        text = await loadDocx(file);
                     } else {
                         text = await readAsText(file);
                     }
@@ -1305,6 +1339,12 @@
                 'zip': 'ph-file-archive text-gray-500',
                 'txt': 'ph-file-text text-gray-500',
                 'csv': 'ph-file-csv text-gray-500',
+                'xlsx': 'ph-file-xls text-gray-500',
+                'xls': 'ph-file-xls text-gray-500',
+                'xlsm': 'ph-file-xls text-gray-500',
+                'ods': 'ph-file-xls text-gray-500',
+                'docx': 'ph-file-doc text-gray-500',
+                'doc': 'ph-file-doc text-gray-500',
                 'png': 'ph-image text-gray-500',
                 'jpg': 'ph-image text-gray-500',
                 'jpeg': 'ph-image text-gray-500'
