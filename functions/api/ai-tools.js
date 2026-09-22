@@ -119,7 +119,19 @@ async function githubRequest(body) {
     // ringkas supaya konteks AI tidak meledak
     const slim = JSON.stringify(d);
     if (slim && slim.length > 30000) d = { truncated: true, note: 'Respons dipangkas (maks 30KB). Gunakan path yang lebih spesifik.', preview: slim.slice(0, 28000) };
-    return jsonOut({ ok: true, http_status: r.status, result: d });
+    // PENTING: proxy sukses (fetch jalan) BUKAN berarti GitHub menerima requestnya —
+    // BUG LAMA: selalu balas ok:true walau GitHub balas 401/403/404, AI jadi mengarang
+    // penyebab ("token belum tersinkron") karena tidak tahu request-nya sebenarnya ditolak.
+    // Sekarang: r.status di luar 200-299 -> success:false + error jelas per kode status.
+    if (!r.ok) {
+      let reason = (d && (d.message || d.error)) || ('GitHub API mengembalikan status ' + r.status);
+      if (r.status === 401) reason = 'Token GitHub tidak valid atau sudah dicabut/expired (Bad credentials). User perlu putuskan lalu hubungkan ulang GitHub di halaman Integrasi.';
+      else if (r.status === 403) reason = (d && d.message) ? d.message + ' (kemungkinan rate limit GitHub API atau scope token kurang — token dibuat dengan scope repo, user:email, delete_repo).' : 'Ditolak GitHub (403) — kemungkinan rate limit atau scope token tidak cukup untuk operasi ini.';
+      else if (r.status === 404) reason = (d && d.message) || 'Resource tidak ditemukan (404) — cek path/nama repo/owner-nya benar dan token punya akses ke repo tersebut.';
+      else if (r.status === 422) reason = (d && d.message) || 'Request ditolak GitHub (422) — cek parameter/body yang dikirim.';
+      return jsonOut({ ok: true, http_status: r.status, success: false, error: reason, result: d });
+    }
+    return jsonOut({ ok: true, http_status: r.status, success: true, result: d });
   } catch (e) {
     return jsonOut({ ok: false, error: 'Gagal memanggil GitHub API: ' + (e && e.message ? e.message : String(e)) }, 502);
   }
