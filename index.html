@@ -451,13 +451,18 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                     </button>
-                    <div id="upload-menu" class="absolute bottom-full left-0 mb-2 w-56 bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-xl p-2 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50">
-                        <button id="upload-file-btn" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-xl transition-colors text-sm font-medium text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black/20 dark:focus-visible:ring-white/20">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                    <div id="upload-menu" class="absolute bottom-full left-0 mb-2 w-56 bg-white text-gray-800 border border-gray-100 rounded-xl shadow-xl p-1.5 flex flex-col gap-1 opacity-0 invisible translate-y-2 pointer-events-none transition-all duration-300 z-50">
+                        <button id="upload-file-btn" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-lg transition-colors text-sm font-medium text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black/20 dark:focus-visible:ring-white/20">
+                            <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                             Upload file
+                        </button>
+                        <button id="upload-image-btn" class="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-lg transition-colors text-sm font-medium text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black/20 dark:focus-visible:ring-white/20">
+                            <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Upload gambar
                         </button>
                     </div>
                     <input type="file" id="real-file-input" class="hidden" multiple>
+                    <input type="file" id="real-image-input" class="hidden" accept="image/*" multiple>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
                 <button id="submit-prompt-btn" class="w-10 h-10 bg-accent text-white rounded-full hover:bg-accent-hover transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20">
@@ -983,6 +988,20 @@
                 const c = document.getElementById('file-preview-container');
                 if (c && c.children.length === 0) c.classList.add('hidden');
             };
+            const realImageInput = document.getElementById('real-image-input');
+            if (realImageInput) {
+                realImageInput.addEventListener('change', (e) => {
+                    try {
+                        if (realImageInput.files && realImageInput.files.length) {
+                            const dt = new DataTransfer();
+                            Array.from(realImageInput.files).forEach(f => dt.items.add(f));
+                            realFileInput.files = dt.files;
+                            realFileInput.dispatchEvent(new Event('change'));
+                        }
+                    } catch (err) {}
+                    realImageInput.value = '';
+                });
+            }
             realFileInput.addEventListener('change', async (e) => {
                 const maxFiles = 10;
                 const maxStage = 3.5 * 1024 * 1024; // batas total isi lampiran (localStorage)
