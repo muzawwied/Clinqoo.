@@ -942,13 +942,13 @@
         if (uploadFileBtn && realFileInput) {
             uploadFileBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                realFileInput.click();
                 if (addBtn && uploadMenu) {
                     addBtn.setAttribute('aria-expanded', 'false');
                     if (addIcon) addIcon.style.transform = 'rotate(0deg)';
                     uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
                     uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
                 }
+                realFileInput.click();
             });
             // Upload dari halaman utama: ISI file dibaca sekarang (bukan cuma nama),
             // distage di localStorage lalu dibawa ke halaman chat saat prompt dikirim.
@@ -988,19 +988,26 @@
                 const c = document.getElementById('file-preview-container');
                 if (c && c.children.length === 0) c.classList.add('hidden');
             };
+            const forceCloseUploadMenu = () => {
+                if (addBtn && uploadMenu) {
+                    addBtn.setAttribute('aria-expanded', 'false');
+                    if (addIcon) addIcon.style.transform = 'rotate(0deg)';
+                    uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
+                    uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
+                }
+            };
             const realImageInput = document.getElementById('real-image-input');
             const uploadImageBtn = document.getElementById('upload-image-btn');
             if (uploadImageBtn && realImageInput) {
                 uploadImageBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    realImageInput.click();
-                    // tutup pop-up upload setelah pilih (sama seperti "Upload file")
                     if (addBtn && uploadMenu) {
                         addBtn.setAttribute('aria-expanded', 'false');
                         if (addIcon) addIcon.style.transform = 'rotate(0deg)';
                         uploadMenu.classList.remove('opacity-100', 'visible', 'translate-y-0', 'pointer-events-auto');
                         uploadMenu.classList.add('opacity-0', 'invisible', 'translate-y-2', 'pointer-events-none');
                     }
+                    realImageInput.click();
                 });
             }
             if (realImageInput) {
@@ -1062,6 +1069,7 @@
                         filePreviewContainer.appendChild(chip);
                     }
                     try { lucide.createIcons(); } catch (e) {}
+                    try { forceCloseUploadMenu(); } catch (e2) {}
                 }
                 realFileInput.value = '';
             });
