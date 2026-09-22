@@ -273,11 +273,11 @@
         .md-content tbody td:first-child { font-weight: 600; background-color: #f9fafb; }
 
         .header-glass {
-            background: linear-gradient(to bottom, rgba(247, 247, 249, 0.95) 0%, rgba(247, 247, 249, 0.7) 65%, rgba(247, 247, 249, 0) 100%);
-            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-            backdrop-filter: blur(9px);
-            -webkit-backdrop-filter: blur(9px);
+            background: linear-gradient(to bottom, rgba(247, 247, 249, 0.92) 0%, rgba(247, 247, 249, 0.55) 70%, rgba(247, 247, 249, 0) 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
         body.dark-mode .header-glass {
             background: linear-gradient(to bottom, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 65%, rgba(0, 0, 0, 0) 100%) !important;
@@ -361,7 +361,7 @@
         body.dark-mode .checkpoint-chip { background: #1a1a1e; border-color: #2c2c33; color: #e5e7eb; }
         /* Kartu POLLING: stepper berurutan — 1 pertanyaan terbuka, lainnya terkunci,
            garis penghubung antar nomor mengisi saat terjawab. Netral, tanpa ungu. */
-        .poll-card { margin-top: 0.5rem; border: 1px solid #e5e7eb; border-radius: 14px; background: #f9fafb; padding: 0.75rem 0.875rem 0.625rem; }
+        .poll-card { margin-top: 0.375rem; border: none; background: transparent; padding: 0.125rem 0 0; }
         .poll-card-head { font-size: 12.5px; font-weight: 600; color: #4b5563; margin-bottom: 0.5rem; }
         .poll-steps { display: flex; flex-direction: column; }
         .poll-step { position: relative; display: flex; gap: 0.625rem; padding-bottom: 0.875rem; }
@@ -381,9 +381,16 @@
         .poll-opt:hover { background: #f3f4f6; border-color: #d1d5db; }
         .poll-opt-letter { flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; color: #4b5563; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
         .poll-opt.other { border-style: dashed; color: #6b7280; }
+        .poll-manual { margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
+        .poll-manual input { flex: 1; min-width: 0; border: 1px solid #d1d5db; border-radius: 999px; background: #ffffff; color: #1f2937; font-size: 13px; padding: 0.5rem 0.875rem; outline: none; transition: border-color 0.15s ease; font-family: inherit; }
+        .poll-manual input:focus { border-color: #111827; }
+        .poll-manual button { flex-shrink: 0; border: none; border-radius: 999px; background: #111827; color: #ffffff; font-size: 12px; font-weight: 600; padding: 0.5rem 0.9rem; cursor: pointer; }
+        body.dark-mode .poll-manual input { background: #18181b; border-color: #3f3f46; color: #e5e7eb; }
+        body.dark-mode .poll-manual input:focus { border-color: #e5e7eb; }
+        body.dark-mode .poll-manual button { background: #e5e7eb; color: #111827; }
         .poll-ans { margin-top: 0.25rem; font-size: 12.5px; color: #15803d; }
         .poll-card-hint { font-size: 11.5px; color: #9ca3af; margin-top: 0.5rem; }
-        body.dark-mode .poll-card { background: #111113; border-color: #2a2a30; }
+        body.dark-mode .poll-card { background: transparent; border-color: transparent; }
         body.dark-mode .poll-card-head { color: #9ca3af; }
         body.dark-mode .poll-rail { background: #2a2a30; }
         body.dark-mode .poll-rail.done { background: #e5e7eb; }
@@ -527,15 +534,15 @@
     
     <div id="session-options-popup" class="hidden fixed bg-white rounded-xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] z-[100] w-40 p-1.5"></div>
 
-    <header class="fixed top-0 left-0 right-0 z-30 p-3 pointer-events-none flex justify-between items-start header-glass h-24">
-        <button id="sidebar-toggle" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-10 h-10 pointer-events-auto" aria-label="Buka Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+    <header class="fixed top-0 left-0 right-0 z-30 px-3 py-2.5 pointer-events-none flex justify-between items-center header-glass h-14">
+        <button id="sidebar-toggle" class="flex-shrink-0 flex items-center justify-center text-[#222222] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:text-black hover:bg-gray-50 transition-all rounded-full w-9 h-9 pointer-events-auto" aria-label="Buka Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 10h14M5 15h8" />
             </svg>
         </button>
     </header>
 
-    <main id="chat-container" class="flex-1 overflow-y-auto px-4 pt-20 pb-32 space-y-6 w-full relative z-10">
+    <main id="chat-container" class="flex-1 overflow-y-auto px-4 pt-16 pb-32 space-y-6 w-full relative z-10">
     </main>
 
     <footer class="fixed bottom-0 left-0 right-0 w-full bg-transparent px-4 py-4 z-20 pointer-events-none flex flex-col justify-end">
@@ -666,10 +673,12 @@
                 // FIX: toolCalls ikut disimpan (dulu HILANG saat pindah halaman — makanya
                 // AI "mengulang progres dari awal" saat user kembali: progres menulis file
                 // dll tidak terbaca, pesan dianggap kosong lalu digenerate ulang).
-                const log = messages.filter(m => m && !m.isHidden && m.text).map(m => ({
+                const log = messages.filter(m => m && !m.isHidden && (m.text || (m.pollQuestions && m.pollQuestions.length) || (m.toolCalls && m.toolCalls.length) || (m.attachments && m.attachments.length))).map(m => ({
                     id: m.id, role: m.role, text: m.text, time: m.time || null,
                     isProcessing: !!m.isProcessing,
                     midPhase: !!m.midPhase,
+                    completed: !!m.completed,
+                    stoppedByUser: !!m.stoppedByUser,
                     pollQuestions: (m.pollQuestions || []).slice(0, 6),
                     pollState: m.pollState || null,
                     toolCalls: (m.toolCalls || []).map(t => ({
@@ -1442,7 +1451,7 @@
                 delete_item: 'ph-trash', search_items: 'ph-magnifying-glass',
                 run_command: 'ph-terminal-window', read_web_page: 'ph-globe', web_search: 'ph-magnifying-glass',
                 search_clinqoo_kb: 'ph-brain', rename_project: 'ph-pencil-simple', set_project_info: 'ph-note-pencil',
-                deploy_project: 'ph-rocket-launch', add_env_var: 'ph-key', list_env_vars: 'ph-key',
+                deploy_project: 'ph-rocket-launch', add_env_var: 'ph-key', list_env_vars: 'ph-key', test_secret: 'ph-shield-check', cloudflare_request: 'ph-cloud',
                 create_backend_function: 'ph-function', call_backend_function: 'ph-function',
                 delete_backend_function: 'ph-function', list_backend_functions: 'ph-function',
                 take_screenshot: 'ph-camera', review_code: 'ph-magnifying-glass'
@@ -1467,6 +1476,8 @@
                 case 'rename_project': return 'Renaming project to: ' + (a.name || a.new_name || '');
                 case 'set_project_info': return 'Naming app: ' + (a.app_name || '');
                 case 'deploy_project': return 'Publishing project…';
+                case 'test_secret': return 'Testing secret status…';
+                case 'cloudflare_request': return 'Calling Cloudflare API…';
                 case 'add_env_var': return 'Adding environment variable: ' + (a.key || a.name || '');
                 case 'list_env_vars': return 'Listing environment variables…';
                 case 'create_backend_function': return 'Creating backend function: ' + (a.name || '');
@@ -1555,12 +1566,19 @@
                             <span>${escText(o)}</span>
                         </button>`;
                     }).join('');
+                    const manual = (st.manualOpen === i)
+                        ? `<div class="poll-manual">
+                            <input type="text" id="poll-manual-input" placeholder="Ketik jawabanmu di sini…" onkeydown="if(event.key==='Enter'){event.preventDefault();pollSubmitManual('${msg.id}', ${i});}" maxlength="500">
+                            <button type="button" onclick="pollSubmitManual('${msg.id}', ${i})">Kirim</button>
+                        </div>`
+                        : '';
                     bodyHtml = `<div class="poll-opts">
                         ${opts}
                         <button type="button" class="poll-opt other" onclick="pollPickOther('${msg.id}', ${i})">
                             <span class="poll-opt-letter">+</span>
-                            <span>Lainnya… (ketik jawaban sendiri di chat)</span>
+                            <span>Lainnya… (jawab dengan kata-kata sendiri)</span>
                         </button>
+                        ${manual}
                     </div>`;
                 }
                 return `
@@ -1588,6 +1606,7 @@
             const qs = pollStepsOf(m);
             if (!qs[qIdx] || !qs[qIdx].options[optIdx]) return;
             const st = pollStateOf(m);
+            if (st.sending || st.done || st.answers[qIdx] !== undefined) return;
             st.answers[qIdx] = qs[qIdx].options[optIdx];
             st.current = qIdx + 1;
             if (st.current >= qs.length) pollAutoSend(m);
@@ -1598,12 +1617,27 @@
             const m = messages.find(x => x && x.id === msgId);
             const qs = m && pollStepsOf(m);
             if (!m || !qs[qIdx]) return;
-            pendingPollAnswer = { msgId: msgId, qIdx: qIdx };
-            chatInput.value = '';
-            adjustInputHeight();
-            showPollAnswerChip(qs[qIdx].q);
-            chatInput.focus();
-            try { scrollToBottom(true); } catch (e) {}
+            const st = pollStateOf(m);
+            st.manualOpen = qIdx;
+            renderMessages();
+            try {
+                const inp = document.getElementById('poll-manual-input');
+                if (inp) { inp.focus(); inp.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+            } catch (e) {}
+        };
+        window.pollSubmitManual = function (msgId, qIdx) {
+            const inp = document.getElementById('poll-manual-input');
+            const val = inp ? inp.value.trim() : '';
+            if (!val) { if (inp) inp.focus(); return; }
+            const m = messages.find(x => x && x.id === msgId);
+            if (!m) return;
+            const qs = pollStepsOf(m);
+            const st = pollStateOf(m);
+            st.manualOpen = null;
+            st.answers[qIdx] = val;
+            st.current = Math.max(st.current, qIdx + 1);
+            if (st.current >= qs.length) pollAutoSend(m);
+            else { renderMessages(); try { scrollToBottom(false); } catch (e) {} }
         };
         window.pollCancelOther = function () {
             pendingPollAnswer = null;
@@ -1631,6 +1665,8 @@
         function pollAutoSend(m) {
             const qs = pollStepsOf(m);
             const st = pollStateOf(m);
+            if (st.sending || st.done) return;
+            st.sending = true;
             st.done = true;
             pendingPollAnswer = null;
             hidePollAnswerChip();
@@ -1731,7 +1767,7 @@
 
         // Tool pencarian/pembacaan info murni — tidak ada aksi/perubahan nyata,
         // jadi tidak perlu kartu "Menjalankan Tugas". Status shimmer teks saja sudah cukup.
-        const INFO_ONLY_TOOLS = new Set(['web_search', 'read_web_page', 'search_clinqoo_kb']);
+        const INFO_ONLY_TOOLS = new Set(['web_search', 'read_web_page', 'search_clinqoo_kb', 'test_secret']);
         function isInfoOnlyToolCalls(toolCalls) {
             if (!toolCalls || toolCalls.length === 0) return true;
             return toolCalls.every(tc => INFO_ONLY_TOOLS.has(tc.name));
@@ -1867,30 +1903,22 @@
                                 </div>
                                 ${renderPollCard(msg)}
                                 ${(msg.sources && msg.sources.length > 0) ? `
-                                    <div class="mt-2 mb-1 pointer-events-auto w-full fade-in">
-                                        <details class="group border border-gray-200 rounded-xl overflow-hidden w-full max-w-sm bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                                            <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer select-none text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors bg-gray-50/50">
-                                                <div class="flex items-center gap-2.5">
-                                                    <i class="ph ph-globe text-gray-500 text-lg"></i>
-                                                    <span>${msg.sources.length} Sumber</span>
-                                                </div>
-                                                <i class="ph ph-caret-down text-gray-400 group-open:rotate-180 transition-transform"></i>
-                                            </summary>
-                                            <div class="px-3 py-3 border-t border-gray-100 bg-white flex flex-wrap gap-2.5">
-                                                ${msg.sources.map(s => `
-                                                    <a href="${escUrl(s.url)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 py-1.5 px-2.5 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors text-decoration-none shadow-sm">
-                                                        <img src="${escUrl(s.favicon)}" class="w-4 h-4 rounded-sm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCI+PC9jaXJjbGU+PGxpbmUgeDE9IjIiIHkxPSIxMiIgeDI9IjIyIiB5Mj0iMTIiPjwvbGluZT48cGF0aCBkPSJNMTIgMmExNS4zIDE1LjMgMCAwIDEgNCAxMGMtLjExIDUuNTQtMS45NCAxMC00IDEwLTIuMDYtLjA2LTQuODktNC40Ni01LTEwQzcuMSAxMS4zNiA4LjA2IDYuNTQgMTIgMnoiPjwvcGF0aD48L3N2Zz4='">
-                                                        <span class="text-[12px] text-gray-700 truncate max-w-[130px] font-medium">${escText(s.domain)}</span>
-                                                    </a>
-                                                `).join('')}
-                                            </div>
-                                        </details>
+                                    <div class="mt-1.5 mb-0.5 pointer-events-auto fade-in">
+                                        <div class="flex items-center flex-wrap gap-x-1.5 gap-y-1 text-[11.5px] text-gray-400">
+                                            <i class="ph ph-globe text-[13px]"></i>
+                                            ${msg.sources.map(s => `<a href="${escUrl(s.url)}" target="_blank" rel="noopener noreferrer" class="underline decoration-gray-300 hover:text-gray-600 transition-colors" title="${escText(s.url)}">${escText(s.domain)}</a>`).join('<span class="text-gray-300">·</span>')}
+                                        </div>
                                     </div>
                                 ` : ''}
                                 ${(msg.checkpoint && isLastAi && !msg.isProcessing && !msg.isTyping) ? `
                                     <button type="button" class="checkpoint-chip fade-in" onclick="handlePromptClick('lanjut')" title="Lanjutkan tugas yang tertunda">
                                         <i class="ph-bold ph-arrow-clockwise"></i> Lanjutkan
                                     </button>
+                                ` : ''}
+                                ${(msg.stoppedByUser && !msg.isProcessing && !msg.isTyping) ? `
+                                    <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-gray-400 fade-in select-none">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> Pesan dihentikan
+                                    </div>
                                 ` : ''}
                                 <div class="flex items-center gap-3 mt-1 pointer-events-auto" id="action-bar-${msg.id}" style="${(msg.isProcessing || msg.isTyping || msg.midPhase) ? 'display: none;' : ''}">
                                     ${msg.isImageResponse ? 
@@ -2160,6 +2188,7 @@
             if (currentAiMessageId) {
                 const textEl = document.getElementById(`msg-text-${currentAiMessageId}`);
                 const finishedMsg = messages.find(m => m.id === currentAiMessageId);
+                if (finishedMsg) { finishedMsg.completed = true; try { saveChatLog(); } catch (e) {} }
                 if (finishedMsg && finishedMsg.text) {
                     try {
                         const urlParams = new URLSearchParams(window.location.search);
@@ -2640,6 +2669,8 @@
                 case 'run_command': return 'Running command in sandbox…';
                 case 'search_clinqoo_kb': return 'Searching Clincoo knowledge base' + (q ? ': ' + q : '…');
                 case 'deploy_project': return 'Publishing project to the internet…';
+                case 'test_secret': return 'Testing secret/API status…';
+                case 'cloudflare_request': return 'Accessing Cloudflare API…';
                 default: return 'Processing: ' + tc.name + '…';
             }
         }
@@ -2711,6 +2742,8 @@
                     case 'deploy_project': return await toolDeployProject(args);
                     case 'add_env_var': return await toolAddEnvVar(args);
                     case 'list_env_vars': return await toolListEnvVars(args);
+                    case 'test_secret': return await toolTestSecret(args);
+                    case 'cloudflare_request': return await toolCloudflareRequest(args);
                     case 'review_code': return await toolReviewCode(args);
                     default: return { success: false, error: 'Tool tidak dikenal: ' + name };
                 }
@@ -2826,8 +2859,9 @@
             const res = await fetch(TOOL_API_BASE + '/api/deploy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_id: pid }) });
             const d = await res.json();
             if (!res.ok || d.error) return { success: false, error: d.error || 'Deploy gagal.' };
-            const url = (d.deployment && d.deployment.url) || d.pages_url || '';
-            return { success: true, url: url, pages_project: d.pages_project || '', file_count: d.fileCount || 0, message: 'Situs berhasil di-deploy' + (url ? ' ke ' + url : '') + '.' };
+            // URL utama: subdomain clinqoo.biz.id (public_url) — pages.dev hanya cadangan.
+            const url = d.public_url || (d.public_domain ? ('https://' + d.public_domain) : '') || (d.deployment && d.deployment.url) || d.pages_url || '';
+            return { success: true, url: url, pages_url: d.pages_url || '', public_domain: d.public_domain || '', pages_project: d.pages_project || '', file_count: d.fileCount || 0, message: 'Situs berhasil di-deploy' + (url ? ' ke ' + url : '') + (d.public_domain ? ' (subdomain clinqoo.biz.id aktif)' : '') + '.' };
         }
 
         async function toolAddEnvVar(args) {
@@ -2851,6 +2885,32 @@
             if (!res.ok) return { success: false, error: d.error || 'Gagal mengambil environment variable.' };
             const vars = (d.env_vars || []).map(function(v) { return { key: v.key, value: v.is_secret ? '(tersembunyi)' : v.value }; });
             return { success: true, env_vars: vars };
+        }
+        async function toolTestSecret(args) {
+            const provider = args && args.provider ? String(args.provider).trim().toLowerCase() : '';
+            const secret = args && args.secret ? String(args.secret) : '';
+            if (!provider || !secret) return { success: false, error: 'Parameter provider dan secret wajib.' };
+            try {
+                const res = await fetch(TOOL_API_BASE + '/api/ai-tools', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'test_secret', provider: provider, secret: secret }) });
+                const d = await res.json().catch(function () { return {}; });
+                if (!res.ok || d.error) return { success: false, error: d.error || 'Gagal menguji secret (HTTP ' + res.status + ').' };
+                return { success: true, provider: d.provider, valid: !!d.valid, status: d.status || '', http_status: d.http_status || null, masked: d.masked || '', details: { account_email: d.account_email || null, account_id: d.account_id || null, expires_on: d.expires_on || null, user: d.user || null, label: d.label || null, usage: d.usage || null, limit: d.limit || null, domains_count: d.domains_count || null, errors: d.errors || [] } };
+            } catch (e) {
+                return { success: false, error: 'Gagal menguji secret: ' + (e && e.message ? e.message : String(e)) };
+            }
+        }
+        async function toolCloudflareRequest(args) {
+            const secret = args && args.secret ? String(args.secret) : '';
+            const path = args && args.path ? String(args.path) : '';
+            if (!secret || !path) return { success: false, error: 'Parameter secret dan path wajib.' };
+            try {
+                const res = await fetch(TOOL_API_BASE + '/api/ai-tools', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cloudflare_request', secret: secret, method: args.method || 'GET', path: path, body: args.body || null }) });
+                const d = await res.json().catch(function () { return {}; });
+                if (!res.ok || d.error) return { success: false, error: d.error || 'Gagal memanggil Cloudflare API (HTTP ' + res.status + ').' };
+                return { success: !!d.success, http_status: d.http_status || null, result: d.result, errors: d.errors || [] };
+            } catch (e) {
+                return { success: false, error: 'Gagal memanggil Cloudflare API: ' + (e && e.message ? e.message : String(e)) };
+            }
         }
         // ===== END WORKSPACE CRUD =====
         const PREFERRED_MODELS = [
@@ -3101,7 +3161,7 @@
                 const formattedDate = now.toLocaleDateString('id-ID', options);
                 const timeContext = `\n\n[INFO SISTEM (REAL-TIME)]: Saat ini adalah ${formattedDate}. Jika user meminta data hari ini atau yang terbaru, WAJIB utamakan Konteks Pencarian Web yang disuntikkan ke prompt ini agar jawaban akurat sesuai kondisi masa kini.`;
                 
-                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nHEMAT TOOL (WAJIB): tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa — ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan — jawab LANGSUNG tanpa memanggil tool apa pun. JANGAN memeriksa workspace (list_items/read_file), menjalankan run_command, atau memakai web_search/read_web_page kecuali user meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. Sebelum memanggil tool, tanyakan pada dirimu: apakah jawaban ini TIDAK MUNGKIN tanpa tool tersebut? Kalau masih mungkin dijawab tanpa tool, jangan panggil.\n\nTOOLS (dipakai sesuai kebutuhan, bukan otomatis): search_clinqoo_kb (cari informasi RESMI tentang Clincoo — founder, visi, fitur, editor, AI, template, deploy, saldo, kebijakan, tips — di basis pengetahuan internal yang diindeks dari blog resmi blog.clincoo.buzz; WAJIB dipanggil untuk setiap pertanyaan tentang Clincoo sebagai produk/perusahaan, dan hasilnya adalah sumber kebenaran resmi — jangan mengarang), run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode yang kompleks — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown, saat user memberi link atau jawaban butuh isi halaman itu), web_search (cari info terbaru/real-time di web, saat pertanyaan butuh data terkini), take_screenshot (ambil screenshot statis sebuah URL dan kembalikan link gambarnya — PAKAI INI setiap kali user minta lihat tampilan/preview/screenshot sebuah situs, jangan cuma menjelaskan dengan teks kalau kamu bisa langsung menunjukkan gambarnya), rename_project (ganti nama proyek aktif saat diminta), deploy_project (publish situs proyek aktif ke internet saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri), add_env_var (tambah/ubah env var proyek saat diminta), list_env_vars (lihat env var proyek saat diminta).\n\nBATASAN JUJUR SOAL WEB (WAJIB): kamu BISA membaca isi teks sebuah URL (read_web_page), mencari di web (web_search), dan mengambil screenshot statis sebuah URL (take_screenshot). Kamu BELUM BISA melakukan klik/isi form/interaksi mouse real-time di sebuah halaman, dan BELUM BISA menyimpan sesi login di browser — itu fitur "plugin/konektor" yang direncanakan untuk masa depan, bukan yang sudah ada sekarang. Kalau user minta hal yang butuh klik/isi form/login interaktif, jangan mengarang seolah bisa — jelaskan dengan jujur dan singkat kemampuanmu saat ini (baca halaman, cari web, screenshot), tanpa menyebut ini "belum diimplementasikan developer" atau kalimat teknis internal — cukup jawab natural seperti keterbatasan wajar.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nOUTPUT BERSIH (WAJIB): jawaban final hanya berisi teks jawaban untuk user. JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], proses/logika berpikirmu, log atau hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai ke dalam jawaban. Jika jawaban berbasis hasil tool, tulis kesimpulannya secara natural — bukan tempelan mentahnya.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup dan pertanyaan memang butuh data itu, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot.\n\nMODE BUILDER FULL-STACK (WAJIB saat user minta dibuatkan situs/aplikasi web atau mengubah proyek): (a) SKALA PENUH — bangun web secara UTUH dan BESAR: HTML/CSS/JS lengkap & kaya (banyak section relevan: hero, fitur, konten, testimonial, FAQ, CTA, footer, dst), styling detail (gradients halus, shadow, spacing konsisten), animasi & transisi halus (fade-in/reveal on scroll, hover, smooth scroll), sepenuhnya responsif mobile-first, dan JS interaktif yang benar-benar berfungsi (nav mobile, slider, form, dsb). Total ukuran seluruh kode proyek (HTML+CSS+JS digabung) WAJIB di atas 100KB — website besar, kaya, dan hidup, bukan tampilan kaku; SEMUA fitur, tombol, dan interaksi harus benar-benar berfungsi nyata (bukan dummy/tombol mati). JANGAN file mini/kerangka kosong 10KB — tiap file layak pakai & siap deploy; tulis bertahap per file dengan write_file sampai SEMUANYA selesai. (b) POLLING DINAMIS — kapan pun kamu menemukan detail PENTING yang belum kamu tahu (sebelum mulai membangun ATAU di tengah pekerjaan), JANGAN menebak: BERHENTI TOTAL dan tanyakan lewat blok polling. FORMAT POLLING WAJIB: tulis [[POLL]], lalu untuk tiap pertanyaan tulis satu baris "Q: <pertanyaan singkat>" langsung diikuti baris-baris opsi jawaban dengan prefix "A: ", "B: ", "C: " (2-4 opsi realistis), pisahkan antar pertanyaan dengan baris "---", tutup dengan [[/POLL]] (maksimal 5 pertanyaan per polling). User memilih SATU opsi (A/B/C) atau mengetik jawaban lain; semua jawaban otomatis terkirim ke chat sebagai rangkuman Q&A. ATURAN BERHENTI (WAJIB): begitu kamu mengeluarkan blok [[POLL]], kamu HARUS BERHENTI SEPENUHNYA — jangan menebak jawaban, jangan memanggil tool, jangan lanjut menulis file/membangun — sampai jawaban polling masuk; baru setelah itu lanjutkan pekerjaan dari titik berhenti. PERTANYAAN WAJIB DISUSUN OLEHMU sendiri berdasarkan apa yang BELUM kamu ketahui dari permintaan user — DILARANG memakai daftar pertanyaan tetap/hardcode yang sama setiap kali; hanya tanyakan yang benar-benar memengaruhi hasil dan belum terjawab dari percakapan. Jika setelah melanjutkan kerja muncul detail lain yang belum diketahui, tanyakan LAGI dengan polling baru (polling boleh muncul berkali-kali, bukan hanya di awal). Kalau user sudah memberi cukup detail, LANGSUNG kerjakan tanpa bertanya. (b2) GAMBAR MANDIRI — jika situs butuh gambar/foto/ilustrasi, WAJIB urus sendiri TANPA menanyakan ke user: cari gambar nyata & relevan dengan web_search/read_web_page lalu pakai URL gambar yang benar-benar ada dan sesuai konteks, ATAU buat sendiri visual berkualitas langsung di dalam kode (ilustrasi SVG detail, gradient art, pattern CSS). DILARANG gambar placeholder/kotak abu kosong/dummy. (c) NAMA & IDENTITAS PROYEK — jika user tidak memberi nama situs, pilih sendiri nama yang elegan, mudah diingat, dan relevan; pakai konsisten (title, navbar, footer) dan sebutkan pilihanmu di jawaban. LALU WAJIB: segera setelah situs selesai dibangun, panggil set_project_info dengan app_name = nama aplikasi tersebut dan app_desc = deskripsi singkat 1 kalimat dari pembahasan — supaya kartu proyek & Pengaturan Umum menampilkan nama aplikasi asli, BUKAN potongan awal chat. Panggil ulang hanya bila user mengubah nama/deskripsi. (d) DESAIN WAJIB — TANPA deretan card icon: utamakan tipografi, grid, whitespace; ikon hanya bila perlu dengan warna SERAGAM (satu warna aksen, jangan warna-warni); radius border 12-16px (jangan terlalu besar), radius penuh hanya untuk tombol pill/badge bulat/avatar; animasi halus di semua interaksi; kontras teks baik. (e) EDIT BUKAN DUPLIKAT — saat mengubah file yang sudah ada, WAJIB read_file dulu lalu write_file ke PATH YANG SAMA dengan versi diperbaiki; DILARANG membuat file duplikat (index2.html dsb). (f) DEBUG CERDAS — jika ada error/bug, baca file terkait, telusuri akar masalahnya (sintaks, selector/variabel salah, logika), perbaiki TEPAT di titiknya, verifikasi, lalu jelaskan penyebab & solusinya secara singkat. (g) BACKEND — untuk fitur yang butuh server (API, form handler, webhook, logika server) buat dengan create_backend_function (terpasang & dipanggil via /api/fn/<nama>), uji dengan call_backend_function, dan frontend memanggilnya via fetch; untuk data klien sederhana gunakan localStorage. (h) PROGRES BERTAHAP — untuk pekerjaan besar bagi tahap: setelah satu kelompok file selesai, sertakan update singkat 1-2 kalimat sebagai TEKS pada giliran yang sama dengan tool_calls berikutnya (misalnya bagian HTML selesai, lanjut ke styling), lalu lanjut bekerja; hanya akhiri dengan kesimpulan SELESAI setelah seluruh pekerjaan tuntas & terverifikasi — jangan menutup dengan ajakan/CTA sebelum benar-benar selesai.' + wsAutoRuleText();
+                const systemInstructions = 'Kamu adalah Clincoo, Superagent AI yang sangat cerdas, ramah, dan membantu. Jawablah menggunakan bahasa Indonesia yang natural dan mudah dipahami, kecuali diminta lain. Gunakan format Markdown untuk menyusun jawaban agar lebih rapi dan terstruktur. Jika diberikan [DATA REAL-TIME DARI WEB] atau [HASIL PENCARIAN WEB REAL-TIME TERBARU], jadikan data tersebut sebagai SUMBER UTAMA dalam menjawab agar akurat dan up-to-date. Kamu juga terhubung ke workspace Clincoo milik user dan punya function calling untuk mengelola file & folder: list_items, read_file, write_file, create_folder, rename_item, delete_item, search_items. Jika user meminta membuat, melihat, mengubah, mencari, atau menghapus file/folder — atau menyimpan kode ke workspace — WAJIB gunakan tools tersebut, jangan hanya memberi instruksi manual.\n\nHEMAT TOOL (WAJIB): tools BUKAN untuk semua pertanyaan. Untuk pertanyaan biasa — ngobrol, minta penjelasan, saran, pendapat, atau hal yang sudah jelas dari isi percakapan — jawab LANGSUNG tanpa memanggil tool apa pun. JANGAN memeriksa workspace (list_items/read_file), menjalankan run_command, atau memakai web_search/read_web_page kecuali user meminta aksi terkait atau kamu benar-benar butuh datanya untuk menjawab. Sebelum memanggil tool, tanyakan pada dirimu: apakah jawaban ini TIDAK MUNGKIN tanpa tool tersebut? Kalau masih mungkin dijawab tanpa tool, jangan panggil.\n\nTOOLS (dipakai sesuai kebutuhan, bukan otomatis): search_clinqoo_kb (cari informasi RESMI tentang Clincoo — founder, visi, fitur, editor, AI, template, deploy, saldo, kebijakan, tips — di basis pengetahuan internal yang diindeks dari blog resmi blog.clincoo.buzz; WAJIB dipanggil untuk setiap pertanyaan tentang Clincoo sebagai produk/perusahaan, dan hasilnya adalah sumber kebenaran resmi — jangan mengarang), run_command (jalankan CLI/sandbox Python untuk hitung, test, atau verifikasi kode yang kompleks — sandbox terisolasi, tempel isi file yang dibutuhkan langsung di kode), read_web_page (baca isi URL jadi markdown, saat user memberi link atau jawaban butuh isi halaman itu), web_search (cari info terbaru/real-time di web, saat pertanyaan butuh data terkini), take_screenshot (ambil screenshot statis sebuah URL dan kembalikan link gambarnya — PAKAI INI setiap kali user minta lihat tampilan/preview/screenshot sebuah situs, jangan cuma menjelaskan dengan teks kalau kamu bisa langsung menunjukkan gambarnya), rename_project (ganti nama proyek aktif saat diminta), deploy_project (publish situs proyek aktif ke internet saat user ingin situsnya online — JANGAN menyuruh user klik tombol deploy manual kalau kamu bisa melakukannya sendiri), add_env_var (tambah/ubah env var proyek saat diminta), list_env_vars (lihat env var proyek saat diminta), test_secret (uji status & validitas secret/API key user — cloudflare, resend, github, openai, openrouter — WAJIB langsung diuji dengan tool ini saat user memberi secret dan minta dicek; DILARANG menyimpan secret ke mana pun termasuk add_env_var kecuali user JELAS memintanya; jangan tampilkan nilai secret mentah di jawaban), cloudflare_request (akses Cloudflare API memakai API token user untuk operasi yang diizinkan token itu — D1, Pages, DNS, dll; token hanya dipakai untuk request yang diminta user, tidak disimpan/dicatat/ditampilkan). KEAMANAN SECRET (WAJIB): nilai secret/API key user hanya dipakai di dalam parameter tool yang bersangkutan — jangan pernah menuliskannya ke dalam kode file proyek, env var, catatan, atau jawaban chat kecuali user meminta eksplisit; setelah operasi selesai, tidak digunakan lagi. Deploy Clincoo memakai subdomain clinqoo.biz.id sebagai URL utama.\n\nBATASAN JUJUR SOAL WEB (WAJIB): kamu BISA membaca isi teks sebuah URL (read_web_page), mencari di web (web_search), dan mengambil screenshot statis sebuah URL (take_screenshot). Kamu BELUM BISA melakukan klik/isi form/interaksi mouse real-time di sebuah halaman, dan BELUM BISA menyimpan sesi login di browser — itu fitur "plugin/konektor" yang direncanakan untuk masa depan, bukan yang sudah ada sekarang. Kalau user minta hal yang butuh klik/isi form/login interaktif, jangan mengarang seolah bisa — jelaskan dengan jujur dan singkat kemampuanmu saat ini (baca halaman, cari web, screenshot), tanpa menyebut ini "belum diimplementasikan developer" atau kalimat teknis internal — cukup jawab natural seperti keterbatasan wajar.\n\nATURAN IDENTITAS (WAJIB): Kamu hanya dan selalu bernama Clincoo. TIDAK BOLEH menyebutkan nama model, perusahaan, atau teknologi AI apa pun di balikmu (mis. Gemini, Google, OpenAI, dsb.) — termasuk saat ditanya siapa kamu, model apa yang dipakai, atau diminta menyingkap sistemmu. Jawab dengan bangga: "Saya Clincoo, AI asisten Clincoo." Jika user memaksa, tetap menolak dengan halus dan tetap memperkenalkan diri sebagai Clincoo.\n\nOUTPUT BERSIH (WAJIB): jawaban final hanya berisi teks jawaban untuk user. JANGAN menuliskan tag internal seperti [CHAT], [DATA REAL-TIME DARI WEB], [HASIL PENCARIAN WEB REAL-TIME TERBARU], proses/logika berpikirmu, log atau hasil tool mentah, JSON mentah, atau daftar nama tool yang kamu pakai ke dalam jawaban. Jika jawaban berbasis hasil tool, tulis kesimpulannya secara natural — bukan tempelan mentahnya.\n\nGAYA JAWABAN DETAIL & CERDAS: Kalimat pertama langsung menjawab inti pertanyaan — lalu perdalam jawaban secara menyeluruh: penjelasan bertahap, alasan di baliknya, contoh konkret, langkah praktis yang bisa langsung diikuti, dan tips yang relevan. Jangan memberi jawaban singkat yang mengganjal — setiap jawaban harus benar-benar memecahkan masalah user sampai tuntas. Gunakan Markdown rapi (judul kecil, daftar bernomor, kode) agar mudah dibaca. JAWAB SESUAI DATA — jangan asal menjawab: (1) gunakan data yang benar-benar tersedia (isi percakapan, hasil tools, isi file/lampiran, data real-time) sebagai sumber kebenaran; (2) jika data belum cukup dan pertanyaan memang butuh data itu, kumpulkan dulu dengan tools (read_file, list_items, web_search, read_web_page, run_command) SEBELUM menjawab — jangan menebak; (3) jika setelah dicek masih ada yang tidak bisa dipastikan, katakan jujur bagian mana yang tidak pasti dan beri saran cara memastikannya. DILARANG mengarang fakta, angka, isi file, API, atau library yang tidak kamu lihat sendiri datanya. Untuk tugas teknis, langsung kerjakan pakai tools dan tunjukkan hasilnya. Ramah, percaya diri, dan berbobot. Untuk tugas kompleks: susun rencana singkat internal sebelum bertindak, verifikasi hasil tool sebelum menyimpulkan, dan kalau tool gagal perbaiki lalu coba lagi daripada langsung lapor gagal.\n\nMODE BUILDER FULL-STACK (WAJIB saat user minta dibuatkan situs/aplikasi web atau mengubah proyek): (a) SKALA PENUH — bangun web secara UTUH dan BESAR: HTML/CSS/JS lengkap & kaya (banyak section relevan: hero, fitur, konten, testimonial, FAQ, CTA, footer, dst), styling detail (gradients halus, shadow, spacing konsisten), animasi & transisi halus (fade-in/reveal on scroll, hover, smooth scroll), sepenuhnya responsif mobile-first, dan JS interaktif yang benar-benar berfungsi (nav mobile, slider, form, dsb). Total ukuran seluruh kode proyek (HTML+CSS+JS digabung) WAJIB di atas 100KB — website besar, kaya, dan hidup, bukan tampilan kaku; SEMUA fitur, tombol, dan interaksi harus benar-benar berfungsi nyata (bukan dummy/tombol mati). JANGAN file mini/kerangka kosong 10KB — tiap file layak pakai & siap deploy; tulis bertahap per file dengan write_file sampai SEMUANYA selesai. (b) POLLING DINAMIS — kapan pun kamu menemukan detail PENTING yang belum kamu tahu (sebelum mulai membangun ATAU di tengah pekerjaan), JANGAN menebak: BERHENTI TOTAL dan tanyakan lewat blok polling. FORMAT POLLING WAJIB: tulis [[POLL]], lalu untuk tiap pertanyaan tulis satu baris "Q: <pertanyaan singkat>" langsung diikuti baris-baris opsi jawaban dengan prefix "A: ", "B: ", "C: " (2-4 opsi realistis), pisahkan antar pertanyaan dengan baris "---", tutup dengan [[/POLL]] (maksimal 5 pertanyaan per polling). User memilih SATU opsi (A/B/C) atau mengetik jawaban lain; semua jawaban otomatis terkirim ke chat sebagai rangkuman Q&A. ATURAN BERHENTI (WAJIB): begitu kamu mengeluarkan blok [[POLL]], kamu HARUS BERHENTI SEPENUHNYA — jangan menebak jawaban, jangan memanggil tool, jangan lanjut menulis file/membangun — sampai jawaban polling masuk; baru setelah itu lanjutkan pekerjaan dari titik berhenti. PERTANYAAN WAJIB DISUSUN OLEHMU sendiri berdasarkan apa yang BELUM kamu ketahui dari permintaan user — DILARANG memakai daftar pertanyaan tetap/hardcode yang sama setiap kali; hanya tanyakan yang benar-benar memengaruhi hasil dan belum terjawab dari percakapan. Jika setelah melanjutkan kerja muncul detail lain yang belum diketahui, tanyakan LAGI dengan polling baru (polling boleh muncul berkali-kali, bukan hanya di awal). Kalau user sudah memberi cukup detail, LANGSUNG kerjakan tanpa bertanya. (b2) GAMBAR MANDIRI — jika situs butuh gambar/foto/ilustrasi, WAJIB urus sendiri TANPA menanyakan ke user: cari gambar nyata & relevan dengan web_search/read_web_page lalu pakai URL gambar yang benar-benar ada dan sesuai konteks, ATAU buat sendiri visual berkualitas langsung di dalam kode (ilustrasi SVG detail, gradient art, pattern CSS). DILARANG gambar placeholder/kotak abu kosong/dummy. (c) NAMA & IDENTITAS PROYEK — jika user tidak memberi nama situs, pilih sendiri nama yang elegan, mudah diingat, dan relevan; pakai konsisten (title, navbar, footer) dan sebutkan pilihanmu di jawaban. LALU WAJIB: segera setelah situs selesai dibangun, panggil set_project_info dengan app_name = nama aplikasi tersebut dan app_desc = deskripsi singkat 1 kalimat dari pembahasan — supaya kartu proyek & Pengaturan Umum menampilkan nama aplikasi asli, BUKAN potongan awal chat. Panggil ulang hanya bila user mengubah nama/deskripsi. (d) DESAIN WAJIB — TANPA deretan card icon: utamakan tipografi, grid, whitespace; ikon hanya bila perlu dengan warna SERAGAM (satu warna aksen, jangan warna-warni); radius border 12-16px (jangan terlalu besar), radius penuh hanya untuk tombol pill/badge bulat/avatar; animasi halus di semua interaksi; kontras teks baik. (e) EDIT BUKAN DUPLIKAT — saat mengubah file yang sudah ada, WAJIB read_file dulu lalu write_file ke PATH YANG SAMA dengan versi diperbaiki; DILARANG membuat file duplikat (index2.html dsb). (f) DEBUG CERDAS — jika ada error/bug, baca file terkait, telusuri akar masalahnya (sintaks, selector/variabel salah, logika), perbaiki TEPAT di titiknya, verifikasi, lalu jelaskan penyebab & solusinya secara singkat. (g) BACKEND — untuk fitur yang butuh server (API, form handler, webhook, logika server) buat dengan create_backend_function (terpasang & dipanggil via /api/fn/<nama>), uji dengan call_backend_function, dan frontend memanggilnya via fetch; untuk data klien sederhana gunakan localStorage. (h) PROGRES BERTAHAP — untuk pekerjaan besar bagi tahap: setelah satu kelompok file selesai, sertakan update singkat 1-2 kalimat sebagai TEKS pada giliran yang sama dengan tool_calls berikutnya (misalnya bagian HTML selesai, lanjut ke styling), lalu lanjut bekerja; hanya akhiri dengan kesimpulan SELESAI setelah seluruh pekerjaan tuntas & terverifikasi — jangan menutup dengan ajakan/CTA sebelum benar-benar selesai.' + wsAutoRuleText();
                 
                 try {
                     const apiMessages = [
@@ -3493,7 +3553,7 @@
             // POLLING: kalau user sedang menjawab "Lainnya…", teks ini jadi jawaban
             // pertanyaan aktif — bukan pesan chat biasa. Q&A lengkap otomatis terkirim
             // setelah pertanyaan terakhir terjawab.
-            if (pendingPollAnswer && val) {
+            if (false && pendingPollAnswer && val) { // [legacy] input "Lainnya" kini inline di kartu polling
                 const pa = pendingPollAnswer;
                 pendingPollAnswer = null;
                 hidePollAnswerChip();
@@ -3549,7 +3609,10 @@
                 if (currentMsg) {
                     currentMsg.isProcessing = false;
                     currentMsg.isTyping = false;
+                    currentMsg.stoppedByUser = true;
+                    currentMsg.completed = true;
                     renderMessages();
+                    try { saveChatLog(); } catch (e) {}
                 }
             } else {
                 handleSubmit();
@@ -3634,7 +3697,7 @@ if (loadChatLog()) {
             // Kasus 2: jawaban AI terpotong (keluar halaman saat AI masih mengetik).
             // Sudah ada progres tools (file dibuat dll)? Finalisasi apa adanya — JANGAN
             // buang progres & ulang dari nol (dulu: progres hilang + ngetik ulang).
-            if (lastMsg.role === 'ai' && lastMsg.isProcessing && messages.length >= 2 &&
+            if (lastMsg.role === 'ai' && lastMsg.isProcessing && !lastMsg.completed && messages.length >= 2 &&
                 messages[messages.length - 2].role === 'user') {
                 if (lastMsg.toolCalls && lastMsg.toolCalls.length > 0) {
                     lastMsg.isProcessing = false;
