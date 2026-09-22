@@ -1706,7 +1706,6 @@
                 messages.push({ id: generateId(), role: 'user', text: qaText, time: Date.now() });
                 renderMessages();
                 pinMessageToTop(messages[messages.length - 1].id);
-                scrollToBottom(true);
                 fetchAIResponse();
             };
             renderMessages();
@@ -2972,7 +2971,11 @@
 
         async function fetchAIResponse() {
             toggleActionState(true);
-            autoScrollActive = true;
+            // JANGAN reset autoScrollActive di sini: kalau pesan user barusan di-pin
+            // ke atas (pinMessageToTop), force-true membuat scrollToBottom(false) di
+            // bawah menarik view balik ke dasar — pesan lama kelihatan lagi ("belum
+            // tertutup"). Pin dipertahankan; auto-follow jalan lagi saat user scroll
+            // manual atau input difokuskan ulang.
             
             const lastUserMsgObj = [...messages].reverse().find(m => m.role === 'user');
             const lastUserMsg = lastUserMsgObj?.text || "";
