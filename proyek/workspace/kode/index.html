@@ -71,6 +71,7 @@
     /* ===== Title bar ===== */
     #titlebar{height:48px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;gap:10px;flex-shrink:0;user-select:none}
     .tb-btn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--text2)}
+    #back-btn{border-radius:50%}
     .tb-btn:hover{background:var(--bg4);color:var(--text)}
     #logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14px;letter-spacing:-.01em;padding:0 4px}
     #logo svg{width:22px;height:22px;color:var(--text)}
@@ -103,6 +104,9 @@
     .audio-circle svg{width:52px;height:52px}
     #audio-player{width:100%;border-radius:12px;outline:none}
     .media-card{background:var(--bg3);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);max-width:100%}
+    .pdf-card{width:100%;height:100%;max-width:none;display:flex}
+    .pdf-card iframe{flex:1;width:100%;height:100%;border:none;border-radius:9px;background:#fff}
+    .pdf-note{padding:28px 20px;color:var(--text3);font-size:13px;text-align:center;line-height:1.7}
     .media-card.wide{width:100%;max-width:960px;display:flex;justify-content:center}
     #video-player{width:100%;max-height:calc(100vh - 200px);border-radius:9px;background:#000;outline:none;object-fit:contain}
     #image-preview{max-width:100%;max-height:calc(100vh - 200px);object-fit:contain;border-radius:9px;display:block}
@@ -247,6 +251,9 @@
     </div>
     <div id="editor-image-container" class="hidden media-wrap">
       <div class="media-card"><img id="image-preview" src="" alt="Preview"></div>
+    </div>
+    <div id="editor-pdf-container" class="hidden media-wrap">
+      <div class="media-card pdf-card"><iframe id="pdf-frame" title="PDF"></iframe></div>
     </div>
   </div>
   <div id="statusbar">
@@ -394,9 +401,11 @@
       const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
       const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'webm'];
       const imageExts = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'bmp', 'ico'];
+      const docExts = ['pdf'];
       if (audioExts.includes(ext)) return 'audio';
       if (videoExts.includes(ext)) return 'video';
       if (imageExts.includes(ext)) return 'image';
+      if (docExts.includes(ext)) return 'pdf';
       return 'code';
     }
 
@@ -424,6 +433,8 @@
           return w('<svg viewBox="0 0 24 24"><path fill="#3776AB" d="M11.898 2c-3.15 0-5.068.322-5.068 2.373v1.89h10.136v.945H6.83c-2.453 0-4.33 1.488-4.33 4.33 0 2.843 1.877 4.33 4.33 4.33h1.892v-2.373c0-2.316 1.83-4.254 4.148-4.254h5.068c1.94 0 2.453-.562 2.453-2.373 0-2.115-1.913-4.868-8.523-4.868zm-2.58 1.418a.945.945 0 1 1 0 1.89.945.945 0 0 1 0-1.89z"/><path fill="#FFD43B" d="M12.102 22c3.15 0 5.068-.322 5.068-2.373v-1.89H7.034v-.945h10.136c2.453 0 4.33-1.488 4.33-4.33 0-2.843-1.877-4.33-4.33-4.33h-1.892v2.373c0 2.316-1.83 4.254-4.148 4.254H6.062c-1.94 0-2.453.562-2.453 2.373 0 2.115 1.913 4.868 8.493 4.868zm2.58-1.418a.945.945 0 1 1 0-1.89.945.945 0 0 1 0 1.89z"/></svg>');
         case 'txt':
           return w('<svg viewBox="0 0 24 24" fill="none" stroke="#546E7A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
+        case 'pdf':
+          return w('<svg viewBox="0 0 24 24" fill="none" stroke="#E04A3A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="12" y="17" font-size="5" font-weight="800" fill="#E04A3A" stroke="none" text-anchor="middle">PDF</text></svg>');
         case 'html': case 'htm':
           return w('<svg viewBox="0 0 24 24" fill="none" stroke="#E34F26" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>');
         case 'js': case 'ts': case 'jsx':
@@ -540,8 +551,10 @@
       const audioContainer = document.getElementById('editor-audio-container');
       const videoContainer = document.getElementById('editor-video-container');
       const imageContainer = document.getElementById('editor-image-container');
+      const pdfContainer = document.getElementById('editor-pdf-container');
       codeContainer.classList.add('hidden'); audioContainer.classList.add('hidden');
       videoContainer.classList.add('hidden'); imageContainer.classList.add('hidden');
+      if (pdfContainer) pdfContainer.classList.add('hidden');
 
       if (fileType === 'audio') {
         audioContainer.classList.remove('hidden');
@@ -555,6 +568,30 @@
         imageContainer.classList.remove('hidden');
         const img = document.getElementById('image-preview');
         if (img) img.src = fileObj.content || '';
+      } else if (fileType === 'pdf') {
+        // PDF dirender di iframe — JANGAN dimuat ke CodeMirror (membekukan halaman).
+        if (pdfContainer) {
+          pdfContainer.classList.remove('hidden');
+          const frame = document.getElementById('pdf-frame');
+          const src = fileObj.content || '';
+          const ok = src.startsWith('data:') || src.startsWith('http') || src.startsWith('blob:');
+          if (frame) {
+            if (ok) {
+              frame.src = src; frame.style.display = '';
+              const oldNote = document.getElementById('pdf-fallback-note');
+              if (oldNote) oldNote.remove();
+            }
+            else {
+              frame.src = 'about:blank'; frame.style.display = 'none';
+              const note = document.getElementById('pdf-fallback-note');
+              if (note) note.remove();
+              const div = document.createElement('div');
+              div.id = 'pdf-fallback-note'; div.className = 'pdf-note';
+              div.textContent = 'PDF ini tidak bisa ditampilkan — kemungkinan diunggah sebelum dukungan PDF aktif. Hapus dan unggah ulang berkasnya.';
+              pdfContainer.appendChild(div);
+            }
+          }
+        }
       } else {
         codeContainer.classList.remove('hidden');
         initCodeEditor();
@@ -621,6 +658,10 @@
       if (audioPlayer) { audioPlayer.pause(); audioPlayer.src = ''; }
       const videoPlayer = document.getElementById('video-player');
       if (videoPlayer) { videoPlayer.pause(); videoPlayer.src = ''; }
+      const pdfFrame = document.getElementById('pdf-frame');
+      if (pdfFrame) { pdfFrame.src = 'about:blank'; }
+      const pdfNote = document.getElementById('pdf-fallback-note');
+      if (pdfNote) pdfNote.remove();
       editingFileName = null;
       // tunggu push cloud selesai supaya simpanan tidak hilang saat pindah halaman
       try { await wsCloudPushNow(); } catch (e) {}
