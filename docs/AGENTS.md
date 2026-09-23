@@ -95,6 +95,14 @@ Log lebih lama dipotong agar wiki ringan.
 - Fix (commit e638daf): resolveOwner fail-closed; kredit 'in' tanpa callback token WAJIB ClincooPay; clear/DELETE admin-only.
 
 ## Log Interaksi Agent
+### 2026-09-23 08:xx WIB — Superagent (Base44): audit ringan GitHub (read-only)
+- `integrasi/index.html:584` menetapkan `WORKER_URL = ""`; token OAuth hanya disimpan sebagai `clincoo_gh_token` di localStorage origin saat itu (`:693`, `:729`). `proyek/chat/index.html:2992` membaca key yang sama tetapi hanya dari origin tempat chat dibuka. Pada dua host berbeda (`app.clincoo.buzz` vs `clinqoo.pages.dev`), localStorage tidak dibagi; status terhubung di A tidak membuktikan token tersedia di B.
+- `proyek/chat/index.html:2318` mengarahkan proxy ke `clincoo-be2.pages.dev`; `functions/api/ai-tools.js:173-182` membaca bearer Clincoo tetapi tidak memvalidasinya sebelum `github_request` memakai token dari body. Perlu audit keamanan/auth dan pengujian E2E dengan akun user sebelum mengklaim akar masalah pasti. Tidak ada perubahan kode GitHub kali ini.
+### 2026-09-23 07:47 WIB — Superagent (Base44): penyegaran landing Clincoo
+- Target hanya landing `clincoo.buzz` (Pages project `clincoo-landing` akun Vylonium0). Sumber deploy mandiri: `../deploy-landing2/index.html`, bukan project app `clincoo` atau `clinqoo`.
+- Header: nama/logo diperbesar, Masuk dipisah dari Daftar Gratis dengan CTA jelas; navigasi Harga. Bagian harga menampilkan Starter gratis, Pro Rp49.000/bulan, Bisnis Rp129.000/bulan, batas paket dari `functions/api/subscription.js` dan `akun/langganan/upgrade/index.html`; tautan paket menuju alur akun/upgrade.
+- Salinan fitur/hero/langkah disesuaikan dengan editor Monaco, template, workspace, dan deploy dashboard; klaim AI membangun/mendeploy situs secara otonom dihapus. Harga promo tidak diklaim sebagai harga permanen.
+- Deploy langsung Vylonium0 project `clincoo-landing`: `54dd1f07.clincoo-landing.pages.dev`. Stylesheet Tailwind dibangun ulang dan dilayani lokal dari `../deploy-landing2/tailwind.css` (stylesheet sebelumnya tidak memuat kelas baru, sempat membuat logo/header membengkak). Browser live `www.clincoo.buzz` kini menampilkan header rapi, Masuk/Daftar Gratis, dan ketiga kartu harga; CTA paket berbayar mengarah ke halaman upgrade lalu login bagi tamu.
 ### 2026-09-22 16:49 WIB — Superagent (Base44): Perbesar logo Plugin
 - `integrasi/index.html`: logo GitHub pada daftar Plugin diperbesar dari 20px (`w-5 h-5`) menjadi 32px (`w-8 h-8`), tetap tanpa card pembungkus.
 - Commit `5bc8494`; deploy GitHub Actions `success`. Terverifikasi live via browser: logo GitHub tampil 32px, lebih besar, dan tetap tanpa card pembungkus.
