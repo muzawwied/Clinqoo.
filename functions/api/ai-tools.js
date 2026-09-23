@@ -6,7 +6,9 @@
 // KEAMANAN: secret TIDAK pernah disimpan, tidak dicatat di log, hanya dipakai untuk
 // request itu lalu dibuang. Endpoint butuh login (Bearer token) seperti API lain.
 
-const JSON_H = { 'Content-Type': 'application/json' };
+// Respons API ini dipanggil Chat dari app.clincoo.buzz ke clincoo-be2.pages.dev.
+// Middleware hanya memantulkan Origin tepercaya jika header CORS sudah tersedia.
+const JSON_H = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
 function jsonOut(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_H });
