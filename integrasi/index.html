@@ -223,6 +223,23 @@
                     <p class="text-[12.5px] text-gray-500 leading-relaxed mt-3">Analisis kode, review Pull Request, dan kelola repositori langsung dari chat.</p>
                 </div>
 
+                <div id="drive-integration-card" class="integration-card group bg-white border border-gray-100 rounded-2xl p-4 sm:p-4.5 hover:border-gray-200 hover:shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-300 w-full cursor-pointer" data-title="drive" data-category="cloud" role="button" tabindex="0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 87.3 75.6" aria-hidden="true" class="w-7 h-7"><path fill="#0066da" d="M6.1 75.6 0 64.9l28.9-56.4 3.1-.1 8.5 14.4-1.4 2.6L13.9 70.5z"/><path fill="#00ac47" d="M28.9 8.5h2.2l3.1.1 1.8 3.2L72.2 66l-6.2 9.6-3.1-.1z"/><path fill="#ea4335" d="M72.2 66 57.9 43.7l.1-.2h21.7l2.3 4.4z"/><path fill="#00832d" d="M28.9 8.5 13.9 70.5l3.1.1h34.8L42.2 51.2 13.9 70.5z" opacity="0"/><path fill="#ffba00" d="M87.3 47.1l-3.4 6.3-31.6-56-6.1-9.2H57l30.3 52.5z"/><path fill="#00ac47" d="M6.1 75.6 25.9 41.1l6.1 9.3L13.9 70.6z"/><path fill="#2684fc" d="M57 0H29.6l27.3 43.7 6.1-9.3z"/><path fill="#00ac47" d="M57.9 43.7 42.2 51.2 25.9 41.1 30.6 32.4z"/></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-[15px] font-bold text-gray-900 font-montserrat tracking-tight leading-tight">Google Drive</h3>
+                            <p class="text-[11.5px] text-gray-400 font-medium mt-0.5">Cloud &middot; Resmi</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span id="drive-status-badge" class="hidden items-center text-[12px] font-semibold text-emerald-600 whitespace-nowrap">Terhubung</span>
+                            <button onclick="event.stopPropagation(); openDriveModal()" id="drive-connect-btn" class="px-4 py-2 bg-[#0f1115] text-white rounded-xl text-[12.5px] font-semibold hover:bg-[#1a1d24] transition-all duration-300 active:scale-[0.97] whitespace-nowrap">Hubungkan</button>
+                        </div>
+                    </div>
+                    <p class="text-[12.5px] text-gray-500 leading-relaxed mt-3">Cari, baca, dan kelola file Google Drive Anda langsung dari chat.</p>
+                </div>
+
                 <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center w-full">
                     <i class="ph ph-magnifying-glass text-5xl text-gray-300 mb-4"></i>
                     <h3 class="text-xl font-bold text-gray-900 font-montserrat mb-2">Tidak ada plugin</h3>
@@ -578,6 +595,84 @@
             <div class="flex items-center gap-2.5">
                 <button onclick="closeDisconnectModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
                 <button onclick="disconnectGitHub()" class="flex-1 py-3 rounded-full bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition active:scale-[0.98]">Putuskan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL GOOGLE DRIVE ===== -->
+    <div id="drive-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 relative">
+            <button onclick="closeDriveModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors absolute top-4 right-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1.5">Hubungkan Google Drive</h3>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-4">Clincoo AI akan terhubung ke Google Drive Anda melalui OAuth resmi Google (akun Google yang sedang login). Koneksi dapat diputuskan kapan saja.</p>
+
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <p class="text-[12px] font-semibold text-gray-700 mb-3">Clincoo AI akan bisa:</p>
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-file-magnifying-glass text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Melihat, mencari, dan membaca isi file di Drive Anda</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-file-plus text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Membuat file dan folder baru di Drive Anda</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-trash text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Menghapus file Drive atas permintaan Anda</p>
+                    </div>
+                </div>
+
+                <label class="flex items-start gap-2.5 mt-4 cursor-pointer select-none">
+                    <input type="checkbox" id="drive-permission-check" class="mt-0.5 w-4 h-4 accent-black flex-shrink-0">
+                    <span class="text-[11.5px] text-gray-500 leading-relaxed">Saya menyetujui pemberian akses di atas dan Kebijakan Privasi Clincoo.</span>
+                </label>
+            </div>
+
+            <div id="drive-oauth-error" class="hidden mt-3 text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 leading-relaxed"></div>
+
+            <div class="px-6 pt-5 pb-6 flex items-center gap-2.5 -mx-6">
+                <button onclick="closeDriveModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
+                <button onclick="startDriveOAuth()" id="drive-connect-cta" disabled class="flex-1 py-3 cta-capsule rounded-full font-semibold text-sm active:scale-95 transition-all opacity-40 pointer-events-none">Hubungkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="drive-loading" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 w-[90%] max-w-sm shadow-2xl text-center">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-gray-100 border-t-black animate-spin"></div>
+            <p class="text-sm font-medium text-gray-700">Menghubungkan ke Google Drive...</p>
+        </div>
+    </div>
+
+    <div id="drive-connected-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 text-center relative">
+            <button onclick="closeDriveConnectedModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors absolute top-4 right-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
+                <i class="ph ph-check-circle text-3xl text-emerald-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1.5">Google Drive Terhubung</h3>
+            <p class="text-[12.5px] text-gray-500 mb-5">Drive Anda berhasil dihubungkan ke Clincoo.</p>
+            <div id="drive-user-info" class="mb-5"></div>
+            <button onclick="closeDriveConnectedModal()" class="w-full py-3 cta-capsule rounded-full font-semibold text-sm active:scale-95 transition-all">Selesai</button>
+            <button onclick="confirmDisconnectDrive()" class="text-[12.5px] font-semibold text-gray-400 hover:text-red-500 transition-colors mt-3">Putuskan koneksi</button>
+        </div>
+    </div>
+
+    <div id="drive-disconnect-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+                <i class="ph ph-warning-circle text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1">Putuskan Google Drive?</h3>
+            <p class="text-[12.5px] text-gray-500 mb-6 leading-relaxed">Clincoo AI tidak akan bisa lagi mengakses Drive Anda. Anda dapat menghubungkan ulang kapan saja.</p>
+            <div class="flex items-center gap-2.5">
+                <button onclick="closeDriveDisconnectModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
+                <button onclick="disconnectDrive()" class="flex-1 py-3 rounded-full bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition active:scale-[0.98]">Putuskan</button>
             </div>
         </div>
     </div>
@@ -954,10 +1049,204 @@
             }
         }
 
+        // ===== PLUGIN GOOGLE DRIVE =====
+        // Alur: Plugin -> Google (redirect_uri = /auth/ yang SUDAH terdaftar di Google
+        // Console, ditandai cookie state khusus) -> /auth/ kirim ulang code ke sini ->
+        // tukar di /api/drive-oauth -> token disimpan per-akun (proxy namespace auth-client).
+        const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+
+        function driveRedirectUri() { return window.location.origin + '/auth/'; }
+
+        function setDriveBadge(connected) {
+            const badge = document.getElementById('drive-status-badge');
+            if (badge) {
+                badge.classList.toggle('hidden', !connected);
+                badge.classList.toggle('flex', !!connected);
+            }
+        }
+
+        function setDriveConnectedUI(connected) {
+            const btn = document.getElementById('drive-connect-btn');
+            if (btn) btn.classList.toggle('hidden', connected);
+            setDriveBadge(connected);
+        }
+
+        function openDriveModal() {
+            const chk = document.getElementById('drive-permission-check');
+            const cta = document.getElementById('drive-connect-cta');
+            if (chk) chk.checked = false;
+            if (cta) { cta.disabled = true; cta.classList.add('opacity-40', 'pointer-events-none'); }
+            const errEl = document.getElementById('drive-oauth-error');
+            if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+            document.getElementById('drive-modal').classList.remove('hidden');
+        }
+
+        function closeDriveModal() { document.getElementById('drive-modal').classList.add('hidden'); }
+        function closeDriveConnectedModal() { document.getElementById('drive-connected-modal').classList.add('hidden'); }
+        function closeDriveDisconnectModal() { document.getElementById('drive-disconnect-modal').classList.add('hidden'); }
+        function confirmDisconnectDrive() {
+            closeDriveConnectedModal();
+            document.getElementById('drive-disconnect-modal').classList.remove('hidden');
+        }
+
+        async function driveRefreshAccessToken() {
+            const refresh = localStorage.getItem('clincoo_drive_refresh');
+            const current = localStorage.getItem('clincoo_drive_token') || '';
+            const expiry = parseInt(localStorage.getItem('clincoo_drive_expiry') || '0', 10);
+            if (!refresh || (current && expiry && Date.now() < expiry - 60000)) return current;
+            try {
+                const res = await fetch('/api/drive-oauth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + clinqooAuthToken() },
+                    body: JSON.stringify({ refresh_token: refresh })
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (res.ok && data.access_token) {
+                    localStorage.setItem('clincoo_drive_token', data.access_token);
+                    localStorage.setItem('clincoo_drive_expiry', String(Date.now() + (data.expires_in || 3600) * 1000));
+                    return data.access_token;
+                }
+            } catch (e) {}
+            return current;
+        }
+
+        async function startDriveOAuth() {
+            const chk = document.getElementById('drive-permission-check');
+            if (chk && !chk.checked) return;
+            // Domain luar (GitHub Pages dll) tidak punya /api Clincoo — pakai domain utama.
+            if (location.hostname.indexOf('clincoo') === -1 && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                window.location.href = 'https://app.clincoo.buzz/integrasi/';
+                return;
+            }
+            document.getElementById('drive-modal').classList.add('hidden');
+            document.getElementById('drive-loading').classList.remove('hidden');
+            let clientId = null;
+            try {
+                const r = await fetch('/api/auth/google');
+                const d = await r.json();
+                clientId = d.client_id;
+            } catch (e) {}
+            if (!clientId) {
+                document.getElementById('drive-loading').classList.add('hidden');
+                const errEl = document.getElementById('drive-oauth-error');
+                if (errEl) { errEl.textContent = 'Client ID Google Clincoo tidak tersedia. Coba lagi sebentar.'; errEl.classList.remove('hidden'); }
+                document.getElementById('drive-modal').classList.remove('hidden');
+                return;
+            }
+            const st = (crypto.randomUUID ? crypto.randomUUID() : ('d' + Date.now() + Math.random())).replace(/-/g, '');
+            const back = window.location.origin + window.location.pathname;
+            // Cookie Path=/ supaya bisa dibaca oleh halaman /auth/ yang menerima callback.
+            document.cookie = 'clinqoo_drive_state=' + encodeURIComponent(JSON.stringify({ v: st, back: back, t: Date.now() })) + '; Max-Age=900; Path=/; SameSite=Lax; Secure';
+            window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + encodeURIComponent(clientId) +
+                '&redirect_uri=' + encodeURIComponent(driveRedirectUri()) +
+                '&response_type=code&scope=' + encodeURIComponent(DRIVE_SCOPE) +
+                '&access_type=offline&prompt=consent&state=' + st;
+        }
+
+        async function handleDriveCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('drive_code');
+            const errParam = urlParams.get('drive_error');
+            if (!codeParam && !errParam) return;
+            window.history.replaceState({}, document.title, window.location.pathname);
+            const errEl = document.getElementById('drive-oauth-error');
+            if (errParam) {
+                if (errEl) { errEl.textContent = 'Gagal menghubungkan Google Drive: ' + errParam; errEl.classList.remove('hidden'); }
+                document.getElementById('drive-modal').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('drive-loading').classList.remove('hidden');
+            try {
+                const res = await fetch('/api/drive-oauth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + clinqooAuthToken() },
+                    body: JSON.stringify({ code: codeParam, redirect_uri: driveRedirectUri() })
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (res.status === 401) throw new Error('Silakan login Clincoo dulu, lalu buka halaman Plugin lagi.');
+                if (!res.ok || !data.access_token) throw new Error(data.error || 'Gagal menghubungkan Google Drive (HTTP ' + res.status + ').');
+                localStorage.setItem('clincoo_drive_token', data.access_token);
+                if (data.refresh_token) localStorage.setItem('clincoo_drive_refresh', data.refresh_token);
+                localStorage.setItem('clincoo_drive_expiry', String(Date.now() + (data.expires_in || 3600) * 1000));
+                if (data.user) localStorage.setItem('clincoo_drive_user', JSON.stringify(data.user));
+                setDriveConnectedUI(true);
+                showDriveConnected(data.user || null);
+            } catch (ex) {
+                document.getElementById('drive-loading').classList.add('hidden');
+                if (errEl) { errEl.textContent = 'Gagal menghubungkan: ' + (ex && ex.message ? ex.message : String(ex)); errEl.classList.remove('hidden'); }
+                document.getElementById('drive-modal').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('drive-loading').classList.add('hidden');
+        }
+
+        async function validateSavedDriveConnection() {
+            const token = localStorage.getItem('clincoo_drive_token');
+            if (!token) { setDriveConnectedUI(false); return false; }
+            const fresh = await driveRefreshAccessToken();
+            if (!fresh) { setDriveConnectedUI(false); return false; }
+            try {
+                const r = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', { headers: { Authorization: 'Bearer ' + fresh } });
+                if (r.status === 401) {
+                    ['clincoo_drive_token', 'clincoo_drive_refresh', 'clincoo_drive_user', 'clincoo_drive_expiry'].forEach(k => localStorage.removeItem(k));
+                    setDriveConnectedUI(false);
+                    return false;
+                }
+                if (!r.ok) { setDriveConnectedUI(false); return false; }
+                const d = await r.json();
+                if (d && d.user) {
+                    localStorage.setItem('clincoo_drive_user', JSON.stringify({ name: d.user.displayName || d.user.emailAddress, email: d.user.emailAddress || '', picture: d.user.photoLink || '' }));
+                }
+                setDriveConnectedUI(true);
+                return true;
+            } catch (e) {
+                setDriveConnectedUI(false);
+                return false;
+            }
+        }
+
+        async function showDriveConnected(user) {
+            let u = user;
+            if (!u) { try { u = JSON.parse(localStorage.getItem('clincoo_drive_user') || 'null'); } catch (e) {} }
+            if (!u) {
+                try {
+                    const tok = await driveRefreshAccessToken();
+                    const r = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', { headers: { Authorization: 'Bearer ' + tok } });
+                    const d = await r.json();
+                    if (d && d.user) u = { name: d.user.displayName || d.user.emailAddress, email: d.user.emailAddress || '', picture: d.user.photoLink || '' };
+                } catch (e) {}
+            }
+            const info = document.getElementById('drive-user-info');
+            if (info && u) {
+                info.innerHTML =
+                    '<div class="flex items-center gap-3">' +
+                        '<img src="' + (u.picture || '') + '" alt="" class="w-10 h-10 rounded-full flex-shrink-0">' +
+                        '<div class="min-w-0 text-left">' +
+                            '<p class="font-semibold text-gray-900 text-[14px] truncate">' + (u.name || 'Drive') + '</p>' +
+                            '<p class="text-xs text-gray-500 truncate">' + (u.email || '') + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center justify-center gap-2 mt-3">' +
+                        '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>' +
+                        '<p class="text-[11.5px] text-emerald-600 leading-relaxed">Token aktif dengan akses ke file Drive Anda.</p>' +
+                    '</div>';
+            }
+            document.getElementById('drive-connected-modal').classList.remove('hidden');
+        }
+
+        function disconnectDrive() {
+            ['clincoo_drive_token', 'clincoo_drive_refresh', 'clincoo_drive_user', 'clincoo_drive_expiry'].forEach(k => localStorage.removeItem(k));
+            closeDriveDisconnectModal();
+            closeDriveConnectedModal();
+            setDriveConnectedUI(false);
+        }
+
         window.addEventListener('load', () => {
             handleOAuthCallback();
             syncGitHubFromDB();
             validateSavedGitHubConnection();
+            handleDriveCallback();
+            validateSavedDriveConnection();
 
             const permCheck = document.getElementById('gh-permission-check');
             const ghCta = document.getElementById('gh-connect-cta');
@@ -966,6 +1255,15 @@
                     ghCta.disabled = !permCheck.checked;
                     ghCta.classList.toggle('opacity-40', !permCheck.checked);
                     ghCta.classList.toggle('pointer-events-none', !permCheck.checked);
+                });
+            }
+            const drivePermCheck = document.getElementById('drive-permission-check');
+            const driveCta = document.getElementById('drive-connect-cta');
+            if (drivePermCheck && driveCta) {
+                drivePermCheck.addEventListener('change', () => {
+                    driveCta.disabled = !drivePermCheck.checked;
+                    driveCta.classList.toggle('opacity-40', !drivePermCheck.checked);
+                    driveCta.classList.toggle('pointer-events-none', !drivePermCheck.checked);
                 });
             }
         });
@@ -979,6 +1277,15 @@
                 };
                 githubCard.addEventListener('click', openGitHub);
                 githubCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGitHub(); } });
+            }
+            const driveCard = document.getElementById('drive-integration-card');
+            if (driveCard) {
+                const openDrive = () => {
+                    if (localStorage.getItem('clincoo_drive_token')) showDriveConnected(null);
+                    else openDriveModal();
+                };
+                driveCard.addEventListener('click', openDrive);
+                driveCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrive(); } });
             }
             const searchInput = document.getElementById('search-integrations');
             const filterDropdownBtn = document.getElementById('filter-modal-toggle');

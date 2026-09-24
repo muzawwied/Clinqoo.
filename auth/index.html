@@ -532,6 +532,22 @@
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             const oauthError = params.get('error');
+
+            // ==== KONEKTOR GOOGLE DRIVE (halaman Plugin) ====
+            // OAuth Drive memakai redirect_uri /auth/ yang SUDAH terdaftar di Google
+            // Console. Cookie state khusus (Path=/) menandai callback ini sebagai alur
+            // KONEKTOR, bukan login Clincoo -> kirim code balik ke halaman Plugin.
+            const dcRaw = (function () { const m = document.cookie.match(/(?:^|;\s*)clinqoo_drive_state=([^;]+)/); return m ? decodeURIComponent(m[1]) : null; })();
+            if ((code || oauthError) && dcRaw) {
+                let dc = null; try { dc = JSON.parse(dcRaw); } catch (e) {}
+                document.cookie = 'clinqoo_drive_state=; Max-Age=0; Path=/; SameSite=Lax; Secure';
+                window.history.replaceState({}, document.title, window.location.pathname);
+                const back = (dc && dc.back) || '/integrasi/';
+                const sep = back.indexOf('?') === -1 ? '?' : '&';
+                window.location.replace(back + sep + (code ? 'drive_code=' + encodeURIComponent(code) : 'drive_error=' + encodeURIComponent(oauthError || 'dibatalkan')));
+                return;
+            }
+
             if (code) {
                 // Deteksi provider dari state tersimpan (cookie). Tanpa validasi blokir:
                 // selalu lanjut login, tanpa popup pemblokir.

@@ -139,6 +139,63 @@ async function githubRequest(body) {
   }
 }
 
+// ---------- drive_request: proxy Google Drive API memakai token KONEKTOR user ----------
+// Token berasal dari plugin Drive (OAuth Clincoo via halaman /auth/), di-inject
+// otomatis oleh halaman chat dari localStorage — user tidak pernah menempel token.
+async function driveRequest(body) {
+  const secret = String(body.token || '').trim();
+  if (!secret) return jsonOut({ ok: false, error: 'Google Drive belum terhubung — hubungkan dulu lewat halaman Plugin (integrasi).' }, 400);
+  const method = String(body.method || 'GET').toUpperCase();
+  if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return jsonOut({ ok: false, error: 'Method tidak didukung: ' + method }, 400);
+  let path = String(body.path || '').trim();
+  // Normalisasi full URL googleapis ke path
+  path = path.replace(/^https?:\/\/(www\.)?googleapis\.com/i, '');
+  if (/^(https?:)?\/\//i.test(path) || /\s/.test(path)) return jsonOut({ ok: false, error: 'Path harus berupa path API Google, contoh: /drive/v3/files?pageSize=10' }, 400);
+  if (!path.startsWith('/')) path = '/' + path;
+  if (path.indexOf('/drive') !== 0 && path.indexOf('/upload/drive') !== 0) {
+    return jsonOut({ ok: false, error: 'Path harus diawali /drive/v3 atau /upload/drive/v3 (hanya Google Drive API yang diizinkan).' }, 400);
+  }
+  const url = 'https://www.googleapis.com' + path;
+  let payload;
+  let contentType = 'application/json';
+  if (body.raw_body !== undefined && body.raw_body !== null && method !== 'GET' && method !== 'DELETE') {
+    // Upload konten file (uploadType=media): kirim raw persis + content type file-nya.
+    payload = String(body.raw_body);
+    if (payload.length > 300000) return jsonOut({ ok: false, error: 'Body terlalu besar (maks 300KB).' }, 413);
+    if (body.content_type) contentType = String(body.content_type);
+  } else if (body.body !== undefined && body.body !== null && method !== 'GET' && method !== 'DELETE') {
+    payload = typeof body.body === 'string' ? body.body : JSON.stringify(body.body);
+    if (payload.length > 300000) return jsonOut({ ok: false, error: 'Body terlalu besar (maks 300KB).' }, 413);
+  }
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: { Authorization: 'Bearer ' + secret, 'Content-Type': contentType, ...(payload ? {} : {}) },
+      body: payload
+    });
+    const ct = r.headers.get('content-type') || '';
+    const text = await r.text();
+    let d = null;
+    if (ct.indexOf('json') !== -1) {
+      try { d = JSON.parse(text); } catch (e) { d = { raw: text.slice(0, 2000) }; }
+    } else {
+      d = { media: text.slice(0, 30000), media_content_type: ct };
+    }
+    const slim = JSON.stringify(d);
+    if (slim && slim.length > 30000) d = { truncated: true, note: 'Respons dipangkas (maks 30KB). Gunakan query fields atau path yang lebih spesifik.', preview: slim.slice(0, 28000) };
+    if (!r.ok) {
+      let reason = (d && (d.error && (d.error.message || d.error.errors) || d.message)) || ('Google Drive API mengembalikan status ' + r.status);
+      if (r.status === 401) reason = 'Token Drive tidak valid atau sudah kedaluwarsa (401). Coba ulangi perintah — halaman chat memperbarui token otomatis; kalau masih gagal, putuskan lalu hubungkan ulang Drive di halaman Plugin.';
+      else if (r.status === 403) reason = (d && d.error && d.error.message ? d.error.message + ' (403) — kemungkinan scope token kurang atau kuota Google Drive habis.' : 'Ditolak Google (403) — cek scope token atau kuota API.');
+      else if (r.status === 404) reason = 'File/folder Drive tidak ditemukan (404) — cek id-nya benar dan akun konektor punya akses.';
+      return jsonOut({ ok: true, http_status: r.status, success: false, error: reason, result: d });
+    }
+    return jsonOut({ ok: true, http_status: r.status, success: true, result: d });
+  } catch (e) {
+    return jsonOut({ ok: false, error: 'Gagal memanggil Google Drive API: ' + (e && e.message ? e.message : String(e)) }, 502);
+  }
+}
+
 // ---------- cloudflare_request: proxy aman ke Cloudflare API dengan token user ----------
 async function cloudflareRequest(body) {
   const secret = String(body.secret || '').trim();
@@ -182,7 +239,8 @@ export async function onRequestPost({ request, env }) {
     if (action === 'test_secret') return testSecret(body);
     if (action === 'cloudflare_request') return cloudflareRequest(body);
     if (action === 'github_request') return githubRequest(body);
-    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret, cloudflare_request, atau github_request.' }, 400);
+    if (action === 'drive_request') return driveRequest(body);
+    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret, cloudflare_request, github_request, atau drive_request.' }, 400);
   } catch (e) {
     return jsonOut({ ok: false, error: 'Gagal memproses: ' + (e && e.message ? e.message : String(e)) }, 500);
   }

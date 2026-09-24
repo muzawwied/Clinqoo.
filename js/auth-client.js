@@ -42,7 +42,7 @@ function nsClaimLegacy() {
   // Migrasikan kunci GitHub mentah setiap kali ditemukan, termasuk bila klaim umum
   // untuk akun ini pernah selesai sebelumnya.
   try {
-    ['clincoo_gh_token', 'clincoo_gh_user'].forEach(function (k) {
+    ['clincoo_gh_token', 'clincoo_gh_user', 'clincoo_drive_token', 'clincoo_drive_refresh', 'clincoo_drive_user', 'clincoo_drive_expiry'].forEach(function (k) {
       var legacy = NS_raw.getItem(k);
       if (legacy !== null && NS_raw.getItem(p + k) === null) NS_raw.setItem(p + k, legacy);
       if (legacy !== null) NS_raw.removeItem(k);
