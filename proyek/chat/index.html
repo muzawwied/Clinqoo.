@@ -1552,7 +1552,7 @@
                 case 'deploy_project': return 'Publishing project…';
                 case 'test_secret': return 'Testing secret status…';
                 case 'cloudflare_request': return 'Calling Cloudflare API…';
-                case 'github_request': return 'Accessing GitHub: ' + ((args && (args.path || '')) + '').slice(0, 60);
+                case 'github_request': return 'Accessing GitHub: ' + ((a && (a.path || '')) + '').slice(0, 60);
                 case 'add_env_var': return 'Adding environment variable: ' + (a.key || a.name || '');
                 case 'list_env_vars': return 'Listing environment variables…';
                 case 'create_backend_function': return 'Creating backend function: ' + (a.name || '');
