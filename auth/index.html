@@ -537,14 +537,22 @@
             // OAuth Drive memakai redirect_uri /auth/ yang SUDAH terdaftar di Google
             // Console. Cookie state khusus (Path=/) menandai callback ini sebagai alur
             // KONEKTOR, bukan login Clincoo -> kirim code balik ke halaman Plugin.
-            const dcRaw = (function () { const m = document.cookie.match(/(?:^|;\s*)clinqoo_drive_state=([^;]+)/); return m ? decodeURIComponent(m[1]) : null; })();
-            if ((code || oauthError) && dcRaw) {
-                let dc = null; try { dc = JSON.parse(dcRaw); } catch (e) {}
-                document.cookie = 'clinqoo_drive_state=; Max-Age=0; Path=/; SameSite=Lax; Secure';
+            // Konektor Google (Drive / Calendar) — cookie state khusus menandai alur KONEKTOR.
+            const connCookie = (function (names) {
+                for (const nm of names) {
+                    const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + nm + '=([^;]+)'));
+                    if (m) return { name: nm, raw: decodeURIComponent(m[1]) };
+                }
+                return null;
+            })(['clinqoo_drive_state', 'clinqoo_calendar_state']);
+            if ((code || oauthError) && connCookie) {
+                let dc = null; try { dc = JSON.parse(connCookie.raw); } catch (e) {}
+                document.cookie = connCookie.name + '=; Max-Age=0; Path=/; SameSite=Lax; Secure';
                 window.history.replaceState({}, document.title, window.location.pathname);
                 const back = (dc && dc.back) || '/integrasi/';
                 const sep = back.indexOf('?') === -1 ? '?' : '&';
-                window.location.replace(back + sep + (code ? 'drive_code=' + encodeURIComponent(code) : 'drive_error=' + encodeURIComponent(oauthError || 'dibatalkan')));
+                const pfx = connCookie.name.indexOf('calendar') !== -1 ? 'calendar' : 'drive';
+                window.location.replace(back + sep + (code ? pfx + '_code=' + encodeURIComponent(code) : pfx + '_error=' + encodeURIComponent(oauthError || 'dibatalkan')));
                 return;
             }
 

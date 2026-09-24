@@ -196,6 +196,51 @@ async function driveRequest(body) {
   }
 }
 
+// ---------- calendar_request: proxy Google Calendar API memakai token KONEKTOR user ----------
+// Token berasal dari plugin Calendar (OAuth Clincoo via halaman /auth/), di-inject
+// otomatis oleh halaman chat dari localStorage — user tidak pernah menempel token.
+async function calendarRequest(body) {
+  const secret = String(body.token || '').trim();
+  if (!secret) return jsonOut({ ok: false, error: 'Google Calendar belum terhubung — hubungkan dulu lewat halaman Plugin (integrasi).' }, 400);
+  const method = String(body.method || 'GET').toUpperCase();
+  if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return jsonOut({ ok: false, error: 'Method tidak didukung: ' + method }, 400);
+  let path = String(body.path || '').trim();
+  path = path.replace(/^https?:\/\/(www\.)?googleapis\.com/i, '');
+  if (/^(https?:)?\/\//i.test(path) || /\s/.test(path)) return jsonOut({ ok: false, error: 'Path harus berupa path API Google, contoh: /calendar/v3/calendars/primary/events' }, 400);
+  if (!path.startsWith('/')) path = '/' + path;
+  if (path.indexOf('/calendar') !== 0) {
+    return jsonOut({ ok: false, error: 'Path harus diawali /calendar/v3 (hanya Google Calendar API yang diizinkan).' }, 400);
+  }
+  const url = 'https://www.googleapis.com' + path;
+  let payload;
+  if (body.body !== undefined && body.body !== null && method !== 'GET' && method !== 'DELETE') {
+    payload = typeof body.body === 'string' ? body.body : JSON.stringify(body.body);
+    if (payload.length > 300000) return jsonOut({ ok: false, error: 'Body terlalu besar (maks 300KB).' }, 413);
+  }
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: { Authorization: 'Bearer ' + secret, 'Content-Type': 'application/json' },
+      body: payload
+    });
+    const text = await r.text();
+    let d = null;
+    try { d = JSON.parse(text); } catch (e) { d = { raw: text.slice(0, 2000) }; }
+    const slim = JSON.stringify(d);
+    if (slim && slim.length > 30000) d = { truncated: true, note: 'Respons dipangkas (maks 30KB). Gunakan query fields atau path yang lebih spesifik.', preview: slim.slice(0, 28000) };
+    if (!r.ok) {
+      let reason = (d && (d.error && d.error.message || d.message)) || ('Google Calendar API mengembalikan status ' + r.status);
+      if (r.status === 401) reason = 'Token Calendar tidak valid atau sudah kedaluwarsa (401). Coba ulangi perintah — halaman chat memperbarui token otomatis; kalau masih gagal, putuskan lalu hubungkan ulang Calendar di halaman Plugin.';
+      else if (r.status === 403) reason = (d && d.error && d.error.message ? d.error.message + ' (403) — kemungkinan scope token kurang atau kuota Google Calendar habis.' : 'Ditolak Google (403) — cek scope token atau kuota API.');
+      else if (r.status === 404) reason = 'Kalender/event tidak ditemukan (404) — cek id kalender/event-nya benar dan akun konektor punya akses.';
+      return jsonOut({ ok: true, http_status: r.status, success: false, error: reason, result: d });
+    }
+    return jsonOut({ ok: true, http_status: r.status, success: true, result: d });
+  } catch (e) {
+    return jsonOut({ ok: false, error: 'Gagal memanggil Google Calendar API: ' + (e && e.message ? e.message : String(e)) }, 502);
+  }
+}
+
 // ---------- cloudflare_request: proxy aman ke Cloudflare API dengan token user ----------
 async function cloudflareRequest(body) {
   const secret = String(body.secret || '').trim();
@@ -240,7 +285,8 @@ export async function onRequestPost({ request, env }) {
     if (action === 'cloudflare_request') return cloudflareRequest(body);
     if (action === 'github_request') return githubRequest(body);
     if (action === 'drive_request') return driveRequest(body);
-    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret, cloudflare_request, github_request, atau drive_request.' }, 400);
+    if (action === 'calendar_request') return calendarRequest(body);
+    return jsonOut({ ok: false, error: 'Action tidak dikenal. Gunakan test_secret, cloudflare_request, github_request, drive_request, atau calendar_request.' }, 400);
   } catch (e) {
     return jsonOut({ ok: false, error: 'Gagal memproses: ' + (e && e.message ? e.message : String(e)) }, 500);
   }

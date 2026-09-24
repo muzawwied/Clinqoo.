@@ -243,6 +243,23 @@
                 </div>
                 </div>
 
+                <div id="calendar-integration-card" class="integration-card group bg-white border border-gray-100 rounded-2xl p-4 sm:p-4.5 hover:border-gray-200 hover:shadow-[0_10px_30px_rgba(0,0,0,0.05)] transition-all duration-300 w-full cursor-pointer" data-title="calendar" data-category="cloud" role="button" tabindex="0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 52 52" aria-hidden="true" class="w-8 h-8"><rect x="4" y="4" width="44" height="44" rx="8" fill="#fff" stroke="#dadce0" stroke-width="1.5"/><path d="M4 12c0-4.42 3.58-8 8-8h28c4.42 0 8 3.58 8 8v4H4z" fill="#4285f4" rx="8"/><path d="M4 12c0-4.42 3.58-8 8-8h28c4.42 0 8 3.58 8 8v4H4z" fill="none"/><text x="26" y="37" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="500" fill="#4285f4" text-anchor="middle">31</text></svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-[15px] font-bold text-gray-900 font-montserrat tracking-tight leading-tight">Google Calendar</h3>
+                            <p class="text-[11.5px] text-gray-400 font-medium mt-0.5">Cloud &middot; Resmi</p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span id="calendar-status-badge" class="hidden items-center text-[12px] font-semibold text-emerald-600 whitespace-nowrap">Terhubung</span>
+                            <button onclick="event.stopPropagation(); openCalendarModal()" id="calendar-connect-btn" class="px-4 py-2 bg-[#0f1115] text-white rounded-xl text-[12.5px] font-semibold hover:bg-[#1a1d24] transition-all duration-300 active:scale-[0.97] whitespace-nowrap">Hubungkan</button>
+                        </div>
+                    </div>
+                    <p class="text-[12.5px] text-gray-500 leading-relaxed mt-3">Lihat jadwal, dan buat event Google Calendar Anda langsung dari chat.</p>
+                </div>
+
 
                 <div id="empty-state" class="hidden flex-col items-center justify-center py-16 px-4 text-center w-full">
                     <i class="ph ph-magnifying-glass text-5xl text-gray-300 mb-4"></i>
@@ -677,6 +694,84 @@
             <div class="flex items-center gap-2.5">
                 <button onclick="closeDriveDisconnectModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
                 <button onclick="disconnectDrive()" class="flex-1 py-3 rounded-full bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition active:scale-[0.98]">Putuskan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL GOOGLE CALENDAR ===== -->
+    <div id="calendar-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 relative">
+            <button onclick="closeCalendarModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors absolute top-4 right-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1.5">Hubungkan Google Calendar</h3>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-4">Clincoo AI akan terhubung ke Google Calendar Anda melalui OAuth resmi Google (akun Google yang sedang login). Koneksi dapat diputuskan kapan saja.</p>
+
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <p class="text-[12px] font-semibold text-gray-700 mb-3">Clincoo AI akan bisa:</p>
+                <div class="flex flex-col gap-2.5">
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-calendar-dot text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Melihat jadwal dan event di Calendar Anda</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-calendar-plus text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Membuat event baru atas permintaan Anda</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <i class="ph ph-calendar-x text-lg text-gray-700 flex-shrink-0"></i>
+                        <p class="text-[12.5px] text-gray-600 leading-snug">Mengubah atau menghapus event atas permintaan Anda</p>
+                    </div>
+                </div>
+
+                <label class="flex items-start gap-2.5 mt-4 cursor-pointer select-none">
+                    <input type="checkbox" id="calendar-permission-check" class="mt-0.5 w-4 h-4 accent-black flex-shrink-0">
+                    <span class="text-[11.5px] text-gray-500 leading-relaxed">Saya menyetujui pemberian akses di atas dan Kebijakan Privasi Clincoo.</span>
+                </label>
+            </div>
+
+            <div id="calendar-oauth-error" class="hidden mt-3 text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2 leading-relaxed"></div>
+
+            <div class="px-6 pt-5 pb-6 flex items-center gap-2.5 -mx-6">
+                <button onclick="closeCalendarModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
+                <button onclick="startCalendarOAuth()" id="calendar-connect-cta" disabled class="flex-1 py-3 cta-capsule rounded-full font-semibold text-sm active:scale-95 transition-all opacity-40 pointer-events-none">Hubungkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendar-loading" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 w-[90%] max-w-sm shadow-2xl text-center">
+            <div class="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-gray-100 border-t-black animate-spin"></div>
+            <p class="text-sm font-medium text-gray-700">Menghubungkan ke Google Calendar...</p>
+        </div>
+    </div>
+
+    <div id="calendar-connected-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 text-center relative">
+            <button onclick="closeCalendarConnectedModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors absolute top-4 right-4">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
+                <i class="ph ph-check-circle text-3xl text-emerald-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1.5">Google Calendar Terhubung</h3>
+            <p class="text-[12.5px] text-gray-500 mb-5">Calendar Anda berhasil dihubungkan ke Clincoo.</p>
+            <div id="calendar-user-info" class="mb-5"></div>
+            <button onclick="closeCalendarConnectedModal()" class="w-full py-3 cta-capsule rounded-full font-semibold text-sm active:scale-95 transition-all">Selesai</button>
+            <button onclick="confirmDisconnectCalendar()" class="text-[12.5px] font-semibold text-gray-400 hover:text-red-500 transition-colors mt-3">Putuskan koneksi</button>
+        </div>
+    </div>
+
+    <div id="calendar-disconnect-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl px-6 pt-6 pb-6 text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+                <i class="ph ph-warning-circle text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 font-montserrat mb-1">Putuskan Google Calendar?</h3>
+            <p class="text-[12.5px] text-gray-500 mb-6 leading-relaxed">Clincoo AI tidak akan bisa lagi mengakses Calendar Anda. Anda dapat menghubungkan ulang kapan saja.</p>
+            <div class="flex items-center gap-2.5">
+                <button onclick="closeCalendarDisconnectModal()" class="flex-1 py-3 rounded-full border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition active:scale-[0.98]">Batal</button>
+                <button onclick="disconnectCalendar()" class="flex-1 py-3 rounded-full bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition active:scale-[0.98]">Putuskan</button>
             </div>
         </div>
     </div>
@@ -1244,6 +1339,192 @@
             closeDriveConnectedModal();
             setDriveConnectedUI(false);
         }
+        // ===== PLUGIN GOOGLE CALENDAR =====
+        // Alur identik Drive: Plugin -> Google (redirect_uri = /auth/, cookie state
+        // clinqoo_calendar_state) -> /auth/ kirim ulang code (calendar_code) -> tukar
+        // di /api/calendar-oauth -> token per-akun di localStorage.
+        const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar';
+
+        function calendarRedirectUri() { return window.location.origin + '/auth/'; }
+
+        function setCalendarBadge(connected) {
+            const badge = document.getElementById('calendar-status-badge');
+            if (badge) {
+                badge.classList.toggle('hidden', !connected);
+                badge.classList.toggle('flex', !!connected);
+            }
+        }
+
+        function setCalendarConnectedUI(connected) {
+            const btn = document.getElementById('calendar-connect-btn');
+            if (btn) btn.classList.toggle('hidden', connected);
+            setCalendarBadge(connected);
+        }
+
+        function openCalendarModal() {
+            const chk = document.getElementById('calendar-permission-check');
+            const cta = document.getElementById('calendar-connect-cta');
+            if (chk) chk.checked = false;
+            if (cta) { cta.disabled = true; cta.classList.add('opacity-40', 'pointer-events-none'); }
+            const errEl = document.getElementById('calendar-oauth-error');
+            if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+            document.getElementById('calendar-modal').classList.remove('hidden');
+        }
+
+        function closeCalendarModal() { document.getElementById('calendar-modal').classList.add('hidden'); }
+        function closeCalendarConnectedModal() { document.getElementById('calendar-connected-modal').classList.add('hidden'); }
+        function closeCalendarDisconnectModal() { document.getElementById('calendar-disconnect-modal').classList.add('hidden'); }
+        function confirmDisconnectCalendar() {
+            closeCalendarConnectedModal();
+            document.getElementById('calendar-disconnect-modal').classList.remove('hidden');
+        }
+
+        async function calendarRefreshAccessToken() {
+            const refresh = localStorage.getItem('clincoo_calendar_refresh');
+            const current = localStorage.getItem('clincoo_calendar_token') || '';
+            const expiry = parseInt(localStorage.getItem('clincoo_calendar_expiry') || '0', 10);
+            if (!refresh || (current && expiry && Date.now() < expiry - 60000)) return current;
+            try {
+                const res = await fetch('/api/calendar-oauth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + clinqooAuthToken() },
+                    body: JSON.stringify({ refresh_token: refresh })
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (res.ok && data.access_token) {
+                    localStorage.setItem('clincoo_calendar_token', data.access_token);
+                    localStorage.setItem('clincoo_calendar_expiry', String(Date.now() + (data.expires_in || 3600) * 1000));
+                    return data.access_token;
+                }
+            } catch (e) {}
+            return current;
+        }
+
+        async function startCalendarOAuth() {
+            const chk = document.getElementById('calendar-permission-check');
+            if (chk && !chk.checked) return;
+            if (location.hostname.indexOf('clincoo') === -1 && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                window.location.href = 'https://app.clincoo.buzz/integrasi/';
+                return;
+            }
+            document.getElementById('calendar-modal').classList.add('hidden');
+            document.getElementById('calendar-loading').classList.remove('hidden');
+            let clientId = null;
+            try {
+                const r = await fetch('/api/auth/google');
+                const d = await r.json();
+                clientId = d.client_id;
+            } catch (e) {}
+            if (!clientId) {
+                document.getElementById('calendar-loading').classList.add('hidden');
+                const errEl = document.getElementById('calendar-oauth-error');
+                if (errEl) { errEl.textContent = 'Client ID Google Clincoo tidak tersedia. Coba lagi sebentar.'; errEl.classList.remove('hidden'); }
+                document.getElementById('calendar-modal').classList.remove('hidden');
+                return;
+            }
+            const st = (crypto.randomUUID ? crypto.randomUUID() : ('c' + Date.now() + Math.random())).replace(/-/g, '');
+            const back = window.location.origin + window.location.pathname;
+            document.cookie = 'clinqoo_calendar_state=' + encodeURIComponent(JSON.stringify({ v: st, back: back, t: Date.now() })) + '; Max-Age=900; Path=/; SameSite=Lax; Secure';
+            window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + encodeURIComponent(clientId) +
+                '&redirect_uri=' + encodeURIComponent(calendarRedirectUri()) +
+                '&response_type=code&scope=' + encodeURIComponent(CALENDAR_SCOPE) +
+                '&access_type=offline&prompt=consent&state=' + st;
+        }
+
+        async function handleCalendarCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('calendar_code');
+            const errParam = urlParams.get('calendar_error');
+            if (!codeParam && !errParam) return;
+            window.history.replaceState({}, document.title, window.location.pathname);
+            const errEl = document.getElementById('calendar-oauth-error');
+            if (errParam) {
+                if (errEl) { errEl.textContent = 'Gagal menghubungkan Google Calendar: ' + errParam; errEl.classList.remove('hidden'); }
+                document.getElementById('calendar-modal').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('calendar-loading').classList.remove('hidden');
+            try {
+                const res = await fetch('/api/calendar-oauth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + clinqooAuthToken() },
+                    body: JSON.stringify({ code: codeParam, redirect_uri: calendarRedirectUri() })
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (res.status === 401) throw new Error('Silakan login Clincoo dulu, lalu buka halaman Plugin lagi.');
+                if (!res.ok || !data.access_token) throw new Error(data.error || 'Gagal menghubungkan Google Calendar (HTTP ' + res.status + ').');
+                localStorage.setItem('clincoo_calendar_token', data.access_token);
+                if (data.refresh_token) localStorage.setItem('clincoo_calendar_refresh', data.refresh_token);
+                localStorage.setItem('clincoo_calendar_expiry', String(Date.now() + (data.expires_in || 3600) * 1000));
+                if (data.user) localStorage.setItem('clincoo_calendar_user', JSON.stringify(data.user));
+                setCalendarConnectedUI(true);
+                showCalendarConnected(data.user || null);
+            } catch (ex) {
+                document.getElementById('calendar-loading').classList.add('hidden');
+                if (errEl) { errEl.textContent = 'Gagal menghubungkan: ' + (ex && ex.message ? ex.message : String(ex)); errEl.classList.remove('hidden'); }
+                document.getElementById('calendar-modal').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('calendar-loading').classList.add('hidden');
+        }
+
+        async function validateSavedCalendarConnection() {
+            const token = localStorage.getItem('clincoo_calendar_token');
+            if (!token) { setCalendarConnectedUI(false); return false; }
+            const fresh = await calendarRefreshAccessToken();
+            if (!fresh) { setCalendarConnectedUI(false); return false; }
+            try {
+                const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary?fields=summary', { headers: { Authorization: 'Bearer ' + fresh } });
+                if (r.status === 401) {
+                    ['clincoo_calendar_token', 'clincoo_calendar_refresh', 'clincoo_calendar_user', 'clincoo_calendar_expiry'].forEach(k => localStorage.removeItem(k));
+                    setCalendarConnectedUI(false);
+                    return false;
+                }
+                if (!r.ok) { setCalendarConnectedUI(false); return false; }
+                setCalendarConnectedUI(true);
+                return true;
+            } catch (e) {
+                setCalendarConnectedUI(false);
+                return false;
+            }
+        }
+
+        async function showCalendarConnected(user) {
+            let u = user;
+            if (!u) { try { u = JSON.parse(localStorage.getItem('clincoo_calendar_user') || 'null'); } catch (e) {} }
+            if (!u) {
+                try {
+                    const tok = await calendarRefreshAccessToken();
+                    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { headers: { Authorization: 'Bearer ' + tok } });
+                    const d = await r.json();
+                    if (d && (d.email || d.name)) u = { name: d.name || d.email, email: d.email || '', picture: d.picture || '' };
+                } catch (e) {}
+            }
+            const info = document.getElementById('calendar-user-info');
+            if (info && u) {
+                info.innerHTML =
+                    '<div class="flex items-center gap-3">' +
+                        '<img src="' + (u.picture || '') + '" alt="" class="w-10 h-10 rounded-full flex-shrink-0">' +
+                        '<div class="min-w-0 text-left">' +
+                            '<p class="font-semibold text-gray-900 text-[14px] truncate">' + (u.name || 'Calendar') + '</p>' +
+                            '<p class="text-xs text-gray-500 truncate">' + (u.email || '') + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex items-center justify-center gap-2 mt-3">' +
+                        '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>' +
+                        '<p class="text-[11.5px] text-emerald-600 leading-relaxed">Token aktif dengan akses ke Calendar Anda.</p>' +
+                    '</div>';
+            }
+            document.getElementById('calendar-connected-modal').classList.remove('hidden');
+        }
+
+        function disconnectCalendar() {
+            ['clincoo_calendar_token', 'clincoo_calendar_refresh', 'clincoo_calendar_user', 'clincoo_calendar_expiry'].forEach(k => localStorage.removeItem(k));
+            closeCalendarDisconnectModal();
+            closeCalendarConnectedModal();
+            setCalendarConnectedUI(false);
+        }
+
 
         window.addEventListener('load', () => {
             handleOAuthCallback();
@@ -1251,6 +1532,8 @@
             validateSavedGitHubConnection();
             handleDriveCallback();
             validateSavedDriveConnection();
+            handleCalendarCallback();
+            validateSavedCalendarConnection();
 
             const permCheck = document.getElementById('gh-permission-check');
             const ghCta = document.getElementById('gh-connect-cta');
@@ -1270,6 +1553,15 @@
                     driveCta.classList.toggle('pointer-events-none', !drivePermCheck.checked);
                 });
             }
+            const calPermCheck = document.getElementById('calendar-permission-check');
+            const calCta = document.getElementById('calendar-connect-cta');
+            if (calPermCheck && calCta) {
+                calPermCheck.addEventListener('change', () => {
+                    calCta.disabled = !calPermCheck.checked;
+                    calCta.classList.toggle('opacity-40', !calPermCheck.checked);
+                    calCta.classList.toggle('pointer-events-none', !calPermCheck.checked);
+                });
+            }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1286,10 +1578,21 @@
             if (driveCard) {
                 const openDrive = () => {
                     if (localStorage.getItem('clincoo_drive_token')) showDriveConnected(null);
+                    if (localStorage.getItem('clincoo_calendar_token')) showCalendarConnected(null);
                     else openDriveModal();
                 };
                 driveCard.addEventListener('click', openDrive);
                 driveCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrive(); } });
+
+                const calendarCard = document.getElementById('calendar-integration-card');
+                if (calendarCard) {
+                    const openCalendar = () => {
+                        if (localStorage.getItem('clincoo_calendar_token')) showCalendarConnected(null);
+                        else openCalendarModal();
+                    };
+                    calendarCard.addEventListener('click', openCalendar);
+                    calendarCard.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCalendar(); } });
+                }
             }
             const searchInput = document.getElementById('search-integrations');
             const filterDropdownBtn = document.getElementById('filter-modal-toggle');
