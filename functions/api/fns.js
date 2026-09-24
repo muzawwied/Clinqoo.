@@ -45,14 +45,53 @@ function fnJson(row) {
   return { id: row.id, name: row.name, description: row.description || '', code_length: (row.code || '').length, url: '/api/fn/' + row.name, created_at: row.created_at, updated_at: row.updated_at };
 }
 
+// ===== Pengaman eksekusi (perbaikan keamanan) =====
+// 1) safeFetch: blokir fetch dari function user ke host internal Clincoo / IP
+//    privat (anti-SSRF & anti-loop biaya). Semua host lain tetap diizinkan.
+const BLOCKED_HOST_RE = /(^|\.)(clincoo\.buzz|clinqoo\.biz\.id|clincoo-be2\.pages\.dev|clinqoo\.pages\.dev)$/i;
+const BLOCKED_IP_RE = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/i;
+function safeFetch(input, init) {
+  let urlStr;
+  try {
+    urlStr = (input instanceof Request) ? input.url : String(input);
+    const u = new URL(urlStr);
+    const host = u.hostname;
+    if (BLOCKED_HOST_RE.test(host) || BLOCKED_IP_RE.test(host)) {
+      return Promise.reject(new Error('fetch ke host internal tidak diizinkan: ' + host));
+    }
+  } catch (e) {
+    return Promise.reject(new Error('URL fetch tidak valid.'));
+  }
+  return fetch(input, init);
+}
+
+// 2) Rate limit invoke per user (D1, tahan lintas-isolate): 60 invoke / 5 menit
+async function rateLimitInvoke(DB, userKey) {
+  try {
+    const window = Math.floor(Date.now() / (5 * 60 * 1000));
+    await DB.prepare('CREATE TABLE IF NOT EXISTS rl_fn (k TEXT PRIMARY KEY, c INTEGER DEFAULT 0)').run();
+    const row = await DB.prepare('SELECT c FROM rl_fn WHERE k = ?').bind(userKey + '|' + window).first();
+    const count = (row?.c || 0) + 1;
+    if (!row) await DB.prepare('INSERT INTO rl_fn (k, c) VALUES (?, 1)').bind(userKey + '|' + window).run();
+    else await DB.prepare('UPDATE rl_fn SET c = ? WHERE k = ?').bind(count, userKey + '|' + window).run();
+    if (count === 1) { // bersihkan jendela lama sesekali
+      try { await DB.prepare("DELETE FROM rl_fn WHERE k LIKE ?").bind(userKey + '|' + (window - 1) + '%').run(); } catch (e) {}
+    }
+    return count <= 60;
+  } catch (e) { return true; /* jangan blokir karena DB gangguan */ }
+}
+
 // ===== Eksekusi kode function user (timeout 15 detik) =====
 export async function invokeFunction(DB, userKey, name, args) {
   await ensureTable(DB);
   const row = await getFn(DB, userKey, name);
   if (!row) return { error: `Function "${name}" tidak ditemukan. Buat dulu dengan create_backend_function.` };
+  if (!(await rateLimitInvoke(DB, userKey))) {
+    return { error: 'Terlalu banyak pemanggilan function. Coba lagi dalam beberapa menit.' };
+  }
   let fn;
   try {
-    // badan fungsi async dengan parameter args; fetch & JSON tersedia
+    // badan fungsi async dengan parameter args; safeFetch (bukan fetch mentah) & JSON tersedia
     fn = new Function('args', 'fetch', 'JSON', '"use strict"; return (async () => {' + row.code + '})();');
   } catch (e) {
     return { error: 'Kode function tidak valid: ' + e.message };
@@ -60,7 +99,7 @@ export async function invokeFunction(DB, userKey, name, args) {
   const safeArgs = (args && typeof args === 'object' && !Array.isArray(args)) ? args : {};
   const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Function melebihi 15 detik (timeout)')), 15_000));
   try {
-    const value = await Promise.race([fn(safeArgs, fetch, JSON), timeout]);
+    const value = await Promise.race([fn(safeArgs, safeFetch, JSON), timeout]);
     let out;
     try { out = JSON.stringify(value === undefined ? null : value); }
     catch (e) { out = JSON.stringify(String(value)); }

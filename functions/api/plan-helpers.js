@@ -20,7 +20,7 @@ export const PLAN_AI_LIMITS = {
 };
 
 // Email admin: bypass semua gate paket (kebijakan internal).
-export const ADMIN_EMAILS = new Set(['muzawwied@gmail.com', 'muzawwied@gmail.com']);
+export const ADMIN_EMAILS = new Set(['muzawwied@gmail.com']);
 
 // Rencana efektif dari key user ('u<id>') — dipakai lintas endpoint tanpa bentuk objek user penuh.
 export async function getEffectivePlanByUserKey(db, userKey) {

@@ -893,7 +893,10 @@
             if (!text) return '';
             try {
                 const html = marked.parse(text);
-                return window.DOMPurify ? DOMPurify.sanitize(html) : html;
+                // Perbaikan keamanan: jika DOMPurify gagal dimuat dari CDN, JANGAN
+                // pernah render HTML mentah (pintu XSS). Render sebagai teks polos.
+                if (!window.DOMPurify) return escText(text);
+                return DOMPurify.sanitize(html);
             } catch (e) {
                 return escText(text);
             }
@@ -1043,68 +1046,31 @@
 
             try {
                 outputEl.innerHTML = '<span class="text-blue-400 animate-pulse">Menyiapkan E2B Sandbox (e2b.dev)...</span>';
-                let CodeInterpreter;
-                try {
-                    const e2bModule = await import('https://esm.sh/@e2b/code-interpreter?bundle&target=es2022');
-                    CodeInterpreter = e2bModule.CodeInterpreter || e2bModule.default?.CodeInterpreter;
-                } catch (importErr) {
-                    throw new Error("Gagal memuat modul E2B, beralih ke fallback.");
+                // Eksekusi diproxy di server (/api/e2b-run): API key E2B tidak pernah
+                // diunduh ke browser (perbaikan keamanan; dulu key dibagikan mentah).
+                const runRes = await fetch(TOOL_API_BASE + '/api/e2b-run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, language: targetLang })
+                });
+                if (!runRes.ok) {
+                    throw new Error('Proxy sandbox gagal (HTTP ' + runRes.status + '), beralih ke fallback.');
                 }
+                const runJson = await runRes.json().catch(() => null);
+                if (!runJson) throw new Error('Respons sandbox tidak valid, beralih ke fallback.');
 
-                if (!CodeInterpreter) throw new Error("E2B CodeInterpreter tidak tersedia.");
-                
-                let e2bKey = '';
-                try {
-                    const keyRes = await fetch('https://clincoo-be2.pages.dev/api/e2b');
-                    if (keyRes.ok) { const kj = await keyRes.json(); e2bKey = kj.apiKey || ''; }
-                } catch(e) {}
-                if (!e2bKey) throw new Error("E2B API key tidak tersedia, beralih ke fallback.");
-                const sandbox = await CodeInterpreter.create({ apiKey: e2bKey });
-                
                 outputEl.innerHTML = '<span class="text-blue-400 animate-pulse">Mengeksekusi kode dalam Sandbox...</span>';
 
-                let outputText = "";
-                let errorText = "";
-
-                if (targetLang === 'python') {
-                    const exec = await sandbox.notebook.execCell(code);
-                    if (exec.text) outputText += exec.text + "\n";
-                    if (exec.results) {
-                        for (const res of exec.results) {
-                            if (res.text) outputText += res.text + "\n";
-                            if (res.error) errorText += res.error.value + "\n";
-                        }
-                    }
-                    if (exec.logs) {
-                        if (exec.logs.stdout) outputText += exec.logs.stdout.join('\n');
-                        if (exec.logs.stderr) errorText += exec.logs.stderr.join('\n');
-                    }
-                    if (exec.error) {
-                        errorText += `${exec.error.name}: ${exec.error.value}\n${exec.error.traceback}`;
-                    }
-                } else {
-                    const e2bLangMap = {
-                        'javascript': { filename: 'main.js', runCmd: 'node main.js' },
-                        'js': { filename: 'main.js', runCmd: 'node main.js' },
-                        'java': { filename: 'Main.java', runCmd: 'javac Main.java && java Main' },
-                        'c': { filename: 'main.c', runCmd: 'gcc main.c -o main && ./main' },
-                        'cpp': { filename: 'main.cpp', runCmd: 'g++ main.cpp -o main && ./main' },
-                        'php': { filename: 'main.php', runCmd: 'php main.php' },
-                        'ruby': { filename: 'main.rb', runCmd: 'ruby main.rb' },
-                        'go': { filename: 'main.go', runCmd: 'go run main.go' },
-                        'rust': { filename: 'main.rs', runCmd: 'rustc main.rs && ./main' }
-                    };
-                    
-                    const runInfo = e2bLangMap[targetLang] || { filename: 'main.txt', runCmd: 'cat main.txt' };
-                    
-                    await sandbox.filesystem.write(runInfo.filename, code);
-                    const cmdExe = await sandbox.commands.run(runInfo.runCmd);
-                    
-                    outputText = cmdExe.stdout;
-                    errorText = cmdExe.stderr || (cmdExe.error ? cmdExe.error.message : "");
+                let outputText = String(runJson.stdout || '');
+                let errorText = String(runJson.stderr || '');
+                if (runJson.error && runJson.error.value) {
+                    errorText += (runJson.error.name ? runJson.error.name + ': ' : '') + runJson.error.value;
                 }
-
-                await sandbox.close();
+                if (runJson.results && runJson.results.length) {
+                    for (const res of runJson.results) {
+                        if (res.text) outputText += res.text + "\n";
+                    }
+                }
 
                 if (errorText) {
                     outputEl.innerHTML = `<span class="text-red-400">${errorText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span>`;
@@ -2841,33 +2807,26 @@
         async function toolRunCommand(args) {
             const cmd = args && args.command ? String(args.command) : '';
             if (!cmd) return { success: false, error: 'Parameter command wajib.' };
-            let CodeInterpreter;
+            // Diproxy di server (/api/e2b-run, mode command): API key E2B tidak pernah
+            // diunduh ke browser (perbaikan keamanan; dulu key dibagikan mentah).
             try {
-                const e2bModule = await import('https://esm.sh/@e2b/code-interpreter?bundle&target=es2022');
-                // SDK E2B v1 mengekspor class 'CodeInterpreter'; v2 (>= 2.x) menamainya
-                // 'Sandbox' dan tidak lagi mengekspor CodeInterpreter. Terima keduanya
-                // supaya modul CDN yang diperbarui esm.sh tidak mematikan tool ini lagi.
-                CodeInterpreter = e2bModule.CodeInterpreter || e2bModule.default?.CodeInterpreter ||
-                                 e2bModule.Sandbox || e2bModule.default?.Sandbox;
-            } catch (e) { return { success: false, error: 'Gagal memuat modul sandbox eksekusi kode.' }; }
-            if (!CodeInterpreter) return { success: false, error: 'Sandbox eksekusi kode tidak tersedia.' };
-            let e2bKey = '';
-            try {
-                const keyRes = await fetch(TOOL_API_BASE + '/api/e2b');
-                if (keyRes.ok) { const kj = await keyRes.json(); e2bKey = kj.apiKey || ''; }
-            } catch (e) {}
-            if (!e2bKey) return { success: false, error: 'Sandbox eksekusi kode belum dikonfigurasi.' };
-            const sandbox = await CodeInterpreter.create({ apiKey: e2bKey });
-            try {
-                const exe = await sandbox.commands.run(cmd);
+                const res = await fetch(TOOL_API_BASE + '/api/e2b-run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'command', command: cmd })
+                });
+                const d = await res.json().catch(() => null);
+                if (!d) return { success: false, error: 'Respons sandbox tidak valid.' };
+                if (d.error && !d.ok) return { success: false, error: String(d.error.value || d.error.name || 'Eksekusi gagal.') };
+                const errText = String(d.error && d.error.value ? (d.error.name ? d.error.name + ': ' : '') + d.error.value : (d.stderr || '')).slice(0, 1500);
                 return {
-                    success: !exe.exitCode,
+                    success: !!d.ok,
                     command: cmd,
-                    stdout: String(exe.stdout || '').slice(0, 3800),
-                    stderr: String(exe.stderr || (exe.error ? exe.error.message : '')).slice(0, 1500)
+                    stdout: String(d.stdout || '').slice(0, 3800),
+                    stderr: errText
                 };
-            } finally {
-                try { await sandbox.close(); } catch (e) {}
+            } catch (e) {
+                return { success: false, error: 'Sandbox eksekusi tidak tersedia: ' + (e && e.message ? e.message : 'galat tak dikenal') };
             }
         }
 

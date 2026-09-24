@@ -55,10 +55,17 @@ function tooMany(retryAfter) {
   });
 }
 
-// ---- 2. VALIDASI ORIGIN (anti-phishing / anti-lintas-situs) ----
-// Frontend resmi Clincoo: origin sama (pages.dev produksi), muzawwied.github.io, *.workers.dev, *.clincoo.buzz (domain utama).
-// Browsers selalu mengirim Origin pada cross-site POST; absen Origin = klien non-browser (curl/webhook) → diizinkan (auth tetap dicek handler).
-const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clincoo\.buzz$)/;
+// ---- 2. VALIDASI ORIGIN (anti-phishing / anti-lints-situs) ----
+// DUA TINGKAT KEPERCAYAAN (perbaikan keamanan):
+//  a) originOk — LONGGAR: hanya untuk echo CORS preflight (OPTIONS). Diperlukan karena
+//     situs hasil deploy user (subdomain *.clinqoo.biz.id dan cadangan *.pages.dev)
+//     memanggil /api/fn lintas-origin. Token auth = header Bearer (bukan cookie),
+//     jadi echo CORS longgar tidak memberi akses apa pun tanpa token.
+//  b) strictOriginOk — KETAT: untuk mutasi /api/auth dan /api/admin. HANYA host milik
+//     Clincoo sendiri. Sebelumnya regex menerima SEMUA subdomain *.pages.dev /
+//     *.workers.dev milik siapa pun (halaman phising siapa pun lolos cek ini).
+const ORIGIN_ALLOW = /^(^[^.:]+\.pages\.dev$)|(^muzawwied\.github\.io$)|(^[^.:]+\.workers\.dev$)|(^([\w-]+\.)*clincoo\.buzz$)|(^([\w-]+\.)*clinqoo\.biz\.id$)/;
+const ORIGIN_STRICT = /^(^clincoo-be2\.pages\.dev$)|(^clinqoo\.pages\.dev$)|(^muzawwied\.github\.io$)|(^([\w-]+\.)*clincoo\.buzz$)|(^localhost(:\d+)?$)/;
 function originOk(request) {
   const origin = request.headers.get('origin');
   if (!origin) return true; // curl / webhook server (BuatQris, e-wallet) — tanpa browser
@@ -66,6 +73,15 @@ function originOk(request) {
     const o = new URL(origin);
     const host = new URL(request.url).host;
     return o.host === host || ORIGIN_ALLOW.test(o.host);
+  } catch { return false; }
+}
+function strictOriginOk(request) {
+  const origin = request.headers.get('origin');
+  if (!origin) return false; // mutasi auth/admin WAJIB bawa Origin browser resmi
+  try {
+    const o = new URL(origin);
+    const host = new URL(request.url).host;
+    return o.host === host || ORIGIN_STRICT.test(o.host);
   } catch { return false; }
 }
 
@@ -142,7 +158,7 @@ export async function onRequest({ request, env, next }) {
 
   // 2. Anti-lintas-situs untuk request yang mengubah data di endpoint sensitif
   const mutates = request.method !== 'GET' && request.method !== 'HEAD';
-  if (mutates && (/^\/api\/(auth|admin)(\/|$)/.test(path)) && !originOk(request)) {
+  if (mutates && (/^\/api\/(auth|admin)(\/|$)/.test(path)) && !strictOriginOk(request)) {
     await logBlocked(env, 'origin_blocked', ipOf(request), path + ' dari ' + (request.headers.get('origin') || '?'));
     return new Response(JSON.stringify({ error: 'Permintaan lintas situs ditolak.' }), {
       status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
@@ -160,7 +176,7 @@ export async function onRequest({ request, env, next }) {
       await logBlocked(env, 'bot_ua_blocked', ip, path + ' UA=' + (ua || 'kosong').slice(0, 90));
       return new Response(JSON.stringify({ error: 'Ditolak.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
     }
-    if (mutates && !(request.headers.get('origin') && originOk(request))) {
+    if (mutates && !(request.headers.get('origin') && strictOriginOk(request))) {
       await logBlocked(env, 'origin_blocked', ip, 'auth-wajib-origin ' + path);
       return new Response(JSON.stringify({ error: 'Permintaan lintas situs ditolak.' }), {
         status: 403, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
