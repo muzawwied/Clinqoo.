@@ -167,7 +167,7 @@ export async function onRequestPost({ request, env }) {
       await notifyEvent(db, user, {
         source: 'Kredit AI', type: 'credits',
         message: 'Paket Kredit AI ' + pack.name + ' aktif: ' + pack.credits + ' kredit selama ' + pack.days + ' hari. Total ' + formatIDR(pack.price) + ' dipotong dari Saldo Dompet.',
-        link: 'https://clinqoo.pages.dev/akun/langganan/kredit/'
+        link: 'https://app.clincoo.buzz/akun/langganan/kredit/'
       });
     } catch (e2) {}
     try {
@@ -192,7 +192,7 @@ export async function onRequestPost({ request, env }) {
               ['Saldo Dompet Tersisa', formatIDR(newBalance)]
             ],
             'Lihat Kredit Anda',
-            'https://clinqoo.pages.dev/akun/langganan/kredit/',
+            'https://app.clincoo.buzz/akun/langganan/kredit/',
             'Sisa kredit dapat dilihat di halaman Kredit AI pada akun Clincoo Anda. Kredit yang tidak terpakai hingga masa aktif berakhir akan hangus.'
           )
         });

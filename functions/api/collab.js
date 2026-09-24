@@ -13,7 +13,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-const FRONTEND_BASE = 'https://clinqoo.pages.dev/akun/';
+const FRONTEND_BASE = 'https://app.clincoo.buzz/akun/';
 const INVITE_MAX_AGE_HOURS = 24;
 
 function j(data, status) {

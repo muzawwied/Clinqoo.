@@ -12,15 +12,15 @@ function toast(msg){
 
 /* ---------- data properti ---------- */
 const PROPS=[
- {id:1,tipe:'Rumah',judul:'Casa Loka — Rumah Tropis dengan Kolam',area:'Jakarta',lokasi:'Permata Hijau, Jakarta Selatan',harga:3200000000,spec:'4 KT · 3 KM · 240 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/rumah-tropis.jpg',tag:'Populer'},
- {id:2,tipe:'Rumah',judul:'Rumah Minimalis 2 Lantai',area:'Bandung',lokasi:'Dago, Bandung',harga:1850000000,spec:'3 KT · 2 KM · 180 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/rumah-minimalis.jpg',tag:'Baru'},
- {id:3,tipe:'Apartemen',judul:'Sky Garden 2BR Sudirman',area:'Jakarta',lokasi:'Sudirman, Jakarta Selatan',harga:850000000,spec:'2 KT · 1 KM · 68 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/apartemen.jpg',tag:''},
- {id:4,tipe:'Ruko',judul:'Ruko Premier 3 Lantai',area:'Tangerang',lokasi:'Alam Sutera, Tangerang',harga:2400000000,spec:'Luas bangunan 168 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/ruko.jpg',tag:'Investasi'},
- {id:5,tipe:'Rumah',judul:'Villa Anakena Ubud',area:'Bali',lokasi:'Ubud, Bali',harga:5900000000,spec:'5 KT · 5 KM · 420 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/villa.jpg',tag:'Premium'},
- {id:6,tipe:'Tanah',judul:'Kavling Siang Bangun 600 m²',area:'Bali',lokasi:'Kuta Utara, Badung, Bali',harga:780000000,spec:'SHM · 600 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/tanah.jpg',tag:''},
- {id:7,tipe:'Rumah',judul:'Rumah Skandinavia Bintaro',area:'Tangerang',lokasi:'Bintaro, Tangerang Selatan',harga:1200000000,spec:'3 KT · 2 KM · 145 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/rumah-minimalis.jpg',tag:''},
- {id:8,tipe:'Apartemen',judul:'1BR Riverside Gubeng',area:'Surabaya',lokasi:'Gubeng, Surabaya',harga:420000000,spec:'1 KT · 1 KM · 42 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/apartemen.jpg',tag:'Baru'},
- {id:9,tipe:'Tanah',judul:'Kavling Komersial 1.200 m²',area:'Bekasi',lokasi:'Summarecon, Bekasi',harga:1500000000,spec:'SHM · 1.200 m²',img:'assets/index.htmlhttps://clinqoo.pages.dev/assets/demo/vylonium-properti/assets/img/tanah.jpg',tag:''}
+ {id:1,tipe:'Rumah',judul:'Casa Loka — Rumah Tropis dengan Kolam',area:'Jakarta',lokasi:'Permata Hijau, Jakarta Selatan',harga:3200000000,spec:'4 KT · 3 KM · 240 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/rumah-tropis.jpg',tag:'Populer'},
+ {id:2,tipe:'Rumah',judul:'Rumah Minimalis 2 Lantai',area:'Bandung',lokasi:'Dago, Bandung',harga:1850000000,spec:'3 KT · 2 KM · 180 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/rumah-minimalis.jpg',tag:'Baru'},
+ {id:3,tipe:'Apartemen',judul:'Sky Garden 2BR Sudirman',area:'Jakarta',lokasi:'Sudirman, Jakarta Selatan',harga:850000000,spec:'2 KT · 1 KM · 68 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/apartemen.jpg',tag:''},
+ {id:4,tipe:'Ruko',judul:'Ruko Premier 3 Lantai',area:'Tangerang',lokasi:'Alam Sutera, Tangerang',harga:2400000000,spec:'Luas bangunan 168 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/ruko.jpg',tag:'Investasi'},
+ {id:5,tipe:'Rumah',judul:'Villa Anakena Ubud',area:'Bali',lokasi:'Ubud, Bali',harga:5900000000,spec:'5 KT · 5 KM · 420 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/villa.jpg',tag:'Premium'},
+ {id:6,tipe:'Tanah',judul:'Kavling Siang Bangun 600 m²',area:'Bali',lokasi:'Kuta Utara, Badung, Bali',harga:780000000,spec:'SHM · 600 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/tanah.jpg',tag:''},
+ {id:7,tipe:'Rumah',judul:'Rumah Skandinavia Bintaro',area:'Tangerang',lokasi:'Bintaro, Tangerang Selatan',harga:1200000000,spec:'3 KT · 2 KM · 145 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/rumah-minimalis.jpg',tag:''},
+ {id:8,tipe:'Apartemen',judul:'1BR Riverside Gubeng',area:'Surabaya',lokasi:'Gubeng, Surabaya',harga:420000000,spec:'1 KT · 1 KM · 42 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/apartemen.jpg',tag:'Baru'},
+ {id:9,tipe:'Tanah',judul:'Kavling Komersial 1.200 m²',area:'Bekasi',lokasi:'Summarecon, Bekasi',harga:1500000000,spec:'SHM · 1.200 m²',img:'assets/index.html/assets/demo/vylonium-properti/assets/img/tanah.jpg',tag:''}
 ];
 const fmtRp=n=>n>=1e9?'Rp '+(Math.round(n/1e9*100)/100).toLocaleString('id-ID')+' M':'Rp '+Math.round(n/1e6).toLocaleString('id-ID')+' jt';
 function card(p,i){

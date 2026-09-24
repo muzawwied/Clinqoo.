@@ -2,7 +2,7 @@
 window.GAMES = [
   {
     slug: "ml", name: "Mobile Legends: Bang Bang", publisher: "Moonton",
-    genre: "MOBA", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/ml.png", popular: true,
+    genre: "MOBA", logo: "/assets/demo/vylonium-topup/assets/img/logos/ml.png", popular: true,
     idLabel: "User ID", idHint: "Lihat di profil in-game kamu (angka).",
     serverLabel: "Server / Zone ID", serverHint: "Contoh: 2214",
     denoms: [
@@ -20,7 +20,7 @@ window.GAMES = [
   },
   {
     slug: "ff", name: "Free Fire (MAX)", publisher: "Garena",
-    genre: "Battle Royale", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/ff.png", popular: true,
+    genre: "Battle Royale", logo: "/assets/demo/vylonium-topup/assets/img/logos/ff.png", popular: true,
     idLabel: "User ID", idHint: "Angka di halaman profil akun FF kamu.",
     denoms: [
       { label: "5 Diamonds", price: 1000, note: "Paket kecil" },
@@ -37,7 +37,7 @@ window.GAMES = [
   },
   {
     slug: "pubg", name: "PUBG Mobile", publisher: "Level Infinite",
-    genre: "Battle Royale", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/pubg.svg", popular: true,
+    genre: "Battle Royale", logo: "/assets/demo/vylonium-topup/assets/img/logos/pubg.svg", popular: true,
     idLabel: "Character ID", idHint: "Angka ID di profil PUBG Mobile kamu.",
     denoms: [
       { label: "60 UC", price: 13000, note: "Paket hemat" },
@@ -50,7 +50,7 @@ window.GAMES = [
   },
   {
     slug: "genshin", name: "Genshin Impact", publisher: "HoYoverse",
-    genre: "RPG", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/genshin.svg", popular: true,
+    genre: "RPG", logo: "/assets/demo/vylonium-topup/assets/img/logos/genshin.svg", popular: true,
     idLabel: "UID (9 digit)", idHint: "Lihat di pojok bawah layar profil.",
     denoms: [
       { label: "60 Genesis Crystals", price: 15000, note: "Paket hemat" },
@@ -63,7 +63,7 @@ window.GAMES = [
   },
   {
     slug: "valorant", name: "Valorant", publisher: "Riot Games",
-    genre: "FPS", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/valorant.svg", popular: false,
+    genre: "FPS", logo: "/assets/demo/vylonium-topup/assets/img/logos/valorant.svg", popular: false,
     idLabel: "Riot ID", idHint: "Format: Nama#Tag (contoh: Vylonium#1234).",
     denoms: [
       { label: "475 VP", price: 50000, note: "Paket hemat" },
@@ -75,7 +75,7 @@ window.GAMES = [
   },
   {
     slug: "codm", name: "Call of Duty: Mobile", publisher: "Activision",
-    genre: "FPS", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/codm.png", popular: false,
+    genre: "FPS", logo: "/assets/demo/vylonium-topup/assets/img/logos/codm.png", popular: false,
     idLabel: "UID Akun", idHint: "Lihat di halaman profil CODM kamu.",
     denoms: [
       { label: "80 CP", price: 15000, note: "Paket hemat" },
@@ -87,7 +87,7 @@ window.GAMES = [
   },
   {
     slug: "hsr", name: "Honkai: Star Rail", publisher: "HoYoverse",
-    genre: "RPG", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/hsr.svg", popular: true,
+    genre: "RPG", logo: "/assets/demo/vylonium-topup/assets/img/logos/hsr.svg", popular: true,
     idLabel: "UID (9 digit)", idHint: "Lihat di menu profil in-game.",
     denoms: [
       { label: "60 Oneiric Shards", price: 15000, note: "Paket hemat" },
@@ -100,7 +100,7 @@ window.GAMES = [
   },
   {
     slug: "roblox", name: "Roblox", publisher: "Roblox Corporation",
-    genre: "Sandbox", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/roblox.svg", popular: false,
+    genre: "Sandbox", logo: "/assets/demo/vylonium-topup/assets/img/logos/roblox.svg", popular: false,
     idLabel: "Username Roblox", idHint: "Bukan nama tampilan — username akun.",
     denoms: [
       { label: "80 Robux", price: 16000, note: "Paket hemat" },
@@ -112,7 +112,7 @@ window.GAMES = [
   },
   {
     slug: "fortnite", name: "Fortnite", publisher: "Epic Games",
-    genre: "Battle Royale", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/fortnite.svg", popular: false,
+    genre: "Battle Royale", logo: "/assets/demo/vylonium-topup/assets/img/logos/fortnite.svg", popular: false,
     idLabel: "Epic Username", idHint: "Username akun Epic Games kamu.",
     denoms: [
       { label: "1000 V-Bucks", price: 135000, note: "Paket standar" },
@@ -123,7 +123,7 @@ window.GAMES = [
   },
   {
     slug: "clashroyale", name: "Clash Royale", publisher: "Supercell",
-    genre: "Strategy", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/clashroyale.png", popular: false,
+    genre: "Strategy", logo: "/assets/demo/vylonium-topup/assets/img/logos/clashroyale.png", popular: false,
     idLabel: "Player Tag", idHint: "Format #XXXXXXXX di profil.",
     denoms: [
       { label: "80 Gems", price: 15000, note: "Paket hemat" },
@@ -135,7 +135,7 @@ window.GAMES = [
   },
   {
     slug: "minecraft", name: "Minecraft", publisher: "Mojang Studios",
-    genre: "Sandbox", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/minecraft.png", popular: false,
+    genre: "Sandbox", logo: "/assets/demo/vylonium-topup/assets/img/logos/minecraft.png", popular: false,
     idLabel: "Email / Username Minecraft", idHint: "Email akun Minecraft kamu.",
     denoms: [
       { label: "1720 Minecoins", price: 155000, note: "Bedrock Edition" },
@@ -145,7 +145,7 @@ window.GAMES = [
   },
   {
     slug: "efootball", name: "eFootball", publisher: "Konami",
-    genre: "Sports", logo: "https://clinqoo.pages.dev/assets/demo/vylonium-topup/assets/img/logos/efootball.svg", popular: false,
+    genre: "Sports", logo: "/assets/demo/vylonium-topup/assets/img/logos/efootball.svg", popular: false,
     idLabel: "KONAMI ID", idHint: "ID akun eFootball kamu.",
     denoms: [
       { label: "110 Coins", price: 16000, note: "Paket hemat" },
