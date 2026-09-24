@@ -225,7 +225,7 @@ window.ClinqooBack = function (fallbackUrl) {
   // yang benar, tidak bergantung urutan tab.
   var PROJECT_PAGES = ['chat', 'workspace', 'environment', 'keamanan',
     'pengaturan', 'umum', 'build-deployment', 'build-deployment-config', 'build-deployment-dashboard', 'domain-kustom',
-    'keamanan-https', 'visibilitas-akses', 'integrasi-webhook', 'zona-bahaya', 'workspace-editor'];
+    'keamanan-https', 'visibilitas-akses', 'integrasi-webhook', 'zona-bahaya', 'workspace-editor', 'editor'];
 
   function patchProjectLinks() {
     if (!isAuthPage && location.pathname.indexOf('/proyek/') !== -1) {
