@@ -2318,6 +2318,14 @@
         const TOOL_API_BASE = (['clincoo-be2.pages.dev','localhost','127.0.0.1'].indexOf(location.hostname) === -1) ? 'https://clincoo-be2.pages.dev' : '';
         const GEMINI_PROXY_URL = TOOL_API_BASE + '/api/chat'; // backend AI Clincoo (kuota 25/hari user gratis, 500/hari admin)
 
+        // Token login Clincoo dipakai tools API (github_request, cloudflare_request,
+        // test_secret). Sebelumnya hanya ada di IIFE bawah file (script block lain),
+        // sehingga tool GitHub melempar ReferenceError: clinqooAuthToken is not defined.
+        function clinqooAuthToken() {
+            try { return localStorage.getItem('clinqoo_auth_token') || localStorage.getItem('clinqoo_token') || ''; } catch (e) { return ''; }
+        }
+        window.clinqooAuthToken = clinqooAuthToken;
+
         // ===== WORKSPACE FILE/FOLDER CRUD (shared store with ../workspace/) =====
         // Kunci workspace per-proyek — sama dengan pola per-chat (lsChatKey), murni localStorage tanpa D1.
         function wsFilesKey() {
