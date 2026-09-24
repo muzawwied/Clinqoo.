@@ -2842,7 +2842,11 @@
             let CodeInterpreter;
             try {
                 const e2bModule = await import('https://esm.sh/@e2b/code-interpreter?bundle&target=es2022');
-                CodeInterpreter = e2bModule.CodeInterpreter || e2bModule.default?.CodeInterpreter;
+                // SDK E2B v1 mengekspor class 'CodeInterpreter'; v2 (>= 2.x) menamainya
+                // 'Sandbox' dan tidak lagi mengekspor CodeInterpreter. Terima keduanya
+                // supaya modul CDN yang diperbarui esm.sh tidak mematikan tool ini lagi.
+                CodeInterpreter = e2bModule.CodeInterpreter || e2bModule.default?.CodeInterpreter ||
+                                 e2bModule.Sandbox || e2bModule.default?.Sandbox;
             } catch (e) { return { success: false, error: 'Gagal memuat modul sandbox eksekusi kode.' }; }
             if (!CodeInterpreter) return { success: false, error: 'Sandbox eksekusi kode tidak tersedia.' };
             let e2bKey = '';
