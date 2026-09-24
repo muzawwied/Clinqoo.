@@ -15,27 +15,27 @@ var ClinqooTemplates = (function () {
       "portfolio": {
     "name": "Portfolio Profesional",
     "desc": "Portfolio pribadi full-stack developer — desain gelap elegan dengan bagian karya, layanan, blog, dan kontak.",
-    "url": "index.html"
+    "url": "/demo/portfolio/"
   },
   "saas": {
     "name": "Landing Page SaaS",
     "desc": "Landing page produk SaaS modern — hero, fitur, showcase, testimoni, pricing, dan FAQ dalam satu halaman ringan yang siap konversi.",
-    "url": "index.html"
+    "url": "/demo/saas/"
   },
   "topup": {
     "name": "Top Up Game",
     "desc": "Situs top up game instan dengan tema terang/gelap — katalog game populer, pilihan nominal lengkap, metode pembayaran beragam, dan pelacakan status pesanan.",
-    "url": "index.html"
+    "url": "/demo/topup/"
   },
       "tasks": {
     "name": "Manajemen Tugas",
     "desc": "Aplikasi manajemen tugas profesional — dashboard statistik, papan kanban, kalender, proyek, dan laporan dalam desain terang elegan.",
-    "url": "index.html"
+    "url": "/demo/tasks/"
   },
       "properti": {
     "name": "Web Properti",
     "desc": "Template web properti profesional — katalog listing dengan filter tipe, lokasi, dan budget; valuasi properti; layanan agen; serta halaman properti, layanan, tentang, dan kontak.",
-    "url": "index.html"
+    "url": "/demo/properti/"
   }
 };
   var files = {
