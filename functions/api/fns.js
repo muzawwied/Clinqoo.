@@ -288,7 +288,7 @@ async function runFunctionCode(DB, row, args, origin) {
   } catch (e) {
     return { error: 'Eksekusi gagal: ' + (e && e.message || e) };
   }
-  if (!out || out.error) return { error: 'Sandbox error: ' + ((out && out.error && (out.error.value || out.error.name)) || 'tidak diketahui') };
+  if (!out) return { error: 'Sandbox error: tidak ada respons dari sandbox.' };
 
   const stdout = String(out.stdout || '');
   const marker = stdout.indexOf('__FNRESULT__');
