@@ -33,7 +33,31 @@ async function handle({ request, env, params }) {
   const name = String((params || {}).name || '').toLowerCase();
   if (!name) return json({ error: 'Nama function kosong' }, 400);
   const user = await resolveUser(env, request);
-  if (!user) return json({ error: 'Login diperlukan', need_login: true }, 401);
+  if (!user) {
+    // ===== WEBHOOK PUBLIK =====
+    // Function yang ditandai is_public bisa dipanggil TANPA login dengan
+    // key rahasia (?key=... atau header X-Webhook-Key) — untuk callback
+    // payment gateway / layanan eksternal. Kuota pemakaian mengikuti pemilik.
+    const url = new URL(request.url);
+    const secret = url.searchParams.get('key') || request.headers.get('X-Webhook-Key') || '';
+    if (!secret) return json({ error: 'Login diperlukan. Untuk akses webhook publik sertakan parameter key.', need_login: true }, 401);
+    const m = await import('../fns.js');
+    let args = {};
+    if (request.method === 'POST') {
+      try { args = await request.json(); } catch (e) { args = {}; }
+    } else {
+      const a = url.searchParams.get('a');
+      if (a) { try { args = JSON.parse(a); } catch (e) {} }
+    }
+    try {
+      const r = await m.invokePublicFunction(env.DB, name, secret, args, request.headers.get('cf-connecting-ip') || 'unknown');
+      const status = r && r.status ? r.status : 200;
+      delete r.status;
+      return json(r, status);
+    } catch (e) {
+      return json({ error: 'Server error: ' + e.message }, 500);
+    }
+  }
 
   let args = {};
   try {
