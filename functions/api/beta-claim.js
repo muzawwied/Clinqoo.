@@ -25,7 +25,7 @@ async function ensureTable(db) {
   await db.prepare(`CREATE TABLE IF NOT EXISTS beta_claims (
     email TEXT PRIMARY KEY,
     token TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',   // pending | claimed_unapplied | applied
+    status TEXT NOT NULL DEFAULT 'pending',
     created_at TEXT NOT NULL,
     claimed_at TEXT
   )`).run();
