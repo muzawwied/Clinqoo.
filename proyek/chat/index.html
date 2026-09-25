@@ -3938,14 +3938,25 @@ if (loadChatLog()) {
             if (lastMsg.role === 'ai' && lastMsg.isProcessing && !lastMsg.completed && messages.length >= 2 &&
                 messages[messages.length - 2].role === 'user') {
                 if (lastMsg.toolCalls && lastMsg.toolCalls.length > 0) {
+                    // REFRESH DI TENGAH TUGAS: JANGAN klaim "selesai" — progresnya
+                    // nyata (file sudah ditulis) tapi tugas BELUM selesai. Finalisasi
+                    // kartu progres apa adanya, tandai checkpoint, lalu AUTO-LANJUT:
+                    // kirim "lanjut" supaya AI meneruskan sisa tugas dari titik
+                    // terpotong (aturan prompt: langsung kerjakan sisa, tanpa
+                    // list_items root / cek workspace ulang).
                     lastMsg.isProcessing = false;
                     lastMsg.isTyping = false;
                     if (!lastMsg.text || !String(lastMsg.text).trim()) {
-                        lastMsg.text = 'Proses selesai — progres tersimpan. Cek hasilnya di halaman Workspace.';
+                        lastMsg.text = 'Progres tersimpan saat halaman dimuat ulang — saya lanjutkan sisa tugasnya ya.';
                     }
+                    lastMsg.checkpoint = true;
                     saveChatLog();
                     renderMessages();
                     scrollToBottom(true);
+                    messages.push({ id: generateId(), role: 'user', text: 'lanjut', time: Date.now() });
+                    renderMessages();
+                    scrollToBottom(true);
+                    fetchAIResponse();
                 } else {
                     // FIX: jawaban yang sudah setengah jadi TIDAK lagi dibuang & diulang
                     // dari nol. Finalisasi apa adanya, lalu kirim "lanjut" supaya AI
