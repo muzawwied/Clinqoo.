@@ -19,9 +19,17 @@ const CORS = {
 };
 const E2B_API_BASE = 'https://api.e2b.app';
 const E2B_TEMPLATE = 'code-interpreter-v1';
-const SANDBOX_TIMEOUT_S = 120;   // umur sandbox
-const EXEC_TIMEOUT_S = 45;      // batas per eksekusi (subprocess)
+const SANDBOX_TIMEOUT_S = 120;   // umur sandbox (mode code, sekali pakai)
+const EXEC_TIMEOUT_S = 45;      // batas per eksekusi (subprocess, mode code)
 const MAX_CODE_BYTES = 100_000; // 100 KB
+
+// ==== TERMINAL PERSISTEN (mode command) ====
+// Sandbox DIPERTAHANKAN antar-command per user (instalasi & file bertahan),
+// di-reuse selama sesi masih hidup. Sandbox mati sendiri lewat timeout E2B.
+const SESSION_SANDBOX_TIMEOUT_S = 900;       // umur sandbox sesi (15 menit)
+const SESSION_IDLE_MS = 10 * 60 * 1000;      // reuse hanya jika < 10 menit terakhir dipakai
+const COMMAND_EXEC_TIMEOUT_S = 110;         // per command (biar cukup utk apt-get install)
+const COMMAND_REQ_TIMEOUT_MS = 120_000;     // batas total request mode command
 
 const LANG_CMD = {
   javascript: { filename: 'main.js', run: 'node main.js' },
@@ -106,52 +114,115 @@ function wrapAsSubprocess(code, lang) {
   ].join('\n');
 }
 
-function wrapCommand(cmd) {
+function wrapCommand(cmd, execTimeoutS) {
   const b64 = btoa(unescape(encodeURIComponent(cmd)));
   return [
     "import base64, subprocess, sys",
     `cmd = base64.b64decode("${b64}").decode("utf-8")`,
-    `p = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=${EXEC_TIMEOUT_S})`,
+    `p = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=${execTimeoutS || EXEC_TIMEOUT_S})`,
     "sys.stdout.write(p.stdout or '')",
     "sys.stderr.write(p.stderr or '')",
     "sys.exit(p.returncode)"
   ].join('\n');
 }
 
-async function execInSandbox(apiKey, code) {
-  // 1. Buat sandbox
+// ==== Sesi terminal persisten per user (D1) ====
+async function ensureSessionTable(DB) {
+  await DB.prepare(`CREATE TABLE IF NOT EXISTS e2b_sessions (
+    user_id TEXT PRIMARY KEY, sandbox_id TEXT NOT NULL, domain TEXT NOT NULL,
+    token TEXT NOT NULL, traffic TEXT, updated_at TEXT NOT NULL
+  )`).run();
+}
+async function getSession(DB, userId) {
+  try {
+    await ensureSessionTable(DB);
+    const row = await DB.prepare('SELECT * FROM e2b_sessions WHERE user_id = ?').bind(String(userId)).first();
+    if (!row || !row.sandbox_id || !row.token) return null;
+    const t = new Date(String(row.updated_at).replace(' ', 'T')).getTime();
+    if (isNaN(t) || Date.now() - t > SESSION_IDLE_MS) return null;
+    return row;
+  } catch (e) { return null; }
+}
+async function saveSession(DB, userId, sb) {
+  try {
+    await ensureSessionTable(DB);
+    await DB.prepare(`INSERT INTO e2b_sessions (user_id, sandbox_id, domain, token, traffic, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET sandbox_id = excluded.sandbox_id, domain = excluded.domain,
+        token = excluded.token, traffic = excluded.traffic, updated_at = excluded.updated_at`)
+      .bind(String(userId), sb.sandboxId, sb.domain, sb.accessToken, sb.trafficToken || '', new Date().toISOString()).run();
+  } catch (e) {}
+}
+async function clearSession(DB, userId) {
+  try { await DB.prepare('DELETE FROM e2b_sessions WHERE user_id = ?').bind(String(userId)).run(); } catch (e) {}
+}
+
+// Eksekusi di sandbox yang sudah ada (token sesi). Return null kalau sandbox sudah mati.
+async function runOnSandbox(row, code) {
+  const execHeaders = { 'Content-Type': 'application/json', 'X-Access-Token': row.token };
+  if (row.traffic) execHeaders['E2B-Traffic-Access-Token'] = row.traffic;
+  let execRes;
+  try {
+    execRes = await fetch(`https://49999-${row.sandbox_id}.${row.domain}/execute`, {
+      method: 'POST', headers: execHeaders,
+      body: JSON.stringify({ code, context_id: null })
+    });
+  } catch (e) { return null; }
+  if (!execRes.ok) return null;
+  try { return parseExecute(await execRes.text()); } catch (e) { return null; }
+}
+
+// Buat sandbox baru; return objek sesi atau {error}
+async function createSandbox(apiKey, timeoutS) {
   const createRes = await fetch(E2B_API_BASE + '/sandboxes', {
     method: 'POST',
     headers: { 'X-API-Key': apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ templateID: E2B_TEMPLATE, timeout: SANDBOX_TIMEOUT_S, secure: true, allow_internet_access: true })
+    body: JSON.stringify({ templateID: E2B_TEMPLATE, timeout: timeoutS || SANDBOX_TIMEOUT_S, secure: true, allow_internet_access: true })
   });
   if (!createRes.ok) {
     const t = await createRes.text().catch(() => '');
     return { error: 'Gagal membuat sandbox E2B (HTTP ' + createRes.status + '): ' + t.slice(0, 300) };
   }
   const sb = await createRes.json();
-  const sandboxId = sb.sandboxID, domain = sb.domain || 'e2b.app';
-  const accessToken = sb.envdAccessToken;
-  const trafficToken = sb.trafficAccessToken;
+  const sandboxId = sb.sandboxID;
+  if (!sandboxId || !sb.envdAccessToken) return { error: 'Respons sandbox E2B tidak valid.' };
+  return { sandboxId, domain: sb.domain || 'e2b.app', accessToken: sb.envdAccessToken, trafficToken: sb.trafficAccessToken || '' };
+}
+
+async function execInSandbox(apiKey, code) {
+  // mode code: sandbox sekali pakai, hapus setelah selesai
+  const sb = await createSandbox(apiKey, SANDBOX_TIMEOUT_S);
+  if (sb.error) return sb;
   try {
-    if (!sandboxId || !accessToken) return { error: 'Respons sandbox E2B tidak valid.' };
-    // 2. Eksekusi (NDJSON)
-    const execHeaders = { 'Content-Type': 'application/json', 'X-Access-Token': accessToken };
-    if (trafficToken) execHeaders['E2B-Traffic-Access-Token'] = trafficToken;
-    const execRes = await fetch(`https://49999-${sandboxId}.${domain}/execute`, {
-      method: 'POST', headers: execHeaders,
-      body: JSON.stringify({ code, context_id: null })
-    });
-    if (!execRes.ok) {
-      const t = await execRes.text().catch(() => '');
-      return { error: 'Eksekusi gagal (HTTP ' + execRes.status + '): ' + t.slice(0, 300) };
-    }
-    const parsed = parseExecute(await execRes.text());
+    const parsed = await runOnSandbox({ sandbox_id: sb.sandboxId, domain: sb.domain, token: sb.accessToken, traffic: sb.trafficToken }, code);
+    if (!parsed) return { error: 'Eksekusi gagal di sandbox E2B.' };
     return parsed;
   } finally {
-    // 3. Hapus sandbox (jangan biarkan berjalan = hemat biaya)
-    try { await fetch(E2B_API_BASE + '/sandboxes/' + sandboxId, { method: 'DELETE', headers: { 'X-API-Key': apiKey } }); } catch (e) {}
+    try { await fetch(E2B_API_BASE + '/sandboxes/' + sb.sandboxId, { method: 'DELETE', headers: { 'X-API-Key': apiKey } }); } catch (e) {}
   }
+}
+
+// mode command: pakai sesi terminal persisten; kalau mati -> buat baru & ulangi sekali
+async function execInSession(env, apiKey, userId, code) {
+  let sess = await getSession(env.DB, userId);
+  if (sess) {
+    const parsed = await runOnSandbox(sess, code);
+    if (parsed) {
+      try { await env.DB.prepare('UPDATE e2b_sessions SET updated_at = ? WHERE user_id = ?').bind(new Date().toISOString(), String(userId)).run(); } catch (e) {}
+      return parsed;
+    }
+    // sandbox mati -> jatuh ke pembuatan baru
+    clearSession(env.DB, userId);
+  }
+  const sb = await createSandbox(apiKey, SESSION_SANDBOX_TIMEOUT_S);
+  if (sb.error) return sb;
+  await saveSession(env.DB, userId, sb);
+  const parsed = await runOnSandbox({ sandbox_id: sb.sandboxId, domain: sb.domain, token: sb.accessToken, traffic: sb.trafficToken }, code);
+  if (!parsed) {
+    clearSession(env.DB, userId);
+    return { error: 'Eksekusi gagal di sandbox E2B (sesi baru). Coba lagi.' };
+  }
+  return parsed;
 }
 
 export async function onRequestPost({ request, env }) {
@@ -165,11 +236,22 @@ export async function onRequestPost({ request, env }) {
   const language = String(body.language || 'python').toLowerCase();
   let code = String(body.code || '');
 
+  // Reset terminal persisten user (buat sesi baru pada command berikutnya)
+  if (mode === 'reset_session') {
+    const old = await getSession(env.DB, user.id);
+    const apiKeyNow = await getE2bKey(env.DB);
+    if (old && apiKeyNow) {
+      try { await fetch(E2B_API_BASE + '/sandboxes/' + old.sandbox_id, { method: 'DELETE', headers: { 'X-API-Key': apiKeyNow } }); } catch (e) {}
+    }
+    await clearSession(env.DB, user.id);
+    return json({ ok: true, message: 'Sesi terminal di-reset. Command berikutnya jalan di Linux baru.' });
+  }
+
   if (mode === 'command') {
     const cmd = String(body.command || '');
     if (!cmd) return json({ error: 'Parameter command wajib.' }, 400);
     if (cmd.length > MAX_CODE_BYTES) return json({ error: 'Command terlalu panjang.' }, 400);
-    code = wrapCommand(cmd);
+    code = wrapCommand(cmd, COMMAND_EXEC_TIMEOUT_S);
   } else {
     if (!code) return json({ error: 'Parameter code wajib.' }, 400);
     if (code.length > MAX_CODE_BYTES) return json({ error: 'Kode terlalu panjang (maks 100KB).' }, 400);
@@ -184,16 +266,21 @@ export async function onRequestPost({ request, env }) {
   if (!apiKey) return json({ error: 'Eksekusi sandbox belum dikonfigurasi.' }, 503);
 
   // batas total waktu supaya request tidak menggantung
-  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Eksekusi melebihi 90 detik (timeout).')), 90_000));
+  const reqTimeoutMs = (mode === 'command') ? COMMAND_REQ_TIMEOUT_MS : 90_000;
+  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Eksekusi melebihi batas waktu (timeout).')), reqTimeoutMs));
   let result;
   try {
-    result = await Promise.race([execInSandbox(apiKey, code), timeout]);
+    result = await Promise.race([
+      (mode === 'command') ? execInSession(env, apiKey, user.id, code) : execInSandbox(apiKey, code),
+      timeout
+    ]);
   } catch (e) {
     return json({ error: e && e.message ? e.message : 'Eksekusi gagal.' }, 504);
   }
 
   if (result.error && !('stdout' in result)) return json({ error: result.error }, 502);
   return json({
+    session: mode === 'command',
     ok: !result.error,
     stdout: String(result.stdout || '').slice(0, 50000),
     stderr: String(result.stderr || '').slice(0, 20000),
