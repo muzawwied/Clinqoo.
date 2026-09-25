@@ -178,7 +178,54 @@ export async function onRequestPost({ request, env }) {
     return j({ success: true, needsAccount: true, message: 'Klaim tercatat! Kamu belum punya akun Clincoo — daftar memakai email ' + row.email + ', dan Pro 30 hari otomatis aktif saat login pertama.' });
   }
 
-  // === 3. Status token (untuk halaman) ===
+  // === 3. Aktivasi langsung dari checkout Rp 0 (WAJIB login) ===
+  if (action === 'activate') {
+    const user = await currentUser(env, request);
+    if (!user || !user.email) return j({ success: false, needLogin: true, error: 'Login dulu untuk mengaktifkan paket.' }, 401);
+    await ensureTable(db);
+    const email = String(user.email).trim().toLowerCase();
+
+    const existing = await db.prepare('SELECT * FROM beta_claims WHERE email = ?').bind(email).first();
+    if (existing && (existing.status === 'claimed_unapplied' || existing.status === 'applied')) {
+      return j({ success: true, already: true, message: 'Email ini sudah pernah klaim Pro beta. Satu email satu kali.' });
+    }
+    if (await claimedCount(db) >= BETA_QUOTA) {
+      return j({ success: false, quotaFull: true, error: 'Maaf, kuota 25 beta tester sudah penuh.' }, 409);
+    }
+
+    const res = await applyProTrial(db, email);
+    if (!res.applied) return j({ success: false, error: 'Gagal mengaktifkan: ' + (res.reason || 'coba lagi.'), detail: res.reason }, 500);
+    if (res.reason === 'already_paid') {
+      if (existing) {
+        await db.prepare(`UPDATE beta_claims SET status = 'applied', claimed_at = ? WHERE email = ? AND status = 'pending'`)
+          .bind(new Date().toISOString(), email).run();
+      } else {
+        await db.prepare(`INSERT INTO beta_claims (email, token, status, created_at, claimed_at) VALUES (?, ?, 'applied', ?, ?)`)
+          .bind(email, makeToken(), new Date().toISOString(), new Date().toISOString()).run();
+      }
+      return j({ success: true, already: true, message: 'Akun kamu sudah memiliki paket berbayar aktif. Terima kasih sudah ikut program beta!' });
+    }
+
+    // catat klaim (race-safe: hitung ulang setelah catat)
+    if (existing) {
+      await db.prepare(`UPDATE beta_claims SET status = 'applied', claimed_at = ? WHERE email = ? AND status = 'pending'`)
+        .bind(new Date().toISOString(), email).run();
+    } else {
+      await db.prepare(`INSERT INTO beta_claims (email, token, status, created_at, claimed_at) VALUES (?, ?, 'applied', ?, ?)`)
+        .bind(email, makeToken(), new Date().toISOString(), new Date().toISOString()).run();
+    }
+    if (await claimedCount(db) > BETA_QUOTA) {
+      // kalah race -> akun ini yang paling terakhir, tarik kembali
+      await db.prepare(`DELETE FROM beta_claims WHERE email = ? AND claimed_at = ?`).bind(email, new Date().toISOString()).run();
+      // turunkan kembali paket (beta saja, aman: baru saja diaktifkan)
+      const pfx = 'u' + user.id + ':';
+      await db.prepare(`DELETE FROM subscription WHERE key IN (?, ?, ?)`).bind(pfx + 'plan', pfx + 'start_date', pfx + 'billing_cycle').run();
+      return j({ success: false, quotaFull: true, error: 'Maaf, kuota 25 beta tester sudah penuh.' }, 409);
+    }
+    return j({ success: true, message: 'Pro 30 hari AKTIF untuk ' + email + '! Selamat mencoba semua fitur Pro Clincoo.' });
+  }
+
+  // === 4. Status token (untuk halaman) ===
   if (action === 'status') {
     const token = String(body.token || '').trim();
     if (!token) return j({ success: false, error: 'no_token' }, 400);
@@ -188,9 +235,9 @@ export async function onRequestPost({ request, env }) {
     return j({ success: true, email: row.email, status: row.status, quotaLeft: Math.max(0, BETA_QUOTA - await claimedCount(db)) });
   }
 
-  // === 4. Daftar klaim (admin/owner saja) ===
+  // === 5. Daftar klaim (admin/owner saja) ===
   if (action === 'list') {
-    const user = await currentUser({ request, env });
+    const user = await currentUser(env, request);
     const isAdmin = user && (user.role === 'admin' || user.role === 'owner' || (user.email && ADMIN_EMAILS.has(user.email.toLowerCase())));
     if (!isAdmin) return j({ success: false, error: 'Hanya admin.' }, 403);
     await ensureTable(db);

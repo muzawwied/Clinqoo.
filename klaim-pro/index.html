@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klaim Pro Gratis 30 Hari — Clincoo</title>
-  <meta name="description" content="Klaim paket Pro Clincoo gratis 30 hari untuk 25 beta tester pertama.">
+  <title>Aktivasi Pro Gratis 30 Hari — Clincoo</title>
+  <meta name="description" content="Aktivasi paket Pro Clincoo gratis 30 hari untuk 25 beta tester pertama.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0a0a'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' fill='%23ffffff' text-anchor='middle'>C</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,113 +22,87 @@
     </a>
 
     <div class="bg-white/[0.04] border border-white/10 rounded-2xl p-6 sm:p-8">
-      <!-- State 1: form email -->
-      <div id="state-form">
+      <div id="state-loading" class="text-center py-8 text-gray-400 text-sm">Memuat…</div>
+
+      <!-- Belum login -->
+      <div id="state-login" class="hidden text-center py-4">
         <div class="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Program Beta — Kuota 25 Orang</div>
         <h1 class="text-2xl font-bold leading-snug">Pro Clincoo gratis 30 hari</h1>
-        <p class="text-sm text-gray-400 mt-2 leading-relaxed">Masukkan email kamu — kami kirim link klaim ke inbox. Link hanya sampai ke email yang benar-benar aktif, dan satu email hanya bisa klaim satu kali.</p>
-        <form id="claim-form" class="mt-6 flex flex-col gap-3">
-          <input id="email" type="email" required placeholder="nama@email.com"
-                 class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white/40">
-          <button type="submit" class="w-full bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors">Kirim Link Klaim</button>
-        </form>
-        <p id="form-err" class="hidden mt-3 text-sm text-red-400"></p>
+        <p class="text-sm text-gray-400 mt-2 leading-relaxed">Masuk dulu ke akun Clincoo kamu untuk mengaktifkan paket Pro beta dengan harga <b class="text-white">Rp 0</b>.</p>
+        <a href="https://app.clincoo.buzz/auth/?redirect=/klaim-pro/" class="inline-block w-full bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors mt-6">Login / Daftar</a>
       </div>
 
-      <!-- State 2: email terkirim -->
-      <div id="state-sent" class="hidden text-center py-4">
-        <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl">✉️</div>
-        <h2 class="text-lg font-bold mt-4">Cek email kamu</h2>
-        <p id="sent-msg" class="text-sm text-gray-400 mt-2 leading-relaxed"></p>
-        <p class="text-xs text-gray-600 mt-4">Belum masuk? Cek folder spam / promosi.</p>
-      </div>
-
-      <!-- State 3: aktivasi dari token -->
-      <div id="state-activate" class="hidden">
-        <div class="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Satu Klik Lagi</div>
-        <h1 class="text-2xl font-bold leading-snug">Aktifkan Pro 30 hari kamu</h1>
-        <p id="activate-msg" class="text-sm text-gray-400 mt-2 leading-relaxed">Klik tombol di bawah untuk mengaktifkan paket Pro beta selama 30 hari penuh.</p>
+      <!-- Checkout Rp 0 -->
+      <div id="state-checkout" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-widest text-amber-400">Checkout</div>
+            <h1 class="text-2xl font-bold mt-1">Paket Pro — Bulanan</h1>
+          </div>
+          <span class="text-[10px] font-bold uppercase bg-amber-400/15 text-amber-400 px-2.5 py-1 rounded-full tracking-wide">Beta Tester</span>
+        </div>
+        <p id="checkout-user" class="text-sm text-gray-400"></p>
+        <div class="mt-4 rounded-xl border border-white/10 divide-y divide-white/10 text-sm">
+          <div class="flex justify-between px-4 py-3"><span class="text-gray-400">Harga normal</span><span class="line-through text-gray-500">Rp 149.000</span></div>
+          <div class="flex justify-between px-4 py-3"><span class="text-gray-400">Diskon beta</span><span class="text-emerald-400 font-semibold">-Rp 149.000</span></div>
+          <div class="flex justify-between px-4 py-3"><span class="font-semibold">Total</span><span class="font-bold text-lg">Rp 0</span></div>
+          <div class="flex justify-between px-4 py-3"><span class="text-gray-400">Masa aktif</span><span class="font-semibold">30 hari</span></div>
+        </div>
         <ul class="text-sm text-gray-300 mt-4 space-y-2">
           <li>🤖 AI chat &amp; asisten penuh — 500 pesan/bulan</li>
           <li>⌨️ Editor kode + publish ke internet</li>
           <li>🌐 Domain kustom + deploy 25x per bulan</li>
-          <li>👥 5 kolaborator per proyek</li>
+          <li>👥 5 kolaborator per proyek, 10 proyek</li>
         </ul>
-        <button id="activate-btn" class="w-full bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors mt-6">Aktifkan Pro 30 Hari</button>
-        <p id="activate-err" class="hidden mt-3 text-sm text-red-400"></p>
+        <button id="activate-btn" class="w-full bg-white text-black font-semibold text-sm py-3.5 rounded-xl hover:bg-gray-200 transition-colors mt-6">Aktifkan Sekarang — Rp 0</button>
+        <p class="text-center text-xs text-gray-600 mt-3">Setelah 30 hari otomatis kembali ke Starter. Data kamu tetap aman.</p>
       </div>
 
-      <!-- State 4: hasil -->
+      <!-- Hasil -->
       <div id="state-done" class="hidden text-center py-4">
-        <div id="done-icon" class="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl">✅</div>
-        <h2 id="done-title" class="text-lg font-bold mt-4">Berhasil!</h2>
+        <div id="done-icon" class="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl">🚀</div>
+        <h2 id="done-title" class="text-lg font-bold mt-4">Pro Aktif!</h2>
         <p id="done-msg" class="text-sm text-gray-400 mt-2 leading-relaxed"></p>
         <a href="https://app.clincoo.buzz/" class="inline-block bg-white text-black font-semibold text-sm py-3 px-8 rounded-xl hover:bg-gray-200 transition-colors mt-6">Buka Clincoo</a>
       </div>
-
-      <div id="state-loading" class="hidden text-center py-8 text-gray-400 text-sm">Memproses…</div>
     </div>
-    <p class="text-center text-xs text-gray-600 mt-6">Masa aktif 30 hari dimulai saat diaktifkan. Setelah itu otomatis kembali ke paket Starter — data kamu tetap aman.</p>
+    <p class="text-center text-xs text-gray-600 mt-6">Program beta terbatas 25 orang. Satu email hanya bisa klaim satu kali.</p>
   </main>
 
   <script>
     var API = 'https://app.clincoo.buzz/api/beta-claim';
-    if (['localhost','127.0.0.1'].indexOf(location.hostname) !== -1) API = '/api/beta-claim';
+    var ME = 'https://app.clincoo.buzz/api/auth/me';
+    if (['localhost','127.0.0.1'].indexOf(location.hostname) !== -1) { API = '/api/beta-claim'; ME = '/api/auth/me'; }
     var $ = function (id) { return document.getElementById(id); };
     function show(state) {
-      ['form','sent','activate','done','loading'].forEach(function (s) {
-        $('state-' + s).classList.toggle('hidden', s !== state);
-      });
+      ['loading','login','checkout','done'].forEach(function (s) { $('state-' + s).classList.toggle('hidden', s !== state); });
     }
-    function post(body) {
-      return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-        .then(function (r) { return r.json(); });
-    }
-
-    $('claim-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var email = $('email').value.trim();
-      $('form-err').classList.add('hidden');
-      show('loading');
-      post({ action: 'request', email: email }).then(function (r) {
-        if (r.success) { $('sent-msg').textContent = r.message; show('sent'); }
-        else { $('form-err').textContent = r.error || 'Terjadi kesalahan, coba lagi.'; $('form-err').classList.remove('hidden'); show('form'); }
-      }).catch(function () { $('form-err').textContent = 'Koneksi gagal, coba lagi.'; $('form-err').classList.remove('hidden'); show('form'); });
-    });
+    fetch(ME, { credentials: 'include' }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.authenticated && d.user && d.user.email) {
+        $('checkout-user').textContent = 'Akun: ' + d.user.email;
+        show('checkout');
+      } else {
+        show('login');
+      }
+    }).catch(function () { show('login'); });
 
     $('activate-btn').addEventListener('click', function () {
-      $('activate-err').classList.add('hidden');
-      show('loading');
-      var token = new URLSearchParams(location.search).get('token') || '';
-      post({ action: 'claim', token: token }).then(function (r) {
-        $('done-title').textContent = r.success ? (r.needsAccount ? 'Klaim Tercatat' : 'Pro Aktif!') : 'Gagal';
-        $('done-msg').textContent = r.message || r.error || '';
-        $('done-icon').textContent = r.success ? '🚀' : '⚠️';
-        show('done');
-      }).catch(function () {
-        $('activate-err').textContent = 'Koneksi gagal, coba lagi.';
-        $('activate-err').classList.remove('hidden');
-        show('activate');
-      });
-    });
-
-    // Ada token di URL? -> tampilkan layar aktivasi
-    var token = new URLSearchParams(location.search).get('token');
-    if (token) {
-      show('loading');
-      post({ action: 'status', token: token }).then(function (r) {
-        if (!r.success) { $('done-title').textContent = 'Link Tidak Valid'; $('done-msg').textContent = 'Link klaim tidak dikenal. Minta link baru dari halaman klaim.'; $('done-icon').textContent = '⚠️'; show('done'); return; }
-        if (r.status === 'claimed_unapplied' || r.status === 'applied') {
-          $('done-title').textContent = 'Sudah Pernah Diaktifkan';
-          $('done-msg').textContent = 'Klaim untuk ' + r.email + ' sudah dipakai sebelumnya.';
-          $('done-icon').textContent = '✅';
+      var btn = this;
+      btn.disabled = true; btn.textContent = 'Memproses…'; btn.className = 'w-full bg-white/60 text-black/60 font-semibold text-sm py-3.5 rounded-xl mt-6 cursor-wait';
+      fetch(API, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'activate' }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          $('done-title').textContent = r.success ? (r.already ? 'Sudah Pernah' : 'Pro Aktif!') : (r.quotaFull ? 'Kuota Penuh' : 'Gagal');
+          $('done-msg').textContent = r.message || r.error || '';
+          $('done-icon').textContent = r.success ? '🚀' : '⚠️';
           show('done');
-        } else {
-          $('activate-msg').textContent = 'Link ini untuk ' + r.email + '. Klik tombol di bawah untuk mengaktifkan Pro 30 hari.';
-          show('activate');
-        }
-      }).catch(function () { show('activate'); });
-    }
+        })
+        .catch(function () {
+          btn.disabled = false; btn.textContent = 'Aktifkan Sekarang — Rp 0';
+          btn.className = 'w-full bg-white text-black font-semibold text-sm py-3.5 rounded-xl hover:bg-gray-200 transition-colors mt-6';
+          $('done-title').textContent = 'Gagal'; $('done-msg').textContent = 'Koneksi gagal, coba lagi.'; show('done');
+        });
+    });
   </script>
 </body>
 </html>
