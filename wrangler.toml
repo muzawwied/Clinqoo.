@@ -1,5 +1,6 @@
 name = "clincoo"
 compatibility_date = "2024-09-01"
+compatibility_flags = ["unsafe_eval"]
 pages_build_output_dir = "."
 
 # D1 Database binding
