@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klaim Pro Gratis 30 Hari — Clincoo</title>
+  <meta name="description" content="Klaim paket Pro Clincoo gratis 30 hari untuk 25 beta tester pertama.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230a0a0a'/><text x='50' y='68' font-size='52' font-family='Arial' font-weight='bold' fill='%23ffffff' text-anchor='middle'>C</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .fade-in { animation: fade .25s ease-out; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-4">
+  <main class="w-full max-w-md fade-in">
+    <a href="https://app.clincoo.buzz/" class="flex items-center justify-center gap-2 mb-8">
+      <svg width="34" height="34" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#fff"/><text x="50" y="68" font-size="52" font-family="Arial" font-weight="bold" fill="#0a0a0a" text-anchor="middle">C</text></svg>
+      <span class="text-2xl font-bold tracking-widest">Clincoo</span>
+    </a>
+
+    <div class="bg-white/[0.04] border border-white/10 rounded-2xl p-6 sm:p-8">
+      <!-- State 1: form email -->
+      <div id="state-form">
+        <div class="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Program Beta — Kuota 25 Orang</div>
+        <h1 class="text-2xl font-bold leading-snug">Pro Clincoo gratis 30 hari</h1>
+        <p class="text-sm text-gray-400 mt-2 leading-relaxed">Masukkan email kamu — kami kirim link klaim ke inbox. Link hanya sampai ke email yang benar-benar aktif, dan satu email hanya bisa klaim satu kali.</p>
+        <form id="claim-form" class="mt-6 flex flex-col gap-3">
+          <input id="email" type="email" required placeholder="nama@email.com"
+                 class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-sm placeholder-gray-600 focus:outline-none focus:border-white/40">
+          <button type="submit" class="w-full bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors">Kirim Link Klaim</button>
+        </form>
+        <p id="form-err" class="hidden mt-3 text-sm text-red-400"></p>
+      </div>
+
+      <!-- State 2: email terkirim -->
+      <div id="state-sent" class="hidden text-center py-4">
+        <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl">✉️</div>
+        <h2 class="text-lg font-bold mt-4">Cek email kamu</h2>
+        <p id="sent-msg" class="text-sm text-gray-400 mt-2 leading-relaxed"></p>
+        <p class="text-xs text-gray-600 mt-4">Belum masuk? Cek folder spam / promosi.</p>
+      </div>
+
+      <!-- State 3: aktivasi dari token -->
+      <div id="state-activate" class="hidden">
+        <div class="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Satu Klik Lagi</div>
+        <h1 class="text-2xl font-bold leading-snug">Aktifkan Pro 30 hari kamu</h1>
+        <p id="activate-msg" class="text-sm text-gray-400 mt-2 leading-relaxed">Klik tombol di bawah untuk mengaktifkan paket Pro beta selama 30 hari penuh.</p>
+        <ul class="text-sm text-gray-300 mt-4 space-y-2">
+          <li>🤖 AI chat &amp; asisten penuh — 500 pesan/bulan</li>
+          <li>⌨️ Editor kode + publish ke internet</li>
+          <li>🌐 Domain kustom + deploy 25x per bulan</li>
+          <li>👥 5 kolaborator per proyek</li>
+        </ul>
+        <button id="activate-btn" class="w-full bg-white text-black font-semibold text-sm py-3 rounded-xl hover:bg-gray-200 transition-colors mt-6">Aktifkan Pro 30 Hari</button>
+        <p id="activate-err" class="hidden mt-3 text-sm text-red-400"></p>
+      </div>
+
+      <!-- State 4: hasil -->
+      <div id="state-done" class="hidden text-center py-4">
+        <div id="done-icon" class="w-14 h-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center text-2xl">✅</div>
+        <h2 id="done-title" class="text-lg font-bold mt-4">Berhasil!</h2>
+        <p id="done-msg" class="text-sm text-gray-400 mt-2 leading-relaxed"></p>
+        <a href="https://app.clincoo.buzz/" class="inline-block bg-white text-black font-semibold text-sm py-3 px-8 rounded-xl hover:bg-gray-200 transition-colors mt-6">Buka Clincoo</a>
+      </div>
+
+      <div id="state-loading" class="hidden text-center py-8 text-gray-400 text-sm">Memproses…</div>
+    </div>
+    <p class="text-center text-xs text-gray-600 mt-6">Masa aktif 30 hari dimulai saat diaktifkan. Setelah itu otomatis kembali ke paket Starter — data kamu tetap aman.</p>
+  </main>
+
+  <script>
+    var API = 'https://app.clincoo.buzz/api/beta-claim';
+    if (['localhost','127.0.0.1'].indexOf(location.hostname) !== -1) API = '/api/beta-claim';
+    var $ = function (id) { return document.getElementById(id); };
+    function show(state) {
+      ['form','sent','activate','done','loading'].forEach(function (s) {
+        $('state-' + s).classList.toggle('hidden', s !== state);
+      });
+    }
+    function post(body) {
+      return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); });
+    }
+
+    $('claim-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = $('email').value.trim();
+      $('form-err').classList.add('hidden');
+      show('loading');
+      post({ action: 'request', email: email }).then(function (r) {
+        if (r.success) { $('sent-msg').textContent = r.message; show('sent'); }
+        else { $('form-err').textContent = r.error || 'Terjadi kesalahan, coba lagi.'; $('form-err').classList.remove('hidden'); show('form'); }
+      }).catch(function () { $('form-err').textContent = 'Koneksi gagal, coba lagi.'; $('form-err').classList.remove('hidden'); show('form'); });
+    });
+
+    $('activate-btn').addEventListener('click', function () {
+      $('activate-err').classList.add('hidden');
+      show('loading');
+      var token = new URLSearchParams(location.search).get('token') || '';
+      post({ action: 'claim', token: token }).then(function (r) {
+        $('done-title').textContent = r.success ? (r.needsAccount ? 'Klaim Tercatat' : 'Pro Aktif!') : 'Gagal';
+        $('done-msg').textContent = r.message || r.error || '';
+        $('done-icon').textContent = r.success ? '🚀' : '⚠️';
+        show('done');
+      }).catch(function () {
+        $('activate-err').textContent = 'Koneksi gagal, coba lagi.';
+        $('activate-err').classList.remove('hidden');
+        show('activate');
+      });
+    });
+
+    // Ada token di URL? -> tampilkan layar aktivasi
+    var token = new URLSearchParams(location.search).get('token');
+    if (token) {
+      show('loading');
+      post({ action: 'status', token: token }).then(function (r) {
+        if (!r.success) { $('done-title').textContent = 'Link Tidak Valid'; $('done-msg').textContent = 'Link klaim tidak dikenal. Minta link baru dari halaman klaim.'; $('done-icon').textContent = '⚠️'; show('done'); return; }
+        if (r.status === 'claimed_unapplied' || r.status === 'applied') {
+          $('done-title').textContent = 'Sudah Pernah Diaktifkan';
+          $('done-msg').textContent = 'Klaim untuk ' + r.email + ' sudah dipakai sebelumnya.';
+          $('done-icon').textContent = '✅';
+          show('done');
+        } else {
+          $('activate-msg').textContent = 'Link ini untuk ' + r.email + '. Klik tombol di bawah untuk mengaktifkan Pro 30 hari.';
+          show('activate');
+        }
+      }).catch(function () { show('activate'); });
+    }
+  </script>
+</body>
+</html>
