@@ -616,15 +616,15 @@ export async function onRequestPost({ request, env, waitUntil }) {
       // catat pemanggilan & hasil ke percakapan (format blok sama seperti klien)
       workMessages.push({ role: 'assistant', content: (r.tool_calls || []).map(tc => ({ type: 'function_call', name: tc.name, args: tc.args || {}, thought_signature: tc.thought_signature || undefined })) });
       workMessages.push({ role: 'user', content: stCalls.map((tc, i) => ({ type: 'function_response', name: tc.name, result: results[i] })) });
-      if (clientCalls.length) {
-        // campuran: tool server sudah selesai (result terisi supaya klien tak
-        // mengeksekusinya lagi), tool klien tetap dieksekusi klien seperti biasa.
-        r.tool_calls = r.tool_calls.map(tc => {
-          const i = stCalls.indexOf(tc);
-          return i !== -1 ? Object.assign({}, tc, { result: results[i] }) : tc;
-        });
-        break;
-      }
+      // SELALU tempel result ke r.tool_calls (bukan hanya saat campuran dgn tool klien) —
+      // supaya kalau loop hop-server ini kehabisan budget (sHop sampai batas) dan
+      // r.tool_calls dikirim ke klien apa adanya, klien tidak coba eksekusi ULANG
+      // tool server (yang klien tidak punya case-nya) dan gagal "Tool tidak dikenal".
+      r.tool_calls = r.tool_calls.map(tc => {
+        const i = stCalls.indexOf(tc);
+        return i !== -1 ? Object.assign({}, tc, { result: results[i] }) : tc;
+      });
+      if (clientCalls.length) break; // tool klien tetap dieksekusi klien seperti biasa
       // semua tool server -> minta giliran model berikutnya (lanjut loop)
     }
     if (!r || (r.error && !apiKey.length && !env.AI)) {
