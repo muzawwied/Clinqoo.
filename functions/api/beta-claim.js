@@ -106,6 +106,7 @@ export async function onRequestPost({ request, env }) {
   if (!db) return j({ success: false, error: 'D1 not bound' }, 500);
   let body = {};
   try { body = await request.json(); } catch (e) {}
+  try {
   const action = body.action || '';
 
   // === 1. Minta link klaim (publik) ===
@@ -198,4 +199,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   return j({ success: false, error: 'Aksi tidak dikenal.' }, 400);
+  } catch (e) {
+    return j({ success: false, error: 'err: ' + String(e && e.message || e) }, 500);
+  }
 }
