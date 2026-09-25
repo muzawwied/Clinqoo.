@@ -50,7 +50,7 @@ async function handle({ request, env, params }) {
       if (a) { try { args = JSON.parse(a); } catch (e) {} }
     }
     try {
-      const r = await m.invokePublicFunction(env.DB, name, secret, args, request.headers.get('cf-connecting-ip') || 'unknown');
+      const r = await m.invokePublicFunction(env.DB, name, secret, args, request.headers.get('cf-connecting-ip') || 'unknown', new URL(request.url).origin);
       const status = r && r.status ? r.status : 200;
       delete r.status;
       return json(r, status);
@@ -71,7 +71,7 @@ async function handle({ request, env, params }) {
   } catch (e) { return json({ error: 'Args JSON tidak valid' }, 400); }
 
   try {
-    return json(await invokeFunction(env.DB, user.key, name, args));
+    return json(await invokeFunction(env.DB, user.key, name, args, { origin: new URL(request.url).origin }));
   } catch (e) {
     return json({ error: 'Server error: ' + e.message }, 500);
   }

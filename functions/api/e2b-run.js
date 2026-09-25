@@ -77,7 +77,7 @@ async function rateLimitUser(DB, userKey) {
   return true;
 }
 
-async function getE2bKey(DB) {
+export async function getE2bKey(DB) {
   try {
     const row = await DB.prepare('SELECT value FROM env_vars WHERE key = ?').bind('E2B_API_KEY').first();
     return row?.value || '';
@@ -173,7 +173,7 @@ async function runOnSandbox(row, code) {
 }
 
 // Buat sandbox baru; return objek sesi atau {error}
-async function createSandbox(apiKey, timeoutS) {
+export async function createSandbox(apiKey, timeoutS) {
   const createRes = await fetch(E2B_API_BASE + '/sandboxes', {
     method: 'POST',
     headers: { 'X-API-Key': apiKey, 'Content-Type': 'application/json' },
@@ -203,7 +203,7 @@ async function execInSandbox(apiKey, code) {
 }
 
 // mode command: pakai sesi terminal persisten; kalau mati -> buat baru & ulangi sekali
-async function execInSession(env, apiKey, userId, code) {
+export async function execInSession(env, apiKey, userId, code) {
   let sess = await getSession(env.DB, userId);
   if (sess) {
     const parsed = await runOnSandbox(sess, code);
