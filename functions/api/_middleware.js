@@ -194,6 +194,9 @@ export async function onRequest({ request, env, next }) {
 
   let publicRoute = false;
   for (const re of PUBLIC) if (re.test(path)) { publicRoute = true; break; }
+  // /api/fn/<nama>?key=... = WEBHOOK PUBLIK: validasi name+key rahasia dilakukan
+  // sendiri di handler fn/[name].js (is_public + webhook_secret + rate limit per IP).
+  if (!publicRoute && /^\/api\/fn\/[^/]+$/.test(path) && url.searchParams.get('key')) publicRoute = true;
 
   if (!publicRoute) {
     try {
