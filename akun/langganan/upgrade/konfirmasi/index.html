@@ -308,6 +308,10 @@
 
     const params = new URLSearchParams(window.location.search);
     const PLAN = params.get('plan') || 'Starter';
+    // Program beta: 25 user pertama, Pro Bulanan Rp 0 selama 30 hari (CTA dari email undangan)
+    const BETA = params.get('beta') === '1' && PLAN === 'Pro' && (params.get('billing') || 'Bulanan') === 'Bulanan';
+    const BETA_API = '/api/beta-claim';
+    let betaInfo = null;
     let BILLING = params.get('billing') === 'Tahunan' ? 'Tahunan' : 'Bulanan';
     function setBilling(cycle){
       BILLING = (cycle === 'Tahunan') ? 'Tahunan' : 'Bulanan';
@@ -320,8 +324,9 @@
       const pp = promoPrice();
       totalPrice = BILLING === 'Tahunan' ? PRICES[PLAN] * 10 : PRICES[PLAN];
       if (pp !== null) totalPrice = pp;
+      if (BETA && betaInfo && betaInfo.eligible) totalPrice = 0;
       setVal('order-billing', BILLING);
-      setVal('order-total', totalPrice === 0 ? 'Gratis' : fmtID(totalPrice) + (pp !== null ? ' (PROMO 100 User Pertama, reguler ' + fmtID(PROMO.original) + ')' : ''));
+      setVal('order-total', (BETA && betaInfo && betaInfo.eligible) ? 'Rp 0 — Program Beta 30 Hari' : (totalPrice === 0 ? 'Gratis' : fmtID(totalPrice) + (pp !== null ? ' (PROMO 100 User Pertama, reguler ' + fmtID(PROMO.original) + ')' : '')));
       const bal = (typeof lastBalance === 'number') ? lastBalance : null;
       if (bal !== null) {
         setVal('wallet-after', totalPrice === 0 ? fmtID(bal) : fmtID(bal - totalPrice));
@@ -385,15 +390,29 @@
       let sub = null, wallet = null;
       try { const r = await fetch(SUB_API); sub = await r.json(); } catch(e) {}
       try { const r = await fetch(WALLET_API); wallet = await r.json(); } catch(e) {}
-      if (PLAN === 'Pro' && BILLING === 'Bulanan') {
+      if (!BETA && PLAN === 'Pro' && BILLING === 'Bulanan') {
         try { const r = await fetch(PROMO_API, { cache: 'no-store' }); PROMO = await r.json(); } catch(e) { PROMO = null; }
+      }
+      if (BETA) {
+        try {
+          const r = await fetch(BETA_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'eligibility' }) });
+          betaInfo = await r.json();
+        } catch(e) { betaInfo = null; }
+        if (betaInfo && betaInfo.eligible === false) {
+          const why = betaInfo.alreadyClaimed ? 'Email Anda sudah pernah klaim program beta ini.' : 'Kuota 25 beta tester sudah penuh.';
+          document.getElementById('pay-error-text').textContent = why;
+          document.getElementById('pay-error').classList.remove('hidden');
+          showFallback('Kembali ke Langganan', function(){ window.ClinqooBack('../langganan/'); });
+          return;
+        }
       }
 
       const badge = document.getElementById('order-plan-badge');
       badge.className = 'inline-flex items-center self-start sm:self-auto px-3 py-1 rounded-full text-xs font-medium ' + planBadgeClass(PLAN);
       setVal('order-plan-badge', PLAN);
       const pp0 = promoPrice();
-      setVal('order-price', PRICES[PLAN] === 0 ? 'Gratis' : (pp0 !== null ? fmtID(pp0) + '/bulan — PROMO 100 User Pertama (reguler ' + fmtID(PRICES[PLAN]) + ')' : fmtID(PRICES[PLAN]) + '/bulan'));
+      const betaOk = BETA && betaInfo && betaInfo.eligible;
+      setVal('order-price', betaOk ? 'Rp 0/bulan — PROGRAM BETA 30 Hari (reguler ' + fmtID(PRICES[PLAN]) + ')' : (PRICES[PLAN] === 0 ? 'Gratis' : (pp0 !== null ? fmtID(pp0) + '/bulan — PROMO 100 User Pertama (reguler ' + fmtID(PRICES[PLAN]) + ')' : fmtID(PRICES[PLAN]) + '/bulan')));
 
       const balance = (wallet && typeof wallet.balance === 'number') ? wallet.balance : 0;
       lastBalance = balance;
@@ -421,6 +440,35 @@
     }
 
     async function doPay(){
+      if (BETA && betaInfo && betaInfo.eligible){
+        try {
+          const res = await fetch(BETA_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'activate' })
+          });
+          const data = await res.json();
+          if(res.ok && data.success){
+            try { localStorage.setItem('clinqoo_subscription_cache', JSON.stringify({ plan: 'Pro', billingCycle: 'Bulanan', ts: Date.now() })); } catch(e) {}
+            document.getElementById('pay-success').textContent = 'Berhasil! Paket Pro (Bulanan) aktif selama 30 hari lewat program beta.';
+            document.getElementById('pay-success').classList.remove('hidden');
+            document.getElementById('pay-error').classList.add('hidden');
+            setLabel('Berhasil!');
+            setTimeout(function(){ window.ClinqooBack('../langganan/'); }, 1200);
+          } else {
+            document.getElementById('pay-error-text').textContent = 'Gagal klaim beta: ' + ((data && data.error) || 'coba lagi nanti');
+            document.getElementById('pay-error').classList.remove('hidden');
+            resetSlide();
+            setSlideEnabled(false);
+          }
+        } catch(e) {
+          document.getElementById('pay-error-text').textContent = 'Koneksi bermasalah, coba lagi.';
+          document.getElementById('pay-error').classList.remove('hidden');
+          resetSlide();
+          setSlideEnabled(true);
+        }
+        return;
+      }
       try {
         const res = await fetch(SUB_API, {
           method: 'POST',

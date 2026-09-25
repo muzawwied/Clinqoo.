@@ -178,6 +178,18 @@ export async function onRequestPost({ request, env }) {
     return j({ success: true, needsAccount: true, message: 'Klaim tercatat! Kamu belum punya akun Clincoo — daftar memakai email ' + row.email + ', dan Pro 30 hari otomatis aktif saat login pertama.' });
   }
 
+  // === 2b. Cek kelayakan beta untuk halaman checkout ===
+  if (action === 'eligibility') {
+    const user = await currentUser(env, request);
+    if (!user || !user.email) return j({ success: false, loggedIn: false });
+    await ensureTable(db);
+    const email = String(user.email).trim().toLowerCase();
+    const existing = await db.prepare('SELECT * FROM beta_claims WHERE email = ?').bind(email).first();
+    const alreadyClaimed = !!(existing && (existing.status === 'claimed_unapplied' || existing.status === 'applied'));
+    const count = await claimedCount(db);
+    return j({ success: true, loggedIn: true, eligible: !alreadyClaimed && count < BETA_QUOTA, alreadyClaimed, quotaFull: count >= BETA_QUOTA, quotaLeft: Math.max(0, BETA_QUOTA - count) });
+  }
+
   // === 3. Aktivasi langsung dari checkout Rp 0 (WAJIB login) ===
   if (action === 'activate') {
     const user = await currentUser(env, request);
