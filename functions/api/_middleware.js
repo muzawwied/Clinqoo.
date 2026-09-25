@@ -25,14 +25,15 @@
 //      (data sensitif tidak pernah nempel di cache).
 import { initTables as initAuthTables, getUserByToken, getToken } from './auth/shared.js';
 
-const PUBLIC = [/^\/api\/promo(\/|$)/, /^\/api\/template-submissions(\/|$)/, /^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(-qris)?(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/user-report-sync(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/, /^\/api\/wa(\/|$)/];
+const PUBLIC = [/^\/api\/beta-claim(\/|$)/, /^\/api\/promo(\/|$)/, /^\/api\/template-submissions(\/|$)/, /^\/api\/auth(\/|$)/, /^\/api\/github-oauth(\/|$)/, /^\/api\/topup(-qris)?(\/|$)/, /^\/api\/wallet(\/|$)/, /^\/api\/scheduled-tasks(\/|$)/, /^\/api\/user-report-sync(\/|$)/, /^\/api\/wallet-sync(\/|$)/, /^\/api\/collab(\/|$)/, /^\/api\/chat(\/|$)/, /^\/api\/wa(\/|$)/];
 
 // ---- 1. RATE LIMIT (anti-DDoS L7 / anti-brute-force) ----
 const _buckets = new Map(); // key -> array timestamp
 const RL = {
   global: { limit: 400, window: 5 * 60 * 1000 },   // per IP: semua /api/*
   auth:   { limit: 40,  window: 5 * 60 * 1000 },   // per IP: /api/auth/* (anti brute-force login)
-  admin:  { limit: 180, window: 5 * 60 * 1000 }    // per IP: /api/admin/*
+  admin:  { limit: 180, window: 5 * 60 * 1000 },   // per IP: /api/admin/*
+  claim:  { limit: 8, window: 10 * 60 * 1000 }     // per IP: /api/beta-claim (kirim email klaim)
 };
 function rateLimit(key, cfg) {
   const now = Date.now();
@@ -131,6 +132,7 @@ export async function onRequest({ request, env, next }) {
   const ip = ipOf(request);
   if (!rateLimit('g:' + ip, RL.global)) { await logBlocked(env, 'rate_limited', ip, 'global ' + path); return tooMany(60); }
   if (/^\/api\/admin(\/|$)/.test(path) && !rateLimit('m:' + ip, RL.admin)) { await logBlocked(env, 'rate_limited', ip, 'admin ' + path); return tooMany(60); }
+  if (/^\/api\/beta-claim(\/|$)/.test(path) && request.method === 'POST' && !rateLimit('c:' + ip, RL.claim)) { await logBlocked(env, 'rate_limited', ip, 'beta-claim ' + path); return tooMany(60); }
 
   // 1b. Rate limit DURABEL (D1) untuk request autentikasi yang mengubah data
   //     (login/register/sesi) — anti brute-force yang tahan lintas-isolate.
